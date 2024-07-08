@@ -7,6 +7,7 @@ import {
     Texture,
 } from "pixi.js";
 import { CanvasContextType } from "./context/CanvasContext";
+import { EE } from "./events/eventEmitter";
 
 export async function createCanvasAppAndViewport(): Promise<CanvasContextType> {
     const app = new Application();
@@ -31,10 +32,7 @@ export async function createCanvasAppAndViewport(): Promise<CanvasContextType> {
     sprite.eventMode = "static";
 
     sprite.on("pointerdown", (event) => {
-        console.log("sprite 1");
-        document.dispatchEvent(
-            new CustomEvent("testevent", { detail: event.target.label }),
-        );
+        EE.emit("test", event.target);
     });
 
     sprite = viewport.addChild(new Sprite(Texture.WHITE));
@@ -67,8 +65,14 @@ export async function createCanvasAppAndViewport(): Promise<CanvasContextType> {
                 localPos.x - position.x,
                 localPos.y - position.y,
             );
+            EE.emit("pos", dragTarget.position);
         }
     }
+
+    EE.on("changepos", (e: any) => {
+        console.log(e);
+        sprite.position.set(e.x, e.y);
+    });
 
     sprite.on(
         "pointerdown",
@@ -85,10 +89,7 @@ export async function createCanvasAppAndViewport(): Promise<CanvasContextType> {
     );
 
     sprite.on("pointerdown", (event) => {
-        console.log("sprite 2");
-        document.dispatchEvent(
-            new CustomEvent("testevent", { detail: event.target.label }),
-        );
+        EE.emit("test", event.target);
     });
 
     return { app, viewport };

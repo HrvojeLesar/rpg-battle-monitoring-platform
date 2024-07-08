@@ -1,8 +1,10 @@
-import { Sprite } from "pixi.js";
+import { ObservablePoint, Sprite } from "pixi.js";
 import "./App.css";
-import { useApp, useViewport } from "./hooks/useCanvasContext";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Slider } from "antd";
+import { useEffect, useMemo, useState } from "react";
+import { Checkbox, Slider } from "antd";
+import { EE } from "./events/eventEmitter";
+import { TestEvent } from "./events/events";
+import { SOCKET } from "./globals";
 
 const style: React.CSSProperties = {
     display: "inline-block",
@@ -11,37 +13,78 @@ const style: React.CSSProperties = {
 };
 
 function App() {
-    const viewport = useViewport();
-    const box: Sprite = viewport.getChildAt(0);
-
-    const [height, setHeight] = useState(box.height);
-    const [width, setWidth] = useState(box.width);
-    const [selection, setSelection] = useState<string | null>(null);
+    const [selection, setSelection] = useState<Sprite | null>(null);
+    const [height, setHeight] = useState(selection?.height ?? 10);
+    const [width, setWidth] = useState(selection?.width ?? 10);
+    const [doesSend, setDoesSend] = useState(false);
+    const [doesReceive, setDoesReceive] = useState(false);
 
     useMemo(() => {
-        document.addEventListener("testevent", (e) => {
-            setSelection(e.detail);
+        EE.on("test", (e: TestEvent) => {
+            setSelection((_old) => {
+                setWidth(e.width);
+                setHeight(e.height);
+                return e;
+            });
         });
     }, []);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            if (width > 100) {
-                setWidth(10);
-            } else {
-                setWidth(width + 1);
+        EE.on("pos", (e: ObservablePoint) => {
+            if (doesSend) {
+                SOCKET.emit("pos", JSON.stringify({ x: e.x, y: e.y }));
             }
-        }, 10);
-        box.height = height;
-        box.width = width;
+        });
+
+        SOCKET.on("changepos", (data: any) => {
+            if (doesReceive) {
+                EE.emit("changepos", JSON.parse(data));
+            }
+        });
 
         return () => {
-            clearTimeout(interval);
+            EE.off("pos");
+            SOCKET.off("changepos");
         };
-    }, [height, width]);
+    }, [doesSend, doesReceive]);
+
+    useEffect(() => {
+        if (!selection) {
+            return;
+        }
+        // const interval = setInterval(() => {
+        //     if (width > 100) {
+        //         setWidth(10);
+        //     } else {
+        //         setWidth(width + 1);
+        //     }
+        // }, 1000);
+        selection.height = height;
+        selection.width = width;
+
+        // return () => {
+        //     clearTimeout(interval);
+        // };
+    }, [height, width, selection]);
 
     return (
         <>
+            <Checkbox
+                checked={doesSend}
+                onChange={() => {
+                    setDoesSend((old) => !old);
+                }}
+            >
+                Does send
+            </Checkbox>
+            <Checkbox
+                checked={doesReceive}
+                onChange={() => {
+                    setDoesReceive((old) => !old);
+                }}
+            >
+                Does Receive
+            </Checkbox>
             <Slider min={10} max={500} value={width} onChange={setWidth} />
             <div style={style}>
                 <Slider
@@ -53,7 +96,7 @@ function App() {
                     onChange={setHeight}
                 />
             </div>
-            <div> {`${selection}`} </div>
+            <div> {`${selection?.label}`} </div>
         </>
     );
 }
