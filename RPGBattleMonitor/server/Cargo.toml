@@ -28,8 +28,20 @@ serde = "1.0.203"
 serde_json = "1.0.118"
 tokio = { version = "1.38.0", features = ["full"] }
 tokio-stream = "0.1.15"
-tracing = "0.1"
+tracing = { version = "0.1", features = ["release_max_level_info"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tower = { version = "0.4", features = ["util"] }
 tower-http = { version = "0.5.0", features = ["fs", "trace", "cors"] }
 socketioxide = { version = "0.14.0", features = ["tracing"] }
+sqlx = { version = "0.7", features = [
+    "runtime-tokio",
+    "tls-rustls",
+    "migrate",
+] }
+dotenvy = "0.15.7"
+
+[features]
+default = ["db_sqlite"]
+
+db_sqlite = ["sqlx/sqlite"]
+db_postgres = ["sqlx/postgres"]
