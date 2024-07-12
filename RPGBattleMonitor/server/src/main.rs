@@ -14,6 +14,9 @@ use tower_http::{
 use tracing::warn;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+mod database;
+mod sockets;
+
 fn on_connect(socket: SocketRef, Data(data): Data<Value>) {
     warn!("Socket.IO connected: {:?} {:?}", socket.ns(), socket.id);
     socket.emit("auth", data).ok();
