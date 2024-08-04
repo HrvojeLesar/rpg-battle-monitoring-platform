@@ -1,3 +1,3 @@
 pub mod database;
-pub mod sockets;
+pub mod socket;
 pub mod models;

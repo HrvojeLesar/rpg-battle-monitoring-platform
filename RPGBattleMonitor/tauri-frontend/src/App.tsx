@@ -1,10 +1,11 @@
 import { ObservablePoint, Sprite } from "pixi.js";
 import "./App.css";
 import { useEffect, useMemo, useState } from "react";
-import { Checkbox, Slider } from "antd";
+import { Button, Checkbox, Input, Slider } from "antd";
 import { EE } from "./events/eventEmitter";
 import { TestEvent } from "./events/events";
-import { SOCKET } from "./globals";
+import { createSocket } from "./globals";
+import { Socket } from "socket.io-client";
 
 const style: React.CSSProperties = {
     display: "inline-block",
@@ -13,11 +14,11 @@ const style: React.CSSProperties = {
 };
 
 function App() {
-    const [selection, setSelection] = useState<Sprite | null>(null);
+    const [selection, setSelection] = useState<Sprite | undefined>(undefined);
     const [height, setHeight] = useState(selection?.height ?? 10);
     const [width, setWidth] = useState(selection?.width ?? 10);
-    const [doesSend, setDoesSend] = useState(false);
-    const [doesReceive, setDoesReceive] = useState(false);
+    const [roomName, setRoomName] = useState<string | undefined>(undefined);
+    const [SOCKET, setSocket] = useState<Socket | undefined>(undefined);
 
     useMemo(() => {
         EE.on("test", (e: TestEvent) => {
@@ -30,23 +31,26 @@ function App() {
     }, []);
 
     useEffect(() => {
+        console.log("BRUH");
         EE.on("pos", (e: ObservablePoint) => {
-            if (doesSend) {
-                SOCKET.emit("pos", JSON.stringify({ x: e.x, y: e.y }));
+            if (SOCKET) {
+                SOCKET.emit("pos", { x: e.x, y: e.y });
             }
         });
 
-        SOCKET.on("changepos", (data: any) => {
-            if (doesReceive) {
+        if (SOCKET) {
+            SOCKET.on("changepos", (data: any) => {
                 EE.emit("changepos", JSON.parse(data));
-            }
-        });
+            });
+        }
 
         return () => {
             EE.off("pos");
-            SOCKET.off("changepos");
+            if (SOCKET) {
+                SOCKET.off("changepos");
+            }
         };
-    }, [doesSend, doesReceive]);
+    }, [SOCKET]);
 
     useEffect(() => {
         if (!selection) {
@@ -69,22 +73,24 @@ function App() {
 
     return (
         <>
-            <Checkbox
-                checked={doesSend}
-                onChange={() => {
-                    setDoesSend((old) => !old);
+            <Input
+                placeholder="Room name"
+                onChange={(e) => {
+                    setRoomName(e.target.value);
+                }}
+            />
+            <Button
+                onClick={() => {
+                    if (SOCKET) {
+                        SOCKET.disconnect();
+                        setSocket(undefined);
+                    } else {
+                        setSocket(createSocket(roomName ?? ""));
+                    }
                 }}
             >
-                Does send
-            </Checkbox>
-            <Checkbox
-                checked={doesReceive}
-                onChange={() => {
-                    setDoesReceive((old) => !old);
-                }}
-            >
-                Does Receive
-            </Checkbox>
+                {SOCKET === undefined ? "Connect" : "Disconnect"}
+            </Button>
             <Slider min={10} max={500} value={width} onChange={setWidth} />
             <div style={style}>
                 <Slider
