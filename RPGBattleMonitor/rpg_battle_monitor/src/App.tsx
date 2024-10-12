@@ -31,7 +31,6 @@ function App() {
     }, []);
 
     useEffect(() => {
-        console.log("BRUH");
         EE.on("pos", (e: ObservablePoint) => {
             if (SOCKET) {
                 SOCKET.emit("pos", { x: e.x, y: e.y });

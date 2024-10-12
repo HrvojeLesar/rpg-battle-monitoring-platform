@@ -1,7 +1,8 @@
 {
+  "$schema": "https://schema.tauri.app/config/2.0.0",
   "productName": "rpg_battle_monitor",
-  "version": "0.0.1",
-  "identifier": "com.rpgbattlemonitor.dev",
+  "version": "0.1.0",
+  "identifier": "com.rpg_battle_monitor.app",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -14,6 +15,7 @@
         "title": "rpg_battle_monitor",
         "width": 800,
         "height": 600
+        
       }
     ],
     "security": {
