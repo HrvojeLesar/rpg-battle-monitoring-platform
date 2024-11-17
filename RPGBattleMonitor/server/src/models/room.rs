@@ -9,11 +9,11 @@ pub struct Room {
 }
 
 impl Room {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { id: RoomId::new() }
     }
 
-    async fn insert(
+    pub async fn insert(
         &self,
         transaction: &mut sqlx::Transaction<'_, sqlx::Any>,
     ) -> Result<(), ModelError> {
@@ -26,10 +26,11 @@ impl Room {
         .bind(&self.id.to_string())
         .execute(&mut **transaction)
         .await?;
+        Err(ModelError::Other("Not implemented"))?;
         Ok(())
     }
 
-    async fn get_by_id(
+    pub async fn get_by_id(
         id: RoomId,
         transaction: &mut sqlx::Transaction<'_, sqlx::Any>,
     ) -> Result<Self, ModelError> {

@@ -15,7 +15,7 @@ path = "src/main.rs"
 
 [dependencies]
 async-trait = "0.1.80"
-axum = { version = "0.7.5", features = ["ws"] }
+axum = { version = "0.7.5", features = ["ws", "macros"] }
 axum-extra = { version = "0.9.3", features = ["typed-header"] }
 enfync = "0.1.6"
 ezsockets = { version = "0.6.2", features = ["axum"] }
@@ -40,8 +40,12 @@ sqlx = { version = "0.7", features = [
     "chrono",
 ] }
 dotenvy = "0.15.7"
-ulid = "1.1.2"
+ulid = { version = "1.1.2", features = ["serde"] }
 thiserror = "1.0.62"
+utoipa = { version = "5.0.0-alpha.0", features = ["axum_extras", "chrono"] }
+utoipa-scalar = { version = "0.2.0-alpha.0", features = ["axum"] }
+anyhow = { version = "1.0.86", features = ["backtrace"] }
+mlua = { version = "0.10.1", features = ["anyhow", "luau", "luau-jit"] }
 
 [features]
 default = ["db_sqlite"]

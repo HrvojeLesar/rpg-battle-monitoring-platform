@@ -1,8 +1,9 @@
 use std::ops::Deref;
 
+use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RoomId(pub Ulid);
 
 impl RoomId {

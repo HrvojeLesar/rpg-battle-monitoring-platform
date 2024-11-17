@@ -6,4 +6,6 @@ pub enum ModelError {
     Database(#[from] sqlx::Error),
     #[error(transparent)]
     Ulid(#[from] ulid::DecodeError),
+    #[error("{0}")]
+    Other(&'static str),
 }

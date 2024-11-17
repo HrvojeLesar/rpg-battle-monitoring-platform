@@ -1,4 +1,4 @@
-use rpg_battle_monitor_lib::socket::message;
+use crate::socket::message;
 use tokio::{sync::mpsc, task::JoinHandle};
 
 #[derive(Default)]

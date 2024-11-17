@@ -1,2 +1,7 @@
 [workspace]
-members = ["server"]
+resolver = "2"
+members = [
+    "server",
+    # "tauri-frontend/src-tauri",
+    "rpg_battle_monitor/src-tauri",
+]
