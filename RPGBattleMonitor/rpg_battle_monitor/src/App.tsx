@@ -18,7 +18,7 @@ function App() {
     const [height, setHeight] = useState(selection?.height ?? 10);
     const [width, setWidth] = useState(selection?.width ?? 10);
     const [roomName, setRoomName] = useState<string | undefined>(undefined);
-    const [SOCKET, setSocket] = useState<Socket | undefined>(undefined);
+    const [socket, setSocket] = useState<Socket | undefined>(undefined);
 
     useMemo(() => {
         EE.on("test", (e: TestEvent) => {
@@ -32,29 +32,30 @@ function App() {
 
     useEffect(() => {
         EE.on("pos", (e: ObservablePoint) => {
-            if (SOCKET) {
-                SOCKET.emit("pos", { x: e.x, y: e.y });
+            if (socket) {
+                socket.emit("pos", { x: e.x, y: e.y });
             }
         });
 
-        if (SOCKET) {
-            SOCKET.on("changepos", (data: any) => {
-                EE.emit("changepos", JSON.parse(data));
+        if (socket) {
+            socket.on("changepos", (data: any) => {
+                EE.emit("changepos", data);
             });
         }
 
         return () => {
             EE.off("pos");
-            if (SOCKET) {
-                SOCKET.off("changepos");
+            if (socket) {
+                socket.off("changepos");
             }
         };
-    }, [SOCKET]);
+    }, [socket]);
 
     useEffect(() => {
         if (!selection) {
             return;
         }
+
         // const interval = setInterval(() => {
         //     if (width > 100) {
         //         setWidth(10);
@@ -80,15 +81,15 @@ function App() {
             />
             <Button
                 onClick={() => {
-                    if (SOCKET) {
-                        SOCKET.disconnect();
+                    if (socket) {
+                        socket.disconnect();
                         setSocket(undefined);
                     } else {
                         setSocket(createSocket(roomName ?? ""));
                     }
                 }}
             >
-                {SOCKET === undefined ? "Connect" : "Disconnect"}
+                {socket === undefined ? "Connect" : "Disconnect"}
             </Button>
             <Slider min={10} max={500} value={width} onChange={setWidth} />
             <div style={style}>
