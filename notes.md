@@ -1,5 +1,14 @@
 # Notes
 
+## Plan
+
+- [ ] Joining a game
+- [ ] Map
+    - [ ] Uploading background map
+    - [ ] Adjusting grid
+    - [ ] Character setup
+    - [ ] Turn order
+
 ## Core feature - MUST HAVE
 
 - [ ] At least one integrated ruleset (e.g. DnD)

@@ -22,7 +22,7 @@ pub(super) fn router(state: GlobalRouterState) -> Router {
         "/room",
         Router::new()
             .route("/create", routing::get(create))
-            .route("/join/:id", routing::get(join))
+            .route("/join/{id}", routing::get(join))
             .with_state(state),
     )
 }

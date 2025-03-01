@@ -15,7 +15,5 @@ pub fn routes_config(state: GlobalRouterState) -> Router {
 pub fn v1_api_router(state: GlobalRouterState) -> Router {
     let room_routes = Router::new().merge(room::router(state));
 
-    let router = Router::new().nest(API_V1, room_routes);
-
-    router
+    Router::new().nest(API_V1, room_routes)
 }

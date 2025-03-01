@@ -1,6 +1,6 @@
 use axum::Router;
 use utoipa::OpenApi;
-use utoipa_scalar::{Scalar, Servable};
+use utoipa_scalar::{Scalar, Servable, Spec};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -14,5 +14,5 @@ pub fn get_api_doc_router<S>() -> impl Into<Router<S>>
 where
     S: Clone + Send + Sync + 'static,
 {
-    Scalar::with_url("/api-docs", ApiDoc::openapi())
+    Scalar::with_url("/scalar", ApiDoc::openapi())
 }

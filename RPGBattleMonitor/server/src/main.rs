@@ -1,21 +1,23 @@
-use std::env;
+use std::{env, sync::Arc};
 
 use axum::{
-    body::{Body, HttpBody},
-    extract::Query,
-    http::{Request, Response, StatusCode},
     RequestExt, Router,
+    body::{Body, HttpBody},
+    extract::{Query, State},
+    http::{Request, Response, StatusCode},
+    routing,
 };
 
 use rpg_battle_monitor_lib::{
+    game::Game,
     global_router_state::GlobalRouterState,
     routes::{self, apidoc},
 };
 use serde_json::Value;
 use socketioxide::{
-    extract::{AckSender, Bin, Data, Extension, SocketRef, TryData},
-    handler::ConnectHandler,
     SocketIo,
+    extract::{AckSender, Data, Extension, SocketRef, TryData},
+    handler::ConnectHandler,
 };
 
 use tower::{Layer, ServiceBuilder};
@@ -29,25 +31,33 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 fn on_connect(socket: SocketRef, Data(data): Data<Value>) {
     warn!("Socket.IO connected: {:?} {:?}", socket.ns(), socket.id);
-    socket.emit("auth", data).ok();
+    socket.emit("auth", &data).ok();
 
     socket.on("pos", |Data::<Value>(data), socket: SocketRef| {
         warn!("{:#?}", data);
-        socket.broadcast().emit("changepos", &data).ok();
+        socket.broadcast().emit("changepos", &data);
     });
-    socket.broadcast().to("test").emit("test", "test").ok();
+    socket.broadcast().to("test").emit("test", "test");
 }
 
 fn do_auth(socket: SocketRef, Data(data): Data<Value>) -> Result<(), String> {
     tracing::warn!("{:#?}", data);
     tracing::warn!("NS: {:#?}", socket.ns());
     let room = data.get("room").unwrap().as_str().unwrap();
-    socket.join(room.to_string()).unwrap();
+    socket.join(room.to_string());
     Ok(())
 }
 
 fn get_port() -> String {
     env::var("PORT").unwrap_or("3000".to_string())
+}
+
+async fn inc(State(global_state): State<Arc<std::sync::Mutex<Game>>>) -> &'static str {
+    let lock = global_state.lock().unwrap();
+    let lua = &lock.lua;
+    // lua.load();
+
+    "test"
 }
 
 #[tokio::main]
