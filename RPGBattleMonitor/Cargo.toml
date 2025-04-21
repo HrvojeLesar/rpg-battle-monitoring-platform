@@ -2,6 +2,8 @@
 resolver = "2"
 members = [
     "server",
-    # "tauri-frontend/src-tauri",
-    "rpg_battle_monitor/src-tauri",
+    # "rpg_battle_monitor/src-tauri",
+    "rpg_battle_monitor_lib",
+    "rpg_battle_monitor_server",
+    "rpg_battle_monitor_frontend/src-tauri",
 ]
