@@ -1,6 +1,8 @@
 use axum::http::StatusCode;
 
-use super::routes::get_v1_api_router;
+use crate::webserver::routes::get_v1_api_router;
+
+use super::global_router_state::GlobalRouterStateTrait;
 
 #[derive(Debug)]
 pub struct BattleMonitorWebServer {
@@ -12,11 +14,10 @@ impl BattleMonitorWebServer {
         (StatusCode::NOT_FOUND, "Not found")
     }
 
-    pub fn new() -> Self {
+    pub fn new<T: GlobalRouterStateTrait>(state: T) -> Self {
         let axum_router = axum::Router::new().fallback(Self::fallback());
 
-        #[cfg(feature = "api_v1_doc")]
-        let axum_router = axum_router.merge(get_v1_api_router());
+        let axum_router = axum_router.merge(get_v1_api_router(state));
 
         BattleMonitorWebServer {
             router: axum_router,
@@ -32,7 +33,7 @@ impl BattleMonitorWebServer {
                 std::env::var("RBM_SERVER_ADDR").unwrap_or("0.0.0.0:3000".into()),
             )
             .await
-            .unwrap(),
+            .expect("Failed to create TcpListener"),
         };
 
         if let Ok(addr) = listener.local_addr() {
@@ -43,11 +44,5 @@ impl BattleMonitorWebServer {
         }
 
         axum::serve(listener, self.router).await.unwrap();
-    }
-}
-
-impl Default for BattleMonitorWebServer {
-    fn default() -> Self {
-        Self::new()
     }
 }
