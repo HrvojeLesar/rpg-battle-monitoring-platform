@@ -1,3 +1,5 @@
+use std::env;
+
 use sqlx::{
     AnyPool,
     any::{AnyPoolOptions, install_drivers},
@@ -27,25 +29,34 @@ pub async fn create_database_pool(database_url: &str) -> AnyPool {
         tracing::info!("Database successfully created");
     }
 
-    #[cfg(debug_assertions)]
-    let max_connections = 10;
-    #[cfg(not(debug_assertions))]
-    let max_connections = compile_error!("Add configuration setting for connection count");
+    let max_connections = env::var("DATABASE_CONNECTIONS")
+        .map_err(|error| {
+            tracing::warn!(error = %error, "DATABASE_CONNECTIONS not found using default");
+            error
+        })
+        .ok()
+        .and_then(|max| {
+            max.parse::<u32>()
+                .map_err(|error| {
+                    tracing::warn!(error = %error, "Failed to parse DATABASE_CONNECTIONS into a number, using default");
+                    error
+                })
+                .ok()
+        })
+        .unwrap_or(10);
 
-    let pool = AnyPoolOptions::new()
+    let mut pool = AnyPoolOptions::new()
         .max_connections(max_connections)
         .connect(database_url)
         .await
         .expect("Pool must be created");
 
-    #[cfg(not(debug_assertions))]
-    let pool = run_migrations(pool).await;
+    run_migrations(&mut pool).await;
 
     pool
 }
 
-#[cfg(not(debug_assertions))]
-async fn run_migrations(pool: AnyPool) -> AnyPool {
+async fn run_migrations(pool: &mut AnyPool) {
     tracing::info!("Running pending migrations");
     let mut migration_transaction = pool
         .begin()
@@ -53,13 +64,13 @@ async fn run_migrations(pool: AnyPool) -> AnyPool {
         .expect("Failed starting migration transaction");
 
     #[cfg(feature = "db_sqlite")]
-    sqlx::migrate!("./migrations_sqlite")
+    sqlx::migrate!("./migrations/sqlite")
         .run(&mut migration_transaction)
         .await
         .expect("Failed running migrations");
 
     #[cfg(feature = "db_postgres")]
-    sqlx::migrate!("./migrations_postgres")
+    sqlx::migrate!("./migrations/postgres")
         .run(&mut migration_transaction)
         .await
         .expect("Failed running migrations");
@@ -69,6 +80,4 @@ async fn run_migrations(pool: AnyPool) -> AnyPool {
         .await
         .expect("Failed committing migrations");
     tracing::info!("Migrations completed");
-
-    pool
 }

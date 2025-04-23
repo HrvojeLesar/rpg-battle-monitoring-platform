@@ -30,7 +30,12 @@ impl BattleMonitorWebServer {
         let listener = match listener {
             Some(l) => l,
             None => tokio::net::TcpListener::bind(
-                std::env::var("RBM_SERVER_ADDR").unwrap_or("0.0.0.0:3000".into()),
+                std::env::var("RBM_SERVER_ADDR")
+                    .map_err(|error| {
+                        tracing::warn!(error = %error, "RBM_SERVER_ADDR not set using default");
+                        error
+                    })
+                    .unwrap_or("0.0.0.0:3000".into()),
             )
             .await
             .expect("Failed to create TcpListener"),

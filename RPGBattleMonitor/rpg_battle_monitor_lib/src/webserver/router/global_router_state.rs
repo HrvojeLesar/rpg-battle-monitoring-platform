@@ -11,8 +11,9 @@ pub struct GlobalRouterState {
 
 impl GlobalRouterState {
     pub async fn new() -> Self {
-        let database_url =
-            env::var("DATABASE_URL").unwrap_or("sqlite://rpg_battle_monitor.db".into());
+        let database_url = env::var("DATABASE_URL")
+            .map_err(|error| tracing::warn!(error = %error, "DATABASE_URL not set using default"))
+            .unwrap_or("sqlite://rpg_battle_monitor.db".into());
 
         Self {
             connection_pool: create_database_pool(&database_url).await,
