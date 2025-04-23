@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-    "server",
+    # "server",
     # "rpg_battle_monitor/src-tauri",
     "rpg_battle_monitor_lib",
     "rpg_battle_monitor_server",

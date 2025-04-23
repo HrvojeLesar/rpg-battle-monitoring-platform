@@ -4,3 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+rpg_battle_monitor_lib = { path = "../rpg_battle_monitor_lib"}
+tokio = { version = "1.44.2", features = ["full"] }
+tracing-subscriber = "0.3.19"
