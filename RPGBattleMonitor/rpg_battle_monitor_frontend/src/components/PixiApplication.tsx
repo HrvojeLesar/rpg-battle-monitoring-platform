@@ -1,7 +1,10 @@
 import { Application, ApplicationOptions } from "pixi.js";
-import { useCallback, useLayoutEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { PixiApplicationProps } from "../types/PixiApplicationProps";
-import { app } from "@tauri-apps/api";
+
+declare global {
+    var __PIXI_APP__: Application;
+}
 
 function defaultOptions(): Partial<ApplicationOptions> {
     return {
@@ -24,6 +27,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
 
     const applicationRef = useRef<Application | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(canvas ?? null);
+    const canvasRemoved = useRef(false);
 
     useCallback(() => {
         const application = applicationRef.current;
@@ -45,18 +49,27 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         }
     }, [resizeTo]);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         const application = new Application();
 
         let canvas = canvasRef.current;
         if (canvas === null) {
-            console.error("CanvasRef not found adding canvas to document");
+            console.error("CanvasRef not found. Adding canvas to document");
             canvas = document.createElement("canvas");
-            document.appendChild(canvas);
+            document.body.appendChild(canvas);
+        }
+
+        if (canvasRemoved.current && canvas) {
+            const newCanvas = document.createElement("canvas");
+            canvas.replaceWith(newCanvas);
+
+            canvasRef.current = newCanvas;
+            canvas = newCanvas;
+
+            canvasRemoved.current = false;
         }
 
         async function initPixi() {
-            console.log("pixi.js initialized");
             const options = applicationOptions ?? defaultOptions();
 
             await application.init({
@@ -67,13 +80,19 @@ export const PixiApplication = (props: PixiApplicationProps) => {
             if (applicationInitCallback !== undefined) {
                 applicationInitCallback(application, applicationIdentifier);
             }
+
+            globalThis.__PIXI_APP__ = application;
+
+            return application;
         }
 
-        initPixi();
+        const initPromise = initPixi();
 
         return () => {
-            console.log("Destroying instance of pixi.js application");
-            applicationRef.current?.destroy();
+            canvasRemoved.current = true;
+            initPromise.then((application) => {
+                application.destroy();
+            });
         };
     }, []);
 
