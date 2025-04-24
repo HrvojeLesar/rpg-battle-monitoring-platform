@@ -3,6 +3,7 @@ import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 import { PixiApplication } from "./components/PixiApplication";
+import { init } from "./canvas/init";
 
 function App() {
     const [greetMsg, setGreetMsg] = useState("");
@@ -10,7 +11,7 @@ function App() {
 
     return (
         <main className="container">
-            <PixiApplication />
+            <PixiApplication applicationInitCallback={init} />
             <h1>Welcome to Tauri + React</h1>
 
             <div className="row">
