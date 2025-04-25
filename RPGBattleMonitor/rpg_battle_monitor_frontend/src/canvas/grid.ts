@@ -5,27 +5,57 @@ import {
     RenderTexture,
     TilingSprite,
 } from "pixi.js";
+import { isDev } from "../utils/devMode";
 
 export class Grid extends TilingSprite {
     protected app: Application;
 
     protected gridGraphics: Graphics;
 
-    constructor(app: Application) {
+    protected hoveredCell: Graphics | undefined;
+
+    constructor(
+        app: Application,
+        options: { hover?: boolean } = { hover: true },
+    ) {
         super();
 
-        console.log(this);
         this.app = app;
+        this.interactive = true;
         this.gridGraphics = new Graphics();
         this.defaultGraphics();
-
         this.renderTexture();
 
-        this.interactive = true;
+        console.log(options);
+
+        if (options.hover) {
+            this.initHoveredCell();
+        }
 
         this.onpointermove = (event) => {
-            console.log(event.getLocalPosition(this));
-            console.log(this.getCellCoordinates(event.getLocalPosition(this)));
+            const localPosition = event.getLocalPosition(this);
+            const cellPosition = this.getCellCoordinates(localPosition);
+            if (isDev()) {
+                console.log("Local position", localPosition);
+                console.log("Cell coordinates", cellPosition);
+            }
+
+            if (this.hoveredCell) {
+                this.hoveredCell.x = cellPosition.x * 32;
+                this.hoveredCell.y = cellPosition.y * 32;
+            }
+        };
+
+        this.onpointerenter = (_event) => {
+            if (this.hoveredCell) {
+                this.hoveredCell.visible = true;
+            }
+        };
+
+        this.onpointerleave = (_event) => {
+            if (this.hoveredCell) {
+                this.hoveredCell.visible = false;
+            }
         };
     }
 
@@ -37,11 +67,7 @@ export class Grid extends TilingSprite {
     }
 
     protected defaultGraphics() {
-        this.gridGraphics
-            .rect(0, 0, 32, 32)
-            .fill(0x808080)
-            .rect(1, 1, 31, 31)
-            .fill(0xffffff);
+        this.gridGraphics.rect(0, 0, 31, 31).stroke({ color: 0xffffff });
     }
 
     protected renderTexture() {
@@ -59,9 +85,15 @@ export class Grid extends TilingSprite {
         renderTexture.source.updateMipmaps();
 
         this.texture = renderTexture;
+
         this.width = this.app.canvas.width;
         this.height = this.app.canvas.height;
+    }
 
-        this.tint = 0x303030;
+    private initHoveredCell() {
+        this.hoveredCell = new Graphics();
+        this.hoveredCell.rect(0, 0, 32, 32).fill({ color: "red" });
+        this.hoveredCell.visible = true;
+        this.addChild(this.hoveredCell);
     }
 }
