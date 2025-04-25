@@ -1,44 +1,44 @@
 import {
     Application,
+    Container,
     Graphics,
     Point,
     RenderTexture,
     TilingSprite,
 } from "pixi.js";
-import { isDev } from "../utils/devMode";
 
-export class Grid extends TilingSprite {
+export class Grid extends Container {
     protected app: Application;
 
-    protected gridGraphics: Graphics;
+    protected gridSprite: GridSprite;
 
     protected hoveredCell: Graphics | undefined;
 
-    constructor(
-        app: Application,
-        options: { hover?: boolean } = { hover: true },
-    ) {
+    private hover: boolean = true;
+
+    constructor(app: Application, options?: { hover?: boolean }) {
         super();
 
+        this.hover = options?.hover ?? this.hover;
+
         this.app = app;
+        this.gridSprite = new GridSprite(this.app);
         this.interactive = true;
-        this.gridGraphics = new Graphics();
-        this.defaultGraphics();
-        this.renderTexture();
 
-        console.log(options);
+        this.hoveredCell = this.initHoveredCell();
 
-        if (options.hover) {
-            this.initHoveredCell();
+        this.initEvents();
+
+        this.addChild(this.gridSprite);
+        if (this.hoveredCell) {
+            this.addChild(this.hoveredCell);
         }
+    }
 
+    protected initEvents() {
         this.onpointermove = (event) => {
             const localPosition = event.getLocalPosition(this);
             const cellPosition = this.getCellCoordinates(localPosition);
-            if (isDev()) {
-                console.log("Local position", localPosition);
-                console.log("Cell coordinates", cellPosition);
-            }
 
             if (this.hoveredCell) {
                 this.hoveredCell.x = cellPosition.x * 32;
@@ -59,11 +59,39 @@ export class Grid extends TilingSprite {
         };
     }
 
-    public getCellCoordinates(point: Point): Point {
+    private getCellCoordinates(point: Point): Point {
         return new Point(
-            Math.floor(-(this.bounds.x - point.x) / 32),
-            Math.floor(-(this.bounds.y - point.y) / 32),
+            Math.floor(-(this.gridSprite.bounds.x - point.x) / 32),
+            Math.floor(-(this.gridSprite.bounds.y - point.y) / 32),
         );
+    }
+
+    private initHoveredCell() {
+        if (!this.hover) {
+            return undefined;
+        }
+
+        this.hoveredCell = new Graphics();
+        this.hoveredCell.rect(0, 0, 32, 32).fill({ color: "red" });
+        this.hoveredCell.visible = true;
+
+        return this.hoveredCell;
+    }
+}
+
+export class GridSprite extends TilingSprite {
+    protected app: Application;
+
+    protected gridGraphics: Graphics;
+
+    constructor(app: Application) {
+        super();
+
+        this.app = app;
+        this.interactive = true;
+        this.gridGraphics = new Graphics();
+        this.defaultGraphics();
+        this.renderTexture();
     }
 
     protected defaultGraphics() {
@@ -88,12 +116,5 @@ export class Grid extends TilingSprite {
 
         this.width = this.app.canvas.width;
         this.height = this.app.canvas.height;
-    }
-
-    private initHoveredCell() {
-        this.hoveredCell = new Graphics();
-        this.hoveredCell.rect(0, 0, 32, 32).fill({ color: "red" });
-        this.hoveredCell.visible = true;
-        this.addChild(this.hoveredCell);
     }
 }
