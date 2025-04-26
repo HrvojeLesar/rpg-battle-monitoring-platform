@@ -3,7 +3,7 @@ use super::router::global_router_state::GlobalRouterStateTrait;
 #[cfg(feature = "api_v1_doc")]
 pub mod apidoc;
 
-mod test_routes;
+mod websocket;
 
 #[cfg(feature = "api_v1")]
 const API_V1: &str = "/api/v1";
@@ -13,6 +13,8 @@ pub fn get_v1_api_router<T: GlobalRouterStateTrait>(state: T) -> axum::Router<()
 
     #[cfg(feature = "api_v1_doc")]
     let router = router.merge(apidoc::get_api_doc_router());
+
+    let router = router.merge(websocket::get_router());
 
     axum::Router::new().nest(API_V1, router)
 }

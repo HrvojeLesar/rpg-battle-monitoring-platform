@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Socket.IO connection test</title>
+  </head>
+  <body>
+    <script type="module">
+      import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
+
+      const socket = io("http://localhost:3000");
+
+      const socket = io("http://localhost:3000", {
+        path: "/api/v1/socket.io",
+      });
+    </script>
+  </body>
+</html>
