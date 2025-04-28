@@ -1,6 +1,6 @@
 import { Application, ApplicationOptions } from "pixi.js";
 import { useCallback, useEffect, useRef } from "react";
-import { PixiApplicationProps } from "../types/PixiApplicationProps";
+import { PixiApplicationProps } from "../types/pixi_application_props";
 
 declare global {
     var __PIXI_APP__: Application;
