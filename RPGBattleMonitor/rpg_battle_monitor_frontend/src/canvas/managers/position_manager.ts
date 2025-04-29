@@ -21,7 +21,7 @@ export function registerPositionEvents(
 ): void {
     let offset = new Point();
 
-    entity.onpointerdown = (event) => {
+    function onPointerDown(event: FederatedMouseEvent) {
         const localPos = event.getLocalPosition(app.stage);
         // TODO: update this after zoom and scale logic is added
         // this will probably be wrong
@@ -35,10 +35,26 @@ export function registerPositionEvents(
             // this will probably be wrong
             entity.position.set(localPos.x - offset.x, localPos.y - offset.y);
         };
-    };
+    }
 
-    entity.onpointerup = (_event) => {
+    function onPointerUp(_event: FederatedMouseEvent) {
         app.stage.eventMode = "passive";
         app.stage.onglobalpointermove = null;
-    };
+
+        snapToGrid(entity);
+    }
+
+    entity.onpointerdown = onPointerDown;
+    entity.onpointerup = onPointerUp;
+    entity.onpointerupoutside = onPointerUp;
+}
+
+function snapToGrid(entity: Container) {
+    if (entity.snapToGrid !== true) {
+        return;
+    }
+
+    // TODO: get grid configuration and actual grid size
+    entity.position.x = Math.round(entity.position.x / 32) * 32;
+    entity.position.y = Math.round(entity.position.y / 32) * 32;
 }
