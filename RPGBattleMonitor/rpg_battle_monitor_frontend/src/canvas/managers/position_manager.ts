@@ -1,60 +1,70 @@
-import { Application, Container, FederatedMouseEvent, Point } from "pixi.js";
-import { SelectionManager } from "./selection_manager";
+import { Application, Container, FederatedPointerEvent, Point } from "pixi.js";
 import { EE } from "../../globals/event_emitter";
+import { ViewportExtended } from "../viewport/viewport_extended";
+
+type UnregisterPositionEvents = () => void;
 
 export class PositionManager {
     protected app: Application;
 
-    protected selectionManager: SelectionManager;
+    protected viewport: ViewportExtended;
 
     protected eventEmitter = EE;
 
-    constructor(app: Application, selectionManager: SelectionManager) {
+    constructor(app: Application, viewport: ViewportExtended) {
         this.app = app;
-        this.selectionManager = selectionManager;
+        this.viewport = viewport;
     }
-}
 
-export function registerPositionEvents(
-    entity: Container,
-    app: Application,
-): void {
-    let offset = new Point();
+    public registerPositionEvents(entity: Container): UnregisterPositionEvents {
+        const offset = new Point();
 
-    function onPointerDown(event: FederatedMouseEvent) {
-        const localPos = event.getLocalPosition(app.stage);
-        // TODO: update this after zoom and scale logic is added
-        // this will probably be wrong
-        offset.x = localPos.x - entity.x;
-        offset.y = localPos.y - entity.y;
-        app.stage.eventMode = "static";
+        const onPointerDown = (event: FederatedPointerEvent) => {
+            if (event.pointerType === "mouse" && event.button !== 0) {
+                return;
+            }
 
-        app.stage.onglobalpointermove = (event) => {
-            const localPos = event.getLocalPosition(app.stage);
-            // TODO: update this after zoom and scale logic is added
-            // this will probably be wrong
-            entity.position.set(localPos.x - offset.x, localPos.y - offset.y);
+            const localPos = event.getLocalPosition(this.viewport);
+            offset.x = localPos.x - entity.x;
+            offset.y = localPos.y - entity.y;
+            this.viewport.pause = true;
+
+            this.viewport.onglobalpointermove = (event) => {
+                const localPos = event.getLocalPosition(this.viewport);
+                entity.position.set(
+                    localPos.x - offset.x,
+                    localPos.y - offset.y,
+                );
+            };
         };
+
+        const onPointerUp = (_event: FederatedPointerEvent) => {
+            this.viewport.onglobalpointermove = null;
+            this.viewport.pause = false;
+
+            this.snapToGrid(entity);
+        };
+
+        entity.onpointerdown = onPointerDown;
+        entity.onpointerup = onPointerUp;
+        entity.onpointerupoutside = onPointerUp;
+
+        const unregisterPositionEvents = () => {
+            entity.onpointerdown = null;
+            entity.onpointerup = null;
+            entity.onpointerupoutside = null;
+        };
+
+        return unregisterPositionEvents;
     }
 
-    function onPointerUp(_event: FederatedMouseEvent) {
-        app.stage.eventMode = "passive";
-        app.stage.onglobalpointermove = null;
+    public snapToGrid(entity: Container) {
+        if (entity.snapToGrid !== true) {
+            return;
+        }
 
-        snapToGrid(entity);
+        // TODO: get grid configuration and actual grid size
+        entity.position.x = Math.round(entity.position.x / 32) * 32;
+        entity.position.y = Math.round(entity.position.y / 32) * 32;
     }
-
-    entity.onpointerdown = onPointerDown;
-    entity.onpointerup = onPointerUp;
-    entity.onpointerupoutside = onPointerUp;
-}
-
-function snapToGrid(entity: Container) {
-    if (entity.snapToGrid !== true) {
-        return;
-    }
-
-    // TODO: get grid configuration and actual grid size
-    entity.position.x = Math.round(entity.position.x / 32) * 32;
-    entity.position.y = Math.round(entity.position.y / 32) * 32;
 }

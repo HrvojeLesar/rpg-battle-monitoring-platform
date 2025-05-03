@@ -1,10 +1,34 @@
 import { Application, Sprite, Texture } from "pixi.js";
 import { Grid } from "./grid";
-import { registerPositionEvents } from "./managers/position_manager";
+import { PositionManager } from "./managers/position_manager";
+import { ViewportExtended } from "./viewport/viewport_extended";
 
 export function init(app: Application) {
+    const viewport = new ViewportExtended({
+        events: app.renderer.events,
+        screenWidth: app.canvas.width,
+        screenHeight: app.canvas.height,
+        worldWidth: app.canvas.width,
+        worldHeight: app.canvas.height,
+        allowPreserveDragOutside: true,
+    });
+
+    const positionManger = new PositionManager(app, viewport);
+
+    viewport.drag().pinch().wheel().clamp({
+        left: true,
+        right: true,
+        top: true,
+        bottom: true,
+        direction: "all",
+        underflow: "center",
+    });
+
+    app.stage.addChild(viewport);
+
     const grid = new Grid(app);
-    app.stage.addChild(grid);
+    // app.stage.addChild(grid);
+    viewport.addChild(grid);
 
     let sprite = new Sprite(Texture.WHITE);
     sprite.tint = 0xff0000;
@@ -14,8 +38,9 @@ export function init(app: Application) {
     sprite.cursor = "pointer";
     sprite.snapToGrid = true;
 
-    app.stage.addChild(sprite);
-    registerPositionEvents(sprite, app);
+    viewport.addChild(sprite);
+    // app.stage.addChild(sprite);
+    positionManger.registerPositionEvents(sprite);
 
     sprite = new Sprite(Texture.WHITE);
     sprite.width = sprite.height = 32 * 3;
@@ -24,6 +49,7 @@ export function init(app: Application) {
     sprite.cursor = "pointer";
     sprite.snapToGrid = true;
 
-    app.stage.addChild(sprite);
-    registerPositionEvents(sprite, app);
+    viewport.addChild(sprite);
+    // app.stage.addChild(sprite);
+    positionManger.registerPositionEvents(sprite);
 }
