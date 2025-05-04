@@ -83,6 +83,10 @@ export const PixiApplication = (props: PixiApplicationProps) => {
 
             globalThis.__PIXI_APP__ = application;
 
+            canvas?.addEventListener("wheel", (event) => {
+                event.preventDefault();
+            });
+
             return application;
         }
 
