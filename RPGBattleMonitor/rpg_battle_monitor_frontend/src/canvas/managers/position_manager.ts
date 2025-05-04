@@ -29,6 +29,8 @@ export class PositionManager {
             offset.y = localPos.y - entity.y;
             this.viewport.pause = true;
 
+            entity.createGhost();
+
             this.viewport.onglobalpointermove = (event) => {
                 const localPos = event.getLocalPosition(this.viewport);
                 entity.position.set(
@@ -42,7 +44,8 @@ export class PositionManager {
             this.viewport.onglobalpointermove = null;
             this.viewport.pause = false;
 
-            this.snapToGrid(entity);
+            entity.snapToGrid();
+            entity.popGost();
         };
 
         entity.onpointerdown = onPointerDown;
@@ -56,15 +59,5 @@ export class PositionManager {
         };
 
         return unregisterPositionEvents;
-    }
-
-    public snapToGrid(entity: Container) {
-        if (entity.snapToGrid !== true) {
-            return;
-        }
-
-        // TODO: get grid configuration and actual grid size
-        entity.position.x = Math.round(entity.position.x / 32) * 32;
-        entity.position.y = Math.round(entity.position.y / 32) * 32;
     }
 }

@@ -2,6 +2,7 @@ import { Application, Sprite, Texture } from "pixi.js";
 import { Grid } from "./grid";
 import { PositionManager } from "./managers/position_manager";
 import { ViewportExtended } from "./viewport/viewport_extended";
+import "./pixi_extensions/container";
 
 export function init(app: Application) {
     const viewport = new ViewportExtended({
@@ -36,7 +37,8 @@ export function init(app: Application) {
     sprite.position.set(64, 64);
     sprite.eventMode = "static";
     sprite.cursor = "pointer";
-    sprite.snapToGrid = true;
+    sprite.canSnapToGrid = true;
+    sprite.alpha = 0.5;
 
     viewport.addChild(sprite);
     // app.stage.addChild(sprite);
@@ -47,7 +49,7 @@ export function init(app: Application) {
     sprite.position.set(128, 128);
     sprite.eventMode = "static";
     sprite.cursor = "pointer";
-    sprite.snapToGrid = true;
+    sprite.canSnapToGrid = true;
 
     viewport.addChild(sprite);
     // app.stage.addChild(sprite);
