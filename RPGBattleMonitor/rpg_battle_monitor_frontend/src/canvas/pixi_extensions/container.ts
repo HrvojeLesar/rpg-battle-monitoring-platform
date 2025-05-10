@@ -1,5 +1,6 @@
 import { Container } from "pixi.js";
 import { createGhost } from "../utils/container_ghost";
+import { GRID_PIXELS } from "../init";
 
 declare module "pixi.js" {
     export interface Container {
@@ -9,6 +10,7 @@ declare module "pixi.js" {
         createGhost(): Container;
         popGost(): Container | undefined | null;
         removeGhost(ghost: Container): Container | undefined | null;
+        removeGhosts(): void;
     }
 }
 
@@ -19,8 +21,8 @@ Container.prototype.snapToGrid = function (this: Container) {
     }
 
     // TODO: get grid configuration and actual grid size
-    this.position.x = Math.round(this.position.x / 32) * 32;
-    this.position.y = Math.round(this.position.y / 32) * 32;
+    this.position.x = Math.round(this.position.x / GRID_PIXELS) * GRID_PIXELS;
+    this.position.y = Math.round(this.position.y / GRID_PIXELS) * GRID_PIXELS;
 };
 
 Container.prototype.ghosts = [];
@@ -62,4 +64,10 @@ Container.prototype.removeGhost = function (
     }
 
     return ghost;
+};
+
+Container.prototype.removeGhosts = function (this: Container): void {
+    this.ghosts.forEach((element) => {
+        this.parent.removeChild(element);
+    });
 };

@@ -3,14 +3,15 @@ import {
     Container,
     Graphics,
     Point,
-    RenderTexture,
-    TilingSprite,
+    Sprite,
+    Texture,
 } from "pixi.js";
+import { GRID_PIXELS, GRID_SIZE } from "./init";
 
 export class Grid extends Container {
     protected app: Application;
 
-    protected gridSprite: GridSprite;
+    protected gridSprite: Container;
 
     protected hoveredCell: Graphics | undefined;
 
@@ -22,7 +23,7 @@ export class Grid extends Container {
         this.hover = options?.hover ?? this.hover;
 
         this.app = app;
-        this.gridSprite = new GridSprite(this.app);
+        this.gridSprite = new DrawnGrid();
         this.interactive = true;
 
         this.hoveredCell = this.initHoveredCell();
@@ -41,8 +42,8 @@ export class Grid extends Container {
             const cellPosition = this.getCellCoordinates(localPosition);
 
             if (this.hoveredCell) {
-                this.hoveredCell.x = cellPosition.x * 32;
-                this.hoveredCell.y = cellPosition.y * 32;
+                this.hoveredCell.x = cellPosition.x * GRID_PIXELS;
+                this.hoveredCell.y = cellPosition.y * GRID_PIXELS;
             }
         };
 
@@ -61,8 +62,8 @@ export class Grid extends Container {
 
     private getCellCoordinates(point: Point): Point {
         return new Point(
-            Math.floor(-(this.gridSprite.bounds.x - point.x) / 32),
-            Math.floor(-(this.gridSprite.bounds.y - point.y) / 32),
+            Math.floor(point.x / GRID_PIXELS),
+            Math.floor(point.y / GRID_PIXELS),
         );
     }
 
@@ -72,49 +73,39 @@ export class Grid extends Container {
         }
 
         this.hoveredCell = new Graphics();
-        this.hoveredCell.rect(0, 0, 32, 32).fill({ color: "red" });
-        this.hoveredCell.visible = true;
+        this.hoveredCell
+            .rect(0, 0, GRID_PIXELS, GRID_PIXELS)
+            .fill({ color: "red" });
+        this.hoveredCell.visible = false;
 
         return this.hoveredCell;
     }
 }
 
-export class GridSprite extends TilingSprite {
-    protected app: Application;
-
-    protected gridGraphics: Graphics;
-
-    constructor(app: Application) {
+class DrawnGrid extends Container {
+    constructor() {
         super();
 
-        this.app = app;
-        this.interactive = true;
-        this.gridGraphics = new Graphics();
-        this.defaultGraphics();
-        this.renderTexture();
-    }
+        const background = new Sprite(Texture.EMPTY);
+        background.width = GRID_SIZE;
+        background.height = GRID_SIZE;
 
-    protected defaultGraphics() {
-        this.gridGraphics.rect(0, 0, 31, 31).stroke({ color: 0xffffff });
-    }
+        const gridGraphics = new Graphics();
+        const repeat = GRID_SIZE / GRID_PIXELS;
+        for (let i = 0; i < repeat; i++) {
+            // Draw vertical lines
+            gridGraphics
+                .moveTo(i * GRID_PIXELS, 0)
+                .lineTo(i * GRID_PIXELS, GRID_SIZE);
 
-    protected renderTexture() {
-        const renderTexture = RenderTexture.create({
-            width: this.gridGraphics.width,
-            height: this.gridGraphics.height,
-            autoGenerateMipmaps: true,
-        });
+            // Draw horizontal lines
+            gridGraphics
+                .moveTo(0, i * GRID_PIXELS)
+                .lineTo(GRID_SIZE, i * GRID_PIXELS);
+        }
 
-        this.app.renderer.render({
-            target: renderTexture,
-            container: this.gridGraphics,
-        });
+        gridGraphics.stroke({ color: 0xffffff, pixelLine: true, width: 1 });
 
-        renderTexture.source.updateMipmaps();
-
-        this.texture = renderTexture;
-
-        this.width = this.app.canvas.width;
-        this.height = this.app.canvas.height;
+        this.addChild(background, gridGraphics);
     }
 }

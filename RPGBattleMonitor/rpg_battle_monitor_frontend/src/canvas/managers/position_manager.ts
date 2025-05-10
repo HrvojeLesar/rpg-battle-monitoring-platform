@@ -45,7 +45,7 @@ export class PositionManager {
             this.viewport.pause = false;
 
             entity.snapToGrid();
-            entity.popGost();
+            entity.removeGhosts();
         };
 
         entity.onpointerdown = onPointerDown;
