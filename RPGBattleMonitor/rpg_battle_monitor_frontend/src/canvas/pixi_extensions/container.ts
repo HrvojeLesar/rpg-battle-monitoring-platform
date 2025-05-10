@@ -5,7 +5,7 @@ import { Grid } from "../grid";
 declare module "pixi.js" {
     export interface Container {
         canSnapToGrid: boolean;
-        snapToGrid(grid: Grid): void;
+        snapToGrid(grid: Grid, force?: boolean): void;
         ghosts: Container[];
         createGhost(): Container;
         popGost(): Option<Container>;
@@ -15,8 +15,12 @@ declare module "pixi.js" {
 }
 
 Container.prototype.canSnapToGrid = false;
-Container.prototype.snapToGrid = function (this: Container, grid: Grid) {
-    if (this.canSnapToGrid !== true) {
+Container.prototype.snapToGrid = function (
+    this: Container,
+    grid: Grid,
+    force: boolean = false,
+) {
+    if (this.canSnapToGrid === false && force === false) {
         return;
     }
 

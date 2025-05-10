@@ -1,26 +1,30 @@
 import { Application, Container, FederatedPointerEvent, Point } from "pixi.js";
-import { EE } from "../../globals/event_emitter";
 import { Viewport } from "../viewport/viewport";
 import { Grid } from "../grid";
 import { AbstractManager } from "./abstract_manager";
+import { ReactPixiJsBridgeEventEmitter } from "../../types/event_emitter";
 
 type UnregisterPositionEvents = () => void;
 
 export class PositionManager extends AbstractManager {
-    protected eventEmitter = EE;
-
     public static default(
         app: Application,
         grid: Grid,
         viewport: Viewport,
+        eventEmitter: ReactPixiJsBridgeEventEmitter,
     ): PositionManager {
-        const positionManger = new PositionManager(app, grid, viewport);
+        const positionManger = new PositionManager([
+            app,
+            grid,
+            viewport,
+            eventEmitter,
+        ]);
 
         return positionManger;
     }
 
-    constructor(app: Application, grid: Grid, viewport: Viewport) {
-        super(app, grid, viewport);
+    constructor(params: ConstructorParameters<typeof AbstractManager>) {
+        super(...params);
     }
 
     public registerPositionEvents(entity: Container): UnregisterPositionEvents {

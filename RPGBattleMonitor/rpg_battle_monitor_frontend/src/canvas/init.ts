@@ -1,9 +1,10 @@
 import { Application, Sprite, Texture } from "pixi.js";
 import "./pixi_extensions/container";
 import { ApplicationManager } from "./managers/application_manager";
+import { ReactPixiJsBridgeEventEmitter } from "../types/event_emitter";
 
-export function init(app: Application) {
-    const applicationManager = ApplicationManager.default(app);
+export function init(app: Application, eventEmitter: ReactPixiJsBridgeEventEmitter) {
+    const applicationManager = ApplicationManager.default(app, eventEmitter);
 
     app.canvas.ondrop = (event) => {
         event.preventDefault();

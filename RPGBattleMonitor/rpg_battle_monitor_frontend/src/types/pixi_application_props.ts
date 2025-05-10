@@ -1,5 +1,6 @@
 import { Application, ApplicationOptions } from "pixi.js";
 import { RefObject } from "react";
+import { ReactPixiJsBridgeEventEmitter } from "./event_emitter";
 
 export interface PixiApplicationProps {
     canvas?: HTMLCanvasElement;
@@ -10,6 +11,6 @@ export interface PixiApplicationProps {
     /** @description Called after pixi.js Application has been initialized. Can be used for seting up pixi.js state */
     applicationInitCallback?: (
         application: Application,
-        applicationIdentifier?: string,
+        eventEmitter: ReactPixiJsBridgeEventEmitter,
     ) => any;
 }

@@ -3,6 +3,7 @@ import { Viewport } from "../viewport/viewport";
 import { Grid } from "../grid";
 import { AbstractManager } from "./abstract_manager";
 import { PositionManager } from "./position_manager";
+import { ReactPixiJsBridgeEventEmitter } from "../../types/event_emitter";
 
 export class EntityManager extends AbstractManager {
     public readonly positionManager: PositionManager;
@@ -13,12 +14,17 @@ export class EntityManager extends AbstractManager {
         app: Application,
         grid: Grid,
         viewport: Viewport,
-        positionManager: PositionManager,
+        eventEmitter: ReactPixiJsBridgeEventEmitter,
     ): EntityManager {
-        const entityManager = new EntityManager(
+        const positionManager = PositionManager.default(
             app,
             grid,
             viewport,
+            eventEmitter,
+        );
+
+        const entityManager = new EntityManager(
+            [app, grid, viewport, eventEmitter],
             positionManager,
         );
 
@@ -27,13 +33,11 @@ export class EntityManager extends AbstractManager {
 
         return entityManager;
     }
-    constructor(
-        app: Application,
-        grid: Grid,
-        viewport: Viewport,
+    private constructor(
+        params: ConstructorParameters<typeof AbstractManager>,
         positionManager: PositionManager,
     ) {
-        super(app, grid, viewport);
+        super(...params);
 
         this.positionManager = positionManager;
     }

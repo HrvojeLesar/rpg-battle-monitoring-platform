@@ -1,4 +1,4 @@
-import { Application, ApplicationOptions } from "pixi.js";
+import { Application, ApplicationOptions, EventEmitter } from "pixi.js";
 import { useCallback, useEffect, useRef } from "react";
 import { PixiApplicationProps } from "../types/pixi_application_props";
 
@@ -21,13 +21,14 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         resizeTo,
         canvasClass,
         applicationOptions,
-        applicationIdentifier,
         applicationInitCallback,
     } = props;
 
     const applicationRef = useRef<Application | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(canvas ?? null);
     const canvasRemoved = useRef(false);
+    // TODO: This will most likely be changed into a context, so any child elements will have access to event emitter
+    const eventEmitter = useRef(new EventEmitter());
 
     useCallback(() => {
         const application = applicationRef.current;
@@ -78,7 +79,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
             });
 
             if (applicationInitCallback !== undefined) {
-                applicationInitCallback(application, applicationIdentifier);
+                applicationInitCallback(application, eventEmitter.current);
             }
 
             globalThis.__PIXI_APP__ = application;
