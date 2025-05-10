@@ -11,8 +11,8 @@ export function init(app: Application) {
     };
 
     const viewport = applicationManager.viewport;
-    const positionManger = applicationManager.positionManager;
     const grid = applicationManager.grid;
+    const entityManager = applicationManager.entityManager;
 
     let sprite = new Sprite(Texture.WHITE);
     sprite.tint = 0xff0000;
@@ -24,8 +24,7 @@ export function init(app: Application) {
     sprite.alpha = 0.5;
 
     viewport.addChild(sprite);
-    // app.stage.addChild(sprite);
-    positionManger.registerPositionEvents(sprite);
+    entityManager.addPlayableEntity(sprite);
 
     sprite = new Sprite(Texture.WHITE);
     sprite.width = sprite.height = grid.cellSize * 3;
@@ -35,6 +34,5 @@ export function init(app: Application) {
     sprite.canSnapToGrid = true;
 
     viewport.addChild(sprite);
-    // app.stage.addChild(sprite);
-    positionManger.registerPositionEvents(sprite);
+    entityManager.addPlayableEntity(sprite);
 }

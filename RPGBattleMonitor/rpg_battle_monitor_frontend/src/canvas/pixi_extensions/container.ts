@@ -8,8 +8,8 @@ declare module "pixi.js" {
         snapToGrid(grid: Grid): void;
         ghosts: Container[];
         createGhost(): Container;
-        popGost(): Container | undefined | null;
-        removeGhost(ghost: Container): Container | undefined | null;
+        popGost(): Option<Container>;
+        removeGhost(ghost: Container): Option<Container>;
         removeGhosts(): void;
     }
 }
@@ -37,9 +37,7 @@ Container.prototype.createGhost = function (this: Container): Container {
     return ghost;
 };
 
-Container.prototype.popGost = function (
-    this: Container,
-): Container | undefined | null {
+Container.prototype.popGost = function (this: Container): Option<Container> {
     const ghost = this.ghosts.pop();
 
     if (ghost) {
@@ -52,7 +50,7 @@ Container.prototype.popGost = function (
 Container.prototype.removeGhost = function (
     this: Container,
     ghost: Container,
-): Container | undefined | null {
+): Option<Container> {
     const index = this.ghosts.indexOf(ghost);
     if (index > -1) {
         return null;
