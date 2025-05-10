@@ -1,11 +1,11 @@
 import { Container } from "pixi.js";
 import { createGhost } from "../utils/container_ghost";
-import { GRID_PIXELS } from "../init";
+import { Grid } from "../grid";
 
 declare module "pixi.js" {
     export interface Container {
         canSnapToGrid: boolean;
-        snapToGrid(): void;
+        snapToGrid(grid: Grid): void;
         ghosts: Container[];
         createGhost(): Container;
         popGost(): Container | undefined | null;
@@ -15,14 +15,15 @@ declare module "pixi.js" {
 }
 
 Container.prototype.canSnapToGrid = false;
-Container.prototype.snapToGrid = function (this: Container) {
+Container.prototype.snapToGrid = function (this: Container, grid: Grid) {
     if (this.canSnapToGrid !== true) {
         return;
     }
 
-    // TODO: get grid configuration and actual grid size
-    this.position.x = Math.round(this.position.x / GRID_PIXELS) * GRID_PIXELS;
-    this.position.y = Math.round(this.position.y / GRID_PIXELS) * GRID_PIXELS;
+    this.position.x =
+        Math.round(this.position.x / grid.cellSize) * grid.cellSize;
+    this.position.y =
+        Math.round(this.position.y / grid.cellSize) * grid.cellSize;
 };
 
 Container.prototype.ghosts = [];

@@ -1,25 +1,35 @@
 import { Application } from "pixi.js";
+import { Viewport } from "../viewport/viewport";
+import { Grid } from "../grid";
 import { PositionManager } from "./position_manager";
-import { SelectionManager } from "./selection_manager";
+import { EntityManager } from "./entity_manager";
+import { AbstractManager } from "./abstract_manager";
 
-interface ApplicationManagerOptions {
-    positionManager?: PositionManager;
-    selectionManager?: SelectionManager;
-}
+export class ApplicationManager extends AbstractManager {
+    public readonly positionManager: PositionManager;
+    public readonly entityManager: EntityManager;
 
-export class ApplicationManager {
-    protected app: Application;
+    public static default(app: Application) {
+        const grid = new Grid(app);
+        const viewport = Viewport.default(app, grid);
+        const applicationManager = new ApplicationManager(app, grid, viewport);
 
-    protected positionManager: PositionManager;
+        return applicationManager;
+    }
 
-    protected selectionManager: SelectionManager;
+    private constructor(app: Application, grid: Grid, viewport: Viewport) {
+        super(app, grid, viewport);
 
-    constructor(app: Application, options?: ApplicationManagerOptions) {
-        this.app = app;
-        this.selectionManager =
-            options?.selectionManager ?? new SelectionManager(this.app);
-        this.positionManager =
-            options?.positionManager ??
-            new PositionManager(this.app, this.selectionManager);
+        this.positionManager = PositionManager.default(
+            this.app,
+            this.grid,
+            this.viewport,
+        );
+        this.entityManager = EntityManager.default(
+            this.app,
+            this.grid,
+            this.viewport,
+            this.positionManager,
+        );
     }
 }

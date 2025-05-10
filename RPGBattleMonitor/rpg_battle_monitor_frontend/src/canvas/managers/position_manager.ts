@@ -1,19 +1,26 @@
 import { Application, Container, FederatedPointerEvent, Point } from "pixi.js";
 import { EE } from "../../globals/event_emitter";
-import { ViewportExtended } from "../viewport/viewport_extended";
+import { Viewport } from "../viewport/viewport";
+import { Grid } from "../grid";
+import { AbstractManager } from "./abstract_manager";
 
 type UnregisterPositionEvents = () => void;
 
-export class PositionManager {
-    protected app: Application;
-
-    protected viewport: ViewportExtended;
-
+export class PositionManager extends AbstractManager {
     protected eventEmitter = EE;
 
-    constructor(app: Application, viewport: ViewportExtended) {
-        this.app = app;
-        this.viewport = viewport;
+    public static default(
+        app: Application,
+        grid: Grid,
+        viewport: Viewport,
+    ): PositionManager {
+        const positionManger = new PositionManager(app, grid, viewport);
+
+        return positionManger;
+    }
+
+    constructor(app: Application, grid: Grid, viewport: Viewport) {
+        super(app, grid, viewport);
     }
 
     public registerPositionEvents(entity: Container): UnregisterPositionEvents {
@@ -33,10 +40,13 @@ export class PositionManager {
 
             this.viewport.onglobalpointermove = (event) => {
                 const localPos = event.getLocalPosition(this.viewport);
-                entity.position.set(
+                const newEntityPosition = new Point(
                     localPos.x - offset.x,
                     localPos.y - offset.y,
                 );
+
+                this.clampPositionToViewport(newEntityPosition, entity);
+                entity.position.set(newEntityPosition.x, newEntityPosition.y);
             };
         };
 
@@ -44,7 +54,7 @@ export class PositionManager {
             this.viewport.onglobalpointermove = null;
             this.viewport.pause = false;
 
-            entity.snapToGrid();
+            entity.snapToGrid(this.grid);
             entity.removeGhosts();
         };
 
@@ -59,5 +69,26 @@ export class PositionManager {
         };
 
         return unregisterPositionEvents;
+    }
+
+    private clampPositionToViewport(position: Point, entity: Container) {
+        const worldWidth = this.viewport.worldWidth;
+        const worldHeight = this.viewport.worldHeight;
+
+        if (position.x < 0) {
+            position.x = 0;
+        }
+
+        if (position.y < 0) {
+            position.y = 0;
+        }
+
+        if (position.x + entity.width > worldWidth) {
+            position.x = worldWidth - entity.width;
+        }
+
+        if (position.y + entity.height > worldHeight) {
+            position.y = worldHeight - entity.height;
+        }
     }
 }
