@@ -1,7 +1,6 @@
 import { Application } from "pixi.js";
 import { Viewport } from "../viewport/viewport";
 import { Grid } from "../grid";
-import { PositionManager } from "./position_manager";
 import { EntityManager } from "./entity_manager";
 import { AbstractManager } from "./abstract_manager";
 import { ReactPixiJsBridgeEventEmitter } from "../../types/event_emitter";
@@ -14,7 +13,7 @@ export class ApplicationManager extends AbstractManager {
         eventEmitter: ReactPixiJsBridgeEventEmitter,
     ) {
         const grid = new Grid(app);
-        const viewport = Viewport.default(app, grid);
+        const viewport = Viewport.default(app, grid, eventEmitter);
         const applicationManager = new ApplicationManager([
             app,
             grid,

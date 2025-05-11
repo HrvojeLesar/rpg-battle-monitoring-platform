@@ -2,6 +2,7 @@ import { type IViewportOptions, Viewport as PixiViewport } from "pixi-viewport";
 import { isDev } from "../../utils/dev_mode";
 import { Application, Graphics } from "pixi.js";
 import { Grid } from "../grid";
+import { ReactPixiJsBridgeEventEmitter } from "../../types/event_emitter";
 
 export class Viewport extends PixiViewport {
     public static readonly WORLD_SIZE = 6000;
@@ -9,11 +10,18 @@ export class Viewport extends PixiViewport {
     protected app: Application;
     protected grid: Grid;
 
-    public static default(app: Application, grid: Grid): Viewport {
+    public readonly eventEmitter: ReactPixiJsBridgeEventEmitter;
+
+    public static default(
+        app: Application,
+        grid: Grid,
+        eventEmitter: ReactPixiJsBridgeEventEmitter,
+    ): Viewport {
         const gridSize = grid.size;
 
         function getWorldSize() {
             return Math.round(
+                // TODO: make sure grid is in the center of viewport and create viewport 4 times larger than grid
                 // Math.max(gridSize.width, gridSize.height, Viewport.WORLD_SIZE),
                 Math.max(gridSize.width, gridSize.height),
             );
@@ -32,6 +40,7 @@ export class Viewport extends PixiViewport {
             },
             app,
             grid,
+            eventEmitter,
         );
 
         viewport.drag().pinch().wheel().clamp({
@@ -43,6 +52,20 @@ export class Viewport extends PixiViewport {
             underflow: "center",
         });
 
+        viewport.on("moved", (event) => {
+            eventEmitter.emit("viewportMoved", {
+                viewport: event.viewport,
+                type: "move",
+            });
+        });
+
+        viewport.on("zoomed", (event) => {
+            eventEmitter.emit("viewportMoved", {
+                viewport: event.viewport,
+                type: "zoom",
+            });
+        });
+
         return viewport;
     }
 
@@ -50,11 +73,13 @@ export class Viewport extends PixiViewport {
         options: IViewportOptions,
         app: Application,
         grid: Grid,
+        eventEmitter: ReactPixiJsBridgeEventEmitter,
     ) {
         super(options);
 
         this.app = app;
         this.grid = grid;
+        this.eventEmitter = eventEmitter;
 
         if (isDev()) {
             const line = this.addChild(new Graphics());

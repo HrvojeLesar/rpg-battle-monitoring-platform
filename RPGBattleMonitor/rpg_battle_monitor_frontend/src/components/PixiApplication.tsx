@@ -1,6 +1,11 @@
-import { Application, ApplicationOptions, EventEmitter } from "pixi.js";
-import { useCallback, useEffect, useRef } from "react";
+import { Application, ApplicationOptions } from "pixi.js";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import { PixiApplicationProps } from "../types/pixi_application_props";
+import {
+    ReactPixiJsBridgeContext,
+    ReactPixiJsBridgeContextProvider,
+} from "../context/ReactPixiJsBridgeContext";
+import { CanvasGui } from "./CanvasGui";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -16,6 +21,14 @@ function defaultOptions(): Partial<ApplicationOptions> {
 }
 
 export const PixiApplication = (props: PixiApplicationProps) => {
+    return (
+        <ReactPixiJsBridgeContextProvider>
+            <PixiApplicationInner {...props} />
+        </ReactPixiJsBridgeContextProvider>
+    );
+};
+
+const PixiApplicationInner = (props: PixiApplicationProps) => {
     const {
         canvas,
         resizeTo,
@@ -24,11 +37,12 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         applicationInitCallback,
     } = props;
 
+    console.log("rerender pixi");
+
     const applicationRef = useRef<Application | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(canvas ?? null);
     const canvasRemoved = useRef(false);
-    // TODO: This will most likely be changed into a context, so any child elements will have access to event emitter
-    const eventEmitter = useRef(new EventEmitter());
+    const eventEmitter = useContext(ReactPixiJsBridgeContext);
 
     useCallback(() => {
         const application = applicationRef.current;
@@ -79,7 +93,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
             });
 
             if (applicationInitCallback !== undefined) {
-                applicationInitCallback(application, eventEmitter.current);
+                applicationInitCallback(application, eventEmitter);
             }
 
             globalThis.__PIXI_APP__ = application;
@@ -101,5 +115,10 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         };
     }, []);
 
-    return <canvas ref={canvasRef} className={canvasClass} />;
+    return (
+        <>
+            <CanvasGui />
+            <canvas ref={canvasRef} className={canvasClass} />
+        </>
+    );
 };

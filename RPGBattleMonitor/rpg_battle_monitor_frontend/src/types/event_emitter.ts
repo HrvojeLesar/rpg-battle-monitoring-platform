@@ -1,7 +1,11 @@
 import type EventEmitter from "eventemitter3";
+import { Viewport } from "pixi-viewport";
 
 type EventNames = {
-    testEvent: (t: string) => void;
+    viewportMoved: {
+        viewport: Viewport;
+        type: "move" | "zoom";
+    };
 };
 
 type EventEmmiterTypes = {
