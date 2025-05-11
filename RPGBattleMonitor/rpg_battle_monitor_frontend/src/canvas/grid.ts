@@ -139,7 +139,6 @@ class DrawnGrid extends Container {
 
         // Draw vertical lines
         const repeatVertical = this.gridSize.width / this.cellSize;
-        console.log(repeatVertical);
         for (let i = 0; i < repeatVertical; i++) {
             gridGraphics
                 .moveTo(i * this.cellSize, 0)

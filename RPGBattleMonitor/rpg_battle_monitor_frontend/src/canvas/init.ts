@@ -3,7 +3,10 @@ import "./pixi_extensions/container";
 import { ApplicationManager } from "./managers/application_manager";
 import { ReactPixiJsBridgeEventEmitter } from "../types/event_emitter";
 
-export function init(app: Application, eventEmitter: ReactPixiJsBridgeEventEmitter) {
+export function init(
+    app: Application,
+    eventEmitter: ReactPixiJsBridgeEventEmitter,
+) {
     const applicationManager = ApplicationManager.default(app, eventEmitter);
 
     app.canvas.ondrop = (event) => {
@@ -11,7 +14,6 @@ export function init(app: Application, eventEmitter: ReactPixiJsBridgeEventEmitt
         event.stopPropagation();
     };
 
-    const viewport = applicationManager.viewport;
     const grid = applicationManager.grid;
     const entityManager = applicationManager.entityManager;
 
@@ -24,7 +26,6 @@ export function init(app: Application, eventEmitter: ReactPixiJsBridgeEventEmitt
     sprite.canSnapToGrid = true;
     sprite.alpha = 0.5;
 
-    viewport.addChild(sprite);
     entityManager.addPlayableEntity(sprite);
 
     sprite = new Sprite(Texture.WHITE);
@@ -34,6 +35,5 @@ export function init(app: Application, eventEmitter: ReactPixiJsBridgeEventEmitt
     sprite.cursor = "pointer";
     sprite.canSnapToGrid = true;
 
-    viewport.addChild(sprite);
     entityManager.addPlayableEntity(sprite);
 }

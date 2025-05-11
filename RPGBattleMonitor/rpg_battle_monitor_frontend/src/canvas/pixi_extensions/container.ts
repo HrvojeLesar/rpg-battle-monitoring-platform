@@ -1,6 +1,7 @@
 import { Container } from "pixi.js";
 import { createGhost } from "../utils/container_ghost";
 import { Grid } from "../grid";
+import { addItem, removeItem } from "../utils/unique_collection_interface";
 
 declare module "pixi.js" {
     export interface Container {
@@ -30,11 +31,13 @@ Container.prototype.snapToGrid = function (
         Math.round(this.position.y / grid.cellSize) * grid.cellSize;
 };
 
+// TODO: Maybe instead of recreating ghost element every time
+// only hide ghost element and reuse it later
 Container.prototype.ghosts = [];
 Container.prototype.createGhost = function (this: Container): Container {
     const ghost = createGhost(this);
 
-    this.ghosts.push(ghost);
+    addItem(this.ghosts, ghost);
 
     this.parent.addChildAt(ghost, this.parent.getChildIndex(this));
 
@@ -55,22 +58,13 @@ Container.prototype.removeGhost = function (
     this: Container,
     ghost: Container,
 ): Option<Container> {
-    const index = this.ghosts.indexOf(ghost);
-    if (index > -1) {
-        return null;
-    }
-
-    this.ghosts.splice(index, 1);
-
-    if (ghost) {
-        this.parent.removeChild(ghost);
-    }
-
-    return ghost;
+    return removeItem(this.ghosts, ghost);
 };
 
 Container.prototype.removeGhosts = function (this: Container): void {
     this.ghosts.forEach((element) => {
         this.parent.removeChild(element);
     });
+
+    this.ghosts = [];
 };

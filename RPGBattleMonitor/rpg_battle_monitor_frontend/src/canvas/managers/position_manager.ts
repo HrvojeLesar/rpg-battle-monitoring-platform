@@ -4,7 +4,7 @@ import { Grid } from "../grid";
 import { AbstractManager } from "./abstract_manager";
 import { ReactPixiJsBridgeEventEmitter } from "../../types/event_emitter";
 
-type UnregisterPositionEvents = () => void;
+export type UnregisterPositionEvents = () => void;
 
 export class PositionManager extends AbstractManager {
     public static default(

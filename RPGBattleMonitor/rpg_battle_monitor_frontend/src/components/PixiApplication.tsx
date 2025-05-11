@@ -37,8 +37,6 @@ const PixiApplicationInner = (props: PixiApplicationProps) => {
         applicationInitCallback,
     } = props;
 
-    console.log("rerender pixi");
-
     const applicationRef = useRef<Application | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(canvas ?? null);
     const canvasRemoved = useRef(false);

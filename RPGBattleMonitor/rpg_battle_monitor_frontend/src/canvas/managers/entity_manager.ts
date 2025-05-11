@@ -2,13 +2,18 @@ import { Application, Container } from "pixi.js";
 import { Viewport } from "../viewport/viewport";
 import { Grid } from "../grid";
 import { AbstractManager } from "./abstract_manager";
-import { PositionManager } from "./position_manager";
+import { PositionManager, UnregisterPositionEvents } from "./position_manager";
 import { ReactPixiJsBridgeEventEmitter } from "../../types/event_emitter";
+import { addItem, removeItem } from "../utils/unique_collection_interface";
 
 export class EntityManager extends AbstractManager {
     public readonly positionManager: PositionManager;
 
     protected playableEntities: Container[] = [];
+    protected cancelEventsCallbackMap: Map<
+        Container,
+        UnregisterPositionEvents
+    > = new Map();
 
     public static default(
         app: Application,
@@ -43,39 +48,42 @@ export class EntityManager extends AbstractManager {
     }
 
     public addPlayableEntity(entity: Container): Container {
+        // Cancel existing events registerd on entity if they exist
+        const existingCallback = this.cancelEventsCallbackMap.get(entity);
+        if (existingCallback !== undefined) {
+            existingCallback();
+        }
+
         this.addEntity(this.playableEntities, entity);
-        this.positionManager.registerPositionEvents(entity);
+        const cancelEventsCallback =
+            this.positionManager.registerPositionEvents(entity);
+
+        this.cancelEventsCallbackMap.set(entity, cancelEventsCallback);
+
+        this.viewport.addChild(entity);
 
         return entity;
     }
 
     public removePlayableEntity(entity: Container): Container {
         this.removeEntity(this.playableEntities, entity);
-        this.positionManager.registerPositionEvents(entity);
+
+        const existingCallback = this.cancelEventsCallbackMap.get(entity);
+        if (existingCallback !== undefined) {
+            existingCallback();
+        }
+        this.cancelEventsCallbackMap.delete(entity);
+
+        this.viewport.removeChild(entity);
 
         return entity;
     }
 
     private addEntity<T>(collection: T[], entity: T): T {
-        const entityIndex = collection.indexOf(entity);
-
-        if (entityIndex !== -1) {
-            collection.splice(entityIndex, 1);
-        }
-
-        return entity;
+        return addItem(collection, entity);
     }
 
     private removeEntity<T>(collection: T[], entity: T): Option<T> {
-        const entityIndex = collection.indexOf(entity);
-
-        if (entityIndex !== -1) {
-            const removedEntity = collection[entityIndex];
-            collection.splice(entityIndex, 1);
-
-            return removedEntity;
-        }
-
-        return null;
+        return removeItem(collection, entity);
     }
 }
