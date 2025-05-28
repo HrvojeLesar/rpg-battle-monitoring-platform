@@ -2,6 +2,7 @@ import { Container } from "pixi.js";
 import { createGhost } from "../utils/container_ghost";
 import { Grid } from "../grid";
 import { addItem, removeItem } from "../utils/unique_collection_interface";
+import { ReactPixiJsBridgeEventEmitter } from "../../types/event_emitter";
 
 declare module "pixi.js" {
     export interface Container {
@@ -12,6 +13,11 @@ declare module "pixi.js" {
         popGost(): Option<Container>;
         removeGhost(ghost: Container): Option<Container>;
         removeGhosts(): void;
+        bridgeEventEmitter?: ReactPixiJsBridgeEventEmitter;
+        setBridgeEventEmitter(
+            eventEmitter: ReactPixiJsBridgeEventEmitter,
+        ): void;
+        getBridgeEventEmitter(): ReactPixiJsBridgeEventEmitter;
     }
 }
 
@@ -67,4 +73,25 @@ Container.prototype.removeGhosts = function (this: Container): void {
     });
 
     this.ghosts = [];
+};
+
+Container.prototype.bridgeEventEmitter = undefined;
+
+Container.prototype.setBridgeEventEmitter = function (
+    this: Container,
+    eventEmitter: ReactPixiJsBridgeEventEmitter,
+): void {
+    this.bridgeEventEmitter = eventEmitter;
+};
+
+Container.prototype.getBridgeEventEmitter = function (
+    this: Container,
+): ReactPixiJsBridgeEventEmitter {
+    if (this.bridgeEventEmitter === undefined) {
+        throw new Error(
+            "This function can only be used after setting the bridge event emitter",
+        );
+    }
+
+    return this.bridgeEventEmitter;
 };

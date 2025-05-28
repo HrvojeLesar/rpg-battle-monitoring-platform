@@ -60,6 +60,7 @@ export class EntityManager extends AbstractManager {
 
         this.cancelEventsCallbackMap.set(entity, cancelEventsCallback);
 
+        entity.setBridgeEventEmitter(this.eventEmitter);
         this.viewport.addChild(entity);
 
         return entity;
