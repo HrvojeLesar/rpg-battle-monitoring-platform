@@ -4,7 +4,11 @@ import { ReactPixiJsBridgeEventEmitter } from "./event_emitter";
 
 export interface PixiApplicationProps {
     canvas?: HTMLCanvasElement;
-    resizeTo?: HTMLElement | Window | RefObject<HTMLElement | null>;
+    resizeTo?:
+        | HTMLElement
+        | Window
+        | RefObject<HTMLElement | undefined>
+        | undefined;
     canvasClass?: string;
     applicationOptions?: Partial<ApplicationOptions>;
     applicationIdentifier?: string;

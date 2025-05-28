@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
@@ -8,10 +8,27 @@ import { init } from "./canvas/init";
 function App() {
     const [greetMsg, setGreetMsg] = useState("");
     const [name, setName] = useState("");
+    const div = useRef<HTMLDivElement | null>(null);
+    const div2 = useRef<HTMLDivElement | null>(null);
+    const [choosenDiv, setChoosenDiv] = useState(div);
 
     return (
         <>
-            <PixiApplication applicationInitCallback={init} />
+            <div style={{ width: "100%", height: "100%" }} ref={div}></div>
+            <div style={{ width: "100px", height: "100px" }} ref={div2}></div>
+            <PixiApplication
+                applicationInitCallback={init}
+                resizeTo={choosenDiv}
+            />
+            <button
+                onClick={() => {
+                    setChoosenDiv((old) => {
+                        return old == div ? div2 : div;
+                    });
+                }}
+            >
+                Test
+            </button>
             <main className="container">
                 <h1>Welcome to Tauri + React</h1>
 

@@ -1,5 +1,5 @@
 import { Application, ApplicationOptions } from "pixi.js";
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { RefObject, useCallback, useContext, useEffect, useRef } from "react";
 import { PixiApplicationProps } from "../types/pixi_application_props";
 import {
     ReactPixiJsBridgeContext,
@@ -11,12 +11,15 @@ declare global {
     var __PIXI_APP__: Application;
 }
 
-function defaultOptions(): Partial<ApplicationOptions> {
+function defaultOptions(
+    overrides: Partial<ApplicationOptions>,
+): Partial<ApplicationOptions> {
     return {
         resolution: window.devicePixelRatio,
         autoDensity: true,
         antialias: true,
         roundPixels: true,
+        ...overrides,
     };
 }
 
@@ -42,7 +45,7 @@ const PixiApplicationInner = (props: PixiApplicationProps) => {
     const canvasRemoved = useRef(false);
     const eventEmitter = useContext(ReactPixiJsBridgeContext);
 
-    useCallback(() => {
+    useEffect(() => {
         const application = applicationRef.current;
         if (application === null) {
             return;
@@ -83,7 +86,16 @@ const PixiApplicationInner = (props: PixiApplicationProps) => {
         }
 
         async function initPixi() {
-            const options = applicationOptions ?? defaultOptions();
+            let resize: HTMLElement | Window | undefined;
+            if (resizeTo !== undefined && Object.hasOwn(resizeTo, "current")) {
+                resize =
+                    (resizeTo as RefObject<HTMLElement | undefined>).current ??
+                    undefined;
+            } else {
+                resize = resizeTo as HTMLElement | Window | undefined;
+            }
+            const options =
+                applicationOptions ?? defaultOptions({ resizeTo: resize });
 
             await application.init({
                 ...options,
@@ -99,6 +111,8 @@ const PixiApplicationInner = (props: PixiApplicationProps) => {
             canvas?.addEventListener("wheel", (event) => {
                 event.preventDefault();
             });
+
+            applicationRef.current = application;
 
             return application;
         }
