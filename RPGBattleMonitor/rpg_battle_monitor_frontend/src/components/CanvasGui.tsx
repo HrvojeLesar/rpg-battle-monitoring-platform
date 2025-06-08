@@ -7,6 +7,7 @@ import {
     ReactPixiJsBridgeContext,
     ReactPixiJsBridgeContextProvider,
 } from "../context/ReactPixiJsBridgeContext";
+import { GridSlider } from "./Inputs/GridSlider";
 
 export const CanvasGui = ({
     eventEmitter,
@@ -76,7 +77,7 @@ const CanvasGuiInner = () => {
 
     return (
         <>
-            <Slider />
+            <GridSlider />
             <div
                 style={{
                     transform: `translate(${position.position.x}px, ${position.position.y}px)`,

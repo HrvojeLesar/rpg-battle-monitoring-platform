@@ -25,7 +25,7 @@ export type GridSize = {
 export class Grid extends Container /* implements IModelConfiguration */ {
     protected app: Application;
     protected gridSprite: Container;
-    protected hoveredCell: Graphics | undefined;
+    protected hoveredCell: Graphics;
     protected hover: boolean = true;
     protected eventEmitter: GridEventEmitter;
 
@@ -52,14 +52,11 @@ export class Grid extends Container /* implements IModelConfiguration */ {
         this.gridSprite = new DrawnGrid(this._cellSize, this._size);
         this.interactive = true;
 
-        this.hoveredCell = this.initHoveredCell();
+        this.hoveredCell = this.createHoveredCell();
 
         this.initEvents();
 
         this.addChild(this.gridSprite);
-        if (this.hoveredCell) {
-            this.addChild(this.hoveredCell);
-        }
     }
 
     public get cellSize(): number {
@@ -84,6 +81,9 @@ export class Grid extends Container /* implements IModelConfiguration */ {
         this.removeChild(this.gridSprite);
         this.gridSprite = new DrawnGrid(this._cellSize, this._size);
         this.addChild(this.gridSprite);
+
+        this.removeChild(this.hoveredCell);
+        this.hoveredCell = this.createHoveredCell();
     }
 
     protected initEvents() {
@@ -91,20 +91,20 @@ export class Grid extends Container /* implements IModelConfiguration */ {
             const localPosition = event.getLocalPosition(this);
             const cellPosition = this.getCellCoordinates(localPosition);
 
-            if (this.hoveredCell) {
+            if (this.hover) {
                 this.hoveredCell.x = cellPosition.x * this._cellSize;
                 this.hoveredCell.y = cellPosition.y * this._cellSize;
             }
         };
 
         this.onpointerenter = (_event) => {
-            if (this.hoveredCell) {
+            if (this.hover) {
                 this.hoveredCell.visible = true;
             }
         };
 
         this.onpointerleave = (_event) => {
-            if (this.hoveredCell) {
+            if (this.hover) {
                 this.hoveredCell.visible = false;
             }
         };
@@ -117,18 +117,16 @@ export class Grid extends Container /* implements IModelConfiguration */ {
         );
     }
 
-    private initHoveredCell() {
-        if (!this.hover) {
-            return undefined;
-        }
-
-        this.hoveredCell = new Graphics();
-        this.hoveredCell
+    private createHoveredCell(): Graphics {
+        const hoveredCell = new Graphics();
+        hoveredCell
             .rect(0, 0, this._cellSize, this._cellSize)
             .fill({ color: "red" });
-        this.hoveredCell.visible = false;
+        hoveredCell.visible = false;
 
-        return this.hoveredCell;
+        this.addChild(hoveredCell);
+
+        return hoveredCell;
     }
 }
 
@@ -165,6 +163,7 @@ class DrawnGrid extends Container {
         }
         gridGraphics.stroke({ color: 0xffffff, pixelLine: true, width: 1 });
 
+        // Outline
         gridGraphics
             .rect(0, 0, this.gridSize.width, this.gridSize.height)
             .stroke({ color: 0xffffff, pixelLine: true, width: 1 });
