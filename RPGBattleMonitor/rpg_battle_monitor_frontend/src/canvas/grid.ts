@@ -6,6 +6,10 @@ import {
     Sprite,
     Texture,
 } from "pixi.js";
+import {
+    GridEventEmitter,
+    ReactPixiJsBridgeEventEmitter,
+} from "../types/event_emitter";
 
 type GridOptions = {
     hover?: boolean;
@@ -13,16 +17,17 @@ type GridOptions = {
     gridSize?: GridSize;
 };
 
-type GridSize = {
+export type GridSize = {
     width: number;
     height: number;
 };
 
-export class Grid extends Container {
+export class Grid extends Container /* implements IModelConfiguration */ {
     protected app: Application;
     protected gridSprite: Container;
     protected hoveredCell: Graphics | undefined;
     protected hover: boolean = true;
+    protected eventEmitter: GridEventEmitter;
 
     protected _cellSize: number = 100;
     protected _size: GridSize = {
@@ -30,12 +35,18 @@ export class Grid extends Container {
         height: 1000,
     };
 
-    constructor(app: Application, options?: GridOptions) {
+    constructor(
+        app: Application,
+        eventEmitter: ReactPixiJsBridgeEventEmitter | GridEventEmitter,
+        options?: GridOptions,
+    ) {
         super();
 
         this.hover = options?.hover ?? this.hover;
         this._cellSize = options?.cellSize ?? this._cellSize;
         this._size = options?.gridSize ?? this._size;
+
+        this.eventEmitter = eventEmitter;
 
         this.app = app;
         this.gridSprite = new DrawnGrid(this._cellSize, this._size);
@@ -152,8 +163,11 @@ class DrawnGrid extends Container {
                 .moveTo(0, i * this.cellSize)
                 .lineTo(this.gridSize.width, i * this.cellSize);
         }
-
         gridGraphics.stroke({ color: 0xffffff, pixelLine: true, width: 1 });
+
+        gridGraphics
+            .rect(0, 0, this.gridSize.width, this.gridSize.height)
+            .stroke({ color: 0xffffff, pixelLine: true, width: 1 });
 
         this.addChild(background, gridGraphics);
     }

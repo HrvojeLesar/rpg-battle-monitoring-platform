@@ -6,7 +6,7 @@ import { ReactPixiJsBridgeEventEmitter } from "../types/event_emitter";
 export function init(
     app: Application,
     eventEmitter: ReactPixiJsBridgeEventEmitter,
-) {
+): ApplicationManager {
     const applicationManager = ApplicationManager.default(app, eventEmitter);
 
     app.canvas.ondrop = (event) => {
@@ -36,4 +36,6 @@ export function init(
     sprite.canSnapToGrid = true;
 
     entityManager.addPlayableEntity(sprite);
+
+    return applicationManager;
 }

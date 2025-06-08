@@ -1,9 +1,11 @@
-import { useContext, useEffect, useState } from "react";
-import { ReactPixiJsBridgeContext } from "../context/ReactPixiJsBridgeContext";
+import { useEffect, useState } from "react";
 import { Point } from "pixi.js";
+import { Slider } from "./Inputs/Slider";
+import { useEventEmitter } from "../hooks/bridge_context_hooks";
 
 export const CanvasGui = () => {
-    const eventEmitter = useContext(ReactPixiJsBridgeContext);
+    const eventEmitter = useEventEmitter();
+
     const [position, setPosition] = useState({
         position: new Point(64, 64),
         recordedPoint: new Point(64, 64),
@@ -25,7 +27,9 @@ export const CanvasGui = () => {
                     old.position.x *= viewport.scale.x;
                     old.position.y *= viewport.scale.y;
 
-                    return old;
+                    return {
+                        ...old,
+                    };
                 });
             }
         });
@@ -36,12 +40,16 @@ export const CanvasGui = () => {
     }, [eventEmitter]);
 
     return (
-        <div
-            style={{
-                transform: `translate(${position.position.x}px, ${position.position.y}px)`,
-            }}
-        >
-            Hello
-        </div>
+        <>
+            <Slider />
+            <div
+                style={{
+                    transform: `translate(${position.position.x}px, ${position.position.y}px)`,
+                    position: "absolute",
+                }}
+            >
+                Hello
+            </div>
+        </>
     );
 };

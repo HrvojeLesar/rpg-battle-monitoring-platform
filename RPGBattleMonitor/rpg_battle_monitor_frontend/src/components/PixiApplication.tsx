@@ -1,11 +1,12 @@
-import { Application, ApplicationOptions } from "pixi.js";
-import { RefObject, useCallback, useContext, useEffect, useRef } from "react";
-import { PixiApplicationProps } from "../types/pixi_application_props";
+import { Application, ApplicationOptions, EventEmitter } from "pixi.js";
+import { RefObject, useContext, useEffect, useRef } from "react";
+import { type PixiApplicationProps } from "../types/pixi_application_props";
 import {
     ReactPixiJsBridgeContext,
     ReactPixiJsBridgeContextProvider,
 } from "../context/ReactPixiJsBridgeContext";
 import { CanvasGui } from "./CanvasGui";
+import { ReactPixiJsBridgeEventEmitter } from "../types/event_emitter";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -23,15 +24,27 @@ function defaultOptions(
     };
 }
 
-export const PixiApplication = (props: PixiApplicationProps) => {
-    return (
-        <ReactPixiJsBridgeContextProvider>
-            <PixiApplicationInner {...props} />
-        </ReactPixiJsBridgeContextProvider>
-    );
-};
+function DrawGui() {
+    const context = useContext(ReactPixiJsBridgeContext);
 
-const PixiApplicationInner = (props: PixiApplicationProps) => {
+    const isReady = () => {
+        if (context === undefined) {
+            return false;
+        }
+
+        return context.isReady;
+    };
+
+    if (!isReady()) {
+        return <>Context not initialized</>;
+    }
+
+    return <CanvasGui />;
+}
+
+export let GPixiInstanceNumber = 0;
+
+export const PixiApplication = (props: PixiApplicationProps) => {
     const {
         canvas,
         resizeTo,
@@ -43,7 +56,9 @@ const PixiApplicationInner = (props: PixiApplicationProps) => {
     const applicationRef = useRef<Application | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(canvas ?? null);
     const canvasRemoved = useRef(false);
-    const eventEmitter = useContext(ReactPixiJsBridgeContext);
+    const eventEmitter = useRef<ReactPixiJsBridgeEventEmitter>(
+        new EventEmitter(),
+    );
 
     useEffect(() => {
         const application = applicationRef.current;
@@ -67,6 +82,7 @@ const PixiApplicationInner = (props: PixiApplicationProps) => {
 
     useEffect(() => {
         const application = new Application();
+        const instanceNumber = ++GPixiInstanceNumber;
 
         let canvas = canvasRef.current;
         if (canvas === null) {
@@ -103,7 +119,15 @@ const PixiApplicationInner = (props: PixiApplicationProps) => {
             });
 
             if (applicationInitCallback !== undefined) {
-                applicationInitCallback(application, eventEmitter);
+                const applicationManager = applicationInitCallback(
+                    application,
+                    eventEmitter.current,
+                );
+
+                eventEmitter.current.emit("initApplication", {
+                    app: applicationManager,
+                    instanceNumber: instanceNumber,
+                });
             }
 
             globalThis.__PIXI_APP__ = application;
@@ -123,14 +147,22 @@ const PixiApplicationInner = (props: PixiApplicationProps) => {
             canvasRemoved.current = true;
             initPromise.then((application) => {
                 application.destroy();
+
+                eventEmitter.current.emit("destroyApplication", {
+                    instanceNumber: instanceNumber,
+                });
             });
         };
     }, []);
 
     return (
-        <>
-            <CanvasGui />
+        <div style={{ overflow: "hidden", position: "relative" }}>
             <canvas ref={canvasRef} className={canvasClass} />
-        </>
+            <ReactPixiJsBridgeContextProvider
+                eventEmitter={eventEmitter.current}
+            >
+                <DrawGui />
+            </ReactPixiJsBridgeContextProvider>
+        </div>
     );
 };

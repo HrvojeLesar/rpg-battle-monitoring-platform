@@ -1,8 +1,9 @@
 import { Application, ApplicationOptions } from "pixi.js";
 import { RefObject } from "react";
 import { ReactPixiJsBridgeEventEmitter } from "./event_emitter";
+import { ApplicationManager } from "../canvas/managers/application_manager";
 
-export interface PixiApplicationProps {
+export type PixiApplicationProps = {
     canvas?: HTMLCanvasElement;
     resizeTo?:
         | HTMLElement
@@ -16,5 +17,5 @@ export interface PixiApplicationProps {
     applicationInitCallback?: (
         application: Application,
         eventEmitter: ReactPixiJsBridgeEventEmitter,
-    ) => any;
-}
+    ) => ApplicationManager;
+};
