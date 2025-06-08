@@ -1,12 +1,8 @@
 import { Application, ApplicationOptions, EventEmitter } from "pixi.js";
-import { RefObject, useContext, useEffect, useRef } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { type PixiApplicationProps } from "../types/pixi_application_props";
-import {
-    ReactPixiJsBridgeContext,
-    ReactPixiJsBridgeContextProvider,
-} from "../context/ReactPixiJsBridgeContext";
-import { CanvasGui } from "./CanvasGui";
 import { ReactPixiJsBridgeEventEmitter } from "../types/event_emitter";
+import { CanvasGui } from "./CanvasGui";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -22,24 +18,6 @@ function defaultOptions(
         roundPixels: true,
         ...overrides,
     };
-}
-
-function DrawGui() {
-    const context = useContext(ReactPixiJsBridgeContext);
-
-    const isReady = () => {
-        if (context === undefined) {
-            return false;
-        }
-
-        return context.isReady;
-    };
-
-    if (!isReady()) {
-        return <>Context not initialized</>;
-    }
-
-    return <CanvasGui />;
 }
 
 export let GPixiInstanceNumber = 0;
@@ -156,13 +134,11 @@ export const PixiApplication = (props: PixiApplicationProps) => {
     }, []);
 
     return (
-        <div style={{ overflow: "hidden", position: "relative" }}>
-            <canvas ref={canvasRef} className={canvasClass} />
-            <ReactPixiJsBridgeContextProvider
-                eventEmitter={eventEmitter.current}
-            >
-                <DrawGui />
-            </ReactPixiJsBridgeContextProvider>
-        </div>
+        <>
+            <div style={{ overflow: "hidden", position: "relative" }}>
+                <canvas ref={canvasRef} className={canvasClass} />
+                <CanvasGui eventEmitter={eventEmitter.current} />
+            </div>
+        </>
     );
 };

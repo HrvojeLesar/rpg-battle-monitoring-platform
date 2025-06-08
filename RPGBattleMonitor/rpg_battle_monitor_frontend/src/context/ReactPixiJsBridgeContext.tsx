@@ -59,12 +59,10 @@ export const ReactPixiJsBridgeContextProvider = (props: Props) => {
         };
 
         eventEmitter.on("initApplication", (event) => {
-            console.log("init");
             handleContextEvent(event, true);
         });
 
         eventEmitter.on("destroyApplication", (event) => {
-            console.log("dest");
             handleContextEvent(event, false);
         });
 

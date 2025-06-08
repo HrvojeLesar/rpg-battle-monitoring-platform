@@ -1,9 +1,44 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Point } from "pixi.js";
 import { Slider } from "./Inputs/Slider";
 import { useEventEmitter } from "../hooks/bridge_context_hooks";
+import { ReactPixiJsBridgeEventEmitter } from "../types/event_emitter";
+import {
+    ReactPixiJsBridgeContext,
+    ReactPixiJsBridgeContextProvider,
+} from "../context/ReactPixiJsBridgeContext";
 
-export const CanvasGui = () => {
+export const CanvasGui = ({
+    eventEmitter,
+}: {
+    eventEmitter: ReactPixiJsBridgeEventEmitter;
+}) => {
+    return (
+        <ReactPixiJsBridgeContextProvider eventEmitter={eventEmitter}>
+            <CanvasGuiInit />
+        </ReactPixiJsBridgeContextProvider>
+    );
+};
+
+const CanvasGuiInit = () => {
+    const context = useContext(ReactPixiJsBridgeContext);
+
+    const isReady = () => {
+        if (context === undefined) {
+            return false;
+        }
+
+        return context.isReady;
+    };
+
+    if (!isReady()) {
+        return <>Context not initialized</>;
+    }
+
+    return <CanvasGuiInner />;
+};
+
+const CanvasGuiInner = () => {
     const eventEmitter = useEventEmitter();
 
     const [position, setPosition] = useState({
