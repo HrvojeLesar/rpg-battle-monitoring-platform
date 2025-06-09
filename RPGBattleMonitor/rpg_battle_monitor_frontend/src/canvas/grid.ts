@@ -94,6 +94,7 @@ export class Grid extends Container /* implements IModelConfiguration */ {
             if (this.hover) {
                 this.hoveredCell.x = cellPosition.x * this._cellSize;
                 this.hoveredCell.y = cellPosition.y * this._cellSize;
+                this.resizeHoveredCell();
             }
         };
 
@@ -127,6 +128,21 @@ export class Grid extends Container /* implements IModelConfiguration */ {
         this.addChild(hoveredCell);
 
         return hoveredCell;
+    }
+
+    private resizeHoveredCell(): void {
+        console.log(this.hoveredCell.y + this._cellSize);
+        if (this.hoveredCell.x + this._cellSize > this._size.width) {
+            this.hoveredCell.width = this._size.width - this.hoveredCell.x;
+        } else {
+            this.hoveredCell.width = this._cellSize;
+        }
+
+        if (this.hoveredCell.y + this._cellSize > this._size.height) {
+            this.hoveredCell.height = this._size.height - this.hoveredCell.y;
+        } else {
+            this.hoveredCell.height = this._cellSize;
+        }
     }
 }
 
