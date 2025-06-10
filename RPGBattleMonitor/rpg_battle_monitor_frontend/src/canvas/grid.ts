@@ -131,7 +131,6 @@ export class Grid extends Container /* implements IModelConfiguration */ {
     }
 
     private resizeHoveredCell(): void {
-        console.log(this.hoveredCell.y + this._cellSize);
         if (this.hoveredCell.x + this._cellSize > this._size.width) {
             this.hoveredCell.width = this._size.width - this.hoveredCell.x;
         } else {

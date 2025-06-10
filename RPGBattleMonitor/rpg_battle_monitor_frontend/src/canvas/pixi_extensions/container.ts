@@ -18,6 +18,7 @@ declare module "pixi.js" {
             eventEmitter: ReactPixiJsBridgeEventEmitter,
         ): void;
         getBridgeEventEmitter(): ReactPixiJsBridgeEventEmitter;
+        id: number | null;
     }
 }
 
@@ -95,3 +96,5 @@ Container.prototype.getBridgeEventEmitter = function (
 
     return this.bridgeEventEmitter;
 };
+
+Container.prototype.id = null;

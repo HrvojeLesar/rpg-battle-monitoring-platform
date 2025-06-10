@@ -21,6 +21,7 @@ function cloneSprite(container: Sprite): Sprite {
     clone.height = container.height;
     clone.position.set(container.position.x, container.position.y);
     clone.eventMode = "passive";
+    clone.texture = container.texture;
 
     return clone;
 }
