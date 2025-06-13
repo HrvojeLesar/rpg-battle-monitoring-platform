@@ -21,8 +21,7 @@ pub(super) fn get_api_doc_router<S>() -> Router<S>
 where
     S: Clone + Send + Sync + 'static,
 {
-    #[allow(unused)]
-    let mut doc = ApiDoc::openapi();
+    let doc = ApiDoc::openapi();
 
     Scalar::with_url("/docs", doc).into()
 }

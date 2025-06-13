@@ -1,5 +1,3 @@
-use std::env;
-
 use sqlx::{
     AnyPool,
     any::{AnyPoolOptions, install_drivers},
@@ -10,7 +8,7 @@ use sqlx::{
 compile_error!("Please select one database feature, either 'db_sqlite' or 'db_postgres'");
 
 #[tracing::instrument]
-pub async fn create_database_pool(database_url: &str) -> AnyPool {
+pub async fn create_database_pool(database_url: &str, max_connections: u32) -> AnyPool {
     #[cfg(feature = "db_sqlite")]
     install_drivers(&[sqlx::sqlite::any::DRIVER]).expect("Failed to install db drivers");
     #[cfg(feature = "db_postgres")]
@@ -28,22 +26,6 @@ pub async fn create_database_pool(database_url: &str) -> AnyPool {
 
         tracing::info!("Database successfully created");
     }
-
-    let max_connections = env::var("DATABASE_CONNECTIONS")
-        .map_err(|error| {
-            tracing::warn!(error = %error, "DATABASE_CONNECTIONS not found using default");
-            error
-        })
-        .ok()
-        .and_then(|max| {
-            max.parse::<u32>()
-                .map_err(|error| {
-                    tracing::warn!(error = %error, "Failed to parse DATABASE_CONNECTIONS into a number, using default");
-                    error
-                })
-                .ok()
-        })
-        .unwrap_or(10);
 
     let mut pool = AnyPoolOptions::new()
         .max_connections(max_connections)
