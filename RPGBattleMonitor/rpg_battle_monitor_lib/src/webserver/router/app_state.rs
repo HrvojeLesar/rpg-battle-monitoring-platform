@@ -1,6 +1,6 @@
 use axum::extract::FromRef;
 
-use crate::model::model_manager::ModelManager;
+use crate::{config, database::setup::create_database_pool};
 
 #[derive(Debug, Clone)]
 pub struct AppState<DB>
@@ -8,7 +8,7 @@ where
     DB: sqlx::Database,
     <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
 {
-    pub model_manager: ModelManager<DB>,
+    pub pool: sqlx::Pool<DB>,
 }
 
 impl<DB> AppState<DB>
@@ -18,10 +18,18 @@ where
 {
     pub async fn new() -> Self {
         Self {
-            model_manager: ModelManager::new()
-                .await
-                .expect("Failed to initialize ModelManager"),
+            pool: Self::get_pool_from_config().await,
         }
+    }
+
+    async fn get_pool_from_config() -> sqlx::Pool<DB> {
+        let config = config::config();
+
+        create_database_pool(
+            &config.database.database_url,
+            config.database.max_connections,
+        )
+        .await
     }
 }
 
@@ -39,17 +47,7 @@ where
     <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
 {
     fn get_db_pool(&self) -> sqlx::Pool<DB> {
-        self.model_manager.db.clone()
-    }
-}
-
-impl<DB> FromRef<AppState<DB>> for ModelManager<DB>
-where
-    DB: sqlx::Database + Clone,
-    <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
-{
-    fn from_ref(input: &AppState<DB>) -> Self {
-        input.model_manager.clone()
+        self.pool.clone()
     }
 }
 
@@ -59,6 +57,6 @@ where
     <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
 {
     fn from_ref(input: &AppState<DB>) -> Self {
-        input.model_manager.db.clone()
+        input.pool.clone()
     }
 }
