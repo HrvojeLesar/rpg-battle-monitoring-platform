@@ -35,7 +35,7 @@ where
 
 pub trait AppStateTrait<DB>
 where
-    Self: Clone + Send + Sync + 'static,
+    Self: Send + Sync + 'static,
     DB: sqlx::Database,
 {
     fn get_db_pool(&self) -> sqlx::Pool<DB>;
@@ -43,7 +43,7 @@ where
 
 impl<DB> AppStateTrait<DB> for AppState<DB>
 where
-    DB: sqlx::Database + Clone,
+    DB: sqlx::Database,
     <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
 {
     fn get_db_pool(&self) -> sqlx::Pool<DB> {

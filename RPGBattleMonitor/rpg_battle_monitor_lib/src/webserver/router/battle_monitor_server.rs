@@ -14,7 +14,7 @@ impl BattleMonitorWebServer {
 
     pub fn new<DB>(state: AppState<DB>) -> Self
     where
-        DB: sqlx::Database + Clone,
+        DB: sqlx::Database,
         <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
     {
         let axum_router = axum::Router::new().fallback(Self::fallback());

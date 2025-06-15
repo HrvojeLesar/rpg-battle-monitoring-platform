@@ -7,7 +7,7 @@ const API_V1: &str = "/api/v1";
 
 pub fn get_v1_api_router<DB>(_state: AppState<DB>) -> axum::Router<()>
 where
-    DB: sqlx::Database + Clone,
+    DB: sqlx::Database,
     <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
 {
     let router = axum::Router::new();
