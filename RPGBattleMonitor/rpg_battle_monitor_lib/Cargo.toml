@@ -9,11 +9,7 @@ socketioxide = { path = "../../socketioxide/crates/socketioxide", features = [
     "tracing",
 ] }
 axum = { version = "0.8.3", features = ["macros", "multipart"] }
-sqlx = { version = "0.8.5", features = [
-    "chrono",
-    "migrate",
-    "runtime-tokio-rustls",
-] }
+sqlx = { version = "0.8.5", features = ["any", "chrono", "migrate", "runtime-tokio-rustls"] }
 tokio = { version = "1.44.2", features = ["full"] }
 tracing = "0.1.41"
 ts-rs = "10.1.0"

@@ -12,7 +12,11 @@ impl BattleMonitorWebServer {
         (StatusCode::NOT_FOUND, "Not found")
     }
 
-    pub fn new(state: AppState) -> Self {
+    pub fn new<DB>(state: AppState<DB>) -> Self
+    where
+        DB: sqlx::Database + Clone,
+        <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
+    {
         let axum_router = axum::Router::new().fallback(Self::fallback());
 
         let axum_router = axum_router.merge(get_v1_api_router(state));

@@ -1,14 +1,14 @@
-use sqlx::{
-    AnyPool,
-    any::{AnyPoolOptions, install_drivers},
-    migrate::MigrateDatabase,
-};
+use sqlx::{any::install_drivers, migrate::MigrateDatabase};
 
 #[cfg(all(feature = "db_sqlite", feature = "db_postgres"))]
 compile_error!("Please select one database feature, either 'db_sqlite' or 'db_postgres'");
 
 #[tracing::instrument]
-pub async fn create_database_pool(database_url: &str, max_connections: u32) -> AnyPool {
+pub async fn create_database_pool<DB>(database_url: &str, max_connections: u32) -> sqlx::Pool<DB>
+where
+    DB: sqlx::Database,
+    <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
+{
     #[cfg(feature = "db_sqlite")]
     install_drivers(&[sqlx::sqlite::any::DRIVER]).expect("Failed to install db drivers");
     #[cfg(feature = "db_postgres")]
@@ -27,7 +27,7 @@ pub async fn create_database_pool(database_url: &str, max_connections: u32) -> A
         tracing::info!("Database successfully created");
     }
 
-    let mut pool = AnyPoolOptions::new()
+    let mut pool = sqlx::pool::PoolOptions::new()
         .max_connections(max_connections)
         .connect(database_url)
         .await
@@ -38,7 +38,11 @@ pub async fn create_database_pool(database_url: &str, max_connections: u32) -> A
     pool
 }
 
-async fn run_migrations(pool: &mut AnyPool) {
+async fn run_migrations<DB>(pool: &mut sqlx::Pool<DB>)
+where
+    DB: sqlx::Database,
+    <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
+{
     tracing::info!("Running pending migrations");
     let mut migration_transaction = pool
         .begin()
