@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 
-use crate::webserver::{router::app_state::AppState, routes::get_v1_api_router};
+use crate::webserver::{router::app_state::AppState, routes::v1::get_v1_api_router};
 
 #[derive(Debug)]
 pub struct BattleMonitorWebServer {
