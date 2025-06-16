@@ -1,27 +1,40 @@
 use axum::Router;
-use utoipa::OpenApi;
+use utoipa::{Modify, OpenApi};
 use utoipa_scalar::{Scalar, Servable};
 
-#[cfg(feature = "api_v1_doc")]
-#[derive(OpenApi)]
-#[openapi(info(description = "My Api description"), paths(get_api_doc_router))]
-pub struct ApiDoc;
+use crate::apidoc::taggroups::tag_groups_config;
 
-#[cfg(feature = "api_v1_doc")]
-#[cfg_attr(feature = "api_v1_doc",
-    utoipa::path(
-        get,
-        path = "/api/v1/docs", 
-        responses(
-            (status = 200, description = "Api Documentation Page")
-        )
+pub mod taggroups;
+
+#[derive(OpenApi)]
+#[openapi(
+    info(description = "My Api description"),
+    modifiers(&ApiDocMod),
+    nest(
+        (path = "/api/v1", api = crate::cdn::ApiDoc, tags = [])
+    )
+)]
+pub struct ApiDocRoot;
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/docs", 
+    responses(
+        (status = 200, description = "Api Documentation Page")
     )
 )]
 pub(super) fn get_api_doc_router<S>() -> Router<S>
 where
     S: Clone + Send + Sync + 'static,
 {
-    let doc = ApiDoc::openapi();
+    let doc = ApiDocRoot::openapi();
 
     Scalar::with_url("/docs", doc).into()
+}
+
+struct ApiDocMod;
+impl Modify for ApiDocMod {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        openapi.extensions = Some(tag_groups_config().to_extension());
+    }
 }
