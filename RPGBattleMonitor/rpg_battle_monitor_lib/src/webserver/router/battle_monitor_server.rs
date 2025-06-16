@@ -1,6 +1,9 @@
 use axum::http::StatusCode;
 
-use crate::webserver::{router::app_state::AppState, routes::v1::get_v1_api_router};
+use crate::{
+    cdn::filesystem::{FileSystem, Writeable},
+    webserver::{router::app_state::AppState, routes::v1::get_v1_api_router},
+};
 
 #[derive(Debug)]
 pub struct BattleMonitorWebServer {
@@ -12,10 +15,11 @@ impl BattleMonitorWebServer {
         (StatusCode::NOT_FOUND, "Not found")
     }
 
-    pub fn new<DB>(state: AppState<DB>) -> Self
+    pub fn new<DB, F>(state: AppState<DB, F>) -> Self
     where
         DB: sqlx::Database,
         <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
+        F: FileSystem + Writeable,
     {
         let axum_router = axum::Router::new().fallback(Self::fallback());
 

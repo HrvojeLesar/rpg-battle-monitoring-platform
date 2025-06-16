@@ -10,12 +10,14 @@ pub struct DatabaseConfig {
 
 pub struct Config {
     pub database: DatabaseConfig,
+    pub assets_base_path: String,
 }
 
 impl Config {
     pub fn load_from_env() -> Result<Self> {
         Ok(Self {
             database: DatabaseConfig::load_from_env()?,
+            assets_base_path: "./assets".to_string(),
         })
     }
 }

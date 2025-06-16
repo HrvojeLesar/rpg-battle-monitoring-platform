@@ -1,14 +1,22 @@
 #[cfg(feature = "api_v1_doc")]
 use crate::apidoc;
-use crate::{cdn, webserver::router::app_state::AppState, websockets};
+use crate::{
+    cdn::{
+        self,
+        filesystem::{FileSystem, Writeable},
+    },
+    webserver::router::app_state::AppState,
+    websockets,
+};
 
 #[cfg(feature = "api_v1")]
 const API_V1: &str = "/api/v1";
 
-pub fn get_v1_api_router<DB>(_state: AppState<DB>) -> axum::Router<()>
+pub fn get_v1_api_router<DB, F>(_state: AppState<DB, F>) -> axum::Router<()>
 where
     DB: sqlx::Database,
     <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
+    F: FileSystem + Writeable,
 {
     let router = axum::Router::new();
 
