@@ -3,7 +3,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use axum::extract::FromRequestParts;
 use tokio::io::{AsyncSeek, AsyncWrite};
 
 use super::error::Result;

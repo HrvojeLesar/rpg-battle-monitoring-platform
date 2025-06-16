@@ -1,14 +1,14 @@
 use axum::{extract::FromRequestParts, http::request::Parts};
 
 use crate::{
-    cdn::filesystem::{Adapter, local_adapter::Local},
-    extractors::error::Error,
-    webserver::router::app_state::AppStateTrait,
+    cdn::filesystem::{Adapter, WritableFilesystem},
+    webserver::{extractors::error::Error, router::app_state::AppStateTrait},
 };
 
-impl<S> FromRequestParts<S> for Adapter<Local>
+impl<S, F> FromRequestParts<S> for Adapter<F>
 where
-    S: AppStateTrait + Sync,
+    S: AppStateTrait<FsHandler = F>,
+    F: WritableFilesystem,
 {
     type Rejection = Error;
 
@@ -18,6 +18,6 @@ where
     ) -> core::result::Result<Self, Self::Rejection> {
         let handler = state.get_fs_handler();
 
-        Ok(Adapter(handler))
+        Ok(handler)
     }
 }

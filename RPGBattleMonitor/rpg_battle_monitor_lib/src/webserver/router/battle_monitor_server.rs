@@ -1,7 +1,7 @@
 use axum::http::StatusCode;
 
 use crate::{
-    cdn::filesystem::{FileSystem, Writeable},
+    cdn::filesystem::{FileSystem, WritableFilesystem, Writeable},
     webserver::{router::app_state::AppState, routes::v1::get_v1_api_router},
 };
 
@@ -19,7 +19,7 @@ impl BattleMonitorWebServer {
     where
         DB: sqlx::Database,
         <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
-        F: FileSystem + Writeable,
+        F: WritableFilesystem,
     {
         let axum_router = axum::Router::new().fallback(Self::fallback());
 

@@ -1,10 +1,8 @@
 use std::sync::Arc;
 
-use axum::extract::FromRef;
-
 use crate::{
     cdn::filesystem::{
-        Adapter, FileSystem, Writeable,
+        Adapter, WritableFilesystem,
         local_adapter::{self, Local},
     },
     config,
@@ -14,7 +12,7 @@ use crate::{
 pub struct AppStateConfig<DB, F>
 where
     DB: sqlx::Database,
-    F: FileSystem + Writeable,
+    F: WritableFilesystem,
 {
     pub pool: sqlx::Pool<DB>,
     pub file_system_handler: Adapter<F>,
@@ -44,66 +42,54 @@ where
 
     fn get_fs_handler_from_config() -> Adapter<local_adapter::Local> {
         let config = config::config();
-        Adapter(Arc::new(Local::new(config.assets_base_path.clone().into())))
+        Adapter::new(Arc::new(Local::new(config.assets_base_path.clone().into())))
     }
 }
 
-#[derive(Debug, Clone)]
+pub trait AppStateTrait: Send + Sync {
+    type Database: sqlx::Database;
+    type FsHandler: WritableFilesystem;
+
+    fn get_db_pool(&self) -> sqlx::Pool<Self::Database>;
+    fn get_fs_handler(&self) -> Adapter<Self::FsHandler>;
+}
+
 pub struct AppState<DB, F>
 where
     DB: sqlx::Database,
-    <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
-    F: FileSystem + Writeable,
+    F: WritableFilesystem,
 {
     pub pool: sqlx::Pool<DB>,
-    pub file_system_handler: Adapter<F>,
+    pub fs_handler: Adapter<F>,
 }
 
 impl<DB, F> AppState<DB, F>
 where
     DB: sqlx::Database,
-    <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
-    F: FileSystem + Writeable,
+    F: WritableFilesystem,
 {
     pub async fn new(config: AppStateConfig<DB, F>) -> Self {
         Self {
             pool: config.pool,
-            file_system_handler: config.file_system_handler,
+            fs_handler: config.file_system_handler,
         }
     }
 }
 
-pub trait AppStateTrait<DB = sqlx::Sqlite, F = Local>
+impl<DB, F> AppStateTrait for AppState<DB, F>
 where
-    Self: Send + Sync + 'static,
     DB: sqlx::Database,
-    F: FileSystem + Writeable,
+    F: WritableFilesystem + Send + Sync,
 {
-    fn get_db_pool(&self) -> sqlx::Pool<DB>;
-    fn get_fs_handler(&self) -> Arc<F>;
-}
+    type Database = DB;
 
-impl<DB, F> AppStateTrait<DB, F> for AppState<DB, F>
-where
-    DB: sqlx::Database,
-    <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
-    F: FileSystem + Writeable + Send + Sync + 'static,
-{
-    fn get_db_pool(&self) -> sqlx::Pool<DB> {
+    type FsHandler = F;
+
+    fn get_db_pool(&self) -> sqlx::Pool<Self::Database> {
         self.pool.clone()
     }
-    fn get_fs_handler(&self) -> Arc<F> {
-        todo!()
-    }
-}
 
-impl<DB, F> FromRef<AppState<DB, F>> for sqlx::Pool<DB>
-where
-    DB: sqlx::Database,
-    <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
-    F: FileSystem + Writeable + Send + Sync + 'static,
-{
-    fn from_ref(input: &AppState<DB, F>) -> Self {
-        input.pool.clone()
+    fn get_fs_handler(&self) -> Adapter<Self::FsHandler> {
+        self.fs_handler.clone()
     }
 }

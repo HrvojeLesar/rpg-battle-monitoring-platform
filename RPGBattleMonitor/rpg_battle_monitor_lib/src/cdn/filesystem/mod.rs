@@ -28,16 +28,33 @@ pub trait Writeable: FileSystem {
     fn get_sync_writer(&self, path: &Path) -> Result<impl Write + Seek>;
 }
 
+pub trait WritableFilesystem: FileSystem + Writeable {}
+impl<T: FileSystem + Writeable> WritableFilesystem for T {}
+
 pub fn sha256_hash(data: impl AsRef<[u8]>) -> String {
     format!("{:x}", Sha256::digest(data))
 }
 
-#[derive(Debug, Clone)]
-pub struct Adapter<F: FileSystem + Writeable>(pub Arc<F>);
+#[derive(Debug)]
+pub struct Adapter<F: WritableFilesystem>(Arc<F>);
 
-impl<F: FileSystem + Writeable> Deref for Adapter<F> {
+impl<F: WritableFilesystem> Adapter<F> {
+    pub fn new(f: Arc<F>) -> Self {
+        Self(f)
+    }
+}
+
+impl<F> Clone for Adapter<F>
+where
+    F: WritableFilesystem,
+{
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
+impl<F: WritableFilesystem> Deref for Adapter<F> {
     type Target = F;
-
     fn deref(&self) -> &Self::Target {
         &self.0
     }
