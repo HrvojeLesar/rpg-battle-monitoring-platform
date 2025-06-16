@@ -4,7 +4,7 @@ use axum::extract::FromRef;
 
 use crate::{
     cdn::filesystem::{
-        FileSystem, Writeable,
+        Adapter, FileSystem, Writeable,
         local_adapter::{self, Local},
     },
     config,
@@ -17,7 +17,7 @@ where
     F: FileSystem + Writeable,
 {
     pub pool: sqlx::Pool<DB>,
-    pub file_system_handler: F,
+    pub file_system_handler: Adapter<F>,
 }
 
 impl<DB> AppStateConfig<DB, local_adapter::Local>
@@ -42,9 +42,9 @@ where
         .await
     }
 
-    fn get_fs_handler_from_config() -> local_adapter::Local {
+    fn get_fs_handler_from_config() -> Adapter<local_adapter::Local> {
         let config = config::config();
-        Local::new(config.assets_base_path.clone().into())
+        Adapter(Arc::new(Local::new(config.assets_base_path.clone().into())))
     }
 }
 
@@ -56,7 +56,7 @@ where
     F: FileSystem + Writeable,
 {
     pub pool: sqlx::Pool<DB>,
-    pub file_system_handler: Arc<F>,
+    pub file_system_handler: Adapter<F>,
 }
 
 impl<DB, F> AppState<DB, F>
@@ -68,7 +68,7 @@ where
     pub async fn new(config: AppStateConfig<DB, F>) -> Self {
         Self {
             pool: config.pool,
-            file_system_handler: Arc::new(config.file_system_handler),
+            file_system_handler: config.file_system_handler,
         }
     }
 }

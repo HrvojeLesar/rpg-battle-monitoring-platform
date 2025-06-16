@@ -9,6 +9,4 @@ pub enum Error {
 
     #[error("There is no active transaction")]
     NoTransaction,
-    #[error("Missing axum extension")]
-    NoExtension,
 }

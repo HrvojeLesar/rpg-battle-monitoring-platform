@@ -3,16 +3,21 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use axum::extract::FromRequestParts;
 use tokio::io::{AsyncSeek, AsyncWrite};
 
 use super::error::Result;
 use crate::cdn::filesystem::{FileSystem, Writeable};
 
-struct Local {
+pub struct Local {
     location: PathBuf,
 }
 
 impl Local {
+    pub fn new(location: PathBuf) -> Self {
+        Self { location }
+    }
+
     fn get_path(&self, path: &Path) -> PathBuf {
         self.location.join(path)
     }

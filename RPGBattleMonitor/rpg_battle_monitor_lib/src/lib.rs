@@ -3,6 +3,7 @@ pub mod apidoc;
 pub mod cdn;
 pub mod config;
 pub mod database;
+pub mod extractors;
 pub mod thumbnail;
 pub mod webserver;
 pub mod websockets;

@@ -1,6 +1,8 @@
 use std::{
     io::{Seek, Write},
+    ops::Deref,
     path::Path,
+    sync::Arc,
 };
 
 pub mod error;
@@ -28,4 +30,15 @@ pub trait Writeable: FileSystem {
 
 pub fn sha256_hash(data: impl AsRef<[u8]>) -> String {
     format!("{:x}", Sha256::digest(data))
+}
+
+#[derive(Debug, Clone)]
+pub struct Adapter<F: FileSystem + Writeable>(pub Arc<F>);
+
+impl<F: FileSystem + Writeable> Deref for Adapter<F> {
+    type Target = F;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }

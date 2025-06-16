@@ -5,16 +5,8 @@ pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error(transparent)]
-    Multipart(#[from] axum::extract::multipart::MultipartError),
-
-    #[error("Field has not name")]
-    FieldHasNoName,
-
-    #[error("filename is empty")]
-    FilenameEmpty,
-    #[error("data is empty")]
-    DataEmpty,
+    #[error("Missing axum extension")]
+    MissingExtension,
 }
 
 impl IntoResponse for Error {
