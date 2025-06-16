@@ -48,6 +48,10 @@ impl<'a> Thumbnail<'a> {
 
             self.thumbnail
                 .set(thumbnail)
+                .map_err(|e| {
+                    tracing::error!(error = ?e);
+                    e
+                })
                 .expect("Tried to set cell twice");
         }
 
