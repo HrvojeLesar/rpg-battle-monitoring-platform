@@ -1,4 +1,4 @@
-use axum::response::IntoResponse;
+use axum::{http::StatusCode, response::IntoResponse};
 use thiserror::Error;
 
 pub type Result<T> = core::result::Result<T, Error>;
@@ -15,10 +15,15 @@ pub enum Error {
     FilenameEmpty,
     #[error("data is empty")]
     DataEmpty,
+
+    #[error(transparent)]
+    CdnError(#[from] crate::cdn::filesystem::error::Error),
 }
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
-        todo!("Into response")
+        tracing::error!(error = %self);
+
+        (StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong").into_response()
     }
 }

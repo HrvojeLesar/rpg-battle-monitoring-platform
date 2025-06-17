@@ -4,23 +4,15 @@ use sqlx::Pool;
 
 use super::error::{Error, Result};
 
-pub trait DatabaseMarker: Debug + Send + Sized + 'static {
-    type Driver: sqlx::Database;
-}
-
-impl<DB: sqlx::Database> DatabaseMarker for Pool<DB> {
-    type Driver = DB;
-}
-
 #[derive(Debug)]
-pub struct Transaction<DB: DatabaseMarker> {
-    pub db: sqlx::Pool<DB::Driver>,
-    transaction: Option<sqlx::Transaction<'static, DB::Driver>>,
+pub struct Transaction<DB: sqlx::Database> {
+    pub db: sqlx::Pool<DB>,
+    transaction: Option<sqlx::Transaction<'static, DB>>,
     counter: u32,
 }
 
-impl<DB: DatabaseMarker> Transaction<DB> {
-    pub fn new(db: Pool<DB::Driver>) -> Self {
+impl<DB: sqlx::Database> Transaction<DB> {
+    pub fn new(db: Pool<DB>) -> Self {
         Self {
             db,
             transaction: Option::default(),
@@ -28,7 +20,7 @@ impl<DB: DatabaseMarker> Transaction<DB> {
         }
     }
 
-    pub async fn begin(&mut self) -> Result<&mut sqlx::Transaction<'static, DB::Driver>> {
+    pub async fn begin(&mut self) -> Result<&mut sqlx::Transaction<'static, DB>> {
         if self.transaction.is_some() {
             self.counter += 1;
         } else {

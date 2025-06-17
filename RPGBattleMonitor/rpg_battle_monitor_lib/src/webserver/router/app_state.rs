@@ -1,8 +1,6 @@
-use std::sync::Arc;
-
 use crate::{
     cdn::filesystem::{
-        Adapter, WritableFilesystem,
+        Adapter,
         local_adapter::{self, Local},
     },
     config,
@@ -12,10 +10,10 @@ use crate::{
 pub struct AppStateConfig<DB, F>
 where
     DB: sqlx::Database,
-    F: WritableFilesystem,
+    F: Adapter,
 {
     pub pool: sqlx::Pool<DB>,
-    pub file_system_handler: Adapter<F>,
+    pub file_system_handler: F,
 }
 
 impl<DB> AppStateConfig<DB, local_adapter::Local>
@@ -40,33 +38,47 @@ where
         .await
     }
 
-    fn get_fs_handler_from_config() -> Adapter<local_adapter::Local> {
+    fn get_fs_handler_from_config() -> local_adapter::Local {
         let config = config::config();
-        Adapter::new(Arc::new(Local::new(config.assets_base_path.clone().into())))
+        Local::new(config.assets_base_path.clone().into())
     }
 }
 
-pub trait AppStateTrait: Send + Sync {
+pub trait AppStateTrait: Clone + Send + Sync + 'static {
     type Database: sqlx::Database;
-    type FsHandler: WritableFilesystem;
+    type FsHandler: Adapter + 'static;
 
     fn get_db_pool(&self) -> sqlx::Pool<Self::Database>;
-    fn get_fs_handler(&self) -> Adapter<Self::FsHandler>;
+    fn get_fs_handler(&self) -> Self::FsHandler;
 }
 
+#[derive(Debug)]
 pub struct AppState<DB, F>
 where
     DB: sqlx::Database,
-    F: WritableFilesystem,
+    F: Adapter,
 {
     pub pool: sqlx::Pool<DB>,
-    pub fs_handler: Adapter<F>,
+    pub fs_handler: F,
+}
+
+impl<DB, F> Clone for AppState<DB, F>
+where
+    DB: sqlx::Database,
+    F: Adapter,
+{
+    fn clone(&self) -> Self {
+        Self {
+            pool: self.pool.clone(),
+            fs_handler: self.fs_handler.clone(),
+        }
+    }
 }
 
 impl<DB, F> AppState<DB, F>
 where
     DB: sqlx::Database,
-    F: WritableFilesystem,
+    F: Adapter,
 {
     pub async fn new(config: AppStateConfig<DB, F>) -> Self {
         Self {
@@ -79,17 +91,16 @@ where
 impl<DB, F> AppStateTrait for AppState<DB, F>
 where
     DB: sqlx::Database,
-    F: WritableFilesystem + Send + Sync,
+    F: Adapter,
 {
     type Database = DB;
-
     type FsHandler = F;
 
     fn get_db_pool(&self) -> sqlx::Pool<Self::Database> {
         self.pool.clone()
     }
 
-    fn get_fs_handler(&self) -> Adapter<Self::FsHandler> {
+    fn get_fs_handler(&self) -> Self::FsHandler {
         self.fs_handler.clone()
     }
 }

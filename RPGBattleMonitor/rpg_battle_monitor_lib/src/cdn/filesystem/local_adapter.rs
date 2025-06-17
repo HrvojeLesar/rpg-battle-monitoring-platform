@@ -8,6 +8,7 @@ use tokio::io::{AsyncSeek, AsyncWrite};
 use super::error::Result;
 use crate::cdn::filesystem::{FileSystem, Writeable};
 
+#[derive(Debug, Clone)]
 pub struct Local {
     location: PathBuf,
 }
@@ -24,7 +25,7 @@ impl Local {
     async fn create_parent(&self, path: &Path) -> Result<()> {
         if let Some(parent) = path.parent() {
             if !parent.exists() {
-                tokio::fs::create_dir_all(path).await?
+                tokio::fs::create_dir_all(parent).await?
             }
         }
 
