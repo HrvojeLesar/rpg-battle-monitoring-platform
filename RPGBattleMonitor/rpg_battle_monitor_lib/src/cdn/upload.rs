@@ -79,7 +79,7 @@ pub async fn upload<F: Adapter, DB: sqlx::Database>(
     let path = Path::new(&file.name);
     fs_adapter.write_file(path, &file.data).await?;
 
-    let transation = transaction.begin().await.unwrap();
+    let transaction = transaction.begin().await?;
 
     Ok("uploaded".into())
 }

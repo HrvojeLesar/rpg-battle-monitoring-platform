@@ -26,6 +26,7 @@ rayon = "1.10.0"
 futures-util = "0.3.31"
 thiserror = "2.0.12"
 sha2 = "0.10.9"
+url = "2.5.4"
 
 [features]
 default = ["api_v1", "api_v1_doc", "db_sqlite"]

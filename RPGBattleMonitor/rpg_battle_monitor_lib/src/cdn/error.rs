@@ -18,6 +18,9 @@ pub enum Error {
 
     #[error(transparent)]
     CdnError(#[from] crate::cdn::filesystem::error::Error),
+
+    #[error(transparent)]
+    DatabaseError(#[from] crate::database::error::Error),
 }
 
 impl IntoResponse for Error {
