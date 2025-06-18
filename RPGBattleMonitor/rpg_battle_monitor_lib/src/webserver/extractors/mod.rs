@@ -8,6 +8,7 @@ macro_rules! implement_manager_from_request {
     ($type:ident) => {
         use axum::{extract::FromRequestParts, http::request::Parts};
 
+        use sea_orm::DatabaseConnection;
         use $crate::{
             database::transaction::Transaction,
             webserver::{
@@ -18,7 +19,7 @@ macro_rules! implement_manager_from_request {
 
         impl<S> FromRequestParts<S> for $type
         where
-            S: AppStateTrait<Database = sqlx::Any>,
+            S: AppStateTrait,
         {
             type Rejection = Error;
 
@@ -26,17 +27,17 @@ macro_rules! implement_manager_from_request {
                 parts: &mut Parts,
                 state: &S,
             ) -> core::result::Result<Self, Self::Rejection> {
-                let pool: Result<&sqlx::Pool<sqlx::Any>> =
+                let pool: Result<&DatabaseConnection> =
                     parts.extensions.get().ok_or(Error::MissingExtension);
 
                 let pool = match pool {
                     Ok(p) => p.clone(),
-                    Err(_) => state.get_db_pool(),
+                    Err(_) => state.get_db(),
                 };
 
                 let transaction = Transaction::new(pool);
 
-                Ok(AssetManager::new(transaction))
+                Ok($type::new(transaction))
             }
         }
     };

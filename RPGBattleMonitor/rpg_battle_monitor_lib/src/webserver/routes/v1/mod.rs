@@ -9,7 +9,7 @@ use crate::{
 #[cfg(feature = "api_v1")]
 const API_V1: &str = "/api/v1";
 
-pub fn get_v1_api_router<T: AppStateTrait<Database = sqlx::Any>>(state: T) -> axum::Router<()> {
+pub fn get_v1_api_router<T: AppStateTrait>(state: T) -> axum::Router<()> {
     let router = axum::Router::new();
 
     #[cfg(feature = "api_v1_doc")]

@@ -1,5 +1,3 @@
-use std::ops::DerefMut;
-
 use sqlx::{Connection, any::install_drivers, migrate::MigrateDatabase};
 use url::Url;
 
@@ -12,6 +10,20 @@ where
     DB: sqlx::Database,
     <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
 {
+    create_database(database_url).await;
+
+    let mut pool = sqlx::pool::PoolOptions::new()
+        .max_connections(max_connections)
+        .connect_with(connect_options::<DB>(database_url))
+        .await
+        .expect("Pool must be created");
+
+    run_migrations(&mut pool).await;
+
+    pool
+}
+
+pub async fn create_database(database_url: &str) {
     #[cfg(feature = "db_sqlite")]
     install_drivers(&[sqlx::sqlite::any::DRIVER]).expect("Failed to install db drivers");
     #[cfg(feature = "db_postgres")]
@@ -29,19 +41,10 @@ where
 
         tracing::info!("Database successfully created");
     }
-
-    let mut pool = sqlx::pool::PoolOptions::new()
-        .max_connections(max_connections)
-        .connect_with(connect_options::<DB>(database_url))
-        .await
-        .expect("Pool must be created");
-
-    run_migrations(&mut pool).await;
-
-    pool
 }
 
-async fn run_migrations<DB>(pool: &mut sqlx::Pool<DB>)
+#[tracing::instrument]
+pub async fn run_migrations<DB>(pool: &mut sqlx::Pool<DB>)
 where
     DB: sqlx::Database,
     <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
@@ -135,17 +138,4 @@ where
     };
 
     custom_options.into_options()
-}
-
-async fn execute_query<DB>(pool: &sqlx::Pool<DB>)
-where
-    DB: sqlx::Database,
-    for<'c> &'c sqlx::Pool<DB>: sqlx::Executor<'c, Database = DB>,
-    for<'a> <DB as sqlx::Database>::Arguments<'a>: sqlx::IntoArguments<'a, DB>,
-    for<'c> &'c mut <DB as sqlx::Database>::Connection: sqlx::Executor<'c, Database = DB>,
-{
-    sqlx::query("test").execute(pool).await.unwrap();
-    let mut t = pool.begin().await.unwrap();
-
-    sqlx::query("test").execute(&mut *t).await.unwrap();
 }

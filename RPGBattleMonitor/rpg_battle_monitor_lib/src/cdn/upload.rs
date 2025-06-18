@@ -4,12 +4,8 @@ use axum::extract;
 use serde::Serialize;
 
 use crate::{
-    cdn::{
-        filesystem::{Adapter, FileSystem, local_adapter::Local},
-        model::assets::AssetManager,
-    },
-    database::transaction::Transaction,
-    webserver::{extractors::local_fs_extractor::FSAdapter, router::app_state::AppState},
+    cdn::{filesystem::Adapter, model::assets::AssetManager},
+    webserver::extractors::local_fs_extractor::FSAdapter,
 };
 
 use super::error::{Error, Result};
@@ -72,21 +68,20 @@ impl UploadedFile {
     }
 }
 
-pub async fn upload<F: Adapter, DB: sqlx::Database>(
+pub async fn upload<F: Adapter>(
     fs_adapter: FSAdapter<F>,
-    mut transaction: Transaction<DB>,
-    mut asset_manager: AssetManager,
+    asset_manager: AssetManager,
     multipart: extract::Multipart,
 ) -> Result<String> {
     let file = UploadedFile::from_multipart(multipart).await?;
 
     let path = Path::new(&file.name);
     fs_adapter.write_file(path, &file.data).await?;
-    asset_manager
+    let asset = asset_manager
         .create_with_data(file.name.to_string(), &file.data)
         .await?;
 
-    Ok("uploaded".into())
+    Ok(format! {"asset id: {}, hash: {}", asset.id, asset.hash})
 }
 
 #[cfg_attr(all(feature = "api_v1_doc", debug_assertions),

@@ -9,4 +9,7 @@ pub enum Error {
 
     #[error("There is no active transaction")]
     NoTransaction,
+
+    #[error(transparent)]
+    SeaOrmDbError(#[from] sea_orm::DbErr),
 }

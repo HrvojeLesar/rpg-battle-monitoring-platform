@@ -1,4 +1,5 @@
 use axum::{extract::FromRequestParts, http::request::Parts};
+use sea_orm::DatabaseConnection;
 
 use crate::{
     database::transaction::Transaction,
@@ -8,9 +9,9 @@ use crate::{
     },
 };
 
-impl<DB: sqlx::Database, S> FromRequestParts<S> for Transaction<DB>
+impl<S> FromRequestParts<S> for Transaction
 where
-    S: AppStateTrait<Database = DB>,
+    S: AppStateTrait,
 {
     type Rejection = Error;
 
@@ -18,11 +19,12 @@ where
         parts: &mut Parts,
         state: &S,
     ) -> core::result::Result<Self, Self::Rejection> {
-        let pool: Result<&sqlx::Pool<DB>> = parts.extensions.get().ok_or(Error::MissingExtension);
+        let pool: Result<&DatabaseConnection> =
+            parts.extensions.get().ok_or(Error::MissingExtension);
 
         let pool = match pool {
             Ok(p) => p.clone(),
-            Err(_) => state.get_db_pool(),
+            Err(_) => state.get_db(),
         };
 
         Ok(Transaction::new(pool))
