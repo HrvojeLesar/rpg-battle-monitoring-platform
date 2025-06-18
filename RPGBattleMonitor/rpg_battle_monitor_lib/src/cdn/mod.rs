@@ -3,11 +3,12 @@ use crate::{
     webserver::router::app_state::{AppState, AppStateTrait},
 };
 use axum::{extract::DefaultBodyLimit, routing};
-use sqlx::Sqlite;
+use sqlx::{Database, Sqlite};
 use tower_http::limit::RequestBodyLimitLayer;
 
 pub mod error;
 pub mod filesystem;
+pub mod model;
 pub mod upload;
 
 const API_ASSETS: &str = "/assets";
@@ -38,7 +39,7 @@ impl Modify for ModifyDoc {
     }
 }
 
-pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
+pub fn get_router<T: AppStateTrait<Database = sqlx::Any>>(state: T) -> axum::Router {
     let upload_router = axum::Router::new()
         .route(
             "/upload",

@@ -21,6 +21,9 @@ pub enum Error {
 
     #[error(transparent)]
     DatabaseError(#[from] crate::database::error::Error),
+
+    #[error(transparent)]
+    SqlxError(#[from] sqlx::Error),
 }
 
 impl IntoResponse for Error {

@@ -1,3 +1,5 @@
+use std::ops::DerefMut;
+
 use sqlx::{Connection, any::install_drivers, migrate::MigrateDatabase};
 use url::Url;
 
@@ -97,6 +99,7 @@ where
             if let Some(sqlite_options) =
                 value_any.downcast_mut::<sqlx::sqlite::SqliteConnectOptions>()
             {
+                // TODO: Credit to https://briandouglas.ie/sqlite-defaults/
                 let options = sqlite_options
                     .clone()
                     .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal)
@@ -132,4 +135,17 @@ where
     };
 
     custom_options.into_options()
+}
+
+async fn execute_query<DB>(pool: &sqlx::Pool<DB>)
+where
+    DB: sqlx::Database,
+    for<'c> &'c sqlx::Pool<DB>: sqlx::Executor<'c, Database = DB>,
+    for<'a> <DB as sqlx::Database>::Arguments<'a>: sqlx::IntoArguments<'a, DB>,
+    for<'c> &'c mut <DB as sqlx::Database>::Connection: sqlx::Executor<'c, Database = DB>,
+{
+    sqlx::query("test").execute(pool).await.unwrap();
+    let mut t = pool.begin().await.unwrap();
+
+    sqlx::query("test").execute(&mut *t).await.unwrap();
 }

@@ -12,7 +12,7 @@ impl BattleMonitorWebServer {
         (StatusCode::NOT_FOUND, "Not found")
     }
 
-    pub fn new<T: AppStateTrait<Database = sqlx::Sqlite>>(state: T) -> Self {
+    pub fn new<T: AppStateTrait<Database = sqlx::Any>>(state: T) -> Self {
         let axum_router = axum::Router::new().fallback(Self::fallback());
 
         let axum_router = axum_router.merge(get_v1_api_router(state));
