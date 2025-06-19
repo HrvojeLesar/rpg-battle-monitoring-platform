@@ -5,7 +5,7 @@ use tower_http::limit::RequestBodyLimitLayer;
 pub mod error;
 pub mod filesystem;
 pub mod model;
-pub mod upload;
+pub mod routes;
 
 const API_ASSETS: &str = "/assets";
 
@@ -19,7 +19,7 @@ use utoipa::{Modify, OpenApi};
 #[openapi(info(description = "Assets API"), 
 modifiers(&ModifyDoc),
 nest(
-    (path = "/assets", api = upload::ApiDoc, tags = ["Upload"])
+    (path = "/assets", api = routes::upload::ApiDoc, tags = ["Upload"])
 ))]
 pub struct ApiDoc;
 
@@ -39,8 +39,9 @@ pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
     let upload_router = axum::Router::new()
         .route(
             "/upload",
-            routing::post(upload::upload).get(upload::upload_form),
+            routing::post(routes::upload::upload).get(routes::upload::upload_form),
         )
+        .route("/{asset_id}", routing::get(routes::serve::serve_file))
         .layer(DefaultBodyLimit::disable())
         .layer(RequestBodyLimitLayer::new(FILE_SIZE_LIMIT))
         .with_state(state.clone());

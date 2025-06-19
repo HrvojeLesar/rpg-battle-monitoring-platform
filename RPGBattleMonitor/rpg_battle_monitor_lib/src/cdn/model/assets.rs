@@ -101,5 +101,24 @@ mod assets_inner {
 
             Ok(())
         }
+
+        pub async fn get_by_uuid(&self, uuid: &str) -> Result<Option<Asset>> {
+            let (transaction, asset_result) = self
+                .transaction
+                .begin()
+                .await?
+                .exec(async |db| Ok(Entity::find().filter(Column::Uuid.eq(uuid)).one(db).await?))
+                .await;
+
+            let asset = asset_result?;
+
+            transaction.commit().await?;
+
+            Ok(asset)
+        }
+
+        pub async fn load_file_data<P: AsRef<Path>>(&self, path: P) -> Result<Vec<u8>> {
+            Ok(self.fs_adapter.read_file(path.as_ref()).await?)
+        }
     }
 }

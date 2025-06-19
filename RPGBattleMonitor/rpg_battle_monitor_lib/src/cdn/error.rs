@@ -27,12 +27,18 @@ pub enum Error {
 
     #[error(transparent)]
     ImageError(#[from] image::error::ImageError),
+
+    #[error("File not found")]
+    FileNotFound { id: String },
 }
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         tracing::error!(error = %self);
 
-        (StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong").into_response()
+        match self {
+            Self::FileNotFound { id: _ } => (StatusCode::NOT_FOUND).into_response(),
+            _ => (StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong").into_response(),
+        }
     }
 }

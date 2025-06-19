@@ -3,7 +3,7 @@ use serde::Serialize;
 
 use crate::cdn::{filesystem::Adapter, model::assets::AssetManager};
 
-use super::error::{Error, Result};
+use crate::cdn::error::{Error, Result};
 
 #[cfg(feature = "api_v1_doc")]
 use utoipa::OpenApi;
@@ -11,7 +11,7 @@ use utoipa::OpenApi;
 #[derive(OpenApi)]
 #[openapi(paths(upload_form, accept_form,))]
 #[cfg(feature = "api_v1_doc")]
-pub(super) struct ApiDoc;
+pub(crate) struct ApiDoc;
 
 #[derive(Debug, Clone, Serialize)]
 struct UploadResponse {}
