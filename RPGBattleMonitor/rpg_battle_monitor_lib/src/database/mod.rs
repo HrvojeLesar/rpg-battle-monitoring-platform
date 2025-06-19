@@ -26,8 +26,11 @@ pub async fn get_sea_orm_database(url: &str, max_connections: u32) -> sea_orm::D
         if let sea_orm::DatabaseBackend::Sqlite = backend {
             use crate::database::setup::run_migrations;
 
+            let mut pool = db.get_sqlite_connection_pool().clone();
+
             // TODO: Credit to https://briandouglas.ie/sqlite-defaults/
-            let connect_options = sqlx::sqlite::SqliteConnectOptions::new()
+            let connect_options = (*pool.connect_options())
+                .clone()
                 .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal)
                 .synchronous(sqlx::sqlite::SqliteSynchronous::Normal)
                 .busy_timeout(std::time::Duration::from_secs(5))
@@ -37,8 +40,6 @@ pub async fn get_sea_orm_database(url: &str, max_connections: u32) -> sea_orm::D
                 .pragma("temp_store", "MEMORY")
                 .pragma("mmap_size", "2147483648")
                 .page_size(8192);
-
-            let mut pool = db.get_sqlite_connection_pool().clone();
             pool.set_connect_options(connect_options);
 
             run_migrations(&mut pool).await;
