@@ -3,6 +3,7 @@ CREATE TABLE assets (
     , uuid VARCHAR(36) NOT NULL
     , name VARCHAR(255) NOT NULL
     , hash VARCHAR(64) NOT NULL
+    , mime VARCHAR(64) NOT NULL
     , created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

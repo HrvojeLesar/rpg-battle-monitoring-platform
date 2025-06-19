@@ -24,6 +24,9 @@ pub enum Error {
 
     #[error(transparent)]
     SqlxError(#[from] sqlx::Error),
+
+    #[error(transparent)]
+    ImageError(#[from] image::error::ImageError),
 }
 
 impl IntoResponse for Error {

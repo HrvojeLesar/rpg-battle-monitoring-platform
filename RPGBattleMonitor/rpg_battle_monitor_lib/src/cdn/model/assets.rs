@@ -9,6 +9,7 @@ pub struct Model {
     pub uuid: String,
     pub name: String,
     pub hash: String,
+    pub mime: String,
     pub created_at: NaiveDateTime,
 }
 
@@ -20,9 +21,12 @@ impl ActiveModelBehavior for ActiveModel {}
 pub use assets_inner::*;
 mod assets_inner {
 
+    use std::path::Path;
+
     use crate::cdn::error::Result;
-    use crate::cdn::filesystem::sha256_hash;
+    use crate::cdn::filesystem::{Adapter, sha256_hash};
     use crate::cdn::model::assets::{ActiveModel, Column, Entity};
+    use crate::webserver::extractors::local_fs_extractor::FSAdapter;
     use crate::{cdn::model::assets::Model, database::transaction::Transaction};
 
     pub type Asset = Model;
@@ -30,13 +34,17 @@ mod assets_inner {
     use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter};
     use uuid::Uuid;
 
-    pub struct AssetManager {
+    pub struct AssetManager<F: Adapter> {
         transaction: Transaction,
+        fs_adapter: FSAdapter<F>,
     }
 
-    impl AssetManager {
-        pub fn new(transaction: Transaction) -> Self {
-            Self { transaction }
+    impl<F: Adapter> AssetManager<F> {
+        pub fn new(transaction: Transaction, fs_adapter: FSAdapter<F>) -> Self {
+            Self {
+                transaction,
+                fs_adapter,
+            }
         }
 
         pub async fn get_by_hash(&self, hash: &str) -> Result<Option<Asset>> {
@@ -54,13 +62,21 @@ mod assets_inner {
             Ok(asset)
         }
 
-        pub async fn create(&self, name: String, hash: String) -> Result<Asset> {
-            let uuid = Uuid::new_v4();
+        pub async fn create(&self, name: String, data: &[u8]) -> Result<Asset> {
+            let hash = sha256_hash(data);
+            let uuid = Uuid::new_v4().to_string();
+
+            if let Some(asset) = self.get_by_hash(&hash).await? {
+                return Ok(asset);
+            }
+
+            let mime = image::guess_format(data)?.to_mime_type().to_string();
 
             let asset = ActiveModel {
                 name: Set(name),
-                uuid: Set(uuid.to_string()),
+                uuid: Set(uuid.clone()),
                 hash: Set(hash),
+                mime: Set(mime),
                 ..Default::default()
             };
 
@@ -72,16 +88,18 @@ mod assets_inner {
                 .await;
 
             let asset = asset_result?;
+            self.write_file(&uuid, data).await?;
 
             transaction.commit().await?;
 
             Ok(asset)
         }
 
-        pub async fn create_with_data(&self, name: String, data: &[u8]) -> Result<Asset> {
-            let hash = sha256_hash(data);
+        async fn write_file(&self, filename: &str, data: &[u8]) -> Result<()> {
+            let path = Path::new(filename);
+            self.fs_adapter.write_file(path, data).await?;
 
-            self.create(name, hash).await
+            Ok(())
         }
     }
 }

@@ -1,12 +1,7 @@
-use std::path::Path;
-
 use axum::extract;
 use serde::Serialize;
 
-use crate::{
-    cdn::{filesystem::Adapter, model::assets::AssetManager},
-    webserver::extractors::local_fs_extractor::FSAdapter,
-};
+use crate::cdn::{filesystem::Adapter, model::assets::AssetManager};
 
 use super::error::{Error, Result};
 
@@ -69,16 +64,13 @@ impl UploadedFile {
 }
 
 pub async fn upload<F: Adapter>(
-    fs_adapter: FSAdapter<F>,
-    asset_manager: AssetManager,
+    asset_manager: AssetManager<F>,
     multipart: extract::Multipart,
 ) -> Result<String> {
     let file = UploadedFile::from_multipart(multipart).await?;
 
-    let path = Path::new(&file.name);
-    fs_adapter.write_file(path, &file.data).await?;
     let asset = asset_manager
-        .create_with_data(file.name.to_string(), &file.data)
+        .create(file.name.to_string(), &file.data)
         .await?;
 
     Ok(format! {"asset id: {}, hash: {}", asset.id, asset.hash})
