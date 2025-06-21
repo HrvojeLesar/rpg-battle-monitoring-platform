@@ -1,8 +1,12 @@
+use std::sync::OnceLock;
+
 use sqlx::{Connection, any::install_drivers, migrate::MigrateDatabase};
 use url::Url;
 
 #[cfg(all(feature = "db_sqlite", feature = "db_postgres"))]
 compile_error!("Please select one database feature, either 'db_sqlite' or 'db_postgres'");
+
+static DRIVERS_INSTALLED: OnceLock<()> = OnceLock::new();
 
 #[tracing::instrument]
 pub async fn create_database_pool<DB>(database_url: &str, max_connections: u32) -> sqlx::Pool<DB>
@@ -24,10 +28,12 @@ where
 }
 
 pub async fn create_database(database_url: &str) {
-    #[cfg(feature = "db_sqlite")]
-    install_drivers(&[sqlx::sqlite::any::DRIVER]).expect("Failed to install db drivers");
-    #[cfg(feature = "db_postgres")]
-    install_drivers(&[sqlx::postgres::any::DRIVER]).expect("Failed to install db drivers");
+    DRIVERS_INSTALLED.get_or_init(|| {
+        #[cfg(feature = "db_sqlite")]
+        install_drivers(&[sqlx::sqlite::any::DRIVER]).expect("Failed to install db drivers");
+        #[cfg(feature = "db_postgres")]
+        install_drivers(&[sqlx::postgres::any::DRIVER]).expect("Failed to install db drivers");
+    });
 
     if !sqlx::Any::database_exists(database_url)
         .await

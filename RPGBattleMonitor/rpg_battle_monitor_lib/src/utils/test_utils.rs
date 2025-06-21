@@ -6,8 +6,10 @@ use uuid::Uuid;
 use crate::{
     cdn::filesystem::temp_file_adapter::TempFileStore,
     database::setup::{create_database, run_migrations},
-    webserver::router::app_state::AppStateConfig,
+    webserver::router::app_state::{AppState, AppStateConfig},
 };
+
+pub(crate) const TEST_IMAGE_BYTES: &[u8] = include_bytes!("../../tests/thumbnail/assets/WIP.png");
 
 pub(crate) fn new_test_app(router: Router) -> TestServer {
     TestServer::builder()
@@ -19,6 +21,10 @@ pub(crate) fn new_test_app(router: Router) -> TestServer {
 
 pub(crate) fn get_random_filename() -> String {
     format!("test-file-{}.jpg", Uuid::new_v4())
+}
+
+pub(crate) async fn get_app_state_with_temp_file_store() -> AppState<TempFileStore> {
+    AppState::new(AppStateConfig::get_test_config().await).await
 }
 
 async fn create_test_database() -> DatabaseConnection {

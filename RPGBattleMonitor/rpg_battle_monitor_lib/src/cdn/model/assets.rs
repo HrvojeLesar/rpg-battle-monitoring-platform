@@ -122,3 +122,61 @@ mod assets_inner {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use std::path::Path;
+
+    use sea_orm::EntityTrait;
+
+    use crate::{
+        cdn::{
+            filesystem::FileSystem,
+            model::assets::{self, AssetManager},
+        },
+        utils::test_utils::{
+            TEST_IMAGE_BYTES, get_app_state_with_temp_file_store, get_random_filename,
+        },
+    };
+
+    #[tokio::test]
+    async fn asset_is_created() {
+        let state = get_app_state_with_temp_file_store().await;
+        let asset_manager = AssetManager::from(state.clone());
+
+        let asset = asset_manager
+            .create(get_random_filename(), TEST_IMAGE_BYTES)
+            .await
+            .unwrap();
+
+        state
+            .fs_handler
+            .read_file(Path::new(&asset.uuid))
+            .await
+            .unwrap();
+    }
+
+    #[tokio::test]
+    async fn duplicate_assets_are_not_created() {
+        let state = get_app_state_with_temp_file_store().await;
+        let asset_manager = AssetManager::from(state.clone());
+
+        let asset1 = asset_manager
+            .create(get_random_filename(), TEST_IMAGE_BYTES)
+            .await
+            .unwrap();
+
+        let asset2 = asset_manager
+            .create(get_random_filename(), TEST_IMAGE_BYTES)
+            .await
+            .unwrap();
+
+        assert_eq!(asset1, asset2);
+
+        let assets = assets::Entity::find().all(&state.database).await.unwrap();
+
+        assert_eq!(1, assets.len());
+        assert_eq!(assets[0], asset1);
+        assert_eq!(assets[0], asset2);
+    }
+}

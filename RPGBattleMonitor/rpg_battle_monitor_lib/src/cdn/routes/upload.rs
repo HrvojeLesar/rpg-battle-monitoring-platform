@@ -152,14 +152,16 @@ mod test {
             model::assets::AssetManager,
             routes::upload::{UploadResponse, upload},
         },
-        utils::test_utils::{get_random_filename, new_test_app},
-        webserver::router::app_state::{AppState, AppStateConfig},
+        utils::test_utils::{
+            TEST_IMAGE_BYTES, get_app_state_with_temp_file_store, get_random_filename, new_test_app,
+        },
+        webserver::router::app_state::AppState,
     };
 
     const UPLOAD_PATH: &str = "/upload";
 
     async fn get_upload_router() -> (Router, AppState<TempFileStore>) {
-        let state = AppState::new(AppStateConfig::get_test_config().await).await;
+        let state = get_app_state_with_temp_file_store().await;
 
         let router = Router::new()
             .route(UPLOAD_PATH, axum::routing::post(upload))
@@ -178,8 +180,7 @@ mod test {
     async fn image_gets_uploaded() {
         let (server, state) = get_upload_test_app().await;
 
-        let image_bytes = include_bytes!("../../../tests/thumbnail/assets/WIP.png");
-        let file = Part::bytes(image_bytes.as_slice());
+        let file = Part::bytes(TEST_IMAGE_BYTES);
 
         let filename = get_random_filename();
         let form = MultipartForm::new()
