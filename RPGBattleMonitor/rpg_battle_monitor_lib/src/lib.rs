@@ -4,5 +4,6 @@ pub mod cdn;
 pub mod config;
 pub mod database;
 pub mod thumbnail;
+pub mod utils;
 pub mod webserver;
 pub mod websockets;

@@ -35,3 +35,20 @@ where
         Ok(AssetManager::new(transaction, fs_adapter))
     }
 }
+
+#[cfg(test)]
+impl<T, F> From<T> for AssetManager<F>
+where
+    T: AppStateTrait<FsHandler = F>,
+    F: Adapter,
+{
+    fn from(state: T) -> Self {
+        let pool = state.get_db();
+        let transaction = Transaction::new(pool);
+        let handler = state.get_fs_handler();
+
+        let fs_adapter = FSAdapter::new(handler);
+
+        AssetManager::new(transaction, fs_adapter)
+    }
+}

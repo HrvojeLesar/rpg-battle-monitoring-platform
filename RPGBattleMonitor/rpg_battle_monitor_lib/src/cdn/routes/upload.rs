@@ -1,4 +1,4 @@
-use axum::extract;
+use axum::{Json, extract};
 use serde::Serialize;
 
 use crate::cdn::{filesystem::Adapter, model::assets::AssetManager};
@@ -13,8 +13,14 @@ use utoipa::OpenApi;
 #[cfg(feature = "api_v1_doc")]
 pub(crate) struct ApiDoc;
 
-#[derive(Debug, Clone, Serialize)]
-struct UploadResponse {}
+#[derive(Debug, Clone, Serialize, Default)]
+#[cfg_attr(test, derive(serde::Deserialize))]
+pub struct UploadResponse {
+    id: i32,
+    uuid: String,
+    url: String,
+    thumbnails: Vec<String>,
+}
 
 #[derive(Debug, Default)]
 struct PartialUploadedFile {
@@ -66,14 +72,18 @@ impl UploadedFile {
 pub async fn upload<F: Adapter>(
     asset_manager: AssetManager<F>,
     multipart: extract::Multipart,
-) -> Result<String> {
+) -> Result<Json<UploadResponse>> {
     let file = UploadedFile::from_multipart(multipart).await?;
 
     let asset = asset_manager
         .create(file.name.to_string(), &file.data)
         .await?;
 
-    Ok(format! {"asset id: {}, hash: {}", asset.id, asset.hash})
+    Ok(Json(UploadResponse {
+        id: asset.id,
+        uuid: asset.uuid,
+        ..Default::default()
+    }))
 }
 
 #[cfg_attr(all(feature = "api_v1_doc", debug_assertions),
@@ -123,5 +133,81 @@ pub async fn accept_form(mut multipart: extract::Multipart) {
     while let Some(field) = multipart.next_field().await.unwrap() {
         let name = field.name().unwrap().to_string();
         tracing::info!("Field: {}", &name);
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use std::path::Path;
+
+    use axum::Router;
+    use axum_test::{
+        TestServer,
+        multipart::{MultipartForm, Part},
+    };
+    use uuid::Uuid;
+
+    use crate::{
+        cdn::{
+            filesystem::{FileSystem, local_adapter::Local},
+            model::assets::AssetManager,
+            routes::upload::{UploadResponse, upload},
+        },
+        utils::test_utils::new_test_app,
+        webserver::router::app_state::{AppState, AppStateConfig},
+    };
+
+    const UPLOAD_PATH: &str = "/upload";
+
+    async fn get_upload_router() -> (Router, AppState<Local>) {
+        let state = AppState::new(AppStateConfig::get_test_config().await).await;
+
+        let router = Router::new()
+            .route(UPLOAD_PATH, axum::routing::post(upload))
+            .with_state(state.clone());
+
+        (router, state)
+    }
+
+    async fn get_upload_test_app() -> (TestServer, AppState<Local>) {
+        let (test_router, state) = get_upload_router().await;
+
+        (new_test_app(test_router), state)
+    }
+
+    fn get_random_filename() -> String {
+        format!("test-file-{}.jpg", Uuid::new_v4())
+    }
+
+    #[tokio::test]
+    async fn image_gets_uploaded() {
+        let (server, state) = get_upload_test_app().await;
+
+        let image_bytes = include_bytes!("../../../tests/thumbnail/assets/WIP.png");
+        let file = Part::bytes(image_bytes.as_slice());
+
+        let filename = get_random_filename();
+        let form = MultipartForm::new()
+            .add_text("filename", filename)
+            .add_part("file", file);
+
+        let response = server.post(UPLOAD_PATH).multipart(form).await;
+        let response_json = response.json::<UploadResponse>();
+
+        let asset_manager = AssetManager::from(state.clone());
+
+        asset_manager
+            .get_by_uuid(&response_json.uuid)
+            .await
+            .unwrap()
+            .unwrap();
+
+        let fshandler = state.fs_handler;
+        let file = fshandler
+            .read_file(Path::new(&response_json.uuid))
+            .await
+            .unwrap();
+
+        assert!(!file.is_empty());
     }
 }

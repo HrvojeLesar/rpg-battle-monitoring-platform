@@ -1,4 +1,4 @@
-use axum::{http::StatusCode, response::IntoResponse};
+use axum::response::IntoResponse;
 use thiserror::Error;
 
 pub type Result<T> = core::result::Result<T, Error>;
@@ -32,8 +32,26 @@ pub enum Error {
     FileNotFound { id: String },
 }
 
+#[cfg(debug_assertions)]
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
+        use axum::Json;
+        use serde_json::json;
+
+        tracing::error!(error = %self);
+
+        Json(json!({
+            "error": format!("{self:?}")
+        }))
+        .into_response()
+    }
+}
+
+#[cfg(not(debug_assertions))]
+impl IntoResponse for Error {
+    fn into_response(self) -> axum::response::Response {
+        use axum::http::StatusCode;
+
         tracing::error!(error = %self);
 
         match self {

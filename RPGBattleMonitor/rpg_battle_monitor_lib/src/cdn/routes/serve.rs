@@ -11,15 +11,15 @@ use crate::cdn::{
 };
 
 pub async fn serve_file<F: Adapter>(
-    Path(asset_id): Path<String>,
+    Path(uuid): Path<String>,
     asset_manager: AssetManager<F>,
 ) -> Result<impl IntoResponse> {
-    let asset = match asset_manager.get_by_uuid(&asset_id).await? {
+    let asset = match asset_manager.get_by_uuid(&uuid).await? {
         Some(asset) => asset,
-        None => return Err(Error::FileNotFound { id: asset_id }),
+        None => return Err(Error::FileNotFound { id: uuid }),
     };
 
-    let data = asset_manager.load_file_data(&asset_id).await?;
+    let data = asset_manager.load_file_data(&uuid).await?;
 
     Ok((StatusCode::OK, [(header::CONTENT_TYPE, asset.mime)], data).into_response())
 }
