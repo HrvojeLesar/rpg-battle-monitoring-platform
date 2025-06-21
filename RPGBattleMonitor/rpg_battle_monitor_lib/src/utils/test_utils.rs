@@ -1,9 +1,10 @@
 use axum::Router;
 use axum_test::TestServer;
 use sea_orm::{Database, DatabaseConnection};
+use uuid::Uuid;
 
 use crate::{
-    cdn::filesystem::local_adapter::Local,
+    cdn::filesystem::temp_file_adapter::TempFileStore,
     database::setup::{create_database, run_migrations},
     webserver::router::app_state::AppStateConfig,
 };
@@ -14,6 +15,10 @@ pub(crate) fn new_test_app(router: Router) -> TestServer {
         .http_transport()
         .build(router)
         .unwrap()
+}
+
+pub(crate) fn get_random_filename() -> String {
+    format!("test-file-{}.jpg", Uuid::new_v4())
 }
 
 async fn create_test_database() -> DatabaseConnection {
@@ -28,10 +33,10 @@ async fn create_test_database() -> DatabaseConnection {
     db
 }
 
-impl AppStateConfig<Local> {
-    pub async fn get_test_config() -> AppStateConfig<Local> {
+impl AppStateConfig<TempFileStore> {
+    pub async fn get_test_config() -> AppStateConfig<TempFileStore> {
         Self {
-            file_system_handler: Local::new("./test-assets".into()),
+            file_system_handler: TempFileStore::new(),
             database: create_test_database().await,
         }
     }

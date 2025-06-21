@@ -5,6 +5,8 @@ use std::{
 
 pub mod error;
 pub mod local_adapter;
+#[cfg(test)]
+pub(crate) mod temp_file_adapter;
 
 use error::Result;
 use sha2::{Digest, Sha256};

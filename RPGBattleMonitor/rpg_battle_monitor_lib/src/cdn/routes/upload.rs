@@ -145,21 +145,20 @@ mod test {
         TestServer,
         multipart::{MultipartForm, Part},
     };
-    use uuid::Uuid;
 
     use crate::{
         cdn::{
-            filesystem::{FileSystem, local_adapter::Local},
+            filesystem::{FileSystem, temp_file_adapter::TempFileStore},
             model::assets::AssetManager,
             routes::upload::{UploadResponse, upload},
         },
-        utils::test_utils::new_test_app,
+        utils::test_utils::{get_random_filename, new_test_app},
         webserver::router::app_state::{AppState, AppStateConfig},
     };
 
     const UPLOAD_PATH: &str = "/upload";
 
-    async fn get_upload_router() -> (Router, AppState<Local>) {
+    async fn get_upload_router() -> (Router, AppState<TempFileStore>) {
         let state = AppState::new(AppStateConfig::get_test_config().await).await;
 
         let router = Router::new()
@@ -169,14 +168,10 @@ mod test {
         (router, state)
     }
 
-    async fn get_upload_test_app() -> (TestServer, AppState<Local>) {
+    async fn get_upload_test_app() -> (TestServer, AppState<TempFileStore>) {
         let (test_router, state) = get_upload_router().await;
 
         (new_test_app(test_router), state)
-    }
-
-    fn get_random_filename() -> String {
-        format!("test-file-{}.jpg", Uuid::new_v4())
     }
 
     #[tokio::test]

@@ -5,7 +5,7 @@ use std::{
 
 use tokio::io::{AsyncSeek, AsyncWrite};
 
-use super::error::Result;
+use super::error::{Error, Result};
 use crate::cdn::filesystem::{FileSystem, Writeable};
 
 #[derive(Debug, Clone)]
@@ -73,9 +73,11 @@ impl FileSystem for Local {
 
     async fn read_file(&self, path: &Path) -> Result<Vec<u8>> {
         let path = self.get_path(path);
-        self.file_exists(&path).await?;
-
-        Ok(tokio::fs::read(path).await?)
+        if self.file_exists(&path).await? {
+            Ok(tokio::fs::read(path).await?)
+        } else {
+            Err(Error::FileNotFound { path })
+        }
     }
 
     async fn checksum(&self, path: &Path) -> Result<String> {
