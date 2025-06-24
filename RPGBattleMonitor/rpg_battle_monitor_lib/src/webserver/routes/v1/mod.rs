@@ -1,3 +1,5 @@
+use tower_http::cors::CorsLayer;
+
 #[cfg(feature = "api_v1_doc")]
 use crate::apidoc;
 use crate::{
@@ -17,7 +19,8 @@ pub fn get_v1_api_router<T: AppStateTrait>(state: T) -> axum::Router<()> {
 
     let router = router
         .merge(websockets::get_router())
-        .merge(cdn::get_router(state.clone()));
+        .merge(cdn::get_router(state.clone()))
+        .layer(CorsLayer::permissive());
 
     axum::Router::new().nest(API_V1, router)
 }

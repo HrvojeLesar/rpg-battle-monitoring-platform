@@ -1,6 +1,7 @@
 use axum::{Json, extract};
 use serde::Serialize;
 
+use crate::cdn::model::assets::AssetType;
 use crate::cdn::{filesystem::Adapter, model::assets::AssetManager};
 
 use crate::cdn::error::{Error, Result};
@@ -17,8 +18,8 @@ pub(crate) struct ApiDoc;
 #[cfg_attr(test, derive(serde::Deserialize))]
 pub struct UploadResponse {
     id: i32,
-    uuid: String,
     url: String,
+    name: String,
     thumbnails: Vec<String>,
 }
 
@@ -75,13 +76,19 @@ pub async fn upload<F: Adapter>(
 ) -> Result<Json<UploadResponse>> {
     let file = UploadedFile::from_multipart(multipart).await?;
 
+    // TODO: use name to identify how asset is called for some user uploading it
     let asset = asset_manager
-        .create(file.name.to_string(), &file.data)
+        .create(file.name.to_string(), &file.data, AssetType::Image)
+        .await?;
+
+    let thumbnails = asset_manager
+        .create_thumbnail_assets(&asset, Some(&file.data))
         .await?;
 
     Ok(Json(UploadResponse {
         id: asset.id,
-        uuid: asset.uuid,
+        thumbnails: thumbnails.iter().map(|t| t.name.clone()).collect(),
+        name: asset.name,
         ..Default::default()
     }))
 }
@@ -193,14 +200,14 @@ mod test {
         let asset_manager = AssetManager::from(state.clone());
 
         asset_manager
-            .get_by_uuid(&response_json.uuid)
+            .get_by_name(&response_json.name)
             .await
             .unwrap()
             .unwrap();
 
         let fshandler = state.fs_handler;
         let file = fshandler
-            .read_file(Path::new(&response_json.uuid))
+            .read_file(Path::new(&response_json.name))
             .await
             .unwrap();
 

@@ -73,7 +73,7 @@ impl FileSystem for Local {
 
     async fn read_file(&self, path: &Path) -> Result<Vec<u8>> {
         let path = self.get_path(path);
-        if self.file_exists(&path).await? {
+        if path.is_file() {
             Ok(tokio::fs::read(path).await?)
         } else {
             Err(Error::FileNotFound { path })

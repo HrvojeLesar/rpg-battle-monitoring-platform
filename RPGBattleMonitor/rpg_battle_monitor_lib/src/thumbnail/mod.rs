@@ -14,8 +14,8 @@ pub mod size;
 pub struct Thumbnail<'a> {
     original_image: Arc<DynamicImage>,
     thumbnail: OnceCell<DynamicImage>,
-    format: ImageFormat,
-    configuration: &'a Configuration<'a>,
+    pub format: ImageFormat,
+    pub configuration: &'a Configuration<'a>,
 }
 
 impl<'a> Thumbnail<'a> {

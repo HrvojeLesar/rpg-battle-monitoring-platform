@@ -30,6 +30,15 @@ pub enum Error {
 
     #[error("File not found")]
     FileNotFound { id: String },
+
+    #[error(transparent)]
+    JoinError(#[from] tokio::task::JoinError),
+
+    #[error(transparent)]
+    ThumbnailError(#[from] crate::thumbnail::error::Error),
+
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
 }
 
 #[cfg(debug_assertions)]
