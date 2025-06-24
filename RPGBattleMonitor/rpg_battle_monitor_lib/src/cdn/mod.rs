@@ -41,6 +41,10 @@ pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
             "/upload",
             routing::post(routes::upload::upload).get(routes::upload::upload_form),
         )
+        .route(
+            "/thumbnails/{image_id}",
+            routing::get(routes::serve::thumbnails),
+        )
         .route("/{filename}", routing::get(routes::serve::serve_file))
         .layer(DefaultBodyLimit::disable())
         .layer(RequestBodyLimitLayer::new(FILE_SIZE_LIMIT))

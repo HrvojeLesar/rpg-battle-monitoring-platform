@@ -1,4 +1,5 @@
 use axum::{
+    Json,
     extract::Path,
     http::{StatusCode, header},
     response::IntoResponse,
@@ -7,7 +8,7 @@ use axum::{
 use crate::cdn::{
     error::{Error, Result},
     filesystem::Adapter,
-    model::assets::AssetManager,
+    model::{self, assets::AssetManager},
 };
 
 pub async fn serve_file<F: Adapter>(
@@ -22,4 +23,13 @@ pub async fn serve_file<F: Adapter>(
     let data = asset_manager.load_file_data(&file_name).await?;
 
     Ok((StatusCode::OK, [(header::CONTENT_TYPE, asset.mime)], data).into_response())
+}
+
+pub async fn thumbnails<F: Adapter>(
+    Path(image_id): Path<i32>,
+    asset_manager: AssetManager<F>,
+) -> Result<Json<Vec<model::assets::Asset>>> {
+    let thumbnails = asset_manager.get_thumbnails(image_id).await?;
+
+    Ok(Json(thumbnails))
 }

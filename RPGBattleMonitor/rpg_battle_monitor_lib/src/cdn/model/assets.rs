@@ -1,9 +1,12 @@
 use std::fmt::Display;
 
+pub use assets_inner::*;
+
 use chrono::NaiveDateTime;
 use sea_orm::entity::prelude::*;
+use serde::Serialize;
 
-#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
+#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize)]
 #[sea_orm(table_name = "assets")]
 pub struct Model {
     #[sea_orm(primary_key)]
@@ -12,6 +15,7 @@ pub struct Model {
     pub hash: String,
     pub mime: String,
     pub asset_type: String,
+    pub original_image_id: Option<i32>,
     pub created_at: NaiveDateTime,
 }
 
@@ -23,14 +27,23 @@ impl ActiveModelBehavior for ActiveModel {}
 #[derive(Debug, Clone, Copy)]
 pub enum AssetType {
     Image,
-    Thumbnail,
+    Thumbnail(i32),
+}
+
+impl AssetType {
+    pub fn as_id(&self) -> Option<i32> {
+        match self {
+            AssetType::Image => None,
+            AssetType::Thumbnail(id) => Some(*id),
+        }
+    }
 }
 
 impl Display for AssetType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AssetType::Image => write!(f, "image"),
-            AssetType::Thumbnail => write!(f, "thumbnail"),
+            AssetType::Thumbnail(_) => write!(f, "thumbnail"),
         }
     }
 }
@@ -44,7 +57,6 @@ impl From<Option<AssetType>> for AssetType {
     }
 }
 
-pub use assets_inner::*;
 mod assets_inner {
 
     use std::io::Cursor;
@@ -112,11 +124,14 @@ mod assets_inner {
 
             self.write_file(&name, data).await?;
 
+            let asset_type = asset_type.into();
+
             let asset = ActiveModel {
                 name: Set(name),
                 hash: Set(hash),
                 mime: Set(mime),
-                asset_type: Set(asset_type.into().to_string()),
+                asset_type: Set(asset_type.to_string()),
+                original_image_id: Set(asset_type.as_id()),
                 ..Default::default()
             };
 
@@ -183,7 +198,7 @@ mod assets_inner {
 
                 if let Some(data) = data {
                     match self
-                        .create("".to_string(), &data, AssetType::Thumbnail)
+                        .create("".to_string(), &data, AssetType::Thumbnail(asset.id))
                         .await
                     {
                         Ok(asset) => assets.push(asset),
@@ -214,6 +229,27 @@ mod assets_inner {
 
         pub async fn load_file_data<P: AsRef<Path>>(&self, path: P) -> Result<Vec<u8>> {
             Ok(self.fs_adapter.read_file(path.as_ref()).await?)
+        }
+
+        pub async fn get_thumbnails(&self, image_id: i32) -> Result<Vec<Asset>> {
+            let (transaction, asset_result) = self
+                .transaction
+                .begin()
+                .await?
+                .exec(async |db| {
+                    Ok(Entity::find()
+                        .filter(Column::OriginalImageId.eq(image_id))
+                        .filter(Column::AssetType.eq(AssetType::Thumbnail(0).to_string()))
+                        .all(db)
+                        .await?)
+                })
+                .await;
+
+            let assets = asset_result?;
+
+            transaction.commit().await?;
+
+            Ok(assets)
         }
     }
 
@@ -310,5 +346,41 @@ mod test {
                 .unwrap()
                 .len()
         );
+    }
+
+    #[tokio::test]
+    async fn asset_thumbnails_are_created() {
+        let state = get_app_state_with_temp_file_store().await;
+        let asset_manager = AssetManager::from(state.clone());
+
+        let asset = asset_manager
+            .create(get_random_filename(), TEST_IMAGE_BYTES, AssetType::Image)
+            .await
+            .unwrap();
+
+        state
+            .fs_handler
+            .read_file(Path::new(&asset.name))
+            .await
+            .unwrap();
+
+        let created_thumbnails = asset_manager
+            .create_thumbnail_assets(&asset, None)
+            .await
+            .unwrap();
+
+        let thumbnails = asset_manager.get_thumbnails(asset.id).await.unwrap();
+        assert_eq!(created_thumbnails.len(), thumbnails.len());
+        for (idx, thumbnail) in thumbnails.into_iter().enumerate() {
+            assert_eq!(
+                created_thumbnails[idx].original_image_id,
+                thumbnail.original_image_id
+            );
+            assert_eq!(
+                AssetType::Thumbnail(0).to_string(),
+                created_thumbnails[idx].asset_type
+            );
+            assert_eq!(AssetType::Thumbnail(0).to_string(), thumbnail.asset_type);
+        }
     }
 }
