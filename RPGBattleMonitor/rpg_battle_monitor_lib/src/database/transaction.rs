@@ -51,7 +51,7 @@ impl Transaction {
         let tx_holder = &mut *self.tx_holder.lock().await;
 
         if let Some(transaction) = tx_holder.transaction.take() {
-            if tx_holder.counter > 1 {
+            if tx_holder.counter >= 1 {
                 tx_holder.counter -= 1;
                 tx_holder.transaction.replace(transaction);
             } else {
@@ -78,6 +78,7 @@ impl Transaction {
         }
     }
 
+    /// Will deadlock if begin, commit, rollback functions are called while executing f
     pub async fn exec<F, T>(&self, f: F) -> (&Self, Result<T>)
     where
         F: AsyncFnOnce(&DatabaseTransaction) -> Result<T>,

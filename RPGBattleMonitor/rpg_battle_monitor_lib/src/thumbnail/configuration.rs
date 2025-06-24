@@ -4,7 +4,7 @@ use crate::thumbnail::size::Size;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Configuration<'a> {
-    name: &'a str,
+    pub name: &'a str,
     pub size: Size,
 }
 

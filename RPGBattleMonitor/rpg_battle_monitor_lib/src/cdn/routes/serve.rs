@@ -8,7 +8,10 @@ use axum::{
 use crate::cdn::{
     error::{Error, Result},
     filesystem::Adapter,
-    model::{self, assets::AssetManager},
+    model::{
+        self,
+        assets::{AssetManager, AssetThumbnail},
+    },
 };
 
 pub async fn serve_file<F: Adapter>(
@@ -28,7 +31,7 @@ pub async fn serve_file<F: Adapter>(
 pub async fn thumbnails<F: Adapter>(
     Path(image_id): Path<i32>,
     asset_manager: AssetManager<F>,
-) -> Result<Json<Vec<model::assets::Asset>>> {
+) -> Result<Json<Vec<AssetThumbnail>>> {
     let thumbnails = asset_manager.get_thumbnails(image_id).await?;
 
     Ok(Json(thumbnails))

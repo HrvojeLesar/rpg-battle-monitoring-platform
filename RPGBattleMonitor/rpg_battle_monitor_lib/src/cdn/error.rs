@@ -39,6 +39,9 @@ pub enum Error {
 
     #[error(transparent)]
     IoError(#[from] std::io::Error),
+
+    #[error(transparent)]
+    DbError(#[from] sea_orm::DbErr),
 }
 
 #[cfg(debug_assertions)]

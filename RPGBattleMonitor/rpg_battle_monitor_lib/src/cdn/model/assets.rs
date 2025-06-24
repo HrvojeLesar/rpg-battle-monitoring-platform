@@ -3,7 +3,7 @@ use std::fmt::Display;
 pub use assets_inner::*;
 
 use chrono::NaiveDateTime;
-use sea_orm::entity::prelude::*;
+use sea_orm::{FromQueryResult, entity::prelude::*};
 use serde::Serialize;
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize)]
@@ -15,35 +15,42 @@ pub struct Model {
     pub hash: String,
     pub mime: String,
     pub asset_type: String,
-    pub original_image_id: Option<i32>,
     pub created_at: NaiveDateTime,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
+pub enum Relation {
+    #[sea_orm(has_many = "super::thumbnails::Entity")]
+    Thumbnail,
+}
+
+impl Related<super::thumbnails::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Thumbnail.def()
+    }
+}
 
 impl ActiveModelBehavior for ActiveModel {}
 
-#[derive(Debug, Clone, Copy)]
-pub enum AssetType {
-    Image,
-    Thumbnail(i32),
+#[derive(Debug, Serialize, FromQueryResult)]
+pub struct AssetThumbnail {
+    #[sea_orm(nested)]
+    asset: Asset,
+    #[sea_orm(nested)]
+    thumbnail: super::thumbnails::Model,
 }
 
-impl AssetType {
-    pub fn as_id(&self) -> Option<i32> {
-        match self {
-            AssetType::Image => None,
-            AssetType::Thumbnail(id) => Some(*id),
-        }
-    }
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum AssetType {
+    Image,
+    Thumbnail,
 }
 
 impl Display for AssetType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AssetType::Image => write!(f, "image"),
-            AssetType::Thumbnail(_) => write!(f, "thumbnail"),
+            AssetType::Thumbnail => write!(f, "thumbnail"),
         }
     }
 }
@@ -64,7 +71,10 @@ mod assets_inner {
 
     use crate::cdn::error::Result;
     use crate::cdn::filesystem::{Adapter, sha256_hash};
-    use crate::cdn::model::assets::{ActiveModel, AssetType, Column, Entity};
+    use crate::cdn::model::assets::{
+        ActiveModel, AssetThumbnail, AssetType, Column, Entity, Relation,
+    };
+    use crate::cdn::model::thumbnails;
     use crate::thumbnail::{configuration, create_thumbnails};
     use crate::webserver::extractors::local_fs_extractor::FSAdapter;
     use crate::{cdn::model::assets::Model, database::transaction::Transaction};
@@ -72,7 +82,10 @@ mod assets_inner {
     pub type Asset = Model;
     use image::ImageFormat;
     use sea_orm::ActiveValue::Set;
-    use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter};
+    use sea_orm::{
+        ActiveModelTrait, ColumnTrait, DbBackend, EntityTrait, JoinType, QueryFilter, QuerySelect,
+        QueryTrait, RelationTrait, SelectColumns,
+    };
     use tokio::task::spawn_blocking;
     use uuid::Uuid;
 
@@ -122,16 +135,31 @@ mod assets_inner {
 
             let name = format!("{uuid}.{}", image_format_to_extension(image_format));
 
+            let transaction = self.transaction.begin().await?;
+
+            let asset = self
+                .create_asset(name.clone(), hash, mime, asset_type.into())
+                .await?;
+
             self.write_file(&name, data).await?;
 
-            let asset_type = asset_type.into();
+            transaction.commit().await?;
 
+            Ok(asset)
+        }
+
+        async fn create_asset(
+            &self,
+            name: String,
+            hash: String,
+            mime: String,
+            asset_type: AssetType,
+        ) -> Result<Asset> {
             let asset = ActiveModel {
                 name: Set(name),
                 hash: Set(hash),
                 mime: Set(mime),
                 asset_type: Set(asset_type.to_string()),
-                original_image_id: Set(asset_type.as_id()),
                 ..Default::default()
             };
 
@@ -158,12 +186,16 @@ mod assets_inner {
 
         pub async fn create_thumbnail_assets(
             &self,
-            asset: &Asset,
+            original_asset: &Asset,
             data: Option<&[u8]>,
         ) -> Result<Vec<Asset>> {
             let data = match data {
                 Some(d) => d.to_vec(),
-                None => self.fs_adapter.read_file(asset.name.as_ref()).await?,
+                None => {
+                    self.fs_adapter
+                        .read_file(original_asset.name.as_ref())
+                        .await?
+                }
             };
 
             let thumbnail_configurations = spawn_blocking(|| {
@@ -183,6 +215,12 @@ mod assets_inner {
             let mut assets = Vec::with_capacity(3);
 
             for thumbnail in thumbnail_configurations {
+                let thumbnail_active_model = thumbnails::ActiveModel {
+                    dimensions: Set(thumbnail.configuration.name.to_string()),
+                    image_id: Set(original_asset.id),
+                    ..Default::default()
+                };
+
                 let data = spawn_blocking(|| {
                     let mut data = Vec::new();
                     let mut writer = Cursor::new(&mut data);
@@ -196,9 +234,17 @@ mod assets_inner {
                 })
                 .await?;
 
+                let (transaction, result) = self
+                    .transaction
+                    .begin()
+                    .await?
+                    .exec(async |db| Ok(thumbnail_active_model.insert(db).await?))
+                    .await;
+                result?;
+
                 if let Some(data) = data {
                     match self
-                        .create("".to_string(), &data, AssetType::Thumbnail(asset.id))
+                        .create("".to_string(), &data, AssetType::Thumbnail)
                         .await
                     {
                         Ok(asset) => assets.push(asset),
@@ -207,6 +253,8 @@ mod assets_inner {
                         }
                     }
                 }
+
+                transaction.commit().await?;
             }
 
             Ok(assets)
@@ -231,15 +279,19 @@ mod assets_inner {
             Ok(self.fs_adapter.read_file(path.as_ref()).await?)
         }
 
-        pub async fn get_thumbnails(&self, image_id: i32) -> Result<Vec<Asset>> {
+        pub async fn get_thumbnails(&self, image_id: i32) -> Result<Vec<AssetThumbnail>> {
             let (transaction, asset_result) = self
                 .transaction
                 .begin()
                 .await?
                 .exec(async |db| {
                     Ok(Entity::find()
-                        .filter(Column::OriginalImageId.eq(image_id))
-                        .filter(Column::AssetType.eq(AssetType::Thumbnail(0).to_string()))
+                        .join(JoinType::LeftJoin, Relation::Thumbnail.def())
+                        .select_column(thumbnails::Column::Id)
+                        .select_column(thumbnails::Column::Dimensions)
+                        .select_column(thumbnails::Column::ImageId)
+                        .filter(thumbnails::Column::ImageId.eq(image_id))
+                        .into_model::<AssetThumbnail>()
                         .all(db)
                         .await?)
                 })
@@ -364,23 +416,23 @@ mod test {
             .await
             .unwrap();
 
-        let created_thumbnails = asset_manager
+        let thumbnail_asset = asset_manager
             .create_thumbnail_assets(&asset, None)
             .await
             .unwrap();
 
         let thumbnails = asset_manager.get_thumbnails(asset.id).await.unwrap();
-        assert_eq!(created_thumbnails.len(), thumbnails.len());
+        assert_eq!(thumbnail_asset.len(), thumbnails.len());
         for (idx, thumbnail) in thumbnails.into_iter().enumerate() {
+            assert_eq!(asset.id, thumbnail.thumbnail.image_id);
             assert_eq!(
-                created_thumbnails[idx].original_image_id,
-                thumbnail.original_image_id
+                AssetType::Thumbnail.to_string(),
+                thumbnail_asset[idx].asset_type
             );
             assert_eq!(
-                AssetType::Thumbnail(0).to_string(),
-                created_thumbnails[idx].asset_type
+                AssetType::Thumbnail.to_string(),
+                thumbnail_asset[idx].asset_type
             );
-            assert_eq!(AssetType::Thumbnail(0).to_string(), thumbnail.asset_type);
         }
     }
 }
