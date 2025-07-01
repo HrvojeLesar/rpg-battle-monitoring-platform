@@ -42,14 +42,14 @@ pub struct AssetThumbnail {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum AssetType {
-    Image,
+    File,
     Thumbnail,
 }
 
 impl Display for AssetType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AssetType::Image => write!(f, "image"),
+            AssetType::File => write!(f, "file"),
             AssetType::Thumbnail => write!(f, "thumbnail"),
         }
     }
@@ -59,7 +59,7 @@ impl From<Option<AssetType>> for AssetType {
     fn from(value: Option<AssetType>) -> Self {
         match value {
             Some(o) => o,
-            None => AssetType::Image,
+            None => AssetType::File,
         }
     }
 }
@@ -310,7 +310,7 @@ mod test {
                 &state.get_db(),
                 get_random_filename(),
                 TEST_IMAGE_BYTES,
-                AssetType::Image,
+                AssetType::File,
             )
             .await
             .unwrap();
@@ -342,7 +342,7 @@ mod test {
                 &state.get_db(),
                 get_random_filename(),
                 TEST_IMAGE_BYTES,
-                AssetType::Image,
+                AssetType::File,
             )
             .await
             .unwrap();
@@ -366,7 +366,7 @@ mod test {
                 &state.get_db(),
                 get_random_filename(),
                 TEST_IMAGE_BYTES,
-                AssetType::Image,
+                AssetType::File,
             )
             .await
             .unwrap();

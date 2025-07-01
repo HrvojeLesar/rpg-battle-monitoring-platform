@@ -87,19 +87,23 @@ pub async fn upload<F: Adapter>(
             &transaction,
             file.name.to_string(),
             &file.data,
-            AssetType::Image,
+            AssetType::File,
         )
         .await?;
 
-    let thumbnails = asset_manager
-        .create_thumbnail_assets(&transaction, &asset, Some(&file.data))
-        .await?;
+    let thumbnails = if infer::is_image(&file.data) {
+        asset_manager
+            .create_thumbnail_assets(&transaction, &asset, Some(&file.data))
+            .await?
+    } else {
+        vec![]
+    };
 
     transaction.commit().await?;
 
     Ok(Json(UploadResponse {
         id: asset.id,
-        thumbnails: thumbnails.iter().map(|t| t.name.clone()).collect(),
+        thumbnails: thumbnails.into_iter().map(|t| t.name).collect(),
         name: asset.name,
         ..Default::default()
     }))
