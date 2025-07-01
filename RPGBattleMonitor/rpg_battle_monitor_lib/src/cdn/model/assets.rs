@@ -71,54 +71,47 @@ mod assets_inner {
 
     use crate::cdn::error::Result;
     use crate::cdn::filesystem::{Adapter, sha256_hash};
+    use crate::cdn::model::assets::Model;
     use crate::cdn::model::assets::{
         ActiveModel, AssetThumbnail, AssetType, Column, Entity, Relation,
     };
     use crate::cdn::model::thumbnails;
     use crate::thumbnail::{configuration, create_thumbnails};
+    use crate::utils::run_blocking;
     use crate::webserver::extractors::local_fs_extractor::FSAdapter;
-    use crate::{cdn::model::assets::Model, database::transaction::Transaction};
 
     pub type Asset = Model;
     use image::ImageFormat;
     use sea_orm::ActiveValue::Set;
     use sea_orm::{
-        ActiveModelTrait, ColumnTrait, DbBackend, EntityTrait, JoinType, QueryFilter, QuerySelect,
-        QueryTrait, RelationTrait, SelectColumns,
+        ActiveModelTrait, ColumnTrait, ConnectionTrait, EntityTrait, JoinType, QueryFilter,
+        QuerySelect, RelationTrait, SelectColumns,
     };
-    use tokio::task::spawn_blocking;
     use uuid::Uuid;
 
     pub struct AssetManager<F: Adapter> {
-        transaction: Transaction,
         fs_adapter: FSAdapter<F>,
     }
 
     impl<F: Adapter> AssetManager<F> {
-        pub fn new(transaction: Transaction, fs_adapter: FSAdapter<F>) -> Self {
-            Self {
-                transaction,
-                fs_adapter,
-            }
+        pub fn new(fs_adapter: FSAdapter<F>) -> Self {
+            Self { fs_adapter }
         }
 
-        pub async fn get_by_hash(&self, hash: &str) -> Result<Option<Asset>> {
-            let (transaction, asset_result) = self
-                .transaction
-                .begin()
-                .await?
-                .exec(async |db| Ok(Entity::find().filter(Column::Hash.eq(hash)).one(db).await?))
-                .await;
-
-            let asset = asset_result?;
-
-            transaction.commit().await?;
-
-            Ok(asset)
+        pub async fn get_by_hash(
+            &self,
+            conn: &impl ConnectionTrait,
+            hash: &str,
+        ) -> Result<Option<Asset>> {
+            Ok(Entity::find()
+                .filter(Column::Hash.eq(hash))
+                .one(conn)
+                .await?)
         }
 
         pub async fn create(
             &self,
+            conn: &impl ConnectionTrait,
             user_give_filename: String,
             data: &[u8],
             asset_type: impl Into<AssetType>,
@@ -126,7 +119,7 @@ mod assets_inner {
             let hash = sha256_hash(data);
             let uuid = Uuid::new_v4().to_string();
 
-            if let Some(asset) = self.get_by_hash(&hash).await? {
+            if let Some(asset) = self.get_by_hash(conn, &hash).await? {
                 return Ok(asset);
             }
 
@@ -135,21 +128,18 @@ mod assets_inner {
 
             let name = format!("{uuid}.{}", image_format_to_extension(image_format));
 
-            let transaction = self.transaction.begin().await?;
-
             let asset = self
-                .create_asset(name.clone(), hash, mime, asset_type.into())
+                .create_asset(conn, name.clone(), hash, mime, asset_type.into())
                 .await?;
 
             self.write_file(&name, data).await?;
-
-            transaction.commit().await?;
 
             Ok(asset)
         }
 
         async fn create_asset(
             &self,
+            conn: &impl ConnectionTrait,
             name: String,
             hash: String,
             mime: String,
@@ -163,18 +153,7 @@ mod assets_inner {
                 ..Default::default()
             };
 
-            let (transaction, asset_result) = self
-                .transaction
-                .begin()
-                .await?
-                .exec(async |db| Ok(asset.insert(db).await?))
-                .await;
-
-            let asset = asset_result?;
-
-            transaction.commit().await?;
-
-            Ok(asset)
+            Ok(asset.insert(conn).await?)
         }
 
         async fn write_file(&self, filename: &str, data: &[u8]) -> Result<()> {
@@ -186,6 +165,7 @@ mod assets_inner {
 
         pub async fn create_thumbnail_assets(
             &self,
+            conn: &impl ConnectionTrait,
             original_asset: &Asset,
             data: Option<&[u8]>,
         ) -> Result<Vec<Asset>> {
@@ -198,7 +178,7 @@ mod assets_inner {
                 }
             };
 
-            let thumbnail_configurations = spawn_blocking(|| {
+            let thumbnail_configurations = run_blocking(|| {
                 let reader = Cursor::new(data);
                 create_thumbnails(
                     reader,
@@ -210,7 +190,7 @@ mod assets_inner {
                     None,
                 )
             })
-            .await??;
+            .await?;
 
             let mut assets = Vec::with_capacity(3);
 
@@ -221,7 +201,7 @@ mod assets_inner {
                     ..Default::default()
                 };
 
-                let data = spawn_blocking(|| {
+                let data = run_blocking(|| {
                     let mut data = Vec::new();
                     let mut writer = Cursor::new(&mut data);
                     match thumbnail.write_to(&mut writer) {
@@ -232,19 +212,13 @@ mod assets_inner {
                         }
                     }
                 })
-                .await?;
+                .await;
 
-                let (transaction, result) = self
-                    .transaction
-                    .begin()
-                    .await?
-                    .exec(async |db| Ok(thumbnail_active_model.insert(db).await?))
-                    .await;
-                result?;
+                thumbnail_active_model.insert(conn).await?;
 
                 if let Some(data) = data {
                     match self
-                        .create("".to_string(), &data, AssetType::Thumbnail)
+                        .create(conn, "".to_string(), &data, AssetType::Thumbnail)
                         .await
                     {
                         Ok(asset) => assets.push(asset),
@@ -253,55 +227,40 @@ mod assets_inner {
                         }
                     }
                 }
-
-                transaction.commit().await?;
             }
 
             Ok(assets)
         }
 
-        pub async fn get_by_name(&self, uuid: &str) -> Result<Option<Asset>> {
-            let (transaction, asset_result) = self
-                .transaction
-                .begin()
-                .await?
-                .exec(async |db| Ok(Entity::find().filter(Column::Name.eq(uuid)).one(db).await?))
-                .await;
-
-            let asset = asset_result?;
-
-            transaction.commit().await?;
-
-            Ok(asset)
+        pub async fn get_by_name(
+            &self,
+            conn: &impl ConnectionTrait,
+            uuid: &str,
+        ) -> Result<Option<Asset>> {
+            Ok(Entity::find()
+                .filter(Column::Name.eq(uuid))
+                .one(conn)
+                .await?)
         }
 
         pub async fn load_file_data<P: AsRef<Path>>(&self, path: P) -> Result<Vec<u8>> {
             Ok(self.fs_adapter.read_file(path.as_ref()).await?)
         }
 
-        pub async fn get_thumbnails(&self, image_id: i32) -> Result<Vec<AssetThumbnail>> {
-            let (transaction, asset_result) = self
-                .transaction
-                .begin()
-                .await?
-                .exec(async |db| {
-                    Ok(Entity::find()
-                        .join(JoinType::LeftJoin, Relation::Thumbnail.def())
-                        .select_column(thumbnails::Column::Id)
-                        .select_column(thumbnails::Column::Dimensions)
-                        .select_column(thumbnails::Column::ImageId)
-                        .filter(thumbnails::Column::ImageId.eq(image_id))
-                        .into_model::<AssetThumbnail>()
-                        .all(db)
-                        .await?)
-                })
-                .await;
-
-            let assets = asset_result?;
-
-            transaction.commit().await?;
-
-            Ok(assets)
+        pub async fn get_thumbnails(
+            &self,
+            conn: &impl ConnectionTrait,
+            image_id: i32,
+        ) -> Result<Vec<AssetThumbnail>> {
+            Ok(Entity::find()
+                .join(JoinType::LeftJoin, Relation::Thumbnail.def())
+                .select_column(thumbnails::Column::Id)
+                .select_column(thumbnails::Column::Dimensions)
+                .select_column(thumbnails::Column::ImageId)
+                .filter(thumbnails::Column::ImageId.eq(image_id))
+                .into_model::<AssetThumbnail>()
+                .all(conn)
+                .await?)
         }
     }
 
@@ -336,6 +295,7 @@ mod test {
         utils::test_utils::{
             TEST_IMAGE_BYTES, get_app_state_with_temp_file_store, get_random_filename,
         },
+        webserver::router::app_state::AppStateTrait,
     };
 
     #[tokio::test]
@@ -344,7 +304,12 @@ mod test {
         let asset_manager = AssetManager::from(state.clone());
 
         let asset = asset_manager
-            .create(get_random_filename(), TEST_IMAGE_BYTES, AssetType::Image)
+            .create(
+                &state.get_db(),
+                get_random_filename(),
+                TEST_IMAGE_BYTES,
+                AssetType::Image,
+            )
             .await
             .unwrap();
 
@@ -361,12 +326,22 @@ mod test {
         let asset_manager = AssetManager::from(state.clone());
 
         let asset1 = asset_manager
-            .create(get_random_filename(), TEST_IMAGE_BYTES, None)
+            .create(
+                &state.get_db(),
+                get_random_filename(),
+                TEST_IMAGE_BYTES,
+                None,
+            )
             .await
             .unwrap();
 
         let asset2 = asset_manager
-            .create(get_random_filename(), TEST_IMAGE_BYTES, AssetType::Image)
+            .create(
+                &state.get_db(),
+                get_random_filename(),
+                TEST_IMAGE_BYTES,
+                AssetType::Image,
+            )
             .await
             .unwrap();
 
@@ -386,7 +361,7 @@ mod test {
 
         assert!(
             asset_manager
-                .create(get_random_filename(), b"", None)
+                .create(&state.get_db(), get_random_filename(), b"", None)
                 .await
                 .is_err()
         );
@@ -406,7 +381,12 @@ mod test {
         let asset_manager = AssetManager::from(state.clone());
 
         let asset = asset_manager
-            .create(get_random_filename(), TEST_IMAGE_BYTES, AssetType::Image)
+            .create(
+                &state.get_db(),
+                get_random_filename(),
+                TEST_IMAGE_BYTES,
+                AssetType::Image,
+            )
             .await
             .unwrap();
 
@@ -417,11 +397,14 @@ mod test {
             .unwrap();
 
         let thumbnail_asset = asset_manager
-            .create_thumbnail_assets(&asset, None)
+            .create_thumbnail_assets(&state.get_db(), &asset, None)
             .await
             .unwrap();
 
-        let thumbnails = asset_manager.get_thumbnails(asset.id).await.unwrap();
+        let thumbnails = asset_manager
+            .get_thumbnails(&state.get_db(), asset.id)
+            .await
+            .unwrap();
         assert_eq!(thumbnail_asset.len(), thumbnails.len());
         for (idx, thumbnail) in thumbnails.into_iter().enumerate() {
             assert_eq!(asset.id, thumbnail.thumbnail.image_id);

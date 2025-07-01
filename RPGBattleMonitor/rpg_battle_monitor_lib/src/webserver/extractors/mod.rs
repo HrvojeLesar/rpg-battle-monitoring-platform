@@ -1,7 +1,7 @@
 pub mod asset_extractor;
+pub mod database_connection_extractor;
 pub mod error;
 pub mod local_fs_extractor;
-pub mod transaction_extractor;
 
 #[macro_export]
 macro_rules! implement_manager_from_request {

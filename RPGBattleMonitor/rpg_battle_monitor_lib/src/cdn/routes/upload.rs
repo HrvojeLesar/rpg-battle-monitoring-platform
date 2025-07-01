@@ -1,10 +1,12 @@
 use axum::{Json, extract};
+use sea_orm::TransactionTrait;
 use serde::Serialize;
 
 use crate::cdn::model::assets::AssetType;
 use crate::cdn::{filesystem::Adapter, model::assets::AssetManager};
 
 use crate::cdn::error::{Error, Result};
+use crate::webserver::extractors::database_connection_extractor::DbConn;
 
 #[cfg(feature = "api_v1_doc")]
 use utoipa::OpenApi;
@@ -72,18 +74,28 @@ impl UploadedFile {
 
 pub async fn upload<F: Adapter>(
     asset_manager: AssetManager<F>,
+    conn: DbConn,
     multipart: extract::Multipart,
 ) -> Result<Json<UploadResponse>> {
     let file = UploadedFile::from_multipart(multipart).await?;
 
+    let transaction = conn.begin().await?;
+
     // TODO: use name to identify how asset is called for some user uploading it
     let asset = asset_manager
-        .create(file.name.to_string(), &file.data, AssetType::Image)
+        .create(
+            &transaction,
+            file.name.to_string(),
+            &file.data,
+            AssetType::Image,
+        )
         .await?;
 
     let thumbnails = asset_manager
-        .create_thumbnail_assets(&asset, Some(&file.data))
+        .create_thumbnail_assets(&transaction, &asset, Some(&file.data))
         .await?;
+
+    transaction.commit().await?;
 
     Ok(Json(UploadResponse {
         id: asset.id,
@@ -152,17 +164,19 @@ mod test {
         TestServer,
         multipart::{MultipartForm, Part},
     };
+    use sea_orm::EntityTrait;
+    use serde_json::Value;
 
     use crate::{
         cdn::{
             filesystem::{FileSystem, temp_file_adapter::TempFileStore},
-            model::assets::AssetManager,
+            model::assets::{self, AssetManager},
             routes::upload::{UploadResponse, upload},
         },
         utils::test_utils::{
             TEST_IMAGE_BYTES, get_app_state_with_temp_file_store, get_random_filename, new_test_app,
         },
-        webserver::router::app_state::AppState,
+        webserver::router::app_state::{AppState, AppStateTrait},
     };
 
     const UPLOAD_PATH: &str = "/upload";
@@ -200,7 +214,7 @@ mod test {
         let asset_manager = AssetManager::from(state.clone());
 
         asset_manager
-            .get_by_name(&response_json.name)
+            .get_by_name(&state.get_db(), &response_json.name)
             .await
             .unwrap()
             .unwrap();
@@ -212,5 +226,33 @@ mod test {
             .unwrap();
 
         assert!(!file.is_empty());
+    }
+
+    #[tokio::test]
+    async fn failed_upload_is_not_saved_to_db() {
+        const INVALID_IMAGE_BYTES: &[u8] = b"invalid image bytes";
+        let (server, state) = get_upload_test_app().await;
+
+        let file = Part::bytes(INVALID_IMAGE_BYTES);
+
+        let filename = get_random_filename();
+        let form = MultipartForm::new()
+            .add_text("filename", filename)
+            .add_part("file", file);
+
+        let response = server
+            .post(UPLOAD_PATH)
+            .multipart(form)
+            .expect_failure()
+            .await;
+        assert!(response.status_code().is_server_error());
+
+        let response_json = response.json::<Value>();
+
+        assert!(response_json["error"].is_string());
+
+        let assets = assets::Entity::find().all(&state.get_db()).await.unwrap();
+
+        assert!(assets.is_empty());
     }
 }

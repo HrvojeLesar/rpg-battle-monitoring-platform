@@ -47,15 +47,18 @@ pub enum Error {
 #[cfg(debug_assertions)]
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
-        use axum::Json;
+        use axum::{Json, http::StatusCode};
         use serde_json::json;
 
         tracing::error!(error = %self);
 
-        Json(json!({
-            "error": format!("{self:?}")
-        }))
-        .into_response()
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({
+                "error": format!("{self:?}")
+            })),
+        )
+            .into_response()
     }
 }
 

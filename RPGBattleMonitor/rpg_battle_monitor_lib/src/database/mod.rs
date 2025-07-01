@@ -4,7 +4,6 @@ use crate::database::setup::create_database;
 
 pub mod error;
 pub mod setup;
-pub mod transaction;
 
 pub async fn get_sea_orm_database(url: &str, max_connections: u32) -> sea_orm::DatabaseConnection {
     create_database(url).await;
