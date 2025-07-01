@@ -69,7 +69,7 @@ mod assets_inner {
     use std::io::Cursor;
     use std::path::Path;
 
-    use crate::cdn::error::Result;
+    use crate::cdn::error::{Error, Result};
     use crate::cdn::filesystem::{Adapter, sha256_hash};
     use crate::cdn::model::assets::Model;
     use crate::cdn::model::assets::{
@@ -77,17 +77,16 @@ mod assets_inner {
     };
     use crate::cdn::model::thumbnails;
     use crate::thumbnail::{configuration, create_thumbnails};
-    use crate::utils::run_blocking;
+    use crate::utils::{gen_uuid, run_blocking, unknown_mime_type};
     use crate::webserver::extractors::local_fs_extractor::FSAdapter;
 
     pub type Asset = Model;
-    use image::ImageFormat;
+    use infer::MatcherType;
     use sea_orm::ActiveValue::Set;
     use sea_orm::{
         ActiveModelTrait, ColumnTrait, ConnectionTrait, EntityTrait, JoinType, QueryFilter,
         QuerySelect, RelationTrait, SelectColumns,
     };
-    use uuid::Uuid;
 
     pub struct AssetManager<F: Adapter> {
         fs_adapter: FSAdapter<F>,
@@ -116,17 +115,35 @@ mod assets_inner {
             data: &[u8],
             asset_type: impl Into<AssetType>,
         ) -> Result<Asset> {
+            if data.is_empty() {
+                return Err(Error::DataEmpty);
+            }
+
             let hash = sha256_hash(data);
-            let uuid = Uuid::new_v4().to_string();
+            let uuid = gen_uuid();
 
             if let Some(asset) = self.get_by_hash(conn, &hash).await? {
                 return Ok(asset);
             }
 
-            let image_format = image::guess_format(data)?;
-            let mime = image_format.to_mime_type().to_string();
+            let mime_type = match infer::get(data) {
+                Some(m) => m,
+                None => unknown_mime_type(),
+            };
 
-            let name = format!("{uuid}.{}", image_format_to_extension(image_format));
+            let (mime, name) = if mime_type.matcher_type() == MatcherType::Image {
+                let image_format = image::guess_format(data)?;
+                let extension = image_format.extensions_str().first().unwrap_or(&"");
+
+                let mime = image_format.to_mime_type().to_string();
+                let name = format!("{uuid}.{}", extension);
+
+                (mime, name)
+            } else {
+                let extension = mime_type.extension();
+                let name = format!("{uuid}.{}", extension);
+                (mime_type.mime_type().to_string(), name)
+            };
 
             let asset = self
                 .create_asset(conn, name.clone(), hash, mime, asset_type.into())
@@ -263,22 +280,6 @@ mod assets_inner {
                 .await?)
         }
     }
-
-    fn image_format_to_extension(format: ImageFormat) -> &'static str {
-        match format {
-            ImageFormat::Avif => "avif",
-            ImageFormat::Bmp => "bmp",
-            ImageFormat::Gif => "gif",
-            ImageFormat::Ico => "ico",
-            ImageFormat::Jpeg => "jpeg",
-            ImageFormat::Png => "png",
-            ImageFormat::Pnm => "pnm",
-            ImageFormat::Tga => "tga",
-            ImageFormat::Tiff => "tiff",
-            ImageFormat::WebP => "webp",
-            _ => "png",
-        }
-    }
 }
 
 #[cfg(test)]
@@ -293,7 +294,8 @@ mod test {
             model::assets::{self, AssetManager, AssetType},
         },
         utils::test_utils::{
-            TEST_IMAGE_BYTES, get_app_state_with_temp_file_store, get_random_filename,
+            TEST_IMAGE_BYTES, TEST_PDF_BYTES, get_app_state_with_temp_file_store,
+            get_random_filename,
         },
         webserver::router::app_state::AppStateTrait,
     };
@@ -355,27 +357,6 @@ mod test {
     }
 
     #[tokio::test]
-    async fn non_image_file_is_not_saved() {
-        let state = get_app_state_with_temp_file_store().await;
-        let asset_manager = AssetManager::from(state.clone());
-
-        assert!(
-            asset_manager
-                .create(&state.get_db(), get_random_filename(), b"", None)
-                .await
-                .is_err()
-        );
-        assert_eq!(
-            0,
-            assets::Entity::find()
-                .all(&state.database)
-                .await
-                .unwrap()
-                .len()
-        );
-    }
-
-    #[tokio::test]
     async fn asset_thumbnails_are_created() {
         let state = get_app_state_with_temp_file_store().await;
         let asset_manager = AssetManager::from(state.clone());
@@ -417,5 +398,67 @@ mod test {
                 thumbnail_asset[idx].asset_type
             );
         }
+    }
+
+    #[tokio::test]
+    async fn asset_has_correct_mime() {
+        let state = get_app_state_with_temp_file_store().await;
+        let asset_manager = AssetManager::from(state.clone());
+
+        assert!(
+            asset_manager
+                .create(&state.get_db(), get_random_filename(), b"", None)
+                .await
+                .is_err()
+        );
+        assert_eq!(
+            0,
+            assets::Entity::find()
+                .all(&state.database)
+                .await
+                .unwrap()
+                .len()
+        );
+
+        assert_eq!(
+            asset_manager
+                .create(
+                    &state.get_db(),
+                    get_random_filename(),
+                    TEST_IMAGE_BYTES,
+                    None
+                )
+                .await
+                .unwrap()
+                .mime,
+            "image/png"
+        );
+
+        assert_eq!(
+            1,
+            assets::Entity::find()
+                .all(&state.database)
+                .await
+                .unwrap()
+                .len()
+        );
+
+        assert_eq!(
+            asset_manager
+                .create(&state.get_db(), get_random_filename(), TEST_PDF_BYTES, None)
+                .await
+                .unwrap()
+                .mime,
+            "application/pdf"
+        );
+
+        assert_eq!(
+            2,
+            assets::Entity::find()
+                .all(&state.database)
+                .await
+                .unwrap()
+                .len()
+        );
     }
 }

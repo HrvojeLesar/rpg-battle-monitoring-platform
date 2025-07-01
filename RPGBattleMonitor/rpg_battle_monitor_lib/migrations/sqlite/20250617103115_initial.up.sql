@@ -10,3 +10,4 @@ CREATE TABLE assets (
 CREATE INDEX IF NOT EXISTS assets_idx_hash ON assets (hash);
 CREATE INDEX IF NOT EXISTS assets_idx_asset_type ON assets (asset_type);
 CREATE INDEX IF NOT EXISTS assets_idx_name ON assets (name);
+CREATE INDEX IF NOT EXISTS assets_idx_mime ON assets (mime);

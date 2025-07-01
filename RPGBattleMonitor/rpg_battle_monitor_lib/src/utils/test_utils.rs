@@ -9,7 +9,8 @@ use crate::{
     webserver::router::app_state::{AppState, AppStateConfig},
 };
 
-pub(crate) const TEST_IMAGE_BYTES: &[u8] = include_bytes!("../../tests/thumbnail/assets/WIP.png");
+pub(crate) const TEST_IMAGE_BYTES: &[u8] = include_bytes!("../../tests/assets/WIP.png");
+pub(crate) const TEST_PDF_BYTES: &[u8] = include_bytes!("../../tests/assets/test.pdf");
 
 pub(crate) fn new_test_app(router: Router) -> TestServer {
     TestServer::builder()

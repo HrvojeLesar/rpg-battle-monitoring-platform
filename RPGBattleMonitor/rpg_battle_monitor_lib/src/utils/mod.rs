@@ -1,3 +1,5 @@
+use infer::Type;
+
 #[cfg(test)]
 pub mod test_utils;
 
@@ -13,4 +15,21 @@ where
             Err(_) => unreachable!("spawn_blocking tasks are never cancelled"),
         },
     }
+}
+
+pub fn gen_uuid() -> String {
+    uuid::Uuid::new_v4().simple().to_string()
+}
+
+fn unknonw_mime_matcher(_buf: &[u8]) -> bool {
+    true
+}
+
+pub fn unknown_mime_type() -> Type {
+    infer::Type::new(
+        infer::MatcherType::Custom,
+        "unknown",
+        "",
+        unknonw_mime_matcher,
+    )
 }

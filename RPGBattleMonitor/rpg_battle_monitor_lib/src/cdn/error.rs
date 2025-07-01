@@ -11,9 +11,9 @@ pub enum Error {
     #[error("Field has not name")]
     FieldHasNoName,
 
-    #[error("filename is empty")]
+    #[error("Filename is empty")]
     FilenameEmpty,
-    #[error("data is empty")]
+    #[error("Data is empty")]
     DataEmpty,
 
     #[error(transparent)]

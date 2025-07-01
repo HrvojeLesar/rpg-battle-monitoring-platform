@@ -4632,6 +4632,7 @@ dependencies = [
  "chrono",
  "futures-util",
  "image",
+ "infer",
  "rayon",
  "sea-orm",
  "serde",
