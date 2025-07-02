@@ -1,8 +1,12 @@
 use sea_orm::entity::prelude::*;
 use serde::Serialize;
 
+#[cfg(feature = "api_doc")]
+use utoipa::ToSchema;
+
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize)]
 #[sea_orm(table_name = "thumbnails")]
+#[cfg_attr(feature = "api_doc", derive(ToSchema))]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,

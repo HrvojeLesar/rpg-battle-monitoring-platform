@@ -21,7 +21,8 @@ use utoipa::{Modify, OpenApi};
 #[openapi(info(description = "Assets API"), 
 modifiers(&ModifyDoc),
 nest(
-    (path = "/assets", api = upload::ApiDoc, tags = ["Upload"])
+    (path = "/assets", api = upload::ApiDoc, tags = ["Upload"]),
+    (path = "/assets", api = serve::ApiDoc, tags = ["Serve"])
 ))]
 pub struct ApiDoc;
 
@@ -35,6 +36,7 @@ impl Modify for ModifyDoc {
         use crate::api::doc::taggroups::tag_groups_config;
 
         tag_groups_config().add("Assets".to_string(), HashSet::from(["Upload".to_string()]));
+        tag_groups_config().add("Assets".to_string(), HashSet::from(["Serve".to_string()]));
     }
 }
 
