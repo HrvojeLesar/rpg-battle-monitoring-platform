@@ -33,10 +33,9 @@ sea-orm = { version = "1.1.12", features = ["sqlx-sqlite"] }
 infer = "0.19.0"
 
 [features]
-default = ["api_v1", "api_v1_doc", "db_sqlite"]
+default = ["db_sqlite", "api_doc"]
 
-api_v1 = []
-api_v1_doc = []
+api_doc = []
 
 db_sqlite = ["sqlx/sqlite"]
 db_postgres = ["sqlx/postgres"]

@@ -11,14 +11,14 @@ pub mod taggroups;
     info(description = "My Api description"),
     modifiers(&ApiDocMod),
     nest(
-        (path = "/api/v1", api = crate::api::assets::ApiDoc, tags = [])
+        (path = "/api", api = crate::api::assets::ApiDoc, tags = [])
     )
 )]
 pub struct ApiDocRoot;
 
 #[utoipa::path(
     get,
-    path = "/api/v1/docs", 
+    path = "/api/docs", 
     responses(
         (status = 200, description = "Api Documentation Page")
     )

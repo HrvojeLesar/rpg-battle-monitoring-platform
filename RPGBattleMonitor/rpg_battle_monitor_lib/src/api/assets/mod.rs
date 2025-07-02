@@ -1,7 +1,7 @@
 use crate::{
     api::assets::{
         serve::{serve_file, thumbnails},
-        upload::{upload, upload_form},
+        upload::upload,
     },
     webserver::router::app_state::AppStateTrait,
 };
@@ -15,10 +15,10 @@ const API_ASSETS: &str = "/assets";
 
 const FILE_SIZE_LIMIT: usize = 10 * 1024 * 1024; // 10MB
 
-#[cfg(feature = "api_v1_doc")]
+#[cfg(feature = "api_doc")]
 use utoipa::{Modify, OpenApi};
 
-#[cfg(feature = "api_v1_doc")]
+#[cfg(feature = "api_doc")]
 #[derive(OpenApi)]
 #[openapi(info(description = "Assets API"), 
 modifiers(&ModifyDoc),
@@ -27,9 +27,9 @@ nest(
 ))]
 pub struct ApiDoc;
 
-#[cfg(feature = "api_v1_doc")]
+#[cfg(feature = "api_doc")]
 struct ModifyDoc;
-#[cfg(feature = "api_v1_doc")]
+#[cfg(feature = "api_doc")]
 impl Modify for ModifyDoc {
     fn modify(&self, _openapi: &mut utoipa::openapi::OpenApi) {
         use std::collections::HashSet;
@@ -42,7 +42,17 @@ impl Modify for ModifyDoc {
 
 pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
     let upload_router = axum::Router::new()
-        .route("/upload", routing::post(upload).get(upload_form))
+        .route(
+            "/upload",
+            #[cfg(debug_assertions)]
+            {
+                routing::post(upload).get(upload::upload_form)
+            },
+            #[cfg(not(debug_assertions))]
+            {
+                routing::post(upload)
+            },
+        )
         .route("/thumbnails/{image_id}", routing::get(thumbnails))
         .route("/{filename}", routing::get(serve_file))
         .layer(DefaultBodyLimit::disable())

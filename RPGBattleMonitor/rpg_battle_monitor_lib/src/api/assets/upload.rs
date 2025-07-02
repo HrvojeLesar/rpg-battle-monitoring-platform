@@ -8,13 +8,19 @@ use crate::models::assets::{AssetManager, AssetType};
 use crate::cdn::error::{Error, Result};
 use crate::webserver::extractors::database_connection_extractor::DbConn;
 
-#[cfg(feature = "api_v1_doc")]
-use utoipa::OpenApi;
+#[cfg(feature = "api_doc")]
+mod doc {
+    use utoipa::OpenApi;
 
-#[derive(OpenApi)]
-#[openapi(paths(upload_form, accept_form,))]
-#[cfg(feature = "api_v1_doc")]
-pub(crate) struct ApiDoc;
+    use crate::api::assets::upload;
+
+    #[derive(OpenApi)]
+    #[cfg_attr(debug_assertions, openapi(paths(upload::upload, upload::upload_form)))]
+    #[cfg_attr(not(debug_assertions), openapi(paths(upload::upload)))]
+    pub(crate) struct ApiDoc;
+}
+#[cfg(feature = "api_doc")]
+pub(crate) use doc::ApiDoc;
 
 #[derive(Debug, Clone, Serialize, Default)]
 #[cfg_attr(test, derive(serde::Deserialize))]
@@ -72,6 +78,15 @@ impl UploadedFile {
     }
 }
 
+#[cfg_attr(all(feature = "api_doc"),
+    utoipa::path(
+        post,
+        path = "/upload", 
+        responses(
+            (status = 200, description = "Asset upload form")
+        )
+    )
+)]
 pub async fn upload<F: Adapter>(
     asset_manager: AssetManager<F>,
     conn: DbConn,
@@ -109,7 +124,7 @@ pub async fn upload<F: Adapter>(
     }))
 }
 
-#[cfg_attr(all(feature = "api_v1_doc", debug_assertions),
+#[cfg_attr(all(feature = "api_doc", debug_assertions),
     utoipa::path(
         get,
         path = "/upload", 
@@ -118,6 +133,7 @@ pub async fn upload<F: Adapter>(
         )
     )
 )]
+#[cfg(debug_assertions)]
 pub async fn upload_form() -> axum::response::Html<&'static str> {
     axum::response::Html(
         r#"
@@ -125,7 +141,7 @@ pub async fn upload_form() -> axum::response::Html<&'static str> {
         <html>
             <head></head>
             <body>
-                <form action="/api/v1/assets/upload" method="post" enctype="multipart/form-data">
+                <form action="/api/assets/upload" method="post" enctype="multipart/form-data">
                     <label>
                         Upload file:
                         <input type="file" name="file">
@@ -141,22 +157,6 @@ pub async fn upload_form() -> axum::response::Html<&'static str> {
         </html>
         "#,
     )
-}
-
-#[cfg_attr(all(feature = "api_v1_doc", debug_assertions),
-    utoipa::path(
-        post,
-        path = "/upload", 
-        responses(
-            (status = 200, description = "Asset upload form")
-        )
-    )
-)]
-pub async fn accept_form(mut multipart: extract::Multipart) {
-    while let Some(field) = multipart.next_field().await.unwrap() {
-        let name = field.name().unwrap().to_string();
-        tracing::info!("Field: {}", &name);
-    }
 }
 
 #[cfg(test)]
