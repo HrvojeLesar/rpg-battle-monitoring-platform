@@ -27,4 +27,3 @@ impl Related<super::assets::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
-

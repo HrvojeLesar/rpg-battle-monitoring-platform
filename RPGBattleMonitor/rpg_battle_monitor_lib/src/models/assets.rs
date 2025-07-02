@@ -184,6 +184,11 @@ mod assets_inner {
             original_asset: &Asset,
             data: Option<&[u8]>,
         ) -> Result<Vec<Asset>> {
+            let existing_thumbnails = self.get_thumbnails(conn, original_asset.id).await?;
+            if !existing_thumbnails.is_empty() {
+                return Ok(existing_thumbnails.into_iter().map(|t| t.asset).collect());
+            }
+
             let data = match data {
                 Some(d) => d.to_vec(),
                 None => {

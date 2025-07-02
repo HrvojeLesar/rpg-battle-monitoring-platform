@@ -2,12 +2,15 @@ use axum::{Json, extract};
 use sea_orm::TransactionTrait;
 use serde::Serialize;
 
+use crate::api::assets::gen_partial_asset_url;
 use crate::cdn::filesystem::Adapter;
 use crate::models::assets::{AssetManager, AssetType};
 
 use crate::cdn::error::{Error, Result};
 use crate::webserver::extractors::database_connection_extractor::DbConn;
 
+#[cfg(feature = "api_doc")]
+use utoipa::ToSchema;
 #[cfg(feature = "api_doc")]
 mod doc {
     use utoipa::OpenApi;
@@ -24,10 +27,10 @@ pub(crate) use doc::ApiDoc;
 
 #[derive(Debug, Clone, Serialize, Default)]
 #[cfg_attr(test, derive(serde::Deserialize))]
+#[cfg_attr(feature = "api_doc", derive(ToSchema))]
 pub struct UploadResponse {
-    id: i32,
     url: String,
-    name: String,
+    filename: String,
     thumbnails: Vec<String>,
 }
 
@@ -83,7 +86,7 @@ impl UploadedFile {
         post,
         path = "/upload", 
         responses(
-            (status = 200, description = "Asset upload form")
+            (status = 200, description = "Uploaded asset", body = UploadResponse)
         )
     )
 )]
@@ -117,10 +120,12 @@ pub async fn upload<F: Adapter>(
     transaction.commit().await?;
 
     Ok(Json(UploadResponse {
-        id: asset.id,
-        thumbnails: thumbnails.into_iter().map(|t| t.name).collect(),
-        name: asset.name,
-        ..Default::default()
+        thumbnails: thumbnails
+            .into_iter()
+            .map(|t| gen_partial_asset_url(&t.name))
+            .collect(),
+        url: gen_partial_asset_url(&asset.name),
+        filename: asset.name,
     }))
 }
 
@@ -216,14 +221,14 @@ mod test {
         let asset_manager = AssetManager::from(state.clone());
 
         asset_manager
-            .get_by_name(&state.get_db(), &response_json.name)
+            .get_by_name(&state.get_db(), &response_json.filename)
             .await
             .unwrap()
             .unwrap();
 
         let fshandler = state.fs_handler;
         let file = fshandler
-            .read_file(Path::new(&response_json.name))
+            .read_file(Path::new(&response_json.filename))
             .await
             .unwrap();
 

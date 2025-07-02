@@ -11,7 +11,7 @@ where
 {
     type Rejection = Error;
     async fn from_request_parts(
-        parts: &mut Parts,
+        _parts: &mut Parts,
         state: &S,
     ) -> core::result::Result<Self, Self::Rejection> {
         let fs_adapter = FSAdapter::new(state.get_fs_handler());

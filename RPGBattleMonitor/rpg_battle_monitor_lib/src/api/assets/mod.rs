@@ -11,8 +11,6 @@ use tower_http::limit::RequestBodyLimitLayer;
 pub mod serve;
 pub mod upload;
 
-const API_ASSETS: &str = "/assets";
-
 const FILE_SIZE_LIMIT: usize = 10 * 1024 * 1024; // 10MB
 
 #[cfg(feature = "api_doc")]
@@ -41,9 +39,9 @@ impl Modify for ModifyDoc {
 }
 
 pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
-    let upload_router = axum::Router::new()
+    axum::Router::new()
         .route(
-            "/upload",
+            "/assets/upload",
             #[cfg(debug_assertions)]
             {
                 routing::post(upload).get(upload::upload_form)
@@ -53,13 +51,14 @@ pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
                 routing::post(upload)
             },
         )
-        .route("/thumbnails/{image_id}", routing::get(thumbnails))
-        .route("/{filename}", routing::get(serve_file))
+        .route("/assets/thumbnails/{image_id}", routing::get(thumbnails))
+        .route("/assets/{filename}", routing::get(serve_file))
         .layer(DefaultBodyLimit::disable())
         .layer(RequestBodyLimitLayer::new(FILE_SIZE_LIMIT))
-        .with_state(state.clone());
+        .with_state(state.clone())
+}
 
-    let router = axum::Router::new().merge(upload_router);
-
-    axum::Router::new().nest(API_ASSETS, router)
+#[allow(dead_code)]
+pub(super) fn gen_partial_asset_url(filename: &str) -> String {
+    format!("/api/assets/{filename}")
 }
