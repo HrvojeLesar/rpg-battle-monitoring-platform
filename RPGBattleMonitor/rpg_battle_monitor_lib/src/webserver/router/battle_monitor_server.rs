@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 
-use crate::webserver::{router::app_state::AppStateTrait, routes::v1::get_v1_api_router};
+use crate::{api::get_router, webserver::router::app_state::AppStateTrait};
 
 #[derive(Debug)]
 pub struct BattleMonitorWebServer {
@@ -15,7 +15,7 @@ impl BattleMonitorWebServer {
     pub fn new<T: AppStateTrait>(state: T) -> Self {
         let axum_router = axum::Router::new().fallback(Self::fallback());
 
-        let axum_router = axum_router.merge(get_v1_api_router(state));
+        let axum_router = axum_router.merge(get_router(state));
 
         BattleMonitorWebServer {
             router: axum_router,

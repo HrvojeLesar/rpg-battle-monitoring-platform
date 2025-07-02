@@ -9,8 +9,8 @@ use crate::{
     cdn::{
         error::{Error, Result},
         filesystem::Adapter,
-        model::assets::{AssetManager, AssetThumbnail},
     },
+    models::assets::{AssetManager, AssetThumbnail},
     webserver::extractors::database_connection_extractor::DbConn,
 };
 

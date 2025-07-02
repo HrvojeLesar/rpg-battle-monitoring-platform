@@ -1,9 +1,8 @@
-#[cfg(feature = "api_v1_doc")]
-pub mod apidoc;
+pub mod api;
 pub mod cdn;
 pub mod config;
 pub mod database;
+pub mod models;
 pub mod thumbnail;
 pub mod utils;
 pub mod webserver;
-pub mod websockets;

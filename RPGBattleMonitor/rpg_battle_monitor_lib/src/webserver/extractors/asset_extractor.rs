@@ -1,5 +1,5 @@
 use crate::cdn::filesystem::Adapter;
-use crate::cdn::model::assets::AssetManager;
+use crate::models::assets::AssetManager;
 
 use crate::webserver::extractors::local_fs_extractor::FSAdapter;
 use crate::webserver::{extractors::error::Error, router::app_state::AppStateTrait};

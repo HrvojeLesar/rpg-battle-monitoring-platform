@@ -2,8 +2,8 @@ use axum::{Json, extract};
 use sea_orm::TransactionTrait;
 use serde::Serialize;
 
-use crate::cdn::model::assets::AssetType;
-use crate::cdn::{filesystem::Adapter, model::assets::AssetManager};
+use crate::cdn::filesystem::Adapter;
+use crate::models::assets::{AssetManager, AssetType};
 
 use crate::cdn::error::{Error, Result};
 use crate::webserver::extractors::database_connection_extractor::DbConn;
@@ -172,11 +172,9 @@ mod test {
     use serde_json::Value;
 
     use crate::{
-        cdn::{
-            filesystem::{FileSystem, temp_file_adapter::TempFileStore},
-            model::assets::{self, AssetManager},
-            routes::upload::{UploadResponse, upload},
-        },
+        api::assets::upload::{UploadResponse, upload},
+        cdn::filesystem::{FileSystem, temp_file_adapter::TempFileStore},
+        models::assets::{self, AssetManager},
         utils::test_utils::{
             TEST_IMAGE_BYTES, get_app_state_with_temp_file_store, get_random_filename, new_test_app,
         },
@@ -234,7 +232,7 @@ mod test {
 
     #[tokio::test]
     async fn failed_upload_is_not_saved_to_db() {
-        const INVALID_IMAGE_BYTES: &[u8] = b"invalid image bytes";
+        const INVALID_IMAGE_BYTES: &[u8] = b"";
         let (server, state) = get_upload_test_app().await;
 
         let file = Part::bytes(INVALID_IMAGE_BYTES);

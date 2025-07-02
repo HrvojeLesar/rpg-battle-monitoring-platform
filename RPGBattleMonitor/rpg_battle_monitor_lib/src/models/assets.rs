@@ -71,11 +71,9 @@ mod assets_inner {
 
     use crate::cdn::error::{Error, Result};
     use crate::cdn::filesystem::{Adapter, sha256_hash};
-    use crate::cdn::model::assets::Model;
-    use crate::cdn::model::assets::{
-        ActiveModel, AssetThumbnail, AssetType, Column, Entity, Relation,
-    };
-    use crate::cdn::model::thumbnails;
+    use crate::models::assets::Model;
+    use crate::models::assets::{ActiveModel, AssetThumbnail, AssetType, Column, Entity, Relation};
+    use crate::models::thumbnails;
     use crate::thumbnail::{configuration, create_thumbnails};
     use crate::utils::{gen_uuid, run_blocking, unknown_mime_type};
     use crate::webserver::extractors::local_fs_extractor::FSAdapter;
@@ -289,10 +287,8 @@ mod test {
     use sea_orm::EntityTrait;
 
     use crate::{
-        cdn::{
-            filesystem::FileSystem,
-            model::assets::{self, AssetManager, AssetType},
-        },
+        cdn::filesystem::FileSystem,
+        models::assets::{self, AssetManager, AssetType},
         utils::test_utils::{
             TEST_IMAGE_BYTES, TEST_PDF_BYTES, get_app_state_with_temp_file_store,
             get_random_filename,

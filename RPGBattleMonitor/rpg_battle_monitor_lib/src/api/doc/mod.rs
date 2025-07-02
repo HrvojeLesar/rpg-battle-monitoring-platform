@@ -2,7 +2,7 @@ use axum::Router;
 use utoipa::{Modify, OpenApi};
 use utoipa_scalar::{Scalar, Servable};
 
-use crate::apidoc::taggroups::tag_groups_config;
+use crate::api::doc::taggroups::tag_groups_config;
 
 pub mod taggroups;
 
@@ -11,7 +11,7 @@ pub mod taggroups;
     info(description = "My Api description"),
     modifiers(&ApiDocMod),
     nest(
-        (path = "/api/v1", api = crate::cdn::ApiDoc, tags = [])
+        (path = "/api/v1", api = crate::api::assets::ApiDoc, tags = [])
     )
 )]
 pub struct ApiDocRoot;
