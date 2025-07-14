@@ -7,9 +7,6 @@ pub mod assets;
 pub mod doc;
 pub mod websockets;
 
-#[cfg(feature = "api_doc")]
-const API_V1: &str = "/api";
-
 pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
     let router = axum::Router::new();
 
@@ -21,5 +18,5 @@ pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
         .merge(assets::get_router(state))
         .layer(CorsLayer::permissive());
 
-    axum::Router::new().nest(API_V1, router)
+    axum::Router::new().nest("/api", router)
 }

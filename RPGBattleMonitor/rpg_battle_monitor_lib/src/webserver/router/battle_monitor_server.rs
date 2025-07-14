@@ -1,4 +1,4 @@
-use axum::http::StatusCode;
+use axum::http::{StatusCode, Uri};
 
 use crate::{api::get_router, webserver::router::app_state::AppStateTrait};
 
@@ -8,12 +8,14 @@ pub struct BattleMonitorWebServer {
 }
 
 impl BattleMonitorWebServer {
-    fn fallback() -> (StatusCode, &'static str) {
+    async fn fallback(uri: Uri) -> (StatusCode, &'static str) {
+        tracing::info!("Requested unknown route: {uri}");
+
         (StatusCode::NOT_FOUND, "Not found")
     }
 
     pub fn new<T: AppStateTrait>(state: T) -> Self {
-        let axum_router = axum::Router::new().fallback(Self::fallback());
+        let axum_router = axum::Router::new().fallback(Self::fallback);
 
         let axum_router = axum_router.merge(get_router(state));
 

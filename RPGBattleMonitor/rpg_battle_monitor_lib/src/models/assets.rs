@@ -69,7 +69,9 @@ mod assets_inner {
     use std::io::Cursor;
     use std::path::Path;
 
+    // TODO: Add model errors
     use crate::cdn::error::{Error, Result};
+
     use crate::cdn::filesystem::{Adapter, sha256_hash};
     use crate::models::assets::Model;
     use crate::models::assets::{ActiveModel, AssetThumbnail, AssetType, Column, Entity, Relation};
@@ -95,6 +97,7 @@ mod assets_inner {
             Self { fs_adapter }
         }
 
+        #[tracing::instrument(skip(self, conn))]
         pub async fn get_by_hash(
             &self,
             conn: &impl ConnectionTrait,
@@ -106,10 +109,11 @@ mod assets_inner {
                 .await?)
         }
 
+        #[tracing::instrument(skip(self, conn, asset_type))]
         pub async fn create(
             &self,
             conn: &impl ConnectionTrait,
-            user_give_filename: String,
+            user_given_filename: String,
             data: &[u8],
             asset_type: impl Into<AssetType>,
         ) -> Result<Asset> {
@@ -152,6 +156,7 @@ mod assets_inner {
             Ok(asset)
         }
 
+        #[tracing::instrument(skip(self, conn, asset_type))]
         async fn create_asset(
             &self,
             conn: &impl ConnectionTrait,
@@ -171,6 +176,7 @@ mod assets_inner {
             Ok(asset.insert(conn).await?)
         }
 
+        #[tracing::instrument(skip(self, data))]
         async fn write_file(&self, filename: &str, data: &[u8]) -> Result<()> {
             let path = Path::new(filename);
             self.fs_adapter.write_file(path, data).await?;
@@ -178,6 +184,7 @@ mod assets_inner {
             Ok(())
         }
 
+        #[tracing::instrument(skip(self, conn, data))]
         pub async fn create_thumbnail_assets(
             &self,
             conn: &impl ConnectionTrait,
