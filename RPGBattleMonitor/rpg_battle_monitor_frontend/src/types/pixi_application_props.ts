@@ -2,6 +2,7 @@ import { Application, ApplicationOptions } from "pixi.js";
 import { RefObject } from "react";
 import { ReactPixiJsBridgeEventEmitter } from "./event_emitter";
 import { ApplicationManager } from "../canvas/managers/application_manager";
+import { Socket } from "socket.io-client";
 
 export type PixiApplicationProps = {
     canvas?: HTMLCanvasElement;
@@ -17,5 +18,6 @@ export type PixiApplicationProps = {
     applicationInitCallback?: (
         application: Application,
         eventEmitter: ReactPixiJsBridgeEventEmitter,
+        socket: Socket,
     ) => ApplicationManager;
 };

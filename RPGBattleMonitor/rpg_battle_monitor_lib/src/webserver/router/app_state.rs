@@ -1,3 +1,6 @@
+use std::sync::Arc;
+
+use dashmap::DashMap;
 use sea_orm::DatabaseConnection;
 
 use crate::{
@@ -7,6 +10,7 @@ use crate::{
     },
     config,
     database::get_sea_orm_database,
+    game::GameManager,
 };
 
 pub struct AppStateConfig<F>
@@ -46,6 +50,7 @@ pub trait AppStateTrait: Clone + Send + Sync + 'static {
 
     fn get_fs_handler(&self) -> Self::FsHandler;
     fn get_db(&self) -> DatabaseConnection;
+    fn get_active_games(&self) -> Arc<DashMap<u64, GameManager<Self>>>;
 }
 
 #[derive(Debug)]
@@ -55,6 +60,7 @@ where
 {
     pub fs_handler: F,
     pub database: DatabaseConnection,
+    pub active_games: Arc<DashMap<u64, GameManager<Self>>>,
 }
 
 impl<F> Clone for AppState<F>
@@ -65,6 +71,7 @@ where
         Self {
             fs_handler: self.fs_handler.clone(),
             database: self.database.clone(),
+            active_games: Arc::new(DashMap::new()),
         }
     }
 }
@@ -77,6 +84,7 @@ where
         Self {
             fs_handler: config.file_system_handler,
             database: config.database,
+            active_games: Arc::new(DashMap::new()),
         }
     }
 }
@@ -93,5 +101,9 @@ where
 
     fn get_db(&self) -> DatabaseConnection {
         self.database.clone()
+    }
+
+    fn get_active_games(&self) -> Arc<DashMap<u64, GameManager<Self>>> {
+        self.active_games.clone()
     }
 }

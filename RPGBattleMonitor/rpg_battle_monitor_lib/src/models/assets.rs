@@ -69,8 +69,7 @@ mod assets_inner {
     use std::io::Cursor;
     use std::path::Path;
 
-    // TODO: Add model errors
-    use crate::cdn::error::{Error, Result};
+    use crate::models::error::{Error, Result};
 
     use crate::cdn::filesystem::{Adapter, sha256_hash};
     use crate::models::assets::Model;

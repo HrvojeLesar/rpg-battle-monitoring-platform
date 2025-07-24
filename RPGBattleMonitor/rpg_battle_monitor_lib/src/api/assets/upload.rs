@@ -6,7 +6,7 @@ use crate::api::assets::gen_partial_asset_url;
 use crate::cdn::filesystem::Adapter;
 use crate::models::assets::{AssetManager, AssetType};
 
-use crate::cdn::error::{Error, Result};
+use crate::api::error::{Error, Result};
 use crate::webserver::extractors::database_connection_extractor::DbConn;
 
 #[cfg(feature = "api_doc")]

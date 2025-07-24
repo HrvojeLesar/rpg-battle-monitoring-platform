@@ -11,8 +11,9 @@ export class ApplicationManager extends AbstractManager {
     public static default(
         app: Application,
         eventEmitter: ReactPixiJsBridgeEventEmitter,
+        grid?: Grid,
     ) {
-        const grid = new Grid(app, eventEmitter);
+        grid = grid ?? new Grid(app, eventEmitter);
         const viewport = Viewport.default(app, grid, eventEmitter);
         const applicationManager = new ApplicationManager([
             app,

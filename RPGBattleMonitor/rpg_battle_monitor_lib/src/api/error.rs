@@ -1,6 +1,8 @@
 use axum::response::IntoResponse;
 use thiserror::Error;
 
+use crate::webserver::router::app_state::AppStateTrait;
+
 pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Debug, Error)]
@@ -13,20 +15,15 @@ pub enum Error {
 
     #[error("Filename is empty")]
     FilenameEmpty,
+
     #[error("Data is empty")]
     DataEmpty,
-
-    #[error(transparent)]
-    CdnError(#[from] crate::cdn::filesystem::error::Error),
 
     #[error(transparent)]
     DatabaseError(#[from] crate::database::error::Error),
 
     #[error(transparent)]
     SqlxError(#[from] sqlx::Error),
-
-    #[error(transparent)]
-    ImageError(#[from] image::error::ImageError),
 
     #[error("File not found")]
     FileNotFound { id: String },
@@ -35,13 +32,25 @@ pub enum Error {
     JoinError(#[from] tokio::task::JoinError),
 
     #[error(transparent)]
-    ThumbnailError(#[from] crate::thumbnail::error::Error),
-
-    #[error(transparent)]
     IoError(#[from] std::io::Error),
 
     #[error(transparent)]
+    ModelsError(#[from] crate::models::error::Error),
+
+    #[error(transparent)]
     DbError(#[from] sea_orm::DbErr),
+
+    #[error("SocketIo state not found")]
+    SocketIoStateNotFound,
+
+    #[error(transparent)]
+    GameError(#[from] crate::game::error::Error),
+}
+
+impl<T: AppStateTrait> From<socketioxide::extract::StateNotFound<T>> for Error {
+    fn from(_value: socketioxide::extract::StateNotFound<T>) -> Self {
+        Self::SocketIoStateNotFound
+    }
 }
 
 #[cfg(debug_assertions)]

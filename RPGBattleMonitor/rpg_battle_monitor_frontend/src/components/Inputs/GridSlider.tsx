@@ -1,5 +1,8 @@
-import { useState } from "react";
-import { useApplicationManager } from "../../hooks/bridge_context_hooks";
+import { useEffect, useState } from "react";
+import {
+    useApplicationManager,
+    useEventEmitter,
+} from "../../hooks/bridge_context_hooks";
 import { Slider } from "./Slider";
 import { InputNumberProps } from "antd";
 import { getPositiveNumber } from "../../utils/number_utils";
@@ -16,9 +19,21 @@ type GridSizeHandler =
 
 export const GridSlider = () => {
     const grid = useApplicationManager().grid;
+    const eventEmitter = useEventEmitter();
 
     const [cellSize, setCellSize] = useState(grid.cellSize);
     const [gridSize, setGridSize] = useState(grid.size);
+
+    useEffect(() => {
+        eventEmitter.on("update-grid", (board) => {
+            setCellSize(board.cell_size);
+            setGridSize(board.size);
+        });
+
+        return () => {
+            eventEmitter.off("update-grid");
+        };
+    }, [eventEmitter]);
 
     const setCellSizeHandler: InputNumberProps["onChange"] = (cellSize) => {
         cellSize = getPositiveNumber(cellSize);

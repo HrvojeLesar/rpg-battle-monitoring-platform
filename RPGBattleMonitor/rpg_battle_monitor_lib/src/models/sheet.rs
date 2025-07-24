@@ -39,15 +39,16 @@ impl Linked for SelfReferencingLink {
 impl ActiveModelBehavior for ActiveModel {}
 
 mod inner {
-    use sea_orm::{ActiveValue::Set, ColumnTrait, ConnectionTrait, EntityTrait, QueryFilter};
+    use sea_orm::{
+        ActiveModelTrait, ActiveValue::Set, ColumnTrait, ConnectionTrait, EntityTrait, QueryFilter,
+    };
 
     use crate::{
         cdn::filesystem::sha256_hash,
         models::sheet::{ActiveModel, Column, Entity, Model},
     };
 
-    // TODO: Add model errors
-    use crate::cdn::error::{Error, Result};
+    use crate::models::error::{Error, Result};
 
     pub type Sheet = Model;
 
@@ -59,11 +60,11 @@ mod inner {
             &self,
             conn: &impl ConnectionTrait,
             attributes: serde_json::Value,
-        ) -> Sheet {
-            let hash = sha256_hash(&attributes.to_string());
+        ) -> Result<Sheet> {
+            let hash = sha256_hash(attributes.to_string());
 
             if let Some(sheet) = self.get_by_hash(conn, &hash).await.unwrap() {
-                return sheet;
+                return Ok(sheet);
             }
 
             let sheet_active_model = ActiveModel {
@@ -73,7 +74,7 @@ mod inner {
                 ..Default::default()
             };
 
-            unimplemented!();
+            Ok(sheet_active_model.insert(conn).await?)
         }
 
         #[tracing::instrument(skip(self, conn))]

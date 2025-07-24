@@ -1,0 +1,7 @@
+CREATE TABLE board (
+    id INTEGER PRIMARY KEY AUTOINCREMENT
+    , grid TEXT NOT NULL
+    , width INTEGER NOT NULL
+    , height INTEGER NOT NULL
+    , cell_size INTEGER NOT NULL
+);

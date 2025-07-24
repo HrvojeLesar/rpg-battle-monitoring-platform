@@ -1,8 +1,10 @@
 import { Application, ApplicationOptions, EventEmitter } from "pixi.js";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef } from "react";
 import { type PixiApplicationProps } from "../types/pixi_application_props";
 import { ReactPixiJsBridgeEventEmitter } from "../types/event_emitter";
 import { CanvasGui } from "./CanvasGui";
+import { Socket } from "socket.io-client";
+import { createSocket } from "../utils/create_socket";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -37,6 +39,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
     const eventEmitter = useRef<ReactPixiJsBridgeEventEmitter>(
         new EventEmitter(),
     );
+    const socketio = useRef<Socket>(createSocket());
 
     useEffect(() => {
         const application = applicationRef.current;
@@ -100,6 +103,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                 const applicationManager = applicationInitCallback(
                     application,
                     eventEmitter.current,
+                    socketio.current,
                 );
 
                 eventEmitter.current.emit("initApplication", {

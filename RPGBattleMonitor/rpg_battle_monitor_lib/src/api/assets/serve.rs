@@ -6,10 +6,8 @@ use axum::{
 };
 
 use crate::{
-    cdn::{
-        error::{Error, Result},
-        filesystem::Adapter,
-    },
+    api::error::{Error, Result},
+    cdn::filesystem::Adapter,
     models::assets::{AssetManager, AssetThumbnail},
     webserver::extractors::database_connection_extractor::DbConn,
 };

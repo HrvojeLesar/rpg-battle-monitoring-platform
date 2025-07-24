@@ -6,6 +6,7 @@ pub mod assets;
 #[cfg(feature = "api_doc")]
 pub mod doc;
 pub mod websockets;
+pub mod error;
 
 pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
     let router = axum::Router::new();
@@ -14,7 +15,7 @@ pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
     let router = router.merge(doc::get_api_doc_router());
 
     let router = router
-        .merge(websockets::get_router())
+        .merge(websockets::get_router(state.clone()))
         .merge(assets::get_router(state))
         .layer(CorsLayer::permissive());
 
