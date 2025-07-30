@@ -1,8 +1,3 @@
-use rpg_battle_monitor_lib::webserver::router::{
-    battle_monitor_server::BattleMonitorWebServer, global_router_state::GlobalRouterState,
-};
-use tracing_subscriber::filter::LevelFilter;
-
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt()
@@ -10,8 +5,7 @@ async fn main() {
         .with_writer(std::io::stderr)
         .init();
 
-    let state = GlobalRouterState::new().await;
-    BattleMonitorWebServer::new(state).serve(None).await;
+    let state: AppState<Local> = AppState::new(AppStateConfig::get_default_config().await).await;
 
-    println!("Hello, world!");
+    BattleMonitorWebServer::new(state).serve(None).await;
 }

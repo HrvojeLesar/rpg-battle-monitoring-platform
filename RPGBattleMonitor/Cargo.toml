@@ -6,6 +6,4 @@ members = [
     "rpg_battle_monitor_frontend/src-tauri",
 ]
 exclude = [
-    "server",
-    "rpg_battle_monitor/src-tauri",
 ]
