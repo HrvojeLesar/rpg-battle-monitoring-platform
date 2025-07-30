@@ -1,9 +1,14 @@
-import { Application, ApplicationOptions, EventEmitter } from "pixi.js";
+import { Application, ApplicationOptions } from "pixi.js";
 import { RefObject, useEffect, useRef } from "react";
 import { type PixiApplicationProps } from "../types/pixi_application_props";
-import { ReactPixiJsBridgeEventEmitter } from "../types/event_emitter";
-import { destroy, GBoard, GEventEmitter } from "../board_core/board";
+import { destroy } from "../board_core/board";
 import { Button } from "antd";
+import {
+    getScenes,
+    sceneReducer,
+    useStoreDispatch,
+    useStoreSelector,
+} from "../board_react_wrapper/board_store";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -21,8 +26,6 @@ function defaultOptions(
     };
 }
 
-export let GPixiInstanceNumber = 0;
-
 export const PixiApplication = (props: PixiApplicationProps) => {
     const {
         canvas,
@@ -34,7 +37,10 @@ export const PixiApplication = (props: PixiApplicationProps) => {
 
     const applicationRef = useRef<Application | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(canvas ?? null);
+    const initPromiseRef = useRef<Promise<Application | null> | null>(null);
     const canvasRemoved = useRef(false);
+    const scenes = useStoreSelector(getScenes);
+    const dispatch = useStoreDispatch();
 
     useEffect(() => {
         const application = applicationRef.current;
@@ -88,6 +94,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                 applicationOptions ?? defaultOptions({ resizeTo: resize });
 
             if (applicationInitCallback !== undefined) {
+                dispatch(sceneReducer.actions.clearScenes());
                 application = await applicationInitCallback({
                     ...options,
                     canvas: canvas as HTMLCanvasElement,
@@ -103,11 +110,17 @@ export const PixiApplication = (props: PixiApplicationProps) => {
             return application;
         }
 
-        const initPromise = initPixi();
+        if (!initPromiseRef.current) {
+            initPromiseRef.current = initPixi();
+        } else {
+            initPromiseRef.current.then(() => {
+                initPromiseRef.current = initPixi();
+            });
+        }
 
         return () => {
             canvasRemoved.current = true;
-            initPromise.then(() => {
+            initPromiseRef.current?.then(() => {
                 destroy();
             });
         };
@@ -117,6 +130,32 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         <>
             <div style={{ overflow: "hidden", position: "relative" }}>
                 <canvas ref={canvasRef} className={canvasClass} />
+                <Button
+                    onClick={() => {
+                        dispatch(
+                            sceneReducer.actions.addScene(
+                                `test-scene${scenes.length + 1}`,
+                            ),
+                        );
+                    }}
+                >
+                    Add scene
+                </Button>
+                {scenes.map((sceneName) => {
+                    return (
+                        <Button
+                            key={sceneName}
+                            onClick={() => {
+                                console.log("change scene to", sceneName);
+                                dispatch(
+                                    sceneReducer.actions.changeScene(sceneName),
+                                );
+                            }}
+                        >
+                            {sceneName}
+                        </Button>
+                    );
+                })}
             </div>
         </>
     );

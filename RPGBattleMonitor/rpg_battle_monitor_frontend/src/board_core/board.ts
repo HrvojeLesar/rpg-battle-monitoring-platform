@@ -105,6 +105,7 @@ export async function init(
 
     boardApplication.setApplication(application);
 
+    console.log("Finished board init");
     return boardApplication.getApplication();
 }
 
@@ -117,7 +118,7 @@ export function destroy(
         ?.destroy(rendererDestroyOptions, options);
 
     boardApplication = new Board();
+    console.log("Destroyed board");
 }
 
-const boardApplication: Board = new Board();
-const boardEventEmitter: EventEmitter = new EventEmitter();
+export { boardApplication as GBoard, boardEventEmitter as GEventEmitter };
