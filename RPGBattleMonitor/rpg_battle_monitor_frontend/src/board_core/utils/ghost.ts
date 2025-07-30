@@ -62,7 +62,7 @@ export class ContainerGhostHandler {
     }
 
     protected cloneSprite(container: Sprite): Sprite {
-        const clone = new Sprite(Texture.WHITE);
+        const clone = new Sprite(Texture.EMPTY);
 
         clone.tint = container.tint;
         clone.alpha = 0.65;

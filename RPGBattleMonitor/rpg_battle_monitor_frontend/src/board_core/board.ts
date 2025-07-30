@@ -1,6 +1,7 @@
 import {
     Application,
     ApplicationOptions,
+    Container,
     DestroyOptions,
     EventEmitter,
     RendererDestroyOptions,
@@ -9,11 +10,19 @@ import { isDev } from "../utils/dev_mode";
 import { Socket } from "socket.io-client";
 import { Scene } from "./scene";
 
+const boardEventEmitter: EventEmitter = new EventEmitter();
+
+export type GameBoard = Board;
+
 class Board {
+    public scenes: Scene[];
+
     protected application?: Application;
     protected eventEmitter: EventEmitter;
+    protected currentScene?: Scene;
+
+    // TODO: Make external global event handler
     protected websocket?: Socket;
-    protected scenes: Scene[];
 
     public constructor() {
         this.eventEmitter = boardEventEmitter;
@@ -47,10 +56,44 @@ class Board {
 
         return this.websocket;
     }
+
+    public getStage(): Container {
+        return this.getApplication().stage;
+    }
+
+    public addScene(scene: Scene) {
+        this.scenes.push(scene);
+    }
+
+    public changeScene(scene: Scene) {
+        if (scene === this.currentScene) {
+            return;
+        }
+
+        this.currentScene?.cleanup();
+        this.currentScene = scene;
+        this.currentScene.setActive();
+    }
+
+    public getScenes(): Scene[] {
+        return this.scenes;
+    }
+
+    public get app(): Application {
+        return this.getApplication();
+    }
+
+    public getSceneByName(name: string): Option<Scene> {
+        return this.getScenes().find((scene) => {
+            return scene.name === name;
+        });
+    }
 }
 
+var boardApplication: Board = new Board();
+
 export async function init(
-    options: Partial<ApplicationOptions>,
+    options?: Partial<ApplicationOptions>,
 ): Promise<Application> {
     const application = new Application();
 
@@ -72,6 +115,8 @@ export function destroy(
     boardApplication
         .getApplicationOptional()
         ?.destroy(rendererDestroyOptions, options);
+
+    boardApplication = new Board();
 }
 
 const boardApplication: Board = new Board();

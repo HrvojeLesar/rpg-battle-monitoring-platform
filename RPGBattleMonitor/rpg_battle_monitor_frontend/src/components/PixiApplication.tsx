@@ -2,9 +2,8 @@ import { Application, ApplicationOptions, EventEmitter } from "pixi.js";
 import { RefObject, useEffect, useRef } from "react";
 import { type PixiApplicationProps } from "../types/pixi_application_props";
 import { ReactPixiJsBridgeEventEmitter } from "../types/event_emitter";
-import { CanvasGui } from "./CanvasGui";
-import { Socket } from "socket.io-client";
-import { createSocket } from "../utils/create_socket";
+import { destroy, GBoard, GEventEmitter } from "../board_core/board";
+import { Button } from "antd";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -36,10 +35,6 @@ export const PixiApplication = (props: PixiApplicationProps) => {
     const applicationRef = useRef<Application | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(canvas ?? null);
     const canvasRemoved = useRef(false);
-    const eventEmitter = useRef<ReactPixiJsBridgeEventEmitter>(
-        new EventEmitter(),
-    );
-    const socketio = useRef<Socket>(createSocket());
 
     useEffect(() => {
         const application = applicationRef.current;
@@ -62,9 +57,6 @@ export const PixiApplication = (props: PixiApplicationProps) => {
     }, [resizeTo]);
 
     useEffect(() => {
-        const application = new Application();
-        const instanceNumber = ++GPixiInstanceNumber;
-
         let canvas = canvasRef.current;
         if (canvas === null) {
             console.error("CanvasRef not found. Adding canvas to document");
@@ -83,6 +75,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         }
 
         async function initPixi() {
+            let application: Option<Application> = null;
             let resize: HTMLElement | Window | undefined;
             if (resizeTo !== undefined && Object.hasOwn(resizeTo, "current")) {
                 resize =
@@ -94,25 +87,12 @@ export const PixiApplication = (props: PixiApplicationProps) => {
             const options =
                 applicationOptions ?? defaultOptions({ resizeTo: resize });
 
-            await application.init({
-                ...options,
-                canvas: canvas as HTMLCanvasElement,
-            });
-
             if (applicationInitCallback !== undefined) {
-                const applicationManager = applicationInitCallback(
-                    application,
-                    eventEmitter.current,
-                    socketio.current,
-                );
-
-                eventEmitter.current.emit("initApplication", {
-                    app: applicationManager,
-                    instanceNumber: instanceNumber,
+                application = await applicationInitCallback({
+                    ...options,
+                    canvas: canvas as HTMLCanvasElement,
                 });
             }
-
-            globalThis.__PIXI_APP__ = application;
 
             canvas?.addEventListener("wheel", (event) => {
                 event.preventDefault();
@@ -127,12 +107,8 @@ export const PixiApplication = (props: PixiApplicationProps) => {
 
         return () => {
             canvasRemoved.current = true;
-            initPromise.then((application) => {
-                application.destroy();
-
-                eventEmitter.current.emit("destroyApplication", {
-                    instanceNumber: instanceNumber,
-                });
+            initPromise.then(() => {
+                destroy();
             });
         };
     }, []);
@@ -141,7 +117,6 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         <>
             <div style={{ overflow: "hidden", position: "relative" }}>
                 <canvas ref={canvasRef} className={canvasClass} />
-                <CanvasGui eventEmitter={eventEmitter.current} />
             </div>
         </>
     );

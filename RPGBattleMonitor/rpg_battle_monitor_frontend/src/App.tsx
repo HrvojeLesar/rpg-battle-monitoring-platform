@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import "./App.css";
 import { PixiApplication } from "./components/PixiApplication";
-import { init } from "./canvas/init";
+import { init } from "./board_core/board";
 
 function App() {
     const div = useRef<HTMLDivElement | null>(null);
