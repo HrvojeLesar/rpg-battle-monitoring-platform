@@ -4,11 +4,13 @@ import { type PixiApplicationProps } from "../types/pixi_application_props";
 import { destroy } from "../board_core/board";
 import { Button } from "antd";
 import {
+    getScene,
     getScenes,
     sceneReducer,
     useStoreDispatch,
     useStoreSelector,
 } from "../board_react_wrapper/board_store";
+import { ButtonColorType } from "antd/es/button";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -40,6 +42,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
     const initPromiseRef = useRef<Promise<Application | null> | null>(null);
     const canvasRemoved = useRef(false);
     const scenes = useStoreSelector(getScenes);
+    const currentScene = useStoreSelector(getScene);
     const dispatch = useStoreDispatch();
 
     useEffect(() => {
@@ -126,6 +129,14 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         };
     }, []);
 
+    const buttonColour = (sceneName: string): Maybe<ButtonColorType> => {
+        if (sceneName === currentScene) {
+            return "primary";
+        }
+
+        return undefined;
+    };
+
     return (
         <>
             <div style={{ overflow: "hidden", position: "relative" }}>
@@ -145,6 +156,8 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                     return (
                         <Button
                             key={sceneName}
+                            color={buttonColour(sceneName)}
+                            variant="solid"
                             onClick={() => {
                                 console.log("change scene to", sceneName);
                                 dispatch(

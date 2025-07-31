@@ -9,6 +9,8 @@ import {
 import { isDev } from "../utils/dev_mode";
 import { Socket } from "socket.io-client";
 import { Scene } from "./scene";
+import { Viewport } from "pixi-viewport";
+import { Grid } from "./grid";
 
 const boardEventEmitter: EventEmitter = new EventEmitter();
 
@@ -87,6 +89,28 @@ class Board {
         return this.getScenes().find((scene) => {
             return scene.name === name;
         });
+    }
+
+    public get viewport(): Viewport {
+        const scene = this.currentScene;
+        if (!scene) {
+            throw new Error("Failed to get viewport, there is no active scene");
+        }
+
+        return scene.viewport;
+    }
+
+    public get grid(): Grid {
+        const scene = this.currentScene;
+        if (!scene) {
+            throw new Error("Failed to get grid, there is no active scene");
+        }
+
+        return scene.grid;
+    }
+
+    public get scene(): Option<Scene> {
+        return this.currentScene;
     }
 }
 

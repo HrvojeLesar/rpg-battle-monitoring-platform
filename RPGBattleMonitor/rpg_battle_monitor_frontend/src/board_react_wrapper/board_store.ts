@@ -48,6 +48,10 @@ export const store = configureStore({
 export const useStoreDispatch = useDispatch.withTypes<StoreDispatch>();
 export const useStoreSelector = useSelector.withTypes<StoreState>();
 
-export const getScenes = (state: StoreState) => {
+export const getScenes = (state: StoreState): string[] => {
     return state.scenes;
+};
+
+export const getScene = (state: StoreState): Option<string> => {
+    return state.currentScene;
 };

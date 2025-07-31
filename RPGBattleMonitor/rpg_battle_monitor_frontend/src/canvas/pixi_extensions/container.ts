@@ -6,8 +6,8 @@ import { ReactPixiJsBridgeEventEmitter } from "../../types/event_emitter";
 
 declare module "pixi.js" {
     export interface Container {
-        canSnapToGrid: boolean;
-        snapToGrid(grid: Grid, force?: boolean): void;
+        // isSnapping: boolean;
+        // snapToGrid(grid: Grid, force?: boolean): void;
         ghosts: Container[];
         createGhost(): Container;
         popGost(): Option<Container>;
@@ -22,13 +22,13 @@ declare module "pixi.js" {
     }
 }
 
-Container.prototype.canSnapToGrid = false;
+Container.prototype.isSnapping = false;
 Container.prototype.snapToGrid = function (
     this: Container,
     grid: Grid,
     force: boolean = false,
 ) {
-    if (this.canSnapToGrid === false && force === false) {
+    if (this.isSnapping === false && force === false) {
         return;
     }
 

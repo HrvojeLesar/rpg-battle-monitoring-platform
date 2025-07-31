@@ -1,38 +1,162 @@
-import { Container, ContainerChild, ContainerOptions } from "pixi.js";
+import { Container, FederatedPointerEvent, Point } from "pixi.js";
 import { ContainerGhostHandler, Ghost } from "../utils/ghost";
-import { UniqueCollection } from "../utils/unique_collection";
+import { GBoard } from "../board";
 
-class ContainerMixin extends Container {
-    protected _canSnapToGrid: boolean = false;
-    protected _ghostHandler: ContainerGhostHandler;
+export type Constructor<T = {}> = new (...args: any[]) => T;
 
-    public constructor(options?: ContainerOptions<ContainerChild>) {
-        super(options);
+interface ContainerMixinOptions {
+    isSnapping: boolean;
+    isMovable: boolean;
+}
 
-        this._ghostHandler = new ContainerGhostHandler(this);
-    }
+export interface ContainerMixin extends ContainerMixinOptions, Container {
+    snapToGrid(force?: boolean): void;
+    createGhost(): Ghost;
+    popGhost(): Option<Ghost>;
+    removeGhost(ghost: Ghost): Option<Ghost>;
+    clearGhosts(): void;
+}
 
-    public get canSnapToGrid(): boolean {
-        return this._canSnapToGrid;
-    }
+export function ContainerExtensionMixin<T extends Constructor<Container>>(
+    Base: T,
+) {
+    return class ContainerExtension extends Base implements ContainerMixin {
+        protected _isSnapping: boolean;
+        protected _isMovable: boolean;
+        protected _ghostHandler: ContainerGhostHandler;
 
-    public set canSnapToGrid(value: boolean) {
-        this._canSnapToGrid = value;
-    }
+        public constructor(...args: any[]) {
+            super(...args);
 
-    public createGhost(): Ghost {
-        return this._ghostHandler.createGhost();
-    }
+            let options = (args[0] || {}) as ContainerMixinOptions;
 
-    public popGhost(): Option<Ghost> {
-        return this._ghostHandler.popGhost();
-    }
+            this._ghostHandler = new ContainerGhostHandler(this);
 
-    public removeGhost(ghost: Ghost): Option<Ghost> {
-        return this._ghostHandler.removeGhost(ghost);
-    }
+            this._isSnapping = options.isSnapping || false;
+            this._isMovable = options.isMovable || false;
 
-    public clearGhosts(): void {
-        this._ghostHandler.clearGhosts();
-    }
+            if (this._isMovable) {
+                this.eventMode = "static";
+            }
+        }
+
+        public get isSnapping(): boolean {
+            return this._isSnapping;
+        }
+
+        public set isSnapping(value: boolean) {
+            this._isSnapping = value;
+        }
+
+        public snapToGrid(force: boolean = false) {
+            if (this.isSnapping === false && force === false) {
+                return;
+            }
+
+            this.position.x =
+                Math.round(this.position.x / GBoard.grid.cellSize) *
+                GBoard.grid.cellSize;
+            this.position.y =
+                Math.round(this.position.y / GBoard.grid.cellSize) *
+                GBoard.grid.cellSize;
+        }
+
+        public createGhost(): Ghost {
+            return this._ghostHandler.createGhost();
+        }
+
+        public popGhost(): Option<Ghost> {
+            return this._ghostHandler.popGhost();
+        }
+
+        public removeGhost(ghost: Ghost): Option<Ghost> {
+            return this._ghostHandler.removeGhost(ghost);
+        }
+
+        public clearGhosts(): void {
+            this._ghostHandler.clearGhosts();
+        }
+
+        public get isMovable(): boolean {
+            return this._isMovable;
+        }
+
+        public set isMovable(value: boolean) {
+            this._isMovable = value;
+            if (this._isMovable) {
+                this.eventMode = "static";
+                this.registerMovable();
+            } else {
+                this.eventMode = "passive";
+                this.unregisterMovable();
+            }
+        }
+
+        private registerMovable() {
+            const offset = new Point();
+
+            const onPointerDown = (event: FederatedPointerEvent) => {
+                if (event.pointerType === "mouse" && event.button !== 0) {
+                    return;
+                }
+
+                const localPos = event.getLocalPosition(GBoard.viewport);
+                offset.x = localPos.x - this.x;
+                offset.y = localPos.y - this.y;
+                GBoard.viewport.pause = true;
+
+                // this.createGhost();
+
+                GBoard.viewport.onglobalpointermove = (event) => {
+                    const localPos = event.getLocalPosition(GBoard.viewport);
+                    const newEntityPosition = new Point(
+                        localPos.x - offset.x,
+                        localPos.y - offset.y,
+                    );
+
+                    this.clampPositionToViewport(newEntityPosition);
+                    this.position.set(newEntityPosition.x, newEntityPosition.y);
+                };
+            };
+
+            const onPointerUp = (_event: FederatedPointerEvent) => {
+                GBoard.viewport.onglobalpointermove = null;
+                GBoard.viewport.pause = false;
+
+                this.snapToGrid();
+                // this.removeGhosts();
+            };
+
+            this.onpointerdown = onPointerDown;
+            this.onpointerup = onPointerUp;
+            this.onpointerupoutside = onPointerUp;
+        }
+
+        private unregisterMovable() {
+            this.onpointerdown = null;
+            this.onpointerup = null;
+            this.onpointerupoutside = null;
+        }
+
+        private clampPositionToViewport(position: Point) {
+            const worldWidth = GBoard.viewport.worldWidth;
+            const worldHeight = GBoard.viewport.worldHeight;
+
+            if (position.x < 0) {
+                position.x = 0;
+            }
+
+            if (position.y < 0) {
+                position.y = 0;
+            }
+
+            if (position.x + this.width > worldWidth) {
+                position.x = worldWidth - this.width;
+            }
+
+            if (position.y + this.height > worldHeight) {
+                position.y = worldHeight - this.height;
+            }
+        }
+    };
 }

@@ -1,6 +1,6 @@
 export interface IUniqueCollection<T> {
-    addItem: (entity: T) => T;
-    removeItem: (entity: T) => Option<T>;
+    add: (entity: T) => T;
+    remove: (entity: T) => Option<T>;
 }
 
 export class UniqueCollection<T> implements IUniqueCollection<T> {
@@ -8,7 +8,7 @@ export class UniqueCollection<T> implements IUniqueCollection<T> {
 
     public constructor() {}
 
-    public addItem(entity: T): T {
+    public add(entity: T): T {
         const entityIndex = this._items.indexOf(entity);
 
         if (entityIndex !== -1) {
@@ -20,7 +20,7 @@ export class UniqueCollection<T> implements IUniqueCollection<T> {
         return entity;
     }
 
-    public removeItem(entity: T): Option<T> {
+    public remove(entity: T): Option<T> {
         const entityIndex = this._items.indexOf(entity);
 
         if (entityIndex !== -1) {

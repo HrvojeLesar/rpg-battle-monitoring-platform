@@ -10,7 +10,7 @@ export class ContainerGhostHandler {
 
     public createGhost(): Ghost {
         const ghost = this.createGhostContainer();
-        this._ghots.addItem(ghost);
+        this._ghots.add(ghost);
 
         this.addToContainerStage(ghost);
 
@@ -28,7 +28,7 @@ export class ContainerGhostHandler {
     }
 
     public removeGhost(ghost: Ghost): Option<Ghost> {
-        const removedGhost = this._ghots.removeItem(ghost);
+        const removedGhost = this._ghots.remove(ghost);
 
         if (removedGhost) {
             this.removeFromContainerStage(ghost);
