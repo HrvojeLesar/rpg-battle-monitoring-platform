@@ -1,10 +1,14 @@
 import { Container, Sprite, Texture } from "pixi.js";
 import { UniqueCollection } from "./unique_collection";
+import { GBoard } from "../board";
+import { IContainerMixin } from "../mixins/container_mixin";
+import { ContainerMixin, SpriteMixin } from "../mixins/mixin_classess";
 
-export type Ghost = Container;
+export type Ghost = IContainerMixin;
 
 export class ContainerGhostHandler {
-    protected _ghots: UniqueCollection<Container> = new UniqueCollection();
+    protected _ghots: UniqueCollection<IContainerMixin> =
+        new UniqueCollection();
 
     public constructor(public container: Container) {}
 
@@ -30,9 +34,7 @@ export class ContainerGhostHandler {
     public removeGhost(ghost: Ghost): Option<Ghost> {
         const removedGhost = this._ghots.remove(ghost);
 
-        if (removedGhost) {
-            this.removeFromContainerStage(ghost);
-        }
+        this.removeFromContainerStage(ghost);
 
         return removedGhost;
     }
@@ -52,7 +54,7 @@ export class ContainerGhostHandler {
         }
 
         if (this.container instanceof Container) {
-            return new Container(this.container);
+            return new ContainerMixin(this.container);
         }
 
         throw new Error(
@@ -61,8 +63,8 @@ export class ContainerGhostHandler {
         );
     }
 
-    protected cloneSprite(container: Sprite): Sprite {
-        const clone = new Sprite(Texture.EMPTY);
+    protected cloneSprite(container: Sprite): IContainerMixin {
+        const clone = new SpriteMixin(Texture.EMPTY);
 
         clone.tint = container.tint;
         clone.alpha = 0.65;
@@ -75,20 +77,14 @@ export class ContainerGhostHandler {
         return clone;
     }
 
-    // TODO: Update this to use global stage.
-    // For now we are trusting that the container is not deeply nested
-    // and the stage is the parent
     private addToContainerStage(ghost: Ghost): void {
-        this.container.parent.addChildAt(
+        GBoard.viewport.addChildAt(
             ghost,
-            this.container.getChildIndex(this.container),
+            GBoard.viewport.getChildIndex(this.container),
         );
     }
 
-    // TODO: Update this to use global stage.
-    // For now we are trusting that the container is not deeply nested
-    // and the stage is the parent
     private removeFromContainerStage(ghost: Container): void {
-        this.container.parent.removeChild(ghost);
+        GBoard.viewport.removeChild(ghost);
     }
 }

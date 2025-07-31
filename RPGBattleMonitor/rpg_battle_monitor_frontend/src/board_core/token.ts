@@ -1,13 +1,13 @@
-import { ContainerMixin } from "./mixins/container_mixin";
+import { IContainerMixin } from "./mixins/container_mixin";
 
 export class Token {
-    protected _container: ContainerMixin;
+    protected _container: IContainerMixin;
 
-    public constructor(container: ContainerMixin) {
+    public constructor(container: IContainerMixin) {
         this._container = container;
     }
 
-    public get container(): ContainerMixin {
+    public get container(): IContainerMixin {
         return this._container;
     }
 }

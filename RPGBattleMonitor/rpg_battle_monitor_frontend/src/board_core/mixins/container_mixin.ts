@@ -9,7 +9,7 @@ interface ContainerMixinOptions {
     isMovable: boolean;
 }
 
-export interface ContainerMixin extends ContainerMixinOptions, Container {
+export interface IContainerMixin extends ContainerMixinOptions, Container {
     snapToGrid(force?: boolean): void;
     createGhost(): Ghost;
     popGhost(): Option<Ghost>;
@@ -20,7 +20,7 @@ export interface ContainerMixin extends ContainerMixinOptions, Container {
 export function ContainerExtensionMixin<T extends Constructor<Container>>(
     Base: T,
 ) {
-    return class ContainerExtension extends Base implements ContainerMixin {
+    return class ContainerExtension extends Base implements IContainerMixin {
         protected _isSnapping: boolean;
         protected _isMovable: boolean;
         protected _ghostHandler: ContainerGhostHandler;
@@ -105,7 +105,7 @@ export function ContainerExtensionMixin<T extends Constructor<Container>>(
                 offset.y = localPos.y - this.y;
                 GBoard.viewport.pause = true;
 
-                // this.createGhost();
+                this.createGhost();
 
                 GBoard.viewport.onglobalpointermove = (event) => {
                     const localPos = event.getLocalPosition(GBoard.viewport);
@@ -124,7 +124,7 @@ export function ContainerExtensionMixin<T extends Constructor<Container>>(
                 GBoard.viewport.pause = false;
 
                 this.snapToGrid();
-                // this.removeGhosts();
+                this.clearGhosts();
             };
 
             this.onpointerdown = onPointerDown;
