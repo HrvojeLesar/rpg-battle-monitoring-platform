@@ -6,7 +6,6 @@ function onGlobalPointerMove(
     this: { offset: Point; container: IContainerMixin },
     event: FederatedPointerEvent,
 ) {
-    console.log("drag???");
     const localPos = event.getLocalPosition(GBoard.viewport);
     const newEntityPosition = new Point(
         localPos.x - this.offset.x,
@@ -24,7 +23,6 @@ export class DragHandler {
 
     public registerDrag(container: IContainerMixin) {
         const onPointerDown = (event: FederatedPointerEvent) => {
-            console.log("drag");
             // TODO: expected flow
             // 1. Check if left click
             // 2. Determine if selection is draggable (if any item in selection is not draggable disallow dragging)

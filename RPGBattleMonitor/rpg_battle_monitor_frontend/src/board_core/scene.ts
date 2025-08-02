@@ -10,6 +10,7 @@ export class Scene {
     public readonly name: string;
     protected _viewport: Viewport;
     protected _grid: Grid;
+    protected _selectionBox: SelectionBox;
     protected _tokens: UniqueCollection<Token> = new UniqueCollection();
 
     public constructor(name: string) {
@@ -27,28 +28,37 @@ export class Scene {
         }
 
         const worldSize = getWorldSize();
-        const app = GBoard.getApplication();
 
         this._viewport = new Viewport({
-            events: app.renderer.events,
-            screenWidth: app.canvas.width,
-            screenHeight: app.canvas.height,
+            events: GBoard.app.renderer.events,
+            screenWidth: GBoard.app.canvas.width,
+            screenHeight: GBoard.app.canvas.height,
             worldWidth: worldSize,
             worldHeight: worldSize,
             allowPreserveDragOutside: true,
+            disableOnContextMenu: true,
         });
 
-        this._viewport.drag().pinch().wheel().clamp({
-            left: true,
-            right: true,
-            top: true,
-            bottom: true,
-            direction: "all",
-            underflow: "center",
-        });
+        this._viewport
+            .drag({
+                mouseButtons: "middle-right",
+            })
+            .pinch()
+            .wheel()
+            .clamp({
+                left: true,
+                right: true,
+                top: true,
+                bottom: true,
+                direction: "all",
+                underflow: "center",
+            });
 
         this._viewport.addChild(this._grid);
         this._viewport.pause = true;
+
+        this._selectionBox = new SelectionBox(this._viewport);
+
         this.addToken({});
         this.addToken({ x: 256, y: 256, tint: "red" });
     }
