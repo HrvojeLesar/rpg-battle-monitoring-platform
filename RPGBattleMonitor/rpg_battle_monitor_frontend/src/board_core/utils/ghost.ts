@@ -2,7 +2,7 @@ import { Container, Sprite, Texture } from "pixi.js";
 import { UniqueCollection } from "./unique_collection";
 import { GBoard } from "../board";
 import { IContainerMixin } from "../mixins/container_mixin";
-import { ContainerMixin, SpriteMixin } from "../mixins/mixin_classess";
+import { ContainerMixin, SpriteMixin } from "../mixins/mixin_classes";
 
 export type Ghost = IContainerMixin;
 
@@ -40,11 +40,10 @@ export class ContainerGhostHandler {
     }
 
     public clearGhosts(): void {
-        while (!this._ghots.isEmpty()) {
-            const ghost = this._ghots.pop();
-            if (ghost) {
-                this.removeGhost(ghost);
-            }
+        const ghosts = this._ghots.clear();
+
+        for (const ghost of ghosts) {
+            this.removeFromContainerStage(ghost);
         }
     }
 

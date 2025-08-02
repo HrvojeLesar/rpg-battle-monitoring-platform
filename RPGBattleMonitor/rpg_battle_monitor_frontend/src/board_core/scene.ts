@@ -3,7 +3,7 @@ import { Grid } from "./grid";
 import { GBoard } from "./board";
 import { UniqueCollection } from "./utils/unique_collection";
 import { Token } from "./token";
-import { SpriteMixin } from "./mixins/mixin_classess";
+import { SpriteMixin } from "./mixins/mixin_classes";
 import { Texture } from "pixi.js";
 
 export class Scene {
@@ -49,7 +49,8 @@ export class Scene {
 
         this._viewport.addChild(this._grid);
         this._viewport.pause = true;
-        this.addToken();
+        this.addToken({});
+        this.addToken({ x: 256, y: 256, tint: "red" });
     }
 
     public setActive(): void {
@@ -70,13 +71,13 @@ export class Scene {
         return this._grid;
     }
 
-    protected addToken(): void {
+    protected addToken({ x = 64, y = 64, tint = "blue" }): void {
         const spriteMixin = new SpriteMixin({
             texture: Texture.WHITE,
-            tint: "blue",
+            tint: tint,
             width: this._grid.cellSize * 3,
             height: this._grid.cellSize * 3,
-            position: { x: 64, y: 64 },
+            position: { x: x, y: y },
             eventMode: "static",
             cursor: "pointer",
             alpha: 0.5,
@@ -85,11 +86,13 @@ export class Scene {
             // isMovable: true,
         });
         spriteMixin.isSnapping = true;
-        spriteMixin.isMovable = true;
+        spriteMixin.isDraggable = true;
+        spriteMixin.isSelectable = true;
 
         const token = new Token(spriteMixin);
 
         this._tokens.add(token);
+        GBoard.selectHandler.select(token.container);
         this._viewport.addChild(token.container);
     }
 }

@@ -1,6 +1,9 @@
 export interface IUniqueCollection<T> {
     add: (entity: T) => T;
     remove: (entity: T) => Option<T>;
+    getItems: () => Readonly<T[]>;
+    contains: (entity: T) => boolean;
+    clear: () => T[];
 }
 
 export class UniqueCollection<T> implements IUniqueCollection<T> {
@@ -39,5 +42,26 @@ export class UniqueCollection<T> implements IUniqueCollection<T> {
 
     public isEmpty(): boolean {
         return this._items.length === 0;
+    }
+
+    public getItems(): Readonly<T[]> {
+        return this._items;
+    }
+
+    public get items(): Readonly<T[]> {
+        return this.getItems();
+    }
+
+    public contains(entity: T): boolean {
+        const entityIndex = this._items.indexOf(entity);
+
+        return entityIndex !== -1;
+    }
+
+    public clear(): T[] {
+        const old = this._items;
+        this._items = [];
+
+        return old;
     }
 }

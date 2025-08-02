@@ -11,6 +11,9 @@ import { Socket } from "socket.io-client";
 import { Scene } from "./scene";
 import { Viewport } from "pixi-viewport";
 import { Grid } from "./grid";
+import { EventStore } from "./handlers/registered_event_store";
+import { DragHandler } from "./handlers/drag_handler";
+import { SelectHandler } from "./handlers/select_handler";
 
 const boardEventEmitter: EventEmitter = new EventEmitter();
 
@@ -22,6 +25,10 @@ class Board {
     protected application?: Application;
     protected eventEmitter: EventEmitter;
     protected currentScene?: Scene;
+
+    protected _eventStore = new EventStore();
+    protected _dragHandler = new DragHandler();
+    protected _selectHandler = new SelectHandler();
 
     // TODO: Make external global event handler
     protected websocket?: Socket;
@@ -112,6 +119,18 @@ class Board {
     public get scene(): Option<Scene> {
         return this.currentScene;
     }
+
+    public get eventStore(): EventStore {
+        return this._eventStore;
+    }
+
+    public get dragHandler(): DragHandler {
+        return this._dragHandler;
+    }
+
+    public get selectHandler(): SelectHandler {
+        return this._selectHandler;
+    }
 }
 
 var boardApplication: Board = new Board();
@@ -123,11 +142,16 @@ export async function init(
 
     await application.init(options);
 
+    boardApplication.setApplication(application);
+
     if (isDev()) {
         globalThis.__PIXI_APP__ = application;
-    }
 
-    boardApplication.setApplication(application);
+        console.log("Added init scene");
+        const scene = new Scene("init-scene");
+        boardApplication.addScene(scene);
+        boardApplication.changeScene(scene);
+    }
 
     console.log("Finished board init");
     return boardApplication.getApplication();
@@ -142,7 +166,6 @@ export function destroy(
         ?.destroy(rendererDestroyOptions, options);
 
     boardApplication = new Board();
-    console.log("Destroyed board");
 }
 
 export { boardApplication as GBoard, boardEventEmitter as GEventEmitter };

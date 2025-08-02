@@ -1,4 +1,4 @@
-import { Container, FederatedPointerEvent, Point } from "pixi.js";
+import { Container } from "pixi.js";
 import { ContainerGhostHandler, Ghost } from "../utils/ghost";
 import { GBoard } from "../board";
 
@@ -6,11 +6,11 @@ export type Constructor<T = {}> = new (...args: any[]) => T;
 
 interface ContainerMixinOptions {
     isSnapping: boolean;
-    isMovable: boolean;
+    isDraggable: boolean;
+    isSelectable: boolean;
 }
 
 export interface IContainerMixin extends ContainerMixinOptions, Container {
-    snapToGrid(force?: boolean): void;
     createGhost(): Ghost;
     popGhost(): Option<Ghost>;
     removeGhost(ghost: Ghost): Option<Ghost>;
@@ -21,8 +21,9 @@ export function ContainerExtensionMixin<T extends Constructor<Container>>(
     Base: T,
 ) {
     return class ContainerExtension extends Base implements IContainerMixin {
-        protected _isSnapping: boolean;
-        protected _isMovable: boolean;
+        protected _isSnapping: boolean = false;
+        protected _isDraggable: boolean = false;
+        protected _isSelectable: boolean = false;
         protected _ghostHandler: ContainerGhostHandler;
 
         public constructor(...args: any[]) {
@@ -32,12 +33,13 @@ export function ContainerExtensionMixin<T extends Constructor<Container>>(
 
             this._ghostHandler = new ContainerGhostHandler(this);
 
-            this._isSnapping = options.isSnapping || false;
-            this._isMovable = options.isMovable || false;
+            this.isSnapping = options.isSnapping || false;
+            this.isDraggable = options.isDraggable || false;
+            this.isSelectable = options.isSelectable || false;
 
-            if (this._isMovable) {
-                this.eventMode = "static";
-            }
+            // WARN: Order matters
+            this.registerSelectable();
+            this.registerDraggable();
         }
 
         public get isSnapping(): boolean {
@@ -46,19 +48,6 @@ export function ContainerExtensionMixin<T extends Constructor<Container>>(
 
         public set isSnapping(value: boolean) {
             this._isSnapping = value;
-        }
-
-        public snapToGrid(force: boolean = false) {
-            if (this.isSnapping === false && force === false) {
-                return;
-            }
-
-            this.position.x =
-                Math.round(this.position.x / GBoard.grid.cellSize) *
-                GBoard.grid.cellSize;
-            this.position.y =
-                Math.round(this.position.y / GBoard.grid.cellSize) *
-                GBoard.grid.cellSize;
         }
 
         public createGhost(): Ghost {
@@ -77,86 +66,41 @@ export function ContainerExtensionMixin<T extends Constructor<Container>>(
             this._ghostHandler.clearGhosts();
         }
 
-        public get isMovable(): boolean {
-            return this._isMovable;
+        public get isDraggable(): boolean {
+            return this._isDraggable;
         }
 
-        public set isMovable(value: boolean) {
-            this._isMovable = value;
-            if (this._isMovable) {
-                this.eventMode = "static";
-                this.registerMovable();
-            } else {
-                this.eventMode = "passive";
-                this.unregisterMovable();
-            }
+        public set isDraggable(value: boolean) {
+            this._isDraggable = value;
         }
 
-        private registerMovable() {
-            const offset = new Point();
-
-            const onPointerDown = (event: FederatedPointerEvent) => {
-                if (event.pointerType === "mouse" && event.button !== 0) {
-                    return;
-                }
-
-                const localPos = event.getLocalPosition(GBoard.viewport);
-                offset.x = localPos.x - this.x;
-                offset.y = localPos.y - this.y;
-                GBoard.viewport.pause = true;
-
-                this.createGhost();
-
-                GBoard.viewport.onglobalpointermove = (event) => {
-                    const localPos = event.getLocalPosition(GBoard.viewport);
-                    const newEntityPosition = new Point(
-                        localPos.x - offset.x,
-                        localPos.y - offset.y,
-                    );
-
-                    this.clampPositionToViewport(newEntityPosition);
-                    this.position.set(newEntityPosition.x, newEntityPosition.y);
-                };
-            };
-
-            const onPointerUp = (_event: FederatedPointerEvent) => {
-                GBoard.viewport.onglobalpointermove = null;
-                GBoard.viewport.pause = false;
-
-                this.snapToGrid();
-                this.clearGhosts();
-            };
-
-            this.onpointerdown = onPointerDown;
-            this.onpointerup = onPointerUp;
-            this.onpointerupoutside = onPointerUp;
+        public get isSelectable(): boolean {
+            return this._isSelectable;
         }
 
-        private unregisterMovable() {
-            this.onpointerdown = null;
-            this.onpointerup = null;
-            this.onpointerupoutside = null;
+        public set isSelectable(value: boolean) {
+            this._isSelectable = value;
         }
 
-        private clampPositionToViewport(position: Point) {
-            const worldWidth = GBoard.viewport.worldWidth;
-            const worldHeight = GBoard.viewport.worldHeight;
+        public cleanup() {
+            this.unregisterDraggable();
+            this.unregisterSelectable();
+        }
 
-            if (position.x < 0) {
-                position.x = 0;
-            }
+        private registerDraggable() {
+            GBoard.dragHandler.registerDrag(this);
+        }
 
-            if (position.y < 0) {
-                position.y = 0;
-            }
+        private unregisterDraggable() {
+            GBoard.dragHandler.unregisterDrag(this);
+        }
 
-            if (position.x + this.width > worldWidth) {
-                position.x = worldWidth - this.width;
-            }
+        private registerSelectable() {
+            GBoard.selectHandler.registerSelect(this);
+        }
 
-            if (position.y + this.height > worldHeight) {
-                position.y = worldHeight - this.height;
-            }
+        private unregisterSelectable() {
+            GBoard.selectHandler.unregisterSelect(this);
         }
     };
 }
