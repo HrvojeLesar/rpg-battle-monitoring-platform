@@ -1,37 +1,36 @@
 import { FederatedPointerEvent } from "pixi.js";
-import { IContainerMixin } from "../mixins/container_mixin";
 import { UniqueCollection } from "../utils/unique_collection";
-import { tryCastContainerAsMixin } from "../mixins/mixin_classes";
 import { GBoard } from "../board";
+import { ContainerExtension } from "../extensions/container_extension";
 
 export class SelectHandler {
     public static UNREGISTER_SELECT: string = "UNREGISTER_SELECT";
 
-    protected _selected: UniqueCollection<IContainerMixin> =
+    protected _selected: UniqueCollection<ContainerExtension> =
         new UniqueCollection();
 
     public constructor() {}
 
-    public get selections(): Readonly<IContainerMixin[]> {
+    public get selections(): Readonly<ContainerExtension[]> {
         return this._selected.items;
     }
 
-    public select(container: IContainerMixin): void {
+    public select(container: ContainerExtension): void {
         this._selected.add(container);
     }
 
-    public deselect(container: IContainerMixin): void {
+    public deselect(container: ContainerExtension): void {
         this._selected.remove(container);
     }
 
-    public isSelected(container: IContainerMixin): boolean {
+    public isSelected(container: ContainerExtension): boolean {
         return this._selected.contains(container);
     }
 
-    public registerSelect(container: IContainerMixin) {
+    public registerSelect(container: ContainerExtension) {
         const onPointerDown = (event: FederatedPointerEvent) => {
-            const target = tryCastContainerAsMixin(event.target);
-            if (!target) {
+            const target = event.target;
+            if (!(target instanceof ContainerExtension)) {
                 return;
             }
 
@@ -55,7 +54,7 @@ export class SelectHandler {
         );
     }
 
-    public unregisterSelect(container: IContainerMixin) {
+    public unregisterSelect(container: ContainerExtension) {
         this.deselect(container);
         GBoard.eventStore.unregister(
             container,

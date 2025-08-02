@@ -1,27 +1,35 @@
 import { FederatedPointerEvent, Point } from "pixi.js";
 import { GBoard } from "../board";
-import { IContainerMixin } from "../mixins/container_mixin";
+import { ContainerExtension } from "../extensions/container_extension";
 
-function onGlobalPointerMove(
-    this: { offset: Point; container: IContainerMixin },
-    event: FederatedPointerEvent,
-) {
-    const localPos = event.getLocalPosition(GBoard.viewport);
-    const newEntityPosition = new Point(
-        localPos.x - this.offset.x,
-        localPos.y - this.offset.y,
-    );
-
-    DragHandler.clampPositionToViewport(this.container, newEntityPosition);
-    this.container.position.set(newEntityPosition.x, newEntityPosition.y);
-}
+type OnGlobalPointerMove = {
+    handler: DragHandler;
+    offset: Point;
+    container: ContainerExtension;
+};
 
 export class DragHandler {
     public static UNREGISTER_DRAG: string = "UNREGISTER_DRAG";
+    protected isDirty: boolean = false;
 
     public constructor() {}
 
-    public registerDrag(container: IContainerMixin) {
+    protected onGlobalPointerMove(
+        this: OnGlobalPointerMove,
+        event: FederatedPointerEvent,
+    ) {
+        const localPos = event.getLocalPosition(GBoard.viewport);
+        const newEntityPosition = new Point(
+            localPos.x - this.offset.x,
+            localPos.y - this.offset.y,
+        );
+
+        this.handler.clampPositionToViewport(this.container, newEntityPosition);
+        this.handler.isDirty = true;
+        this.container.position.set(newEntityPosition.x, newEntityPosition.y);
+    }
+
+    public registerDrag(container: ContainerExtension) {
         const onPointerDown = (event: FederatedPointerEvent) => {
             // TODO: expected flow
             // 1. Check if left click
@@ -52,22 +60,31 @@ export class DragHandler {
 
                 container.createGhost();
 
-                GBoard.viewport.on("globalpointermove", onGlobalPointerMove, {
-                    offset: offset,
-                    container: container,
-                });
+                GBoard.viewport.on(
+                    "globalpointermove",
+                    this.onGlobalPointerMove,
+                    {
+                        handler: this,
+                        offset: offset,
+                        container: container,
+                    },
+                );
             }
         };
 
         const onPointerUp = (_event: FederatedPointerEvent) => {
-            GBoard.viewport.off("globalpointermove", onGlobalPointerMove);
+            GBoard.viewport.off("globalpointermove", this.onGlobalPointerMove);
             GBoard.viewport.pause = false;
 
             const selectedItems = GBoard.selectHandler.selections;
             for (const container of selectedItems) {
-                this.snapToGrid(container);
+                if (this.isDirty) {
+                    this.snapToGrid(container);
+                }
                 container.clearGhosts();
             }
+
+            this.isDirty = false;
         };
 
         container.on("pointerdown", onPointerDown);
@@ -87,11 +104,11 @@ export class DragHandler {
         );
     }
 
-    public unregisterDrag(container: IContainerMixin) {
+    public unregisterDrag(container: ContainerExtension) {
         GBoard.eventStore.unregister(container, DragHandler.UNREGISTER_DRAG);
     }
 
-    private snapToGrid(container: IContainerMixin, force: boolean = false) {
+    private snapToGrid(container: ContainerExtension, force: boolean = false) {
         if (container.isSnapping === false && force === false) {
             return;
         }
@@ -104,8 +121,8 @@ export class DragHandler {
             GBoard.grid.cellSize;
     }
 
-    public static clampPositionToViewport(
-        container: IContainerMixin,
+    public clampPositionToViewport(
+        container: ContainerExtension,
         position: Point,
     ) {
         const worldWidth = GBoard.viewport.worldWidth;

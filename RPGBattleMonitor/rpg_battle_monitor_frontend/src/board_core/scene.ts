@@ -3,8 +3,9 @@ import { Grid } from "./grid";
 import { GBoard } from "./board";
 import { UniqueCollection } from "./utils/unique_collection";
 import { Token } from "./token";
-import { SpriteMixin } from "./mixins/mixin_classes";
 import { Texture } from "pixi.js";
+import { SelectionBox } from "./selection/selection_box";
+import { SpriteExtension } from "./extensions/sprite_extension";
 
 export class Scene {
     public readonly name: string;
@@ -81,28 +82,28 @@ export class Scene {
         return this._grid;
     }
 
-    protected addToken({ x = 64, y = 64, tint = "blue" }): void {
-        const spriteMixin = new SpriteMixin({
-            texture: Texture.WHITE,
-            tint: tint,
-            width: this._grid.cellSize * 3,
-            height: this._grid.cellSize * 3,
-            position: { x: x, y: y },
-            eventMode: "static",
-            cursor: "pointer",
-            alpha: 0.5,
-            // TODO: get the typescript compiler to recognise these options
-            // isSnapping: false,
-            // isMovable: true,
-        });
-        spriteMixin.isSnapping = true;
-        spriteMixin.isDraggable = true;
-        spriteMixin.isSelectable = true;
+    protected addToken({ x = 64, y = 64, tint = "green" }): void {
+        const sprite = new SpriteExtension(
+            {
+                texture: Texture.WHITE,
+                tint: tint,
+                width: this._grid.cellSize * 3,
+                height: this._grid.cellSize * 3,
+                alpha: 0.5,
+            },
+            {
+                isSnapping: true,
+                isDraggable: true,
+                isSelectable: true,
+                eventMode: "static",
+                cursor: "pointer",
+                position: { x: x, y: y },
+            },
+        );
 
-        const token = new Token(spriteMixin);
+        const token = new Token(sprite);
 
         this._tokens.add(token);
-        GBoard.selectHandler.select(token.container);
         this._viewport.addChild(token.container);
     }
 }

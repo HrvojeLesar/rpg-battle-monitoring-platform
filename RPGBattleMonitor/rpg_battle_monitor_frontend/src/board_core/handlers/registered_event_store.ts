@@ -1,4 +1,4 @@
-import { IContainerMixin } from "../mixins/container_mixin";
+import { ContainerExtension } from "../extensions/container_extension";
 
 type RegisteredEvent = {
     event: string;
@@ -6,10 +6,10 @@ type RegisteredEvent = {
 };
 
 export class EventStore {
-    protected eventMap = new Map<IContainerMixin, RegisteredEvent[]>();
+    protected eventMap = new Map<ContainerExtension, RegisteredEvent[]>();
 
     public register(
-        container: IContainerMixin,
+        container: ContainerExtension,
         event: string,
         handler: () => void,
     ): EventStore {
@@ -20,7 +20,7 @@ export class EventStore {
         return this;
     }
 
-    public unregister(container: IContainerMixin, event: string): EventStore {
+    public unregister(container: ContainerExtension, event: string): EventStore {
         const events = this.eventMap.get(container) || [];
         events.filter((e) => e.event === event).forEach((e) => e.handler());
 
@@ -32,7 +32,7 @@ export class EventStore {
         return this;
     }
 
-    public clear(container: IContainerMixin): EventStore {
+    public clear(container: ContainerExtension): EventStore {
         const events = this.eventMap.get(container) || [];
         events.forEach((e) => e.handler());
 

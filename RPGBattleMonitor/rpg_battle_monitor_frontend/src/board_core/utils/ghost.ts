@@ -1,16 +1,27 @@
-import { Container, Sprite, Texture } from "pixi.js";
+import {
+    Container,
+    ContainerOptions,
+    Point,
+    Sprite,
+    SpriteOptions,
+    Texture,
+} from "pixi.js";
 import { UniqueCollection } from "./unique_collection";
 import { GBoard } from "../board";
-import { IContainerMixin } from "../mixins/container_mixin";
-import { ContainerMixin, SpriteMixin } from "../mixins/mixin_classes";
+import {
+    ContainerExtension,
+    ContainerExtensionOptions,
+} from "../extensions/container_extension";
+import { SpriteExtension } from "../extensions/sprite_extension";
+import { event } from "@tauri-apps/api";
 
-export type Ghost = IContainerMixin;
+export type Ghost = ContainerExtension;
 
 export class ContainerGhostHandler {
-    protected _ghots: UniqueCollection<IContainerMixin> =
+    protected _ghots: UniqueCollection<ContainerExtension> =
         new UniqueCollection();
 
-    public constructor(public container: Container) {}
+    public constructor(public container: ContainerExtension) {}
 
     public createGhost(): Ghost {
         const ghost = this.createGhostContainer();
@@ -48,12 +59,15 @@ export class ContainerGhostHandler {
     }
 
     protected createGhostContainer(): Ghost {
-        if (this.container instanceof Sprite) {
-            return this.cloneSprite(this.container);
+        if (this.container.displayedEntity instanceof Sprite) {
+            return new SpriteExtension(
+                this.cloneSpriteOptions(this.container.displayedEntity),
+                this.cloneContainerOptions(this.container),
+            );
         }
 
-        if (this.container instanceof Container) {
-            return new ContainerMixin(this.container);
+        if (this.container instanceof ContainerExtension) {
+            return new ContainerExtension(this.container);
         }
 
         throw new Error(
@@ -62,21 +76,31 @@ export class ContainerGhostHandler {
         );
     }
 
-    protected cloneSprite(container: Sprite): IContainerMixin {
-        const clone = new SpriteMixin(Texture.EMPTY);
+    protected cloneSpriteOptions(container: Sprite): SpriteOptions {
+        return {
+            alpha: 0.65,
+            tint: container.tint,
+            width: container.width,
+            height: container.height,
+            eventMode: "passive",
+            texture: container.texture,
+        };
+    }
 
-        clone.tint = container.tint;
-        clone.alpha = 0.65;
-        clone.width = container.width;
-        clone.height = container.height;
-        clone.position.set(container.position.x, container.position.y);
-        clone.eventMode = "passive";
-        clone.texture = container.texture;
-
-        return clone;
+    protected cloneContainerOptions(
+        container: ContainerExtension,
+    ): ContainerExtensionOptions {
+        return {
+            position: new Point(container.position.x, container.position.y),
+            eventMode: "passive",
+        };
     }
 
     private addToContainerStage(ghost: Ghost): void {
+        if (!this.container.displayedEntity) {
+            return;
+        }
+
         GBoard.viewport.addChildAt(
             ghost,
             GBoard.viewport.getChildIndex(this.container),
