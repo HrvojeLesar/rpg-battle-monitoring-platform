@@ -1,5 +1,6 @@
 import { Viewport } from "pixi-viewport";
 import { FederatedPointerEvent, Graphics, Point } from "pixi.js";
+import { GBoard } from "../board";
 
 export class SelectionBox extends Graphics {
     protected _viewport: Viewport;
@@ -36,6 +37,16 @@ export class SelectionBox extends Graphics {
                 .rect(x, y, width, height)
                 .fill({ color: "green" })
                 .stroke({ color: "white", width: 1 });
+
+            const bounds = this.getBounds();
+            GBoard.scene?.tokens.forEach((token) => {
+                const tokenBounds = token.container.getBounds();
+                if (bounds.intersects(tokenBounds)) {
+                    GBoard.selectHandler.select(token.container);
+                } else {
+                    GBoard.selectHandler.deselect(token.container);
+                }
+            });
         };
 
         const onPointerDown = (event: FederatedPointerEvent) => {
@@ -45,6 +56,8 @@ export class SelectionBox extends Graphics {
             }
 
             startPoint = event.getLocalPosition(this._viewport);
+
+            GBoard.selectHandler.clearSelections();
 
             this._viewport.addChild(this);
             this._viewport.on("globalpointermove", onGlobalPointerMove);
@@ -58,6 +71,7 @@ export class SelectionBox extends Graphics {
 
         this._viewport.on("pointerdown", onPointerDown);
         this._viewport.on("pointerup", onPointerUp);
+        this._viewport.on("pointerupoutside", onPointerUp);
 
         // TODO: unregister events
     }

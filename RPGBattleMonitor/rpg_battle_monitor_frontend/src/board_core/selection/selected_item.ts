@@ -1,11 +1,11 @@
-import { Container, DestroyOptions, Graphics } from "pixi.js";
+import { DestroyOptions, Graphics } from "pixi.js";
 import { GBoard } from "../board";
 import { ContainerExtension } from "../extensions/container_extension";
 
-export class SelectionOutline<T extends Container> extends Graphics {
-    protected _outlineAround: ContainerExtension<T>;
+export class SelectionOutline extends Graphics {
+    protected _outlineAround: ContainerExtension;
 
-    constructor(around: ContainerExtension<T>) {
+    constructor(around: ContainerExtension) {
         super();
 
         this._outlineAround = around;
@@ -28,15 +28,17 @@ export class SelectionOutline<T extends Container> extends Graphics {
 
         if (GBoard.selectHandler.isSelected(this._outlineAround)) {
             this.visible = true;
-            this.rect(
-                -5,
-                -5,
-                this._outlineAround.displayedEntity.width + 10,
-                this._outlineAround.displayedEntity.height + 10,
-            ).stroke({
-                color: "red",
-                width: 3,
-            });
+            this.clear()
+                .rect(
+                    -5,
+                    -5,
+                    this._outlineAround.displayedEntity.width + 10,
+                    this._outlineAround.displayedEntity.height + 10,
+                )
+                .stroke({
+                    color: "red",
+                    width: 3,
+                });
         } else {
             this.visible = false;
         }

@@ -29,6 +29,10 @@ export class SelectHandler {
 
     public registerSelect(container: ContainerExtension) {
         const onPointerDown = (event: FederatedPointerEvent) => {
+            if (event.pointerType === "mouse" && event.button !== 0) {
+                return;
+            }
+
             const target = event.target;
             if (!(target instanceof ContainerExtension)) {
                 return;

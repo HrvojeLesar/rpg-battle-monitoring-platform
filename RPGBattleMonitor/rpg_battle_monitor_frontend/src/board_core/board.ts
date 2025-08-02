@@ -14,6 +14,7 @@ import { Grid } from "./grid";
 import { EventStore } from "./handlers/registered_event_store";
 import { DragHandler } from "./handlers/drag_handler";
 import { SelectHandler } from "./handlers/select_handler";
+import "./mixins/bounds_mixin";
 
 const boardEventEmitter: EventEmitter = new EventEmitter();
 

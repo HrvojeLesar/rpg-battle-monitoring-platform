@@ -31,6 +31,7 @@ export class DragHandler {
 
     public registerDrag(container: ContainerExtension) {
         const onPointerDown = (event: FederatedPointerEvent) => {
+            event.stopPropagation();
             // TODO: expected flow
             // 1. Check if left click
             // 2. Determine if selection is draggable (if any item in selection is not draggable disallow dragging)

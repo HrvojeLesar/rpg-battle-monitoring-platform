@@ -82,6 +82,10 @@ export class Scene {
         return this._grid;
     }
 
+    public get tokens(): Readonly<Token[]> {
+        return this._tokens.getItems();
+    }
+
     protected addToken({ x = 64, y = 64, tint = "green" }): void {
         const sprite = new SpriteExtension(
             {

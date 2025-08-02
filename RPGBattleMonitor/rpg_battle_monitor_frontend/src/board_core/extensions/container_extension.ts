@@ -16,7 +16,7 @@ export class ContainerExtension<
     protected _isDraggable: boolean = false;
     protected _isSelectable: boolean = false;
     protected _ghostHandler: ContainerGhostHandler;
-    protected _selectionOutline: SelectionOutline<T>;
+    protected _selectionOutline: SelectionOutline;
     protected _displayedEntity?: T;
 
     public constructor(options?: ContainerExtensionOptions) {
