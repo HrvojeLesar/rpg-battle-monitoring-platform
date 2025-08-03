@@ -1,6 +1,8 @@
 import { FederatedPointerEvent, Point } from "pixi.js";
 import { GBoard } from "../board";
 import { ContainerExtension } from "../extensions/container_extension";
+import { GEventStore } from "./registered_event_store";
+import { GSelectHandler } from "./select_handler";
 
 type OnGlobalPointerMove = {
     handler: DragHandler;
@@ -52,7 +54,7 @@ export class DragHandler {
 
             GBoard.viewport.pause = true;
 
-            const selectedItems = GBoard.selectHandler.selections;
+            const selectedItems = GSelectHandler.selections;
             for (const container of selectedItems) {
                 const offset = new Point();
                 const localPos = event.getLocalPosition(GBoard.viewport);
@@ -77,7 +79,7 @@ export class DragHandler {
             GBoard.viewport.off("globalpointermove", this.onGlobalPointerMove);
             GBoard.viewport.pause = false;
 
-            const selectedItems = GBoard.selectHandler.selections;
+            const selectedItems = GSelectHandler.selections;
             for (const container of selectedItems) {
                 if (this.isDirty) {
                     this.snapToGrid(container);
@@ -98,7 +100,7 @@ export class DragHandler {
             container.off("pointerupoutside", onPointerUp);
         };
 
-        GBoard.eventStore.register(
+        GEventStore.register(
             container,
             DragHandler.UNREGISTER_DRAG,
             unregisterDrag,
@@ -106,7 +108,7 @@ export class DragHandler {
     }
 
     public unregisterDrag(container: ContainerExtension) {
-        GBoard.eventStore.unregister(container, DragHandler.UNREGISTER_DRAG);
+        GEventStore.unregister(container, DragHandler.UNREGISTER_DRAG);
     }
 
     private snapToGrid(container: ContainerExtension, force: boolean = false) {
@@ -146,3 +148,5 @@ export class DragHandler {
         }
     }
 }
+
+export const GDragHandler = new DragHandler();

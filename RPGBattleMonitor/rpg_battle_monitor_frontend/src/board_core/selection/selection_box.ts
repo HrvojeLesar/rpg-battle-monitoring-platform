@@ -1,15 +1,20 @@
 import { Viewport } from "pixi-viewport";
 import { FederatedPointerEvent, Graphics, Point } from "pixi.js";
 import { GBoard } from "../board";
+import { ContainerExtension } from "../extensions/container_extension";
+import { GSelectHandler } from "../handlers/select_handler";
 
 export class SelectionBox extends Graphics {
     protected _viewport: Viewport;
+    protected _multiselectContainer: ContainerExtension;
 
     public constructor(viewport: Viewport) {
         super();
 
         this._viewport = viewport;
         this.alpha = 0.5;
+        this._multiselectContainer = new ContainerExtension();
+
         this.initEvents();
     }
 
@@ -42,9 +47,9 @@ export class SelectionBox extends Graphics {
             GBoard.scene?.tokens.forEach((token) => {
                 const tokenBounds = token.container.getBounds();
                 if (bounds.intersects(tokenBounds)) {
-                    GBoard.selectHandler.select(token.container);
+                    GSelectHandler.select(token.container);
                 } else {
-                    GBoard.selectHandler.deselect(token.container);
+                    GSelectHandler.deselect(token.container);
                 }
             });
         };
@@ -57,7 +62,7 @@ export class SelectionBox extends Graphics {
 
             startPoint = event.getLocalPosition(this._viewport);
 
-            GBoard.selectHandler.clearSelections();
+            GSelectHandler.clearSelections();
 
             this._viewport.addChild(this);
             this._viewport.on("globalpointermove", onGlobalPointerMove);

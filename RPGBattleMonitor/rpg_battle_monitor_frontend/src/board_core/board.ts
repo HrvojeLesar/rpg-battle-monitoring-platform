@@ -11,9 +11,6 @@ import { Socket } from "socket.io-client";
 import { Scene } from "./scene";
 import { Viewport } from "pixi-viewport";
 import { Grid } from "./grid";
-import { EventStore } from "./handlers/registered_event_store";
-import { DragHandler } from "./handlers/drag_handler";
-import { SelectHandler } from "./handlers/select_handler";
 import "./mixins/bounds_mixin";
 
 const boardEventEmitter: EventEmitter = new EventEmitter();
@@ -26,10 +23,6 @@ class Board {
     protected application?: Application;
     protected eventEmitter: EventEmitter;
     protected currentScene?: Scene;
-
-    protected _eventStore = new EventStore();
-    protected _dragHandler = new DragHandler();
-    protected _selectHandler = new SelectHandler();
 
     // TODO: Make external global event handler
     protected websocket?: Socket;
@@ -119,18 +112,6 @@ class Board {
 
     public get scene(): Option<Scene> {
         return this.currentScene;
-    }
-
-    public get eventStore(): EventStore {
-        return this._eventStore;
-    }
-
-    public get dragHandler(): DragHandler {
-        return this._dragHandler;
-    }
-
-    public get selectHandler(): SelectHandler {
-        return this._selectHandler;
     }
 }
 

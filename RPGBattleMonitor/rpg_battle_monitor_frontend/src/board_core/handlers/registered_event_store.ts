@@ -20,7 +20,10 @@ export class EventStore {
         return this;
     }
 
-    public unregister(container: ContainerExtension, event: string): EventStore {
+    public unregister(
+        container: ContainerExtension,
+        event: string,
+    ): EventStore {
         const events = this.eventMap.get(container) || [];
         events.filter((e) => e.event === event).forEach((e) => e.handler());
 
@@ -41,3 +44,5 @@ export class EventStore {
         return this;
     }
 }
+
+export const GEventStore = new EventStore();

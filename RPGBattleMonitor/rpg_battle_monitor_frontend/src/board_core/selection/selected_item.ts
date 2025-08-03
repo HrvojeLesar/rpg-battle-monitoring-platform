@@ -1,6 +1,7 @@
 import { DestroyOptions, Graphics } from "pixi.js";
 import { GBoard } from "../board";
 import { ContainerExtension } from "../extensions/container_extension";
+import { GSelectHandler } from "../handlers/select_handler";
 
 export class SelectionOutline extends Graphics {
     protected _outlineAround: ContainerExtension;
@@ -26,7 +27,7 @@ export class SelectionOutline extends Graphics {
             return;
         }
 
-        if (GBoard.selectHandler.isSelected(this._outlineAround)) {
+        if (GSelectHandler.isSelected(this._outlineAround)) {
             this.visible = true;
             this.clear()
                 .rect(

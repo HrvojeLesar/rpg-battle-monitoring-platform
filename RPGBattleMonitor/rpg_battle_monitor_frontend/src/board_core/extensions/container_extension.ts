@@ -1,7 +1,9 @@
-import { Container, ContainerOptions } from "pixi.js";
-import { ContainerGhostHandler, Ghost } from "../utils/ghost";
-import { GBoard } from "../board";
+import { Container, ContainerOptions, Point } from "pixi.js";
 import { SelectionOutline } from "../selection/selected_item";
+import { GDragHandler } from "../handlers/drag_handler";
+import { GSelectHandler } from "../handlers/select_handler";
+import { UniqueCollection } from "../utils/unique_collection";
+import { GBoard } from "../board";
 
 export type ContainerExtensionOptions = {
     isSnapping?: boolean;
@@ -9,20 +11,21 @@ export type ContainerExtensionOptions = {
     isSelectable?: boolean;
 } & ContainerOptions;
 
+export type Ghost = ContainerExtension;
+
 export class ContainerExtension<
     T extends Container = Container,
 > extends Container {
     protected _isSnapping: boolean = false;
     protected _isDraggable: boolean = false;
     protected _isSelectable: boolean = false;
-    protected _ghostHandler: ContainerGhostHandler;
     protected _selectionOutline: SelectionOutline;
     protected _displayedEntity?: T;
+    protected _ghots: UniqueCollection<ContainerExtension> =
+        new UniqueCollection();
 
     public constructor(options?: ContainerExtensionOptions) {
         super(options);
-
-        this._ghostHandler = new ContainerGhostHandler(this);
 
         this.isSnapping = options?.isSnapping || false;
         this.isDraggable = options?.isDraggable || false;
@@ -45,19 +48,38 @@ export class ContainerExtension<
     }
 
     public createGhost(): Ghost {
-        return this._ghostHandler.createGhost();
+        const ghost = this.createGhostContainer();
+        this._ghots.add(ghost);
+
+        this.addToContainerStage(ghost);
+
+        return ghost;
     }
 
     public popGhost(): Option<Ghost> {
-        return this._ghostHandler.popGhost();
+        const ghost = this._ghots.pop();
+
+        if (ghost) {
+            this.removeFromContainerStage(ghost);
+        }
+
+        return ghost;
     }
 
     public removeGhost(ghost: Ghost): Option<Ghost> {
-        return this._ghostHandler.removeGhost(ghost);
+        const removedGhost = this._ghots.remove(ghost);
+
+        this.removeFromContainerStage(ghost);
+
+        return removedGhost;
     }
 
     public clearGhosts(): void {
-        this._ghostHandler.clearGhosts();
+        const ghosts = this._ghots.clear();
+
+        for (const ghost of ghosts) {
+            this.removeFromContainerStage(ghost);
+        }
     }
 
     public get isDraggable(): boolean {
@@ -89,19 +111,48 @@ export class ContainerExtension<
         this.unregisterSelectable();
     }
 
+    protected createGhostContainer(): Ghost {
+        if (this instanceof ContainerExtension) {
+            return new ContainerExtension(this);
+        }
+
+        throw new Error("Creating a ghost of an unhandled type:", this);
+    }
+
+    protected cloneContainerOptions(
+        container: ContainerExtension,
+    ): ContainerExtensionOptions {
+        return {
+            position: new Point(container.position.x, container.position.y),
+            eventMode: "passive",
+        };
+    }
+
     private registerDraggable() {
-        GBoard.dragHandler.registerDrag(this);
+        GDragHandler.registerDrag(this);
     }
 
     private unregisterDraggable() {
-        GBoard.dragHandler.unregisterDrag(this);
+        GDragHandler.unregisterDrag(this);
     }
 
     private registerSelectable() {
-        GBoard.selectHandler.registerSelect(this);
+        GSelectHandler.registerSelect(this);
     }
 
     private unregisterSelectable() {
-        GBoard.selectHandler.unregisterSelect(this);
+        GSelectHandler.unregisterSelect(this);
+    }
+
+    private addToContainerStage(ghost: Ghost): void {
+        if (!this.displayedEntity) {
+            return;
+        }
+
+        GBoard.viewport.addChildAt(ghost, GBoard.viewport.getChildIndex(this));
+    }
+
+    private removeFromContainerStage(ghost: Container): void {
+        GBoard.viewport.removeChild(ghost);
     }
 }

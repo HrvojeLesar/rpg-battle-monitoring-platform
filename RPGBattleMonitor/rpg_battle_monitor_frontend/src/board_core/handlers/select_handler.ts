@@ -1,7 +1,7 @@
 import { FederatedPointerEvent } from "pixi.js";
 import { UniqueCollection } from "../utils/unique_collection";
-import { GBoard } from "../board";
 import { ContainerExtension } from "../extensions/container_extension";
+import { GEventStore } from "./registered_event_store";
 
 export class SelectHandler {
     public static UNREGISTER_SELECT: string = "UNREGISTER_SELECT";
@@ -51,7 +51,7 @@ export class SelectHandler {
             container.off("pointerdown", onPointerDown);
         };
 
-        GBoard.eventStore.register(
+        GEventStore.register(
             container,
             SelectHandler.UNREGISTER_SELECT,
             unregister,
@@ -60,13 +60,12 @@ export class SelectHandler {
 
     public unregisterSelect(container: ContainerExtension) {
         this.deselect(container);
-        GBoard.eventStore.unregister(
-            container,
-            SelectHandler.UNREGISTER_SELECT,
-        );
+        GEventStore.unregister(container, SelectHandler.UNREGISTER_SELECT);
     }
 
     public clearSelections() {
         this._selected.clear();
     }
 }
+
+export const GSelectHandler = new SelectHandler();
