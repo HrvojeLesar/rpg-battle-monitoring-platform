@@ -6,12 +6,14 @@ import { Token } from "./token";
 import { Texture } from "pixi.js";
 import { SelectionBox } from "./selection/selection_box";
 import { SpriteExtension } from "./extensions/sprite_extension";
+import { SelectionHolder } from "./selection/selection_holder";
 
 export class Scene {
     public readonly name: string;
     protected _viewport: Viewport;
     protected _grid: Grid;
     protected _selectionBox: SelectionBox;
+    protected _selectionHolder: SelectionHolder;
     protected _tokens: UniqueCollection<Token> = new UniqueCollection();
 
     public constructor(name: string) {
@@ -59,9 +61,11 @@ export class Scene {
         this._viewport.pause = true;
 
         this._selectionBox = new SelectionBox(this._viewport);
+        this._selectionHolder = new SelectionHolder();
 
         this.addToken({});
         this.addToken({ x: 256, y: 256, tint: "red" });
+        this.addToken({ x: 256, y: 512, tint: "blue" });
     }
 
     public setActive(): void {
@@ -86,6 +90,10 @@ export class Scene {
         return this._tokens.getItems();
     }
 
+    public get selectionHolder(): SelectionHolder {
+        return this._selectionHolder;
+    }
+
     protected addToken({ x = 64, y = 64, tint = "green" }): void {
         const sprite = new SpriteExtension(
             {
@@ -96,9 +104,9 @@ export class Scene {
                 alpha: 0.5,
             },
             {
-                isSnapping: true,
+                isSnapping: tint === "red" ? false : true,
                 isDraggable: true,
-                isSelectable: true,
+                isSelectable: tint === "blue" ? false : true,
                 eventMode: "static",
                 cursor: "pointer",
                 position: { x: x, y: y },

@@ -4,6 +4,7 @@ import { ContainerExtension } from "../extensions/container_extension";
 import { GSelectHandler } from "../handlers/select_handler";
 
 export class SelectionOutline extends Graphics {
+    public static readonly OUTLINE_OFFSET: Readonly<number> = 5;
     protected _outlineAround: ContainerExtension;
 
     constructor(around: ContainerExtension) {
@@ -31,8 +32,8 @@ export class SelectionOutline extends Graphics {
             this.visible = true;
             this.clear()
                 .rect(
-                    -5,
-                    -5,
+                    -SelectionOutline.OUTLINE_OFFSET,
+                    -SelectionOutline.OUTLINE_OFFSET,
                     this._outlineAround.displayedEntity.width + 10,
                     this._outlineAround.displayedEntity.height + 10,
                 )

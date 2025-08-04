@@ -11,9 +11,6 @@ import { Socket } from "socket.io-client";
 import { Scene } from "./scene";
 import { Viewport } from "pixi-viewport";
 import { Grid } from "./grid";
-import "./mixins/bounds_mixin";
-
-const boardEventEmitter: EventEmitter = new EventEmitter();
 
 export type GameBoard = Board;
 
@@ -21,14 +18,14 @@ class Board {
     public scenes: Scene[];
 
     protected application?: Application;
-    protected eventEmitter: EventEmitter;
     protected currentScene?: Scene;
+
+    protected _eventEmitter: EventEmitter = new EventEmitter();
 
     // TODO: Make external global event handler
     protected websocket?: Socket;
 
     public constructor() {
-        this.eventEmitter = boardEventEmitter;
         this.scenes = [];
     }
 
@@ -113,6 +110,10 @@ class Board {
     public get scene(): Option<Scene> {
         return this.currentScene;
     }
+
+    public get eventEmitter(): EventEmitter {
+        return this._eventEmitter;
+    }
 }
 
 var boardApplication: Board = new Board();
@@ -150,4 +151,4 @@ export function destroy(
     boardApplication = new Board();
 }
 
-export { boardApplication as GBoard, boardEventEmitter as GEventEmitter };
+export { boardApplication as GBoard };

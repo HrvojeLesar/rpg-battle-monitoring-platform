@@ -1,9 +1,9 @@
-import { Container, ContainerOptions, Point } from "pixi.js";
-import { SelectionOutline } from "../selection/selected_item";
+import { Container, ContainerOptions, DestroyOptions, Point } from "pixi.js";
 import { GDragHandler } from "../handlers/drag_handler";
 import { GSelectHandler } from "../handlers/select_handler";
 import { UniqueCollection } from "../utils/unique_collection";
 import { GBoard } from "../board";
+import { SelectionOutline } from "../selection/selection_outline";
 
 export type ContainerExtensionOptions = {
     isSnapping?: boolean;
@@ -106,9 +106,46 @@ export class ContainerExtension<
         this._displayedEntity = value;
     }
 
-    public cleanup() {
+    public destroy(options?: DestroyOptions) {
         this.unregisterDraggable();
         this.unregisterSelectable();
+        super.destroy(options);
+    }
+
+    public snapToGrid(force: boolean = false): void {
+        if (this.isSnapping === false && force === false) {
+            return;
+        }
+
+        this.position.x =
+            Math.round(this.position.x / GBoard.grid.cellSize) *
+            GBoard.grid.cellSize;
+        this.position.y =
+            Math.round(this.position.y / GBoard.grid.cellSize) *
+            GBoard.grid.cellSize;
+    }
+
+    public clampPositionToViewport(position: Point) {
+        const worldWidth = GBoard.viewport.worldWidth;
+        const worldHeight = GBoard.viewport.worldHeight;
+
+        if (position.x < 0) {
+            position.x = 0;
+        }
+
+        if (position.y < 0) {
+            position.y = 0;
+        }
+
+        const width = this.displayedEntity?.width ?? this.width;
+        if (position.x + width > worldWidth) {
+            position.x = worldWidth - width;
+        }
+
+        const height = this.displayedEntity?.height ?? this.height;
+        if (position.y + height > worldHeight) {
+            position.y = worldHeight - height;
+        }
     }
 
     protected createGhostContainer(): Ghost {

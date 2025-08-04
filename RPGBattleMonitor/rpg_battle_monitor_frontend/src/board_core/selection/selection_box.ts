@@ -1,19 +1,16 @@
 import { Viewport } from "pixi-viewport";
 import { FederatedPointerEvent, Graphics, Point } from "pixi.js";
 import { GBoard } from "../board";
-import { ContainerExtension } from "../extensions/container_extension";
 import { GSelectHandler } from "../handlers/select_handler";
 
 export class SelectionBox extends Graphics {
     protected _viewport: Viewport;
-    protected _multiselectContainer: ContainerExtension;
 
     public constructor(viewport: Viewport) {
         super();
 
         this._viewport = viewport;
         this.alpha = 0.5;
-        this._multiselectContainer = new ContainerExtension();
 
         this.initEvents();
     }
@@ -43,10 +40,13 @@ export class SelectionBox extends Graphics {
                 .fill({ color: "green" })
                 .stroke({ color: "white", width: 1 });
 
-            const bounds = this.getBounds();
+            const bounds = this.getBounds().rectangle;
             GBoard.scene?.tokens.forEach((token) => {
-                const tokenBounds = token.container.getBounds();
-                if (bounds.intersects(tokenBounds)) {
+                const tokenBounds = token.container.getBounds().rectangle;
+                if (
+                    bounds.intersects(tokenBounds) &&
+                    token.container.isSelectable
+                ) {
                     GSelectHandler.select(token.container);
                 } else {
                     GSelectHandler.deselect(token.container);
@@ -66,17 +66,21 @@ export class SelectionBox extends Graphics {
 
             this._viewport.addChild(this);
             this._viewport.on("globalpointermove", onGlobalPointerMove);
+            this._viewport.on("pointerup", onPointerUp);
+            this._viewport.on("pointerupoutside", onPointerUp);
         };
 
         const onPointerUp = (_event: FederatedPointerEvent) => {
             this._viewport.off("globalpointermove", onGlobalPointerMove);
+            this._viewport.off("pointerup", onPointerUp);
+            this._viewport.off("pointerupoutside", onPointerUp);
             this._viewport.removeChild(this);
             this.clear();
+
+            GSelectHandler.selectGroup();
         };
 
         this._viewport.on("pointerdown", onPointerDown);
-        this._viewport.on("pointerup", onPointerUp);
-        this._viewport.on("pointerupoutside", onPointerUp);
 
         // TODO: unregister events
     }

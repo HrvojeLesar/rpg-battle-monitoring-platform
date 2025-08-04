@@ -4,6 +4,7 @@ import { init } from "./board_core/board";
 import React, { useRef } from "react";
 import { Provider } from "react-redux";
 import { store } from "./board_react_wrapper/board_store";
+import "pixi.js/math-extras";
 
 function App() {
     const div = useRef<HTMLDivElement | null>(null);
