@@ -50,6 +50,7 @@ export class DragHandler {
 
             if (
                 container.isDraggable === false ||
+                container.isSelectable === false ||
                 !GSelectHandler.isSelectionDraggable()
             ) {
                 return;
