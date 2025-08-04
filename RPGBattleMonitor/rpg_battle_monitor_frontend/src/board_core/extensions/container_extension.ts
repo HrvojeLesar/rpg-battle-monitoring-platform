@@ -51,25 +51,17 @@ export class ContainerExtension<
         const ghost = this.createGhostContainer();
         this._ghots.add(ghost);
 
-        this.addToContainerStage(ghost);
-
         return ghost;
     }
 
     public popGhost(): Option<Ghost> {
         const ghost = this._ghots.pop();
 
-        if (ghost) {
-            this.removeFromContainerStage(ghost);
-        }
-
         return ghost;
     }
 
     public removeGhost(ghost: Ghost): Option<Ghost> {
         const removedGhost = this._ghots.remove(ghost);
-
-        this.removeFromContainerStage(ghost);
 
         return removedGhost;
     }
@@ -78,7 +70,8 @@ export class ContainerExtension<
         const ghosts = this._ghots.clear();
 
         for (const ghost of ghosts) {
-            this.removeFromContainerStage(ghost);
+            this.removeGhostFromStage(ghost);
+            ghost.destroy();
         }
     }
 
@@ -181,7 +174,7 @@ export class ContainerExtension<
         GSelectHandler.unregisterSelect(this);
     }
 
-    private addToContainerStage(ghost: Ghost): void {
+    protected addGhostToStage(ghost: Ghost): void {
         if (!this.displayedEntity) {
             return;
         }
@@ -189,7 +182,7 @@ export class ContainerExtension<
         GBoard.viewport.addChildAt(ghost, GBoard.viewport.getChildIndex(this));
     }
 
-    private removeFromContainerStage(ghost: Container): void {
+    protected removeGhostFromStage(ghost: Container): void {
         GBoard.viewport.removeChild(ghost);
     }
 }

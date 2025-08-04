@@ -72,7 +72,7 @@ export class DragHandler {
             offset.x = localPos.x - selectionHolder.x;
             offset.y = localPos.y - selectionHolder.y;
 
-            // container.createGhost();
+            selectionHolder.createGhost();
 
             GBoard.viewport.on("globalpointermove", this.onGlobalPointerMove, {
                 handler: this,

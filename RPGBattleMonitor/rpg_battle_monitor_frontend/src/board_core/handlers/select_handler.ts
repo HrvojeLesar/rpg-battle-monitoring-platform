@@ -102,8 +102,8 @@ export class SelectHandler {
     public deselectGroup(): void {
         const selectionHolder = this.selectionHolder;
         const isHolderOnStage =
-            GBoard.viewport.children.find((c) => c === selectionHolder) !==
-            undefined;
+            selectionHolder &&
+            GBoard.viewport.children.indexOf(selectionHolder) !== -1;
         if (selectionHolder && isHolderOnStage) {
             let index = GBoard.viewport.getChildIndex(selectionHolder);
             const children = [...selectionHolder.children];
