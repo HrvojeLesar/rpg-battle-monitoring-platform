@@ -154,7 +154,7 @@ export class ContainerExtension<
     ): ContainerExtensionOptions {
         return {
             position: new Point(container.position.x, container.position.y),
-            eventMode: "passive",
+            eventMode: "none",
         };
     }
 
