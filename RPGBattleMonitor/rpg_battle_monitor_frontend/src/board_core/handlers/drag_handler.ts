@@ -58,11 +58,6 @@ export class DragHandler {
 
             GBoard.viewport.pause = true;
 
-            let selectedItems = GSelectHandler.selections;
-            if (selectedItems.length > 1 && GSelectHandler.selectionHolder) {
-                selectedItems = [GSelectHandler.selectionHolder];
-            }
-
             const selectionHolder = GSelectHandler.selectionHolder;
             if (!selectionHolder) {
                 return;

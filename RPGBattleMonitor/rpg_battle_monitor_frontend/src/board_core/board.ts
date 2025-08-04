@@ -11,6 +11,7 @@ import { Socket } from "socket.io-client";
 import { Scene } from "./scene";
 import { Viewport } from "pixi-viewport";
 import { Grid } from "./grid";
+import "./mixins/point_mixin";
 
 export type GameBoard = Board;
 

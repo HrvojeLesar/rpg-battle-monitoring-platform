@@ -13,7 +13,7 @@ export class EventStore {
         event: string,
         handler: () => void,
     ): EventStore {
-        const events = this.eventMap.get(container) || [];
+        const events = this.eventMap.get(container) ?? [];
         events.push({ event, handler });
         this.eventMap.set(container, events);
 
@@ -24,7 +24,7 @@ export class EventStore {
         container: ContainerExtension,
         event: string,
     ): EventStore {
-        const events = this.eventMap.get(container) || [];
+        const events = this.eventMap.get(container) ?? [];
         events.filter((e) => e.event === event).forEach((e) => e.handler());
 
         this.eventMap.set(
@@ -36,7 +36,7 @@ export class EventStore {
     }
 
     public clear(container: ContainerExtension): EventStore {
-        const events = this.eventMap.get(container) || [];
+        const events = this.eventMap.get(container) ?? [];
         events.forEach((e) => e.handler());
 
         this.eventMap.delete(container);

@@ -3,10 +3,11 @@ import { Grid } from "./grid";
 import { GBoard } from "./board";
 import { UniqueCollection } from "./utils/unique_collection";
 import { Token } from "./token";
-import { Texture } from "pixi.js";
+import { Assets, Texture } from "pixi.js";
 import { SelectionBox } from "./selection/selection_box";
 import { SpriteExtension } from "./extensions/sprite_extension";
 import { SelectionHolder } from "./selection/selection_holder";
+import { GResizeHandler } from "./handlers/resize_handler";
 
 export class Scene {
     public readonly name: string;
@@ -63,6 +64,23 @@ export class Scene {
         this._selectionBox = new SelectionBox(this._viewport);
         this._selectionHolder = new SelectionHolder();
 
+        Assets.load("https://pixijs.com/assets/bunny.png").then((texture) => {
+            this.addToken({
+                x: 512,
+                y: 512,
+                texture,
+                tint: "white",
+                height: 300,
+            });
+            const control = this.tokens[this.tokens.length - 2];
+            const resizecontainer = this.tokens[this.tokens.length - 1];
+            control.container.unregisterDraggable();
+            control.container.unregisterSelectable();
+            GResizeHandler.registerResize(
+                control.container,
+                resizecontainer.container,
+            );
+        });
         this.addToken({});
         this.addToken({ x: 256, y: 256, tint: "red" });
         this.addToken({ x: 256, y: 512, tint: "blue" });
@@ -94,13 +112,20 @@ export class Scene {
         return this._selectionHolder;
     }
 
-    protected addToken({ x = 64, y = 64, tint = "green" }): void {
+    protected addToken({
+        x = 64,
+        y = 64,
+        tint = "green",
+        texture = undefined,
+        width = undefined,
+        height = undefined,
+    }): void {
         const sprite = new SpriteExtension(
             {
-                texture: Texture.WHITE,
+                texture: texture ?? Texture.WHITE,
                 tint: tint,
-                width: this._grid.cellSize * 3,
-                height: this._grid.cellSize * 3,
+                width: width ?? this._grid.cellSize * 3,
+                height: height ?? this._grid.cellSize * 3,
                 alpha: 0.5,
             },
             {

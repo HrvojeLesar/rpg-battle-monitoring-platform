@@ -9,6 +9,8 @@ export type ContainerExtensionOptions = {
     isSnapping?: boolean;
     isDraggable?: boolean;
     isSelectable?: boolean;
+    selectionOutline?: SelectionOutline;
+    isResizable?: boolean;
 } & ContainerOptions;
 
 export type Ghost = ContainerExtension;
@@ -19,6 +21,7 @@ export class ContainerExtension<
     protected _isSnapping: boolean = false;
     protected _isDraggable: boolean = false;
     protected _isSelectable: boolean = false;
+    protected _isResizable: boolean = false;
     protected _selectionOutline: SelectionOutline;
     protected _displayedEntity?: T;
     protected _ghots: UniqueCollection<ContainerExtension> =
@@ -27,9 +30,10 @@ export class ContainerExtension<
     public constructor(options?: ContainerExtensionOptions) {
         super(options);
 
-        this.isSnapping = options?.isSnapping || false;
-        this.isDraggable = options?.isDraggable || false;
-        this.isSelectable = options?.isSelectable || false;
+        this.isSnapping = options?.isSnapping ?? false;
+        this.isDraggable = options?.isDraggable ?? false;
+        this.isSelectable = options?.isSelectable ?? false;
+        this.isResizable = options?.isResizable ?? false;
         this._selectionOutline = new SelectionOutline(this);
 
         this.addChild(this._selectionOutline);
@@ -99,6 +103,14 @@ export class ContainerExtension<
         this._displayedEntity = value;
     }
 
+    public get isRenderable(): boolean {
+        return this._isResizable;
+    }
+
+    public set isResizable(value: boolean) {
+        this._isResizable = value;
+    }
+
     public destroy(options?: DestroyOptions) {
         this.unregisterDraggable();
         this.unregisterSelectable();
@@ -158,19 +170,19 @@ export class ContainerExtension<
         };
     }
 
-    private registerDraggable() {
+    public registerDraggable() {
         GDragHandler.registerDrag(this);
     }
 
-    private unregisterDraggable() {
+    public unregisterDraggable() {
         GDragHandler.unregisterDrag(this);
     }
 
-    private registerSelectable() {
+    public registerSelectable() {
         GSelectHandler.registerSelect(this);
     }
 
-    private unregisterSelectable() {
+    public unregisterSelectable() {
         GSelectHandler.unregisterSelect(this);
     }
 

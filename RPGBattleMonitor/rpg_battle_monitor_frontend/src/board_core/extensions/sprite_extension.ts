@@ -20,7 +20,7 @@ export class SpriteExtension extends ContainerExtension<Sprite> {
         super(containerOptions);
 
         this._displayedEntity = sprite;
-        this.addChild(this._displayedEntity);
+        this.addChildAt(this._displayedEntity, 0);
     }
 
     protected createGhostContainer(): Ghost {

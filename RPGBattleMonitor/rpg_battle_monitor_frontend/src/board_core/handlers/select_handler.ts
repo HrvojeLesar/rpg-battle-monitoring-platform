@@ -109,9 +109,7 @@ export class SelectHandler {
             const children = [...selectionHolder.children];
 
             children.forEach((c) => {
-                if (!(c instanceof ContainerExtension)) {
-                    c.destroy();
-                } else {
+                if (c instanceof ContainerExtension) {
                     GBoard.viewport.addChildAt(c, index++);
                     c.position = c.position.add(selectionHolder.position);
                 }
@@ -129,6 +127,10 @@ export class SelectHandler {
 
     public isSelectionDraggable(): boolean {
         return this.selections.every((s) => s.isDraggable);
+    }
+
+    public isSelectionResizable(): boolean {
+        return this.selections.every((s) => s.isResizable);
     }
 
     protected findSelectionRectangle(): Rectangle {
