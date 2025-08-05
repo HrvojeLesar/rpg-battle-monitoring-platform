@@ -6,16 +6,20 @@ import { Token } from "./token";
 import { Assets, Texture } from "pixi.js";
 import { SelectionBox } from "./selection/selection_box";
 import { SpriteExtension } from "./extensions/sprite_extension";
-import { SelectionHolder } from "./selection/selection_holder";
-import { GResizeHandler } from "./handlers/resize_handler";
+import { DragHandler } from "./handlers/drag_handler";
+import { EventStore } from "./handlers/registered_event_store";
+import { SelectHandler } from "./handlers/select_handler";
 
 export class Scene {
     public readonly name: string;
     protected _viewport: Viewport;
     protected _grid: Grid;
     protected _selectionBox: SelectionBox;
-    protected _selectionHolder: SelectionHolder;
     protected _tokens: UniqueCollection<Token> = new UniqueCollection();
+
+    protected _dragHandler: DragHandler;
+    protected _eventStore: EventStore;
+    protected _selectHandler: SelectHandler;
 
     public constructor(name: string) {
         this.name = name;
@@ -61,8 +65,19 @@ export class Scene {
         this._viewport.addChild(this._grid);
         this._viewport.pause = true;
 
-        this._selectionBox = new SelectionBox(this._viewport);
-        this._selectionHolder = new SelectionHolder();
+        this._eventStore = new EventStore(this);
+        this._selectHandler = new SelectHandler(this, this._eventStore);
+
+        this._dragHandler = new DragHandler(
+            this,
+            this._selectHandler,
+            this._eventStore,
+        );
+
+        this._selectionBox = new SelectionBox(
+            this._viewport,
+            this._selectHandler,
+        );
 
         Assets.load("https://pixijs.com/assets/bunny.png").then((texture) => {
             this.addToken({
@@ -72,14 +87,14 @@ export class Scene {
                 tint: "white",
                 height: 300,
             });
-            const control = this.tokens[this.tokens.length - 2];
-            const resizecontainer = this.tokens[this.tokens.length - 1];
-            control.container.unregisterDraggable();
-            control.container.unregisterSelectable();
-            GResizeHandler.registerResize(
-                control.container,
-                resizecontainer.container,
-            );
+            // const control = this.tokens[this.tokens.length - 2];
+            // const resizecontainer = this.tokens[this.tokens.length - 1];
+            // control.container.unregisterDraggable();
+            // control.container.unregisterSelectable();
+            // GResizeHandler.registerResize(
+            //     control.container,
+            //     resizecontainer.container,
+            // );
         });
         this.addToken({});
         this.addToken({ x: 256, y: 256, tint: "red" });
@@ -106,10 +121,6 @@ export class Scene {
 
     public get tokens(): Readonly<Token[]> {
         return this._tokens.getItems();
-    }
-
-    public get selectionHolder(): SelectionHolder {
-        return this._selectionHolder;
     }
 
     protected addToken({
@@ -139,6 +150,10 @@ export class Scene {
         );
 
         const token = new Token(sprite);
+
+        // WARN: Order matters, try changing so any order is valid
+        this._selectHandler.registerSelect(token.container);
+        this._dragHandler.registerDrag(token.container);
 
         this._tokens.add(token);
         this._viewport.addChild(token.container);

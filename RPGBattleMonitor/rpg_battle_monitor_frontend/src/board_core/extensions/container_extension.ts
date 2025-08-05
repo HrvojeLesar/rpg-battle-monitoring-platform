@@ -1,6 +1,6 @@
 import { Container, ContainerOptions, DestroyOptions, Point } from "pixi.js";
-import { GDragHandler } from "../handlers/drag_handler";
-import { GSelectHandler } from "../handlers/select_handler";
+import { DragHandler } from "../handlers/drag_handler";
+import { SelectHandler } from "../handlers/select_handler";
 import { UniqueCollection } from "../utils/unique_collection";
 import { GBoard } from "../board";
 import { SelectionOutline } from "../selection/selection_outline";
@@ -15,6 +15,11 @@ export type ContainerExtensionOptions = {
 
 export type Ghost = ContainerExtension;
 
+export type Handlers = {
+    dragHandler: DragHandler;
+    selectHandler: SelectHandler;
+};
+
 export class ContainerExtension<
     T extends Container = Container,
 > extends Container {
@@ -22,7 +27,6 @@ export class ContainerExtension<
     protected _isDraggable: boolean = false;
     protected _isSelectable: boolean = false;
     protected _isResizable: boolean = false;
-    protected _selectionOutline: SelectionOutline;
     protected _displayedEntity?: T;
     protected _ghots: UniqueCollection<ContainerExtension> =
         new UniqueCollection();
@@ -34,13 +38,6 @@ export class ContainerExtension<
         this.isDraggable = options?.isDraggable ?? false;
         this.isSelectable = options?.isSelectable ?? false;
         this.isResizable = options?.isResizable ?? false;
-        this._selectionOutline = new SelectionOutline(this);
-
-        this.addChild(this._selectionOutline);
-
-        // WARN: Order matters
-        this.registerSelectable();
-        this.registerDraggable();
     }
 
     public get isSnapping(): boolean {
@@ -112,8 +109,8 @@ export class ContainerExtension<
     }
 
     public destroy(options?: DestroyOptions) {
-        this.unregisterDraggable();
-        this.unregisterSelectable();
+        // this.unregisterDraggable();
+        // this.unregisterSelectable();
         super.destroy(options);
     }
 
@@ -170,21 +167,21 @@ export class ContainerExtension<
         };
     }
 
-    public registerDraggable() {
-        GDragHandler.registerDrag(this);
-    }
-
-    public unregisterDraggable() {
-        GDragHandler.unregisterDrag(this);
-    }
-
-    public registerSelectable() {
-        GSelectHandler.registerSelect(this);
-    }
-
-    public unregisterSelectable() {
-        GSelectHandler.unregisterSelect(this);
-    }
+    // public registerDraggable() {
+    //     this.dragHandler.registerDrag(this);
+    // }
+    //
+    // public unregisterDraggable() {
+    //     this.dragHandler.unregisterDrag(this);
+    // }
+    //
+    // public registerSelectable() {
+    //     this.selectHandler.registerSelect(this);
+    // }
+    //
+    // public unregisterSelectable() {
+    //     this.selectHandler.unregisterSelect(this);
+    // }
 
     protected addGhostToStage(ghost: Ghost): void {
         if (!this.displayedEntity) {

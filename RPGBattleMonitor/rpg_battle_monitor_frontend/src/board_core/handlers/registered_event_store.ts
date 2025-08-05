@@ -1,4 +1,5 @@
 import { ContainerExtension } from "../extensions/container_extension";
+import { Scene } from "../scene";
 
 type RegisteredEvent = {
     event: string;
@@ -7,6 +8,12 @@ type RegisteredEvent = {
 
 export class EventStore {
     protected eventMap = new Map<ContainerExtension, RegisteredEvent[]>();
+
+    protected scene: Scene;
+
+    public constructor(scene: Scene) {
+        this.scene = scene;
+    }
 
     public register(
         container: ContainerExtension,
@@ -44,5 +51,3 @@ export class EventStore {
         return this;
     }
 }
-
-export const GEventStore = new EventStore();

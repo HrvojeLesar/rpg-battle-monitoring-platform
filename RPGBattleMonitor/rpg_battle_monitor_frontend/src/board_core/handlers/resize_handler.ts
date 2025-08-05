@@ -1,8 +1,8 @@
 import { Container, FederatedPointerEvent, Point } from "pixi.js";
 import { ContainerExtension } from "../extensions/container_extension";
-import { GSelectHandler } from "./select_handler";
 import { GBoard } from "../board";
 import { DragHandler } from "./drag_handler";
+import { SelectHandler } from "./select_handler";
 
 export enum ResizeKind {
     Top,
@@ -21,7 +21,12 @@ type OnGlobalPointerMove = {
     container: ContainerExtension;
 };
 
-class ResizeHandler {
+export class ResizeHandler {
+    protected selectHandler: SelectHandler;
+
+    public constructor(selectHandler: SelectHandler) {
+        this.selectHandler = selectHandler;
+    }
     public registerResize(
         resizeDragPoint: Container,
         container: ContainerExtension,
@@ -36,7 +41,7 @@ class ResizeHandler {
             if (
                 container.isResizable === false ||
                 container.isSelectable === false ||
-                !GSelectHandler.isSelectionResizable()
+                !this.selectHandler.isSelectionResizable()
             ) {
                 return;
             }
@@ -77,5 +82,3 @@ class ResizeHandler {
         }
     }
 }
-
-export const GResizeHandler = new ResizeHandler();

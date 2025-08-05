@@ -7,7 +7,7 @@ import {
 } from "pixi.js";
 import { GBoard } from "../board";
 import { ContainerExtension } from "../extensions/container_extension";
-import { GSelectHandler } from "../handlers/select_handler";
+import { SelectHandler } from "../handlers/select_handler";
 
 class ResizeControls extends Container {
     private static readonly POSITION_FUNCS = [
@@ -114,13 +114,15 @@ export class SelectionOutline extends Container {
         SelectionOutline.OUTLINE_OFFSET * 2;
     protected _outlineAround: ContainerExtension;
     protected _outline: Graphics;
+    protected selectHandler: SelectHandler;
     // protected _resizeControls: ResizeControls;
 
-    constructor(around: ContainerExtension) {
+    constructor(around: ContainerExtension, selectHandler: SelectHandler) {
         super();
 
         this.visible = false;
         this._outlineAround = around;
+        this.selectHandler = selectHandler;
 
         GBoard.app.ticker.add(this.tickerStroke, this);
 
@@ -142,7 +144,7 @@ export class SelectionOutline extends Container {
             return;
         }
 
-        if (GSelectHandler.isSelected(this._outlineAround)) {
+        if (this.selectHandler.isSelected(this._outlineAround)) {
             this.visible = true;
             this._outline
                 .clear()

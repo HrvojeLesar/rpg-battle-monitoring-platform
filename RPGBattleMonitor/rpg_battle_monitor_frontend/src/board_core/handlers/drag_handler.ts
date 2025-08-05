@@ -1,8 +1,9 @@
 import { FederatedPointerEvent, Point } from "pixi.js";
-import { GBoard } from "../board";
 import { ContainerExtension } from "../extensions/container_extension";
-import { GEventStore } from "./registered_event_store";
-import { GSelectHandler } from "./select_handler";
+import { Scene } from "../scene";
+import { SelectHandler } from "./select_handler";
+import { EventStore } from "./registered_event_store";
+import { UniqueCollection } from "../utils/unique_collection";
 
 type OnGlobalPointerMove = {
     handler: DragHandler;
@@ -14,13 +15,28 @@ export class DragHandler {
     public static UNREGISTER_DRAG: string = "UNREGISTER_DRAG";
     protected isDirty: boolean = false;
 
-    public constructor() {}
+    protected scene: Scene;
+    protected selectHandler: SelectHandler;
+    protected eventStore: EventStore;
+
+    protected managedContainers: UniqueCollection<ContainerExtension> =
+        new UniqueCollection();
+
+    public constructor(
+        scene: Scene,
+        selectHandler: SelectHandler,
+        eventStore: EventStore,
+    ) {
+        this.scene = scene;
+        this.selectHandler = selectHandler;
+        this.eventStore = eventStore;
+    }
 
     protected onGlobalPointerMove(
         this: OnGlobalPointerMove,
         event: FederatedPointerEvent,
     ) {
-        const localPos = event.getLocalPosition(GBoard.viewport);
+        const localPos = event.getLocalPosition(this.handler.scene.viewport);
         const newEntityPosition = new Point(
             localPos.x - this.offset.x,
             localPos.y - this.offset.y,
@@ -51,45 +67,52 @@ export class DragHandler {
             if (
                 container.isDraggable === false ||
                 container.isSelectable === false ||
-                !GSelectHandler.isSelectionDraggable()
+                !this.selectHandler.isSelectionDraggable()
             ) {
                 return;
             }
 
-            GBoard.viewport.pause = true;
+            this.scene.viewport.pause = true;
 
-            const selectionHolder = GSelectHandler.selectionHolder;
+            const selectionHolder = this.selectHandler.selectionHolder;
             if (!selectionHolder) {
                 return;
             }
 
             const offset = new Point();
-            const localPos = event.getLocalPosition(GBoard.viewport);
+            const localPos = event.getLocalPosition(this.scene.viewport);
             offset.x = localPos.x - selectionHolder.x;
             offset.y = localPos.y - selectionHolder.y;
 
             selectionHolder.createGhost();
 
-            GBoard.viewport.on("globalpointermove", this.onGlobalPointerMove, {
-                handler: this,
-                offset: offset,
-                container: selectionHolder,
-            });
+            this.scene.viewport.on(
+                "globalpointermove",
+                this.onGlobalPointerMove,
+                {
+                    handler: this,
+                    offset: offset,
+                    container: selectionHolder,
+                },
+            );
         };
 
         const onPointerUp = (_event: FederatedPointerEvent) => {
-            GBoard.viewport.off("globalpointermove", this.onGlobalPointerMove);
-            GBoard.viewport.pause = false;
+            this.scene.viewport.off(
+                "globalpointermove",
+                this.onGlobalPointerMove,
+            );
+            this.scene.viewport.pause = false;
 
-            const selectedItems = GSelectHandler.selections;
-            GSelectHandler.deselectGroup();
+            const selectedItems = this.selectHandler.selections;
+            this.selectHandler.deselectGroup();
             for (const container of selectedItems) {
                 if (this.isDirty) {
                     container.snapToGrid();
                 }
                 container.clearGhosts();
             }
-            GSelectHandler.selectGroup();
+            this.selectHandler.selectGroup();
 
             this.isDirty = false;
         };
@@ -104,16 +127,17 @@ export class DragHandler {
             container.off("pointerupoutside", onPointerUp);
         };
 
-        GEventStore.register(
+        this.eventStore.register(
             container,
             DragHandler.UNREGISTER_DRAG,
             unregisterDrag,
         );
+
+        this.managedContainers.add(container);
     }
 
     public unregisterDrag(container: ContainerExtension) {
-        GEventStore.unregister(container, DragHandler.UNREGISTER_DRAG);
+        this.managedContainers.remove(container);
+        this.eventStore.unregister(container, DragHandler.UNREGISTER_DRAG);
     }
 }
-
-export const GDragHandler = new DragHandler();

@@ -6,11 +6,11 @@ import {
 } from "../extensions/container_extension";
 import { GBoard } from "../board";
 import { SelectionOutline } from "./selection_outline";
-import { GSelectHandler } from "../handlers/select_handler";
+import { SelectHandler } from "../handlers/select_handler";
 
 class SelectionHolderOutline extends SelectionOutline {
     protected tickerStroke(): void {
-        if (GSelectHandler.isMultiSelection()) {
+        if (this.selectHandler.isMultiSelection()) {
             this.visible = true;
             this._outline
                 .clear()
@@ -31,19 +31,20 @@ class SelectionHolderOutline extends SelectionOutline {
 }
 
 export class SelectionHolder extends ContainerExtension<Container> {
-    public constructor(options?: ContainerExtensionOptions) {
+    protected selectHandler: SelectHandler;
+
+    public constructor(
+        selectHandler: SelectHandler,
+        options?: ContainerExtensionOptions,
+    ) {
         super(options);
 
-        this.removeChild(this._selectionOutline);
-        this._selectionOutline.destroy();
-
-        this._selectionOutline = new SelectionHolderOutline(this);
-        this.addChild(this._selectionOutline);
+        this.selectHandler = selectHandler;
     }
 
     protected createGhostContainer(): Ghost {
         const children = [...this.children];
-        GSelectHandler.deselectGroup();
+        this.selectHandler.deselectGroup();
 
         children.forEach((c) => {
             if (
@@ -54,9 +55,9 @@ export class SelectionHolder extends ContainerExtension<Container> {
                 this.addGhostToStage(ghost);
             }
         });
-        GSelectHandler.selectGroup();
+        this.selectHandler.selectGroup();
 
-        return new SelectionHolder();
+        return new SelectionHolder(this.selectHandler);
     }
 
     public clearGhosts(): void {
@@ -106,9 +107,6 @@ export class SelectionHolder extends ContainerExtension<Container> {
         ...children: U
     ): U[0] {
         const child = super.addChild(...children);
-
-        // Keeps outline on top
-        super.addChild(this._selectionOutline);
 
         return child;
     }

@@ -1,9 +1,9 @@
 import { FederatedPointerEvent, Rectangle } from "pixi.js";
 import { UniqueCollection } from "../utils/unique_collection";
 import { ContainerExtension } from "../extensions/container_extension";
-import { GEventStore } from "./registered_event_store";
-import { GBoard } from "../board";
+import { EventStore } from "./registered_event_store";
 import { SelectionHolder } from "../selection/selection_holder";
+import { Scene } from "../scene";
 
 export class SelectHandler {
     public static UNREGISTER_SELECT: string = "UNREGISTER_SELECT";
@@ -11,7 +11,19 @@ export class SelectHandler {
     protected _selected: UniqueCollection<ContainerExtension> =
         new UniqueCollection();
 
-    public constructor() {}
+    protected scene: Scene;
+    protected eventStore: EventStore;
+    protected _selectionHolder: SelectionHolder;
+
+    protected managedContainers: UniqueCollection<ContainerExtension> =
+        new UniqueCollection();
+
+    public constructor(scene: Scene, eventStore: EventStore) {
+        this.scene = scene;
+        this.eventStore = eventStore;
+        this._selectionHolder = new SelectionHolder(this);
+        this.scene.viewport.addChild(this._selectionHolder);
+    }
 
     public get selections(): Readonly<ContainerExtension[]> {
         return this._selected.items;
@@ -53,16 +65,19 @@ export class SelectHandler {
             container.off("pointerdown", onPointerDown);
         };
 
-        GEventStore.register(
+        this.eventStore.register(
             container,
             SelectHandler.UNREGISTER_SELECT,
             unregister,
         );
+
+        this.managedContainers.add(container);
     }
 
     public unregisterSelect(container: ContainerExtension) {
         this.deselect(container);
-        GEventStore.unregister(container, SelectHandler.UNREGISTER_SELECT);
+        this.managedContainers.remove(container);
+        this.eventStore.unregister(container, SelectHandler.UNREGISTER_SELECT);
     }
 
     public clearSelections() {
@@ -91,9 +106,9 @@ export class SelectHandler {
             selectionRectangle.y,
         );
 
-        GBoard.viewport.addChildAt(
+        this.scene.viewport.addChildAt(
             selectionHolder,
-            GBoard.viewport.getChildIndex(this.selections[0]),
+            this.scene.viewport.getChildIndex(this.selections[0]),
         );
 
         this.putSelectionsIntoHolder();
@@ -103,22 +118,22 @@ export class SelectHandler {
         const selectionHolder = this.selectionHolder;
         const isHolderOnStage =
             selectionHolder &&
-            GBoard.viewport.children.indexOf(selectionHolder) !== -1;
+            this.scene.viewport.children.indexOf(selectionHolder) !== -1;
         if (selectionHolder && isHolderOnStage) {
-            let index = GBoard.viewport.getChildIndex(selectionHolder);
+            let index = this.scene.viewport.getChildIndex(selectionHolder);
             const children = [...selectionHolder.children];
 
             children.forEach((c) => {
                 if (c instanceof ContainerExtension) {
-                    GBoard.viewport.addChildAt(c, index++);
+                    this.scene.viewport.addChildAt(c, index++);
                     c.position = c.position.add(selectionHolder.position);
                 }
             });
         }
     }
 
-    public get selectionHolder(): Maybe<SelectionHolder> {
-        return GBoard.scene?.selectionHolder;
+    public get selectionHolder(): SelectionHolder {
+        return this._selectionHolder;
     }
 
     public isContainerInSelection(container: ContainerExtension): boolean {
@@ -168,11 +183,9 @@ export class SelectHandler {
                     localPositionToContainer.x,
                     localPositionToContainer.y,
                 );
-                GBoard.viewport.removeChild(s);
+                this.scene.viewport.removeChild(s);
                 selectionHolder.addChild(s);
             });
         }
     }
 }
-
-export const GSelectHandler = new SelectHandler();
