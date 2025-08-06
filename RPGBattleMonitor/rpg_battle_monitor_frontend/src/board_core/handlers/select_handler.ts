@@ -41,7 +41,6 @@ export class SelectHandler {
 
     public select(container: ContainerExtension): void {
         this._selected.add(container);
-        console.log("selected", this._selected.items);
         const outline = new SingleSelectionOutline(container, this);
         this.outlines.get(container)?.destroy();
 
@@ -51,7 +50,6 @@ export class SelectHandler {
 
     public deselect(container: ContainerExtension): void {
         this._selected.remove(container);
-        console.log("deselect", this._selected.items);
         this.outlines.get(container)?.destroy();
     }
 
@@ -104,7 +102,6 @@ export class SelectHandler {
             this.outlines.get(key)?.destroy();
         }
         this._selected.clear();
-        console.log("clear", this._selected.items);
     }
 
     public isMultiSelection(): boolean {

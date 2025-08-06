@@ -20,6 +20,10 @@ type OnGlobalPointerMove = {
     handler: DragHandler;
     startPoint: Point;
     container: ContainerExtension;
+    initialWidth: number;
+    initialHeight: number;
+    initialPoint: Point;
+    kind: ResizeKind;
 };
 
 export class ResizeHandler {
@@ -41,11 +45,6 @@ export class ResizeHandler {
             }
             event.stopPropagation();
 
-            console.log(kind);
-            console.log(container.isResizable === false);
-            console.log(container.isSelectable === false);
-            console.log(this.selectHandler.isSelectionResizable());
-
             if (
                 container.isResizable === false ||
                 container.isSelectable === false ||
@@ -58,6 +57,12 @@ export class ResizeHandler {
                 handler: this,
                 startPoint: event.getLocalPosition(GBoard.viewport),
                 container: container,
+                initialWidth:
+                    container.displayedEntity?.width ?? container.width,
+                initialHeight:
+                    container.displayedEntity?.height ?? container.height,
+                initialPoint: container.position,
+                kind: kind,
             });
         };
 
@@ -78,17 +83,64 @@ export class ResizeHandler {
         event: FederatedPointerEvent,
     ) {
         const localPos = event.getLocalPosition(GBoard.viewport);
-        const modifyWidthBy = localPos.x - this.startPoint.x;
-        const modifyHeightBy = localPos.y - this.startPoint.y;
+        const modifyX = localPos.x - this.startPoint.x;
+        const modifyY = localPos.y - this.startPoint.y;
 
-        const container = this.container.displayedEntity ?? this.container;
-        const widthResult = container.width + modifyWidthBy;
-        console.log("container width", container.width);
-        console.log("final width", widthResult);
-        if (widthResult < 10) {
-            container.width = 10;
-        } else {
-            container.width = widthResult;
+        const modifyContainer =
+            this.container.displayedEntity ?? this.container;
+
+        if (this.kind === ResizeKind.Right) {
+            const widthResult = this.initialWidth + modifyX;
+            modifyContainer.width = widthResult;
+        }
+
+        if (this.kind === ResizeKind.Bottom) {
+            const heightResult = this.initialHeight + modifyY;
+            modifyContainer.height = heightResult;
+        }
+
+        if (this.kind === ResizeKind.Left) {
+            const widthResult = this.initialWidth - modifyX;
+            this.container.position.x = modifyX;
+            modifyContainer.width = widthResult;
+        }
+
+        if (this.kind === ResizeKind.Top) {
+            const heightResult = this.initialHeight - modifyY;
+            this.container.position.y = modifyY;
+            modifyContainer.height = heightResult;
+        }
+
+        if (this.kind === ResizeKind.BottomRight) {
+            const widthResult = this.initialWidth + modifyX;
+            modifyContainer.width = widthResult;
+            const heightResult = this.initialHeight + modifyY;
+            modifyContainer.height = heightResult;
+        }
+
+        if (this.kind === ResizeKind.TopRight) {
+            const heightResult = this.initialHeight - modifyY;
+            this.container.position.y = modifyY;
+            modifyContainer.height = heightResult;
+            const widthResult = this.initialWidth + modifyX;
+            modifyContainer.width = widthResult;
+        }
+
+        if (this.kind === ResizeKind.BottomLeft) {
+            const heightResult = this.initialHeight + modifyY;
+            modifyContainer.height = heightResult;
+            const widthResult = this.initialWidth - modifyX;
+            this.container.position.x = modifyX;
+            modifyContainer.width = widthResult;
+        }
+
+        if (this.kind === ResizeKind.TopLeft) {
+            const widthResult = this.initialWidth - modifyX;
+            this.container.position.x = modifyX;
+            modifyContainer.width = widthResult;
+            const heightResult = this.initialHeight - modifyY;
+            this.container.position.y = modifyY;
+            modifyContainer.height = heightResult;
         }
     }
 }
