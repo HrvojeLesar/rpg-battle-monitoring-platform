@@ -3,16 +3,17 @@ import { ContainerExtension } from "../extensions/container_extension";
 import { GBoard } from "../board";
 import { DragHandler } from "./drag_handler";
 import { SelectHandler } from "./select_handler";
+import { Scene } from "../scene";
 
 export enum ResizeKind {
-    Top,
-    TopRight,
-    Right,
-    BottomRight,
-    Bottom,
-    BottomLeft,
-    Left,
-    TopLeft,
+    TopLeft = "top-left",
+    Top = "top",
+    TopRight = "top-right",
+    Right = "right",
+    BottomRight = "bottom-right",
+    Bottom = "bottom",
+    BottomLeft = "bottom-left",
+    Left = "left",
 }
 
 type OnGlobalPointerMove = {
@@ -23,9 +24,11 @@ type OnGlobalPointerMove = {
 
 export class ResizeHandler {
     protected selectHandler: SelectHandler;
+    protected scene: Scene;
 
-    public constructor(selectHandler: SelectHandler) {
+    public constructor(selectHandler: SelectHandler, scene: Scene) {
         this.selectHandler = selectHandler;
+        this.scene = scene;
     }
     public registerResize(
         resizeDragPoint: Container,
@@ -38,6 +41,11 @@ export class ResizeHandler {
             }
             event.stopPropagation();
 
+            console.log(kind);
+            console.log(container.isResizable === false);
+            console.log(container.isSelectable === false);
+            console.log(this.selectHandler.isSelectionResizable());
+
             if (
                 container.isResizable === false ||
                 container.isSelectable === false ||
@@ -46,7 +54,6 @@ export class ResizeHandler {
                 return;
             }
 
-            // console.log("start", event.getLocalPosition(GBoard.viewport));
             GBoard.viewport.on("globalmousemove", this.onGlobalPointerMove, {
                 handler: this,
                 startPoint: event.getLocalPosition(GBoard.viewport),
@@ -55,7 +62,10 @@ export class ResizeHandler {
         };
 
         const onPointerUp = () => {
-            GBoard.viewport.off("globalmousemove", this.onGlobalPointerMove);
+            this.scene.viewport.off(
+                "globalmousemove",
+                this.onGlobalPointerMove,
+            );
         };
 
         resizeDragPoint.on("pointerdown", onPointerDown);

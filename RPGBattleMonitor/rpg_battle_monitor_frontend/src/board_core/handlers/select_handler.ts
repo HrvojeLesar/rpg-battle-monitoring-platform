@@ -2,8 +2,14 @@ import { FederatedPointerEvent, Rectangle } from "pixi.js";
 import { UniqueCollection } from "../utils/unique_collection";
 import { ContainerExtension } from "../extensions/container_extension";
 import { EventStore } from "./registered_event_store";
-import { SelectionHolder } from "../selection/selection_holder";
 import { Scene } from "../scene";
+import { SelectionOutline } from "../selection/selection_outline";
+import { SingleSelectionOutline } from "../selection/single_selection_outline";
+import {
+    SelectionHolder,
+    SelectionHolderContainer,
+} from "../selection/selection_holder";
+import { ResizeHandler } from "./resize_handler";
 
 export class SelectHandler {
     public static UNREGISTER_SELECT: string = "UNREGISTER_SELECT";
@@ -13,7 +19,9 @@ export class SelectHandler {
 
     protected scene: Scene;
     protected eventStore: EventStore;
-    protected _selectionHolder: SelectionHolder;
+    protected selectionHolderContainer: SelectionHolderContainer;
+    protected outlines: Map<ContainerExtension, SelectionOutline> = new Map();
+    protected _resizeHandler: ResizeHandler;
 
     protected managedContainers: UniqueCollection<ContainerExtension> =
         new UniqueCollection();
@@ -21,8 +29,10 @@ export class SelectHandler {
     public constructor(scene: Scene, eventStore: EventStore) {
         this.scene = scene;
         this.eventStore = eventStore;
-        this._selectionHolder = new SelectionHolder(this);
-        this.scene.viewport.addChild(this._selectionHolder);
+        this._resizeHandler = new ResizeHandler(this, this.scene);
+
+        this.selectionHolderContainer = new SelectionHolderContainer(this);
+        this.scene.viewport.addChild(this.selectionHolderContainer);
     }
 
     public get selections(): Readonly<ContainerExtension[]> {
@@ -31,10 +41,18 @@ export class SelectHandler {
 
     public select(container: ContainerExtension): void {
         this._selected.add(container);
+        console.log("selected", this._selected.items);
+        const outline = new SingleSelectionOutline(container, this);
+        this.outlines.get(container)?.destroy();
+
+        this.outlines.set(container, outline);
+        this.scene.viewport.addChild(outline);
     }
 
     public deselect(container: ContainerExtension): void {
         this._selected.remove(container);
+        console.log("deselect", this._selected.items);
+        this.outlines.get(container)?.destroy();
     }
 
     public isSelected(container: ContainerExtension): boolean {
@@ -82,7 +100,11 @@ export class SelectHandler {
 
     public clearSelections() {
         this.deselectGroup();
+        for (const key of this.outlines.keys()) {
+            this.outlines.get(key)?.destroy();
+        }
         this._selected.clear();
+        console.log("clear", this._selected.items);
     }
 
     public isMultiSelection(): boolean {
@@ -95,9 +117,6 @@ export class SelectHandler {
         }
 
         const selectionHolder = this.selectionHolder;
-        if (!selectionHolder) {
-            return;
-        }
 
         const selectionRectangle = this.findSelectionRectangle();
 
@@ -133,7 +152,11 @@ export class SelectHandler {
     }
 
     public get selectionHolder(): SelectionHolder {
-        return this._selectionHolder;
+        return this.selectionHolderContainer.holder;
+    }
+
+    public get resizeHandler(): ResizeHandler {
+        return this._resizeHandler;
     }
 
     public isContainerInSelection(container: ContainerExtension): boolean {

@@ -67,7 +67,6 @@ export class Scene {
 
         this._eventStore = new EventStore(this);
         this._selectHandler = new SelectHandler(this, this._eventStore);
-
         this._dragHandler = new DragHandler(
             this,
             this._selectHandler,
@@ -143,6 +142,7 @@ export class Scene {
                 isSnapping: tint === "red" ? false : true,
                 isDraggable: true,
                 isSelectable: tint === "blue" ? false : true,
+                isResizable: true,
                 eventMode: "static",
                 cursor: "pointer",
                 position: { x: x, y: y },

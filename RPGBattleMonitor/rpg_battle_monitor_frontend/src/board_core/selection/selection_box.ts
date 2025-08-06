@@ -43,6 +43,9 @@ export class SelectionBox extends Graphics {
                 .stroke({ color: "white", width: 1 });
 
             const bounds = this.getBounds().rectangle;
+
+            // TODO: This only works for tokens, shoudl be generic for any container
+            // that is currently selectable on the scene
             GBoard.scene?.tokens.forEach((token) => {
                 const tokenBounds = token.container.getBounds().rectangle;
                 if (

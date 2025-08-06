@@ -100,7 +100,7 @@ export class ContainerExtension<
         this._displayedEntity = value;
     }
 
-    public get isRenderable(): boolean {
+    public get isResizable(): boolean {
         return this._isResizable;
     }
 

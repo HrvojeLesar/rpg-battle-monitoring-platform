@@ -1,6 +1,7 @@
 import {
     Container,
     ContainerOptions,
+    Cursor,
     DestroyOptions,
     Graphics,
     Point,
@@ -8,74 +9,127 @@ import {
 import { GBoard } from "../board";
 import { ContainerExtension } from "../extensions/container_extension";
 import { SelectHandler } from "../handlers/select_handler";
+import { NEGATIVE_POINT } from "../utils/consts";
+import { ResizeHandler, ResizeKind } from "../handlers/resize_handler";
+
+type PositionFuncs = {
+    fn: (position: Point, width: number, height: number) => Point;
+    kind: ResizeKind;
+    cursor: Cursor;
+};
 
 class ResizeControls extends Container {
-    private static readonly POSITION_FUNCS = [
-        (position: Point, _width: number, _height: number): Point => {
-            return new Point(
-                position.x - SelectionOutline.OUTLINE_OFFSET,
-                position.y - SelectionOutline.OUTLINE_OFFSET,
-            );
-        }, // Top left
-        (position: Point, width: number, _height: number): Point => {
-            return new Point(
-                position.x - SelectionOutline.OUTLINE_OFFSET + width / 2,
-                position.y - SelectionOutline.OUTLINE_OFFSET,
-            );
-        }, // Top
-        (position: Point, width: number, _height: number): Point => {
-            return new Point(
-                position.x - SelectionOutline.OUTLINE_OFFSET + width,
-                position.y - SelectionOutline.OUTLINE_OFFSET,
-            );
-        }, // Top right
-        (position: Point, width: number, height: number): Point => {
-            return new Point(
-                position.x - SelectionOutline.OUTLINE_OFFSET + width,
-                position.y - SelectionOutline.OUTLINE_OFFSET + height / 2,
-            );
-        }, // Right
-        (position: Point, width: number, height: number): Point => {
-            return new Point(
-                position.x - SelectionOutline.OUTLINE_OFFSET + width,
-                position.y - SelectionOutline.OUTLINE_OFFSET + height,
-            );
-        }, // Bottom right
-        (position: Point, width: number, height: number): Point => {
-            return new Point(
-                position.x - SelectionOutline.OUTLINE_OFFSET + width / 2,
-                position.y - SelectionOutline.OUTLINE_OFFSET + height,
-            );
-        }, // Bottom
-        (position: Point, _width: number, height: number): Point => {
-            return new Point(
-                position.x - SelectionOutline.OUTLINE_OFFSET,
-                position.y - SelectionOutline.OUTLINE_OFFSET + height,
-            );
-        }, // Bottom left
-        (position: Point, _width: number, height: number): Point => {
-            return new Point(
-                position.x - SelectionOutline.OUTLINE_OFFSET,
-                position.y - SelectionOutline.OUTLINE_OFFSET + height / 2,
-            );
-        }, // Left
+    private static readonly POSITION_FUNCS: PositionFuncs[] = [
+        {
+            fn: (position: Point, _width: number, _height: number): Point => {
+                return new Point(
+                    position.x - SelectionOutline.OUTLINE_OFFSET,
+                    position.y - SelectionOutline.OUTLINE_OFFSET,
+                );
+            }, // Top left
+            kind: ResizeKind.TopLeft,
+            cursor: "nw-resize",
+        },
+        {
+            fn: (position: Point, width: number, _height: number): Point => {
+                return new Point(
+                    position.x - SelectionOutline.OUTLINE_OFFSET + width / 2,
+                    position.y - SelectionOutline.OUTLINE_OFFSET,
+                );
+            }, // Top
+            kind: ResizeKind.Top,
+            cursor: "n-resize",
+        },
+        {
+            fn: (position: Point, width: number, _height: number): Point => {
+                return new Point(
+                    position.x - SelectionOutline.OUTLINE_OFFSET + width,
+                    position.y - SelectionOutline.OUTLINE_OFFSET,
+                );
+            }, // Top right
+            kind: ResizeKind.TopRight,
+            cursor: "ne-resize",
+        },
+        {
+            fn: (position: Point, width: number, height: number): Point => {
+                return new Point(
+                    position.x - SelectionOutline.OUTLINE_OFFSET + width,
+                    position.y - SelectionOutline.OUTLINE_OFFSET + height / 2,
+                );
+            }, // Right
+            kind: ResizeKind.Right,
+            cursor: "e-resize",
+        },
+        {
+            fn: (position: Point, width: number, height: number): Point => {
+                return new Point(
+                    position.x - SelectionOutline.OUTLINE_OFFSET + width,
+                    position.y - SelectionOutline.OUTLINE_OFFSET + height,
+                );
+            }, // Bottom right
+            kind: ResizeKind.BottomRight,
+            cursor: "se-resize",
+        },
+        {
+            fn: (position: Point, width: number, height: number): Point => {
+                return new Point(
+                    position.x - SelectionOutline.OUTLINE_OFFSET + width / 2,
+                    position.y - SelectionOutline.OUTLINE_OFFSET + height,
+                );
+            }, // Bottom
+            kind: ResizeKind.Bottom,
+            cursor: "s-resize",
+        },
+        {
+            fn: (position: Point, _width: number, height: number): Point => {
+                return new Point(
+                    position.x - SelectionOutline.OUTLINE_OFFSET,
+                    position.y - SelectionOutline.OUTLINE_OFFSET + height,
+                );
+            }, // Bottom left
+            kind: ResizeKind.BottomLeft,
+            cursor: "sw-resize",
+        },
+        {
+            fn: (position: Point, _width: number, height: number): Point => {
+                return new Point(
+                    position.x - SelectionOutline.OUTLINE_OFFSET,
+                    position.y - SelectionOutline.OUTLINE_OFFSET + height / 2,
+                );
+            }, // Left
+            kind: ResizeKind.Left,
+            cursor: "w-resize",
+        },
     ];
+
     protected _outlineContainer: ContainerExtension;
     protected _controlPoints: Graphics[];
+    protected resizeHandler: ResizeHandler;
 
     constructor(
         outlineContainer: ContainerExtension,
+        resizeHandler: ResizeHandler,
         options?: ContainerOptions,
     ) {
         super(options);
 
         this._outlineContainer = outlineContainer;
         this._controlPoints = [];
+        this.resizeHandler = resizeHandler;
 
-        ResizeControls.POSITION_FUNCS.forEach(() => {
-            const controlPoint = new Graphics();
+        ResizeControls.POSITION_FUNCS.forEach((f) => {
+            const controlPoint = new Graphics({
+                eventMode: "static",
+                cursor: f.cursor,
+            });
             this._controlPoints.push(controlPoint);
             this.addChild(controlPoint);
+
+            this.resizeHandler.registerResize(
+                controlPoint,
+                this._outlineContainer,
+                f.kind,
+            );
         });
 
         GBoard.app.ticker.add(this.tickerStroke, this);
@@ -88,13 +142,13 @@ class ResizeControls extends Container {
     }
 
     protected tickerStroke(): void {
-        const outlineContainerLocalPos = GBoard.viewport.toLocal(
-            this._outlineContainer,
-        );
+        const outlineContainerLocalPos = this._outlineContainer
+            .toLocal(GBoard.viewport)
+            .multiply(NEGATIVE_POINT);
 
-        ResizeControls.POSITION_FUNCS.forEach((pos, idx) => {
+        ResizeControls.POSITION_FUNCS.forEach((f, idx) => {
             const controlPoint = this._controlPoints[idx];
-            const position = pos(
+            const position = f.fn(
                 outlineContainerLocalPos,
                 this._outlineContainer.width,
                 this._outlineContainer.height,
@@ -115,12 +169,11 @@ export class SelectionOutline extends Container {
     protected _outlineAround: ContainerExtension;
     protected _outline: Graphics;
     protected selectHandler: SelectHandler;
-    // protected _resizeControls: ResizeControls;
+    protected _resizeControls: ResizeControls;
 
     constructor(around: ContainerExtension, selectHandler: SelectHandler) {
         super();
 
-        this.visible = false;
         this._outlineAround = around;
         this.selectHandler = selectHandler;
 
@@ -129,37 +182,44 @@ export class SelectionOutline extends Container {
         this._outline = new Graphics();
         this.addChild(this._outline);
 
-        // this._resizeControls = new ResizeControls(this._outlineAround);
-        // this.addChild(this._resizeControls);
+        this._resizeControls = new ResizeControls(
+            this._outlineAround,
+            this.selectHandler.resizeHandler,
+        );
+        this.addChild(this._resizeControls);
     }
 
     public destroy(options?: DestroyOptions): void {
         GBoard.app.ticker.remove(this.tickerStroke, this);
 
+        this._resizeControls.destroy(options);
         super.destroy(options);
     }
 
-    protected tickerStroke(): void {
+    protected drawOutline(): void {
         if (!this._outlineAround.displayedEntity) {
             return;
         }
 
-        if (this.selectHandler.isSelected(this._outlineAround)) {
-            this.visible = true;
-            this._outline
-                .clear()
-                .rect(
-                    0,
-                    0,
-                    this._outlineAround.displayedEntity.width,
-                    this._outlineAround.displayedEntity.height,
-                )
-                .stroke({
-                    color: "red",
-                    width: 5,
-                });
-        } else {
-            this.visible = false;
-        }
+        const outlinePosition = this._outlineAround
+            .toLocal(GBoard.viewport)
+            .multiply(NEGATIVE_POINT);
+
+        this._outline
+            .clear()
+            .rect(
+                outlinePosition.x,
+                outlinePosition.y,
+                this._outlineAround.displayedEntity.width,
+                this._outlineAround.displayedEntity.height,
+            )
+            .stroke({
+                color: "red",
+                width: 5,
+            });
+    }
+
+    private tickerStroke(): void {
+        this.drawOutline();
     }
 }
