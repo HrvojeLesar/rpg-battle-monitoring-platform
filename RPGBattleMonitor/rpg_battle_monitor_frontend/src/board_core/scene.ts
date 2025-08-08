@@ -122,6 +122,10 @@ export class Scene {
         return this._tokens.getItems();
     }
 
+    public get eventStore(): EventStore {
+        return this._eventStore;
+    }
+
     protected addToken({
         x = 64,
         y = 64,

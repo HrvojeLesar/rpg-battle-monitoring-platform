@@ -1,9 +1,17 @@
-import { Container, ContainerOptions, DestroyOptions, Point } from "pixi.js";
+import {
+    Container,
+    ContainerOptions,
+    DestroyOptions,
+    ObservablePoint,
+    Point,
+} from "pixi.js";
 import { DragHandler } from "../handlers/drag_handler";
 import { SelectHandler } from "../handlers/select_handler";
 import { UniqueCollection } from "../utils/unique_collection";
 import { GBoard } from "../board";
 import { SelectionOutline } from "../selection/selection_outline";
+import { IResizable, resize } from "../handlers/resizable";
+import { ResizeKind } from "../handlers/resize_handler";
 
 export type ContainerExtensionOptions = {
     isSnapping?: boolean;
@@ -20,9 +28,10 @@ export type Handlers = {
     selectHandler: SelectHandler;
 };
 
-export class ContainerExtension<
-    T extends Container = Container,
-> extends Container {
+export class ContainerExtension<T extends Container = Container>
+    extends Container
+    implements IResizable
+{
     protected _isSnapping: boolean = false;
     protected _isDraggable: boolean = false;
     protected _isSelectable: boolean = false;
@@ -101,6 +110,10 @@ export class ContainerExtension<
     }
 
     public get isResizable(): boolean {
+        if (!this.displayedEntity) {
+            return false;
+        }
+
         return this._isResizable;
     }
 
@@ -150,6 +163,40 @@ export class ContainerExtension<
         }
     }
 
+    getInitialPosition(): ObservablePoint {
+        return this.position;
+    }
+
+    getInitialHeight(): number {
+        return this.displayedEntity?.height ?? this.height;
+    }
+
+    getInitialWidth(): number {
+        return this.displayedEntity?.width ?? this.width;
+    }
+
+    resize(
+        pointerPosition: Point,
+        startPoint: Point,
+        initialWidth: number,
+        initialHeight: number,
+        kind: ResizeKind,
+    ): void {
+        if (!this.displayedEntity) {
+            return;
+        }
+
+        resize(
+            this,
+            this.displayedEntity,
+            pointerPosition,
+            startPoint,
+            initialWidth,
+            initialHeight,
+            kind,
+        );
+    }
+
     protected createGhostContainer(): Ghost {
         if (this instanceof ContainerExtension) {
             return new ContainerExtension(this);
@@ -166,22 +213,6 @@ export class ContainerExtension<
             eventMode: "none",
         };
     }
-
-    // public registerDraggable() {
-    //     this.dragHandler.registerDrag(this);
-    // }
-    //
-    // public unregisterDraggable() {
-    //     this.dragHandler.unregisterDrag(this);
-    // }
-    //
-    // public registerSelectable() {
-    //     this.selectHandler.registerSelect(this);
-    // }
-    //
-    // public unregisterSelectable() {
-    //     this.selectHandler.unregisterSelect(this);
-    // }
 
     protected addGhostToStage(ghost: Ghost): void {
         if (!this.displayedEntity) {

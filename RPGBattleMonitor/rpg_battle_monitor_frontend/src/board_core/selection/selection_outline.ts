@@ -105,10 +105,12 @@ class ResizeControls extends Container {
     protected _outlineContainer: ContainerExtension;
     protected _controlPoints: Graphics[];
     protected resizeHandler: ResizeHandler;
+    protected selectHandler: SelectHandler;
 
     constructor(
         outlineContainer: ContainerExtension,
         resizeHandler: ResizeHandler,
+        selectHandler: SelectHandler,
         options?: ContainerOptions,
     ) {
         super(options);
@@ -116,7 +118,14 @@ class ResizeControls extends Container {
         this._outlineContainer = outlineContainer;
         this._controlPoints = [];
         this.resizeHandler = resizeHandler;
+        this.selectHandler = selectHandler;
 
+        this.registerResize();
+
+        GBoard.app.ticker.add(this.tickerStroke, this);
+    }
+
+    private registerResize(): void {
         ResizeControls.POSITION_FUNCS.forEach((f) => {
             const controlPoint = new Graphics({
                 eventMode: "static",
@@ -131,17 +140,25 @@ class ResizeControls extends Container {
                 f.kind,
             );
         });
-
-        GBoard.app.ticker.add(this.tickerStroke, this);
     }
 
+    // private unregisterResize(): void {
+    //     this.resizeHandler.unregisterResize(this._outlineContainer);
+    // }
+
     public destroy(options?: DestroyOptions): void {
+        // this.unregisterResize();
         GBoard.app.ticker.remove(this.tickerStroke, this);
 
         super.destroy(options);
     }
 
     protected tickerStroke(): void {
+        if (this.selectHandler.isMultiSelection()) {
+            this.visible = false;
+            return;
+        }
+
         const outlineContainerLocalPos = this._outlineContainer
             .toLocal(GBoard.viewport)
             .multiply(NEGATIVE_POINT);
@@ -185,6 +202,7 @@ export class SelectionOutline extends Container {
         this._resizeControls = new ResizeControls(
             this._outlineAround,
             this.selectHandler.resizeHandler,
+            this.selectHandler,
         );
         this.addChild(this._resizeControls);
     }
