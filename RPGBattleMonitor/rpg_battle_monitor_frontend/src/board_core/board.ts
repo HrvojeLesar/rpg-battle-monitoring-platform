@@ -137,6 +137,15 @@ export async function init(
         boardApplication.changeScene(scene);
     }
 
+    globalThis.addEventListener("resize", () => {
+        boardApplication.scenes.forEach((scene) => {
+            scene.viewport.resize(
+                boardApplication.app.canvas.width,
+                boardApplication.app.canvas.height,
+            );
+        });
+    });
+
     console.log("Finished board init");
     return boardApplication.getApplication();
 }
