@@ -4,6 +4,7 @@ import { Scene } from "../scene";
 import { SelectHandler } from "./select_handler";
 import { EventStore } from "./registered_event_store";
 import { UniqueCollection } from "../utils/unique_collection";
+import { ClampPositionRegistry } from "../utils/clamp_position_registry";
 
 type OnGlobalPointerMove = {
     handler: DragHandler;
@@ -42,59 +43,65 @@ export class DragHandler {
             localPos.y - this.offset.y,
         );
 
-        this.container.clampPositionToViewport(newEntityPosition);
+        ClampPositionRegistry.get().tryClamp(
+            this.container,
+            newEntityPosition,
+            this.handler.selectHandler,
+        );
         this.handler.isDirty = true;
         this.container.position.set(newEntityPosition.x, newEntityPosition.y);
     }
 
     public registerDrag(container: ContainerExtension) {
         const onPointerDown = (event: FederatedPointerEvent) => {
-            // TODO: expected flow
-            // 1. Check if left click
-            // 2. Determine if selection is draggable (if any item in selection is not draggable disallow dragging)
-            // 3. Create ghosts for each item dragged
-            // 4. Determine bounding box of all selected items
-            // 5. Handle dragging
-            // 5.1. Disallow dragging outside of bounds, clamp bounding box to viewport
-            // 6. If any item has snapping property all items snap
-            // 7. Snap/place items on release
-
             if (event.pointerType === "mouse" && event.button !== 0) {
                 return;
             }
             event.stopPropagation();
 
-            if (
-                container.isDraggable === false ||
-                container.isSelectable === false ||
-                !this.selectHandler.isSelectionDraggable()
-            ) {
+            if (!this.selectHandler.isSelectionDraggable()) {
                 return;
             }
 
             this.scene.viewport.pause = true;
 
-            const selectionHolder = this.selectHandler.selectionHolder;
-            if (!selectionHolder) {
-                return;
+            const localPos = event.getLocalPosition(this.scene.viewport);
+
+            if (this.selectHandler.isMultiSelection()) {
+                const holder = this.selectHandler.selectionHolderContainer;
+                const offset = new Point();
+                offset.x = localPos.x - holder.x;
+                offset.y = localPos.y - holder.y;
+
+                this.scene.viewport.on(
+                    "globalpointermove",
+                    this.onGlobalPointerMove,
+                    {
+                        handler: this,
+                        offset: offset,
+                        container: holder,
+                    },
+                );
             }
 
-            const offset = new Point();
-            const localPos = event.getLocalPosition(this.scene.viewport);
-            offset.x = localPos.x - selectionHolder.x;
-            offset.y = localPos.y - selectionHolder.y;
+            const selections = this.selectHandler.selections;
+            for (const selection of selections) {
+                const offset = new Point();
+                offset.x = localPos.x - selection.x;
+                offset.y = localPos.y - selection.y;
 
-            selectionHolder.createGhost();
+                selection.addGhostToStage(selection.createGhost());
 
-            this.scene.viewport.on(
-                "globalpointermove",
-                this.onGlobalPointerMove,
-                {
-                    handler: this,
-                    offset: offset,
-                    container: selectionHolder,
-                },
-            );
+                this.scene.viewport.on(
+                    "globalpointermove",
+                    this.onGlobalPointerMove,
+                    {
+                        handler: this,
+                        offset: offset,
+                        container: selection,
+                    },
+                );
+            }
         };
 
         const onPointerUp = (_event: FederatedPointerEvent) => {
@@ -105,14 +112,14 @@ export class DragHandler {
             this.scene.viewport.pause = false;
 
             const selectedItems = this.selectHandler.selections;
-            this.selectHandler.deselectGroup();
             for (const container of selectedItems) {
                 if (this.isDirty) {
                     container.snapToGrid();
                 }
                 container.clearGhosts();
             }
-            this.selectHandler.selectGroup();
+
+            this.selectHandler.drawSelectionOutline();
 
             this.isDirty = false;
         };

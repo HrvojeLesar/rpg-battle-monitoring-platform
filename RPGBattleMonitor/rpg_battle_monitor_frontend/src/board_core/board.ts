@@ -12,6 +12,9 @@ import { Scene } from "./scene";
 import { Viewport } from "pixi-viewport";
 import { Grid } from "./grid";
 import "./mixins/point_mixin";
+import { ClampPositionRegistry } from "./utils/clamp_position_registry";
+import { ContainerExtensionClamp } from "./clamp/container_extensions_clamp";
+import { SelectionHolderClamp } from "./clamp/selection_holder_clamp";
 
 export type GameBoard = Board;
 
@@ -119,6 +122,11 @@ class Board {
 
 var boardApplication: Board = new Board();
 
+function registerClampers(): void {
+    ClampPositionRegistry.get().register(new ContainerExtensionClamp());
+    ClampPositionRegistry.get().register(new SelectionHolderClamp());
+}
+
 export async function init(
     options?: Partial<ApplicationOptions>,
 ): Promise<Application> {
@@ -145,6 +153,8 @@ export async function init(
             );
         });
     });
+
+    registerClampers();
 
     console.log("Finished board init");
     return boardApplication.getApplication();

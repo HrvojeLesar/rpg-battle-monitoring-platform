@@ -1,60 +1,90 @@
-import { FederatedPointerEvent, Rectangle } from "pixi.js";
+import { FederatedPointerEvent, Point, Sprite } from "pixi.js";
 import { UniqueCollection } from "../utils/unique_collection";
 import { ContainerExtension } from "../extensions/container_extension";
 import { EventStore } from "./registered_event_store";
 import { Scene } from "../scene";
 import { SelectionOutline } from "../selection/selection_outline";
 import { SingleSelectionOutline } from "../selection/single_selection_outline";
-import {
-    SelectionHolder,
-    SelectionHolderContainer,
-} from "../selection/selection_holder";
 import { ResizeHandler } from "./resize_handler";
+import { SelectionBox } from "../selection/selection_box";
+import { SelectedMap } from "../utils/selected_map";
+import { SelectionHolderContainer } from "../selection/selection_holder";
+
+export enum SelectionState {
+    None = "None",
+    Selection = "Selection",
+    BoxSelecting = "BoxSelecting",
+}
+
+export type SelectedItemMeta = {
+    viewportPositionIndex: number;
+    outline: SelectionOutline;
+};
 
 export class SelectHandler {
     public static UNREGISTER_SELECT: string = "UNREGISTER_SELECT";
 
-    protected _selected: UniqueCollection<ContainerExtension> =
-        new UniqueCollection();
+    protected _selected: SelectedMap;
 
-    protected scene: Scene;
+    protected _scene: Scene;
     protected eventStore: EventStore;
-    protected selectionHolderContainer: SelectionHolderContainer;
-    protected outlines: Map<ContainerExtension, SelectionOutline> = new Map();
+    public selectionHolderContainer: SelectionHolderContainer;
     protected _resizeHandler: ResizeHandler;
+    protected _selectionState: SelectionState = SelectionState.None;
+    protected selectionBox: SelectionBox;
+
+    protected clampWidthRight: boolean = false;
+    protected clampWidthLeft: boolean = false;
+    protected clampHeightTop: boolean = false;
+    protected clampHeightBottom: boolean = false;
 
     protected managedContainers: UniqueCollection<ContainerExtension> =
         new UniqueCollection();
 
     public constructor(scene: Scene, eventStore: EventStore) {
-        this.scene = scene;
+        this._scene = scene;
         this.eventStore = eventStore;
-        this._resizeHandler = new ResizeHandler(this, this.scene);
+        this._resizeHandler = new ResizeHandler(this, this._scene);
+        this.selectionBox = new SelectionBox(this._scene.viewport, this);
 
         this.selectionHolderContainer = new SelectionHolderContainer(this);
-        this.scene.viewport.addChild(this.selectionHolderContainer);
+        this._scene.viewport.addChild(this.selectionHolderContainer);
+
+        this._selected = new SelectedMap();
     }
 
     public get selections(): Readonly<ContainerExtension[]> {
-        return this._selected.items;
+        return this._selected.selections;
     }
 
     public select(container: ContainerExtension): void {
-        this._selected.add(container);
-        const outline = new SingleSelectionOutline(container, this);
-        this.outlines.get(container)?.destroy();
+        if (this.isSelected(container)) {
+            this.deselect(container);
+        }
 
-        this.outlines.set(container, outline);
-        this.scene.viewport.addChild(outline);
+        const meta = {
+            viewportPositionIndex:
+                this._scene.viewport.children.indexOf(container),
+            outline: new SingleSelectionOutline(container, this),
+        };
+        this._selected.set(container, meta);
+        this._scene.viewport.addChild(meta.outline);
+
+        if (this.isMultiSelection()) {
+            this.drawSelectionOutline();
+        }
     }
 
     public deselect(container: ContainerExtension): void {
-        this._selected.remove(container);
-        this.outlines.get(container)?.destroy();
+        this._selected.delete(container);
+
+        if (this.isMultiSelection()) {
+            this.drawSelectionOutline();
+        }
     }
 
     public isSelected(container: ContainerExtension): boolean {
-        return this._selected.contains(container);
+        return this._selected.get(container) !== undefined;
     }
 
     public registerSelect(container: ContainerExtension) {
@@ -68,10 +98,9 @@ export class SelectHandler {
                 return;
             }
 
-            if (!this.isSelected(target) && target.isSelectable) {
+            if (target.isSelectable && !this.isSelected(target)) {
                 this.clearSelections();
                 this.select(target);
-                this.selectGroup();
             }
         };
 
@@ -96,11 +125,11 @@ export class SelectHandler {
         this.eventStore.unregister(container, SelectHandler.UNREGISTER_SELECT);
     }
 
-    public clearSelections() {
-        this.deselectGroup();
-        for (const key of this.outlines.keys()) {
-            this.outlines.get(key)?.destroy();
-        }
+    public clearSelections(): void {
+        this.setClampWidthLeft(false);
+        this.setClampWidthRight(false);
+        this.setClampHeightTop(false);
+        this.setClampHeightBottom(false);
         this._selected.clear();
     }
 
@@ -108,52 +137,32 @@ export class SelectHandler {
         return this.selections.length > 1;
     }
 
-    public selectGroup(): void {
-        if (this.selections.length === 0) {
-            return;
-        }
+    public drawSelectionOutline(): void {
+        const startPoint = this.findSelectionStartPoint();
+        this.selectionHolderContainer.position.set(startPoint.x, startPoint.y);
+        const selectionHolder = this.selectionHolderContainer.holder;
+        selectionHolder.removeChildren();
 
-        const selectionHolder = this.selectionHolder;
-
-        const selectionRectangle = this.findSelectionRectangle();
-
-        selectionHolder.position.set(
-            selectionRectangle.x,
-            selectionRectangle.y,
-        );
-
-        this.scene.viewport.addChildAt(
-            selectionHolder,
-            this.scene.viewport.getChildIndex(this.selections[0]),
-        );
-
-        this.putSelectionsIntoHolder();
-    }
-
-    public deselectGroup(): void {
-        const selectionHolder = this.selectionHolder;
-        const isHolderOnStage =
-            selectionHolder &&
-            this.scene.viewport.children.indexOf(selectionHolder) !== -1;
-        if (selectionHolder && isHolderOnStage) {
-            let index = this.scene.viewport.getChildIndex(selectionHolder);
-            const children = [...selectionHolder.children];
-
-            children.forEach((c) => {
-                if (c instanceof ContainerExtension) {
-                    this.scene.viewport.addChildAt(c, index++);
-                    c.position = c.position.add(selectionHolder.position);
-                }
+        this.selections.forEach((s) => {
+            const localPositionToContainer = s.position.subtract(
+                this.selectionHolderContainer.position,
+            );
+            const dummySprite = new Sprite({
+                x: localPositionToContainer.x,
+                y: localPositionToContainer.y,
+                width: s.width,
+                height: s.height,
             });
-        }
-    }
-
-    public get selectionHolder(): SelectionHolder {
-        return this.selectionHolderContainer.holder;
+            selectionHolder.addChild(dummySprite);
+        });
     }
 
     public get resizeHandler(): ResizeHandler {
         return this._resizeHandler;
+    }
+
+    public get scene(): Scene {
+        return this._scene;
     }
 
     public isContainerInSelection(container: ContainerExtension): boolean {
@@ -168,44 +177,50 @@ export class SelectHandler {
         return this.selections.every((s) => s.isResizable);
     }
 
-    protected findSelectionRectangle(): Rectangle {
-        let rect: Rectangle = new Rectangle();
+    public findSelectionStartPoint(): Point {
+        let point = new Point();
         this.selections.forEach((s, idx) => {
             const other = s.position;
-            const otherWidth = s.displayedEntity?.width ?? s.width;
-            const otherHeight = s.displayedEntity?.height ?? s.height;
-
-            if (idx === 0 || rect.x > other.x) {
-                rect.x = other.x;
+            if (idx === 0 || point.x > other.x) {
+                point.x = other.x;
             }
-            if (idx === 0 || rect.y > other.y) {
-                rect.y = other.y;
-            }
-
-            if (idx === 0 || rect.width < otherWidth) {
-                rect.width = otherWidth;
-            }
-            if (idx === 0 || rect.height < otherHeight) {
-                rect.height = otherHeight;
+            if (idx === 0 || point.y > other.y) {
+                point.y = other.y;
             }
         });
 
-        return rect;
+        return point;
     }
 
-    protected putSelectionsIntoHolder(): void {
-        const selectionHolder = this.selectionHolder;
-        if (selectionHolder) {
-            this.selections.forEach((s) => {
-                const localPositionToContainer =
-                    s.position.subtract(selectionHolder);
-                s.position.set(
-                    localPositionToContainer.x,
-                    localPositionToContainer.y,
-                );
-                this.scene.viewport.removeChild(s);
-                selectionHolder.addChild(s);
-            });
-        }
+    public getClampWidthLeft(): boolean {
+        return this.clampWidthLeft;
+    }
+
+    public setClampWidthLeft(value: boolean): void {
+        this.clampWidthLeft = value;
+    }
+
+    public getClampWidthRight(): boolean {
+        return this.clampWidthRight;
+    }
+
+    public setClampWidthRight(value: boolean): void {
+        this.clampWidthRight = value;
+    }
+
+    public getClampHeightTop(): boolean {
+        return this.clampHeightTop;
+    }
+
+    public setClampHeightTop(value: boolean): void {
+        this.clampHeightTop = value;
+    }
+
+    public getClampHeightBottom(): boolean {
+        return this.clampHeightBottom;
+    }
+
+    public setClampHeightBottom(value: boolean): void {
+        this.clampHeightBottom = value;
     }
 }

@@ -142,12 +142,12 @@ class ResizeControls extends Container {
         });
     }
 
-    // private unregisterResize(): void {
-    //     this.resizeHandler.unregisterResize(this._outlineContainer);
-    // }
+    private unregisterResize(): void {
+        this.resizeHandler.unregisterResize(this._outlineContainer);
+    }
 
     public destroy(options?: DestroyOptions): void {
-        // this.unregisterResize();
+        this.unregisterResize();
         GBoard.app.ticker.remove(this.tickerStroke, this);
 
         super.destroy(options);
@@ -183,6 +183,7 @@ export class SelectionOutline extends Container {
     public static readonly OUTLINE_OFFSET: Readonly<number> = 5;
     public static readonly OUTLINE_POS_OFFSET: Readonly<number> =
         SelectionOutline.OUTLINE_OFFSET * 2;
+
     protected _outlineAround: ContainerExtension;
     protected _outline: Graphics;
     protected selectHandler: SelectHandler;
@@ -196,7 +197,7 @@ export class SelectionOutline extends Container {
 
         GBoard.app.ticker.add(this.tickerStroke, this);
 
-        this._outline = new Graphics();
+        this._outline = new Graphics({ eventMode: "none" });
         this.addChild(this._outline);
 
         this._resizeControls = new ResizeControls(

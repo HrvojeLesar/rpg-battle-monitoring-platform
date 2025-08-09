@@ -1,10 +1,4 @@
-import {
-    Container,
-    ContainerOptions,
-    DestroyOptions,
-    ObservablePoint,
-    Point,
-} from "pixi.js";
+import { Container, ContainerOptions, ObservablePoint, Point } from "pixi.js";
 import { DragHandler } from "../handlers/drag_handler";
 import { SelectHandler } from "../handlers/select_handler";
 import { UniqueCollection } from "../utils/unique_collection";
@@ -85,7 +79,14 @@ export class ContainerExtension<T extends Container = Container>
         }
     }
 
+    /**
+     * Container can be draggable if it is selectable and has draggable flag set
+     * */
     public get isDraggable(): boolean {
+        if (this.isSelectable === false) {
+            return false;
+        }
+
         return this._isDraggable;
     }
 
@@ -114,17 +115,15 @@ export class ContainerExtension<T extends Container = Container>
             return false;
         }
 
+        if (this.isSelectable === false) {
+            return false;
+        }
+
         return this._isResizable;
     }
 
     public set isResizable(value: boolean) {
         this._isResizable = value;
-    }
-
-    public destroy(options?: DestroyOptions) {
-        // this.unregisterDraggable();
-        // this.unregisterSelectable();
-        super.destroy(options);
     }
 
     public snapToGrid(force: boolean = false): void {
@@ -138,29 +137,6 @@ export class ContainerExtension<T extends Container = Container>
         this.position.y =
             Math.round(this.position.y / GBoard.grid.cellSize) *
             GBoard.grid.cellSize;
-    }
-
-    public clampPositionToViewport(position: Point) {
-        const worldWidth = GBoard.viewport.worldWidth;
-        const worldHeight = GBoard.viewport.worldHeight;
-
-        if (position.x < 0) {
-            position.x = 0;
-        }
-
-        if (position.y < 0) {
-            position.y = 0;
-        }
-
-        const width = this.displayedEntity?.width ?? this.width;
-        if (position.x + width > worldWidth) {
-            position.x = worldWidth - width;
-        }
-
-        const height = this.displayedEntity?.height ?? this.height;
-        if (position.y + height > worldHeight) {
-            position.y = worldHeight - height;
-        }
     }
 
     getInitialPosition(): ObservablePoint {
@@ -214,7 +190,7 @@ export class ContainerExtension<T extends Container = Container>
         };
     }
 
-    protected addGhostToStage(ghost: Ghost): void {
+    public addGhostToStage(ghost: Ghost): void {
         if (!this.displayedEntity) {
             return;
         }
@@ -222,7 +198,7 @@ export class ContainerExtension<T extends Container = Container>
         GBoard.viewport.addChildAt(ghost, GBoard.viewport.getChildIndex(this));
     }
 
-    protected removeGhostFromStage(ghost: Container): void {
+    public removeGhostFromStage(ghost: Container): void {
         GBoard.viewport.removeChild(ghost);
     }
 }

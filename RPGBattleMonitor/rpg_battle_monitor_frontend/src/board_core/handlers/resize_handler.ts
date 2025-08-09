@@ -47,7 +47,6 @@ export class ResizeHandler {
         container: ContainerExtension & IResizable,
         kind: ResizeKind,
     ) {
-        console.log("register resize");
         const onPointerDown = (event: FederatedPointerEvent) => {
             if (event.pointerType === "mouse" && event.button !== 0) {
                 return;

@@ -48,13 +48,17 @@ export class SelectionBox extends Graphics {
             // that is currently selectable on the scene
             GBoard.scene?.tokens.forEach((token) => {
                 const tokenBounds = token.container.getBounds().rectangle;
-                if (
-                    bounds.intersects(tokenBounds) &&
-                    token.container.isSelectable
-                ) {
-                    this.selectHandler.select(token.container);
+                if (bounds.intersects(tokenBounds)) {
+                    if (
+                        token.container.isSelectable &&
+                        !this.selectHandler.isSelected(token.container)
+                    ) {
+                        this.selectHandler.select(token.container);
+                    }
                 } else {
-                    this.selectHandler.deselect(token.container);
+                    if (this.selectHandler.isSelected(token.container)) {
+                        this.selectHandler.deselect(token.container);
+                    }
                 }
             });
         };
@@ -81,8 +85,6 @@ export class SelectionBox extends Graphics {
             this._viewport.off("pointerupoutside", onPointerUp);
             this._viewport.removeChild(this);
             this.clear();
-
-            this.selectHandler.selectGroup();
         };
 
         this._viewport.on("pointerdown", onPointerDown);
