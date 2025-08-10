@@ -171,6 +171,116 @@ export class ContainerExtension<T extends Container = Container>
             initialHeight,
             kind,
         );
+
+        if (this.isSnapping) {
+            if (kind === ResizeKind.Right) {
+                this.displayedEntity.width =
+                    Math.round(
+                        this.displayedEntity.width / (GBoard.grid.cellSize / 2),
+                    ) *
+                    (GBoard.grid.cellSize / 2);
+            }
+
+            if (kind === ResizeKind.Bottom) {
+                this.displayedEntity.height =
+                    Math.round(
+                        this.displayedEntity.height /
+                            (GBoard.grid.cellSize / 2),
+                    ) *
+                    (GBoard.grid.cellSize / 2);
+            }
+
+            if (kind === ResizeKind.Left) {
+                this.position.x =
+                    Math.round(this.position.x / (GBoard.grid.cellSize / 2)) *
+                    (GBoard.grid.cellSize / 2);
+                this.displayedEntity.width =
+                    Math.round(
+                        this.displayedEntity.width / (GBoard.grid.cellSize / 2),
+                    ) *
+                    (GBoard.grid.cellSize / 2);
+            }
+
+            if (kind === ResizeKind.Top) {
+                this.position.y =
+                    Math.round(this.position.y / (GBoard.grid.cellSize / 2)) *
+                    (GBoard.grid.cellSize / 2);
+                this.displayedEntity.height =
+                    Math.round(
+                        this.displayedEntity.height /
+                            (GBoard.grid.cellSize / 2),
+                    ) *
+                    (GBoard.grid.cellSize / 2);
+            }
+
+            if (kind === ResizeKind.BottomRight) {
+                this.displayedEntity.width =
+                    Math.round(
+                        this.displayedEntity.width / (GBoard.grid.cellSize / 2),
+                    ) *
+                    (GBoard.grid.cellSize / 2);
+                this.displayedEntity.height =
+                    Math.round(
+                        this.displayedEntity.height /
+                            (GBoard.grid.cellSize / 2),
+                    ) *
+                    (GBoard.grid.cellSize / 2);
+            }
+
+            if (kind === ResizeKind.TopRight) {
+                this.position.y =
+                    Math.round(this.position.y / (GBoard.grid.cellSize / 2)) *
+                    (GBoard.grid.cellSize / 2);
+                this.displayedEntity.height =
+                    Math.round(
+                        this.displayedEntity.height /
+                            (GBoard.grid.cellSize / 2),
+                    ) *
+                    (GBoard.grid.cellSize / 2);
+                this.displayedEntity.width =
+                    Math.round(
+                        this.displayedEntity.width / (GBoard.grid.cellSize / 2),
+                    ) *
+                    (GBoard.grid.cellSize / 2);
+            }
+
+            if (kind === ResizeKind.BottomLeft) {
+                this.displayedEntity.height =
+                    Math.round(
+                        this.displayedEntity.height /
+                            (GBoard.grid.cellSize / 2),
+                    ) *
+                    (GBoard.grid.cellSize / 2);
+                this.position.x =
+                    Math.round(this.position.x / (GBoard.grid.cellSize / 2)) *
+                    (GBoard.grid.cellSize / 2);
+                this.displayedEntity.width =
+                    Math.round(
+                        this.displayedEntity.width / (GBoard.grid.cellSize / 2),
+                    ) *
+                    (GBoard.grid.cellSize / 2);
+            }
+
+            if (kind === ResizeKind.TopLeft) {
+                this.position.y =
+                    Math.round(this.position.y / (GBoard.grid.cellSize / 2)) *
+                    (GBoard.grid.cellSize / 2);
+                this.displayedEntity.height =
+                    Math.round(
+                        this.displayedEntity.height /
+                            (GBoard.grid.cellSize / 2),
+                    ) *
+                    (GBoard.grid.cellSize / 2);
+                this.position.x =
+                    Math.round(this.position.x / (GBoard.grid.cellSize / 2)) *
+                    (GBoard.grid.cellSize / 2);
+                this.displayedEntity.width =
+                    Math.round(
+                        this.displayedEntity.width / (GBoard.grid.cellSize / 2),
+                    ) *
+                    (GBoard.grid.cellSize / 2);
+            }
+        }
     }
 
     protected createGhostContainer(): Ghost {
