@@ -1,5 +1,6 @@
 import { Container, ObservablePoint, Point } from "pixi.js";
 import { ResizeKind } from "./resize_handler";
+import { GBoard } from "../board";
 
 export interface IResizable {
     getInitialPosition(): ObservablePoint;
@@ -14,6 +15,8 @@ export interface IResizable {
     ): void;
 }
 
+export const MIN_DIMENSION_PX = 50;
+
 export function resize(
     container: Container,
     modifyContainer: Container,
@@ -27,56 +30,140 @@ export function resize(
     const modifyY = pointerPosition.y - startPoint.y;
 
     if (kind === ResizeKind.Right) {
-        const widthResult = initialWidth + modifyX;
+        const widthResult = Math.min(
+            Math.max(initialWidth + modifyX, MIN_DIMENSION_PX),
+            GBoard.viewport.worldWidth - container.x,
+        );
         modifyContainer.width = widthResult;
     }
 
     if (kind === ResizeKind.Bottom) {
-        const heightResult = initialHeight + modifyY;
+        const heightResult = Math.min(
+            Math.max(initialHeight + modifyY, MIN_DIMENSION_PX),
+            GBoard.viewport.worldHeight - container.y,
+        );
         modifyContainer.height = heightResult;
     }
 
     if (kind === ResizeKind.Left) {
-        const widthResult = initialWidth - modifyX;
-        container.position.x = modifyX;
-        modifyContainer.width = widthResult;
+        const widthResult = Math.max(initialWidth - modifyX, MIN_DIMENSION_PX);
+        const xResult = Math.max(
+            Math.min(
+                startPoint.x + modifyX,
+                startPoint.x + initialWidth - MIN_DIMENSION_PX,
+            ),
+            0,
+        );
+        container.position.x = xResult;
+        if (xResult > 0) {
+            modifyContainer.width = widthResult;
+        }
     }
 
     if (kind === ResizeKind.Top) {
-        const heightResult = initialHeight - modifyY;
-        container.position.y = modifyY;
-        modifyContainer.height = heightResult;
+        const heightResult = Math.min(
+            Math.max(initialHeight - modifyY, MIN_DIMENSION_PX),
+            GBoard.viewport.worldHeight - container.y,
+        );
+        const yResult = Math.max(
+            Math.min(
+                startPoint.y + modifyY,
+                startPoint.y + initialHeight - MIN_DIMENSION_PX,
+            ),
+            0,
+        );
+        container.position.y = yResult;
+        if (yResult > 0) {
+            modifyContainer.height = heightResult;
+        }
     }
 
     if (kind === ResizeKind.BottomRight) {
-        const widthResult = initialWidth + modifyX;
+        const widthResult = Math.min(
+            Math.max(initialWidth + modifyX, MIN_DIMENSION_PX),
+            GBoard.viewport.worldWidth - container.x,
+        );
         modifyContainer.width = widthResult;
-        const heightResult = initialHeight + modifyY;
+        const heightResult = Math.min(
+            Math.max(initialHeight + modifyY, MIN_DIMENSION_PX),
+            GBoard.viewport.worldHeight - container.y,
+        );
         modifyContainer.height = heightResult;
     }
 
     if (kind === ResizeKind.TopRight) {
-        const heightResult = initialHeight - modifyY;
-        container.position.y = modifyY;
-        modifyContainer.height = heightResult;
-        const widthResult = initialWidth + modifyX;
+        const heightResult = Math.min(
+            Math.max(initialHeight - modifyY, MIN_DIMENSION_PX),
+            GBoard.viewport.worldHeight - container.y,
+        );
+        const yResult = Math.max(
+            Math.min(
+                startPoint.y + modifyY,
+                startPoint.y + initialHeight - MIN_DIMENSION_PX,
+            ),
+            0,
+        );
+        container.position.y = yResult;
+        if (yResult > 0) {
+            modifyContainer.height = heightResult;
+        }
+        const widthResult = Math.min(
+            Math.max(initialWidth + modifyX, MIN_DIMENSION_PX),
+            GBoard.viewport.worldWidth - container.x,
+        );
         modifyContainer.width = widthResult;
     }
 
     if (kind === ResizeKind.BottomLeft) {
-        const heightResult = initialHeight + modifyY;
+        const heightResult = Math.min(
+            Math.max(initialHeight + modifyY, MIN_DIMENSION_PX),
+            GBoard.viewport.worldHeight - container.y,
+        );
         modifyContainer.height = heightResult;
-        const widthResult = initialWidth - modifyX;
-        container.position.x = modifyX;
-        modifyContainer.width = widthResult;
+        const widthResult = Math.min(
+            Math.max(initialWidth - modifyX, MIN_DIMENSION_PX),
+            GBoard.viewport.worldWidth - container.x,
+        );
+        const xResult = Math.max(
+            Math.min(
+                startPoint.x + modifyX,
+                startPoint.x + initialWidth - MIN_DIMENSION_PX,
+            ),
+            0,
+        );
+        container.position.x = xResult;
+        if (xResult > 0) {
+            modifyContainer.width = widthResult;
+        }
     }
 
     if (kind === ResizeKind.TopLeft) {
-        const widthResult = initialWidth - modifyX;
-        container.position.x = modifyX;
-        modifyContainer.width = widthResult;
-        const heightResult = initialHeight - modifyY;
-        container.position.y = modifyY;
-        modifyContainer.height = heightResult;
+        const widthResult = Math.max(initialWidth - modifyX, MIN_DIMENSION_PX);
+        const xResult = Math.max(
+            Math.min(
+                startPoint.x + modifyX,
+                startPoint.x + initialWidth - MIN_DIMENSION_PX,
+            ),
+            0,
+        );
+        container.position.x = xResult;
+        if (xResult > 0) {
+            modifyContainer.width = widthResult;
+        }
+        const heightResult = Math.min(
+            Math.max(initialHeight - modifyY, MIN_DIMENSION_PX),
+            GBoard.viewport.worldHeight - container.y,
+        );
+        const yResult = Math.max(
+            Math.min(
+                startPoint.y + modifyY,
+                startPoint.y + initialHeight - MIN_DIMENSION_PX,
+            ),
+            0,
+        );
+        container.position.y = yResult;
+        if (yResult > 0) {
+            modifyContainer.height = heightResult;
+        }
     }
 }

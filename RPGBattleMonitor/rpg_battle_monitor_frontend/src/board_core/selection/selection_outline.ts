@@ -172,7 +172,7 @@ class ResizeControls extends Container {
             );
             controlPoint
                 .clear()
-                .rect(position.x, position.y, 10, 10)
+                .rect(position.x - 8, position.y - 8, 25, 25)
                 .fill({ color: "white" })
                 .stroke();
         });

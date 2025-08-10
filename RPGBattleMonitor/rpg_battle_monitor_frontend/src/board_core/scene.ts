@@ -3,18 +3,17 @@ import { Grid } from "./grid";
 import { GBoard } from "./board";
 import { UniqueCollection } from "./utils/unique_collection";
 import { Token } from "./token";
-import { Assets, Texture } from "pixi.js";
-import { SelectionBox } from "./selection/selection_box";
+import { Assets, Container, Graphics, Sprite, Texture } from "pixi.js";
 import { SpriteExtension } from "./extensions/sprite_extension";
 import { DragHandler } from "./handlers/drag_handler";
 import { EventStore } from "./handlers/registered_event_store";
 import { SelectHandler } from "./handlers/select_handler";
+import { ContainerExtension } from "./extensions/container_extension";
 
 export class Scene {
     public readonly name: string;
     protected _viewport: Viewport;
     protected _grid: Grid;
-    protected _selectionBox: SelectionBox;
     protected _tokens: UniqueCollection<Token> = new UniqueCollection();
 
     protected _dragHandler: DragHandler;
@@ -73,11 +72,6 @@ export class Scene {
             this._eventStore,
         );
 
-        this._selectionBox = new SelectionBox(
-            this._viewport,
-            this._selectHandler,
-        );
-
         Assets.load("https://pixijs.com/assets/bunny.png").then((texture) => {
             this.addToken({
                 x: 512,
@@ -98,6 +92,11 @@ export class Scene {
         this.addToken({});
         this.addToken({ x: 256, y: 256, tint: "red" });
         this.addToken({ x: 256, y: 512, tint: "blue" });
+
+        // const timeout = setTimeout(() => {
+        //     this.addToken({ x: 256, y: 512, tint: "green" });
+        //     clearTimeout(timeout);
+        // }, 5000);
     }
 
     public setActive(): void {
