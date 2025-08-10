@@ -15,6 +15,7 @@ import "./mixins/point_mixin";
 import { ClampPositionRegistry } from "./utils/clamp_position_registry";
 import { ContainerExtensionClamp } from "./clamp/container_extensions_clamp";
 import { SelectionHolderClamp } from "./clamp/selection_holder_clamp";
+import { BoardEventEmitter } from "./events/board_event_emitters";
 
 export type GameBoard = Board;
 
@@ -24,7 +25,7 @@ class Board {
     protected application?: Application;
     protected currentScene?: Scene;
 
-    protected _eventEmitter: EventEmitter = new EventEmitter();
+    protected _eventEmitter: BoardEventEmitter = new BoardEventEmitter();
 
     // TODO: Make external global event handler
     protected websocket?: Socket;
@@ -115,7 +116,7 @@ class Board {
         return this.currentScene;
     }
 
-    public get eventEmitter(): EventEmitter {
+    public get eventEmitter(): BoardEventEmitter {
         return this._eventEmitter;
     }
 }
