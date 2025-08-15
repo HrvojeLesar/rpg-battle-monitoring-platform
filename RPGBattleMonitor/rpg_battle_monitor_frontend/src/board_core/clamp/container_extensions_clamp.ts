@@ -1,9 +1,9 @@
 import { Container, Point } from "pixi.js";
-import { IClampPositionToViewport } from "./clamp_interface";
 import { GBoard } from "../board";
 import { ContainerExtension } from "../extensions/container_extension";
 import { SelectHandler } from "../handlers/select_handler";
 import { SelectionHolderContainer } from "../selection/selection_holder";
+import { IClampPositionToViewport } from "../interfaces/clamp_position_to_viewport";
 
 export class ContainerExtensionClamp implements IClampPositionToViewport {
     public clampPositionToViewport(

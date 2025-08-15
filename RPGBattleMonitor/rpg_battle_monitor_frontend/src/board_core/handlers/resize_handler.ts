@@ -9,7 +9,7 @@ import { GBoard } from "../board";
 import { DragHandler } from "./drag_handler";
 import { SelectHandler } from "./select_handler";
 import { Scene } from "../scene";
-import { IResizable } from "./resizable";
+import { IResizable } from "../interfaces/resizable";
 
 export enum ResizeKind {
     TopLeft = "top-left",

@@ -4,9 +4,11 @@ import {
     ContainerExtensionOptions,
     Ghost,
 } from "./container_extension";
+import { Grid } from "../grid/grid";
 
 export class SpriteExtension extends ContainerExtension<Sprite> {
     public constructor(
+        grid: Grid,
         spriteOptions?: SpriteOptions,
         containerOptions?: ContainerExtensionOptions,
     ) {
@@ -17,7 +19,7 @@ export class SpriteExtension extends ContainerExtension<Sprite> {
             cursor: "default",
         });
 
-        super(containerOptions);
+        super(grid, containerOptions);
 
         this._displayedEntity = sprite;
         this.addChildAt(this._displayedEntity, 0);
@@ -26,6 +28,7 @@ export class SpriteExtension extends ContainerExtension<Sprite> {
     protected createGhostContainer(): Ghost {
         if (this.displayedEntity instanceof Sprite) {
             return new SpriteExtension(
+                this.grid,
                 this.cloneSpriteOptions(this.displayedEntity),
                 this.cloneContainerOptions(this),
             );

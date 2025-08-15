@@ -1,6 +1,6 @@
 import { Container, Point } from "pixi.js";
-import { IClampPositionToViewport } from "../clamp/clamp_interface";
 import { UniqueCollection } from "./unique_collection";
+import { IClampPositionToViewport } from "../interfaces/clamp_position_to_viewport";
 
 export class ClampPositionRegistry {
     private static instance: ClampPositionRegistry;

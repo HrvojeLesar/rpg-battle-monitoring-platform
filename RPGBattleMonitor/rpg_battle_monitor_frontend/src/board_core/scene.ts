@@ -1,14 +1,13 @@
 import { Viewport } from "pixi-viewport";
-import { Grid } from "./grid";
 import { GBoard } from "./board";
 import { UniqueCollection } from "./utils/unique_collection";
 import { Token } from "./token";
-import { Assets, Container, Graphics, Sprite, Texture } from "pixi.js";
+import { Assets, Point, Texture } from "pixi.js";
 import { SpriteExtension } from "./extensions/sprite_extension";
 import { DragHandler } from "./handlers/drag_handler";
 import { EventStore } from "./handlers/registered_event_store";
 import { SelectHandler } from "./handlers/select_handler";
-import { ContainerExtension } from "./extensions/container_extension";
+import { Grid } from "./grid/grid";
 
 export class Scene {
     public readonly name: string;
@@ -93,10 +92,11 @@ export class Scene {
         this.addToken({ x: 256, y: 256, tint: "red" });
         this.addToken({ x: 256, y: 512, tint: "blue" });
 
-        // const timeout = setTimeout(() => {
-        //     this.addToken({ x: 256, y: 512, tint: "green" });
-        //     clearTimeout(timeout);
-        // }, 5000);
+        const timeout = setTimeout(() => {
+            this.tokens[0].container.moveToGridCell(new Point(7, 1));
+            // this.addToken({ x: 256, y: 512, tint: "green" });
+            // clearTimeout(timeout);
+        }, 5000);
     }
 
     public setActive(): void {
@@ -134,6 +134,7 @@ export class Scene {
         height = undefined,
     }): void {
         const sprite = new SpriteExtension(
+            this.grid,
             {
                 texture: texture ?? Texture.WHITE,
                 tint: tint,
@@ -152,7 +153,7 @@ export class Scene {
             },
         );
 
-        const token = new Token(sprite);
+        const token = new Token(sprite, this.grid);
 
         // WARN: Order matters, try changing so any order is valid
         this._selectHandler.registerSelect(token.container);

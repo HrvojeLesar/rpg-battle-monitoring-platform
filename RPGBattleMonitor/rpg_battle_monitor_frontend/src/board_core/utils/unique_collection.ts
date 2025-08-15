@@ -1,10 +1,4 @@
-export interface IUniqueCollection<T> {
-    add: (entity: T) => T;
-    remove: (entity: T) => Option<T>;
-    getItems: () => Readonly<T[]>;
-    contains: (entity: T) => boolean;
-    clear: () => T[];
-}
+import { IUniqueCollection } from "../interfaces/unique_collection";
 
 export class UniqueCollection<T> implements IUniqueCollection<T> {
     protected _items: T[] = [];

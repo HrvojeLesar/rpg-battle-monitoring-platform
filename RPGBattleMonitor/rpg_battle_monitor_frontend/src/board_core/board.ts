@@ -3,19 +3,18 @@ import {
     ApplicationOptions,
     Container,
     DestroyOptions,
-    EventEmitter,
     RendererDestroyOptions,
 } from "pixi.js";
 import { isDev } from "../utils/dev_mode";
 import { Socket } from "socket.io-client";
 import { Scene } from "./scene";
 import { Viewport } from "pixi-viewport";
-import { Grid } from "./grid";
 import "./mixins/point_mixin";
 import { ClampPositionRegistry } from "./utils/clamp_position_registry";
 import { ContainerExtensionClamp } from "./clamp/container_extensions_clamp";
 import { SelectionHolderClamp } from "./clamp/selection_holder_clamp";
 import { BoardEventEmitter } from "./events/board_event_emitters";
+import { Grid } from "./grid/grid";
 
 export type GameBoard = Board;
 

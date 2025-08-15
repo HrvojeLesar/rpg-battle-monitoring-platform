@@ -47,7 +47,10 @@ export class SelectHandler {
         this._resizeHandler = new ResizeHandler(this, this._scene);
         this.selectionBox = new SelectionBox(this._scene.viewport, this);
 
-        this.selectionHolderContainer = new SelectionHolderContainer(this);
+        this.selectionHolderContainer = new SelectionHolderContainer(
+            this.scene.grid,
+            this,
+        );
         this._scene.viewport.addChild(this.selectionHolderContainer);
 
         this._selected = new SelectedMap();

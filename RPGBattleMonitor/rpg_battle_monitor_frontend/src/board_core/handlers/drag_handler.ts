@@ -117,6 +117,7 @@ export class DragHandler {
                     container.snapToGrid();
                 }
                 container.clearGhosts();
+                container.getGridCellPosition();
             }
 
             this.selectHandler.drawSelectionOutline();

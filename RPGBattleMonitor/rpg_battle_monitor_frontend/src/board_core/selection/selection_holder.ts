@@ -5,6 +5,7 @@ import {
 } from "../extensions/container_extension";
 import { SelectionOutline } from "./selection_outline";
 import { SelectHandler } from "../handlers/select_handler";
+import { Grid } from "../grid/grid";
 
 export type SelectionHolder = InstanceType<typeof SelectionHolderInner>;
 
@@ -35,10 +36,11 @@ export class SelectionHolderContainer extends ContainerExtension {
     protected outline: SelectionHolderOutline;
 
     public constructor(
+        grid: Grid,
         selectHandler: SelectHandler,
         options?: ContainerExtensionOptions,
     ) {
-        super(options);
+        super(grid, options);
 
         this._holder = new SelectionHolderInner(selectHandler, options);
         this.outline = new SelectionHolderOutline(

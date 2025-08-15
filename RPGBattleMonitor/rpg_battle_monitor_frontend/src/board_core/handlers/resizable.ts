@@ -1,19 +1,6 @@
-import { Container, ObservablePoint, Point } from "pixi.js";
+import { Container, Point } from "pixi.js";
 import { ResizeKind } from "./resize_handler";
 import { GBoard } from "../board";
-
-export interface IResizable {
-    getInitialPosition(): ObservablePoint;
-    getInitialHeight(): number;
-    getInitialWidth(): number;
-    resize(
-        pointerPosition: Point,
-        startPoint: Point,
-        initialWidth: number,
-        initialHeight: number,
-        kind: ResizeKind,
-    ): void;
-}
 
 export const MIN_DIMENSION_PX = 50;
 

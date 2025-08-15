@@ -1,16 +1,23 @@
-use crate::game::objects::{board::Board, token::Token};
+use serde_json::Value;
 
-#[derive(Debug)]
-pub(crate) struct Scene {
-    pub(crate) board: Board,
-    tokens: Vec<Token>,
+use crate::game::objects::board::{Board, Grid};
+
+struct Token {
+    unique_id: uuid::Uuid,
+    attributes: Value,
 }
 
-impl Scene {
-    pub(crate) fn new(board: Board) -> Self {
-        Self {
-            board,
-            tokens: vec![],
-        }
-    }
+struct Position {
+    x: f64,
+    y: f64,
+}
+
+struct TokenSceneMeta<'a> {
+    token_ref: &'a Token,
+    position: Position,
+}
+
+pub(crate) struct Scene<'a> {
+    grid: Grid,
+    tokens: Vec<TokenSceneMeta<'a>>,
 }
