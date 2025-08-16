@@ -189,11 +189,11 @@
   "active": "499779ec7438bc7c",
   "lastOpenFiles": [
     "Client <-> Server/Sent messages/Action.md",
-    "Client <-> Server/Basic websocket communication.md",
     "Token.md",
+    "Client <-> Server/Sent messages",
+    "Client <-> Server/Basic websocket communication.md",
     "token.md",
     "Client <-> Server/Recieved messages",
-    "Client <-> Server/Sent messages",
     "Action example.md",
     "Welcome.md",
     "Action-update.md",

@@ -1,13 +1,13 @@
 import { Viewport } from "pixi-viewport";
 import { GBoard } from "./board";
 import { UniqueCollection } from "./utils/unique_collection";
-import { Token } from "./token";
 import { Assets, Point, Texture } from "pixi.js";
 import { SpriteExtension } from "./extensions/sprite_extension";
 import { DragHandler } from "./handlers/drag_handler";
 import { EventStore } from "./handlers/registered_event_store";
 import { SelectHandler } from "./handlers/select_handler";
 import { Grid } from "./grid/grid";
+import { Token } from "./token/token";
 
 export class Scene {
     public readonly name: string;

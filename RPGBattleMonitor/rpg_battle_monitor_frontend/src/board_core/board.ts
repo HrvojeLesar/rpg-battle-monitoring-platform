@@ -12,6 +12,7 @@ import { Viewport } from "pixi-viewport";
 import "./mixins/point_mixin";
 import { BoardEventEmitter } from "./events/board_event_emitters";
 import { Grid } from "./grid/grid";
+import { SocketioWebsocket } from "../websocket/websocket";
 
 export type GameBoard = Board;
 
@@ -21,13 +22,13 @@ class Board {
     protected application?: Application;
     protected currentScene?: Scene;
 
-    protected _eventEmitter: BoardEventEmitter = new BoardEventEmitter();
+    protected _eventEmitter: BoardEventEmitter;
 
-    // TODO: Make external global event handler
-    protected websocket?: Socket;
+    protected _websocket?: Socket;
 
-    public constructor() {
+    public constructor(eventEmitter: BoardEventEmitter) {
         this.scenes = [];
+        this._eventEmitter = eventEmitter;
     }
 
     public setApplication(application: Application) {
@@ -46,16 +47,16 @@ class Board {
         return this.application;
     }
 
-    public setSocket(socket: Socket) {
-        this.websocket = socket;
+    public set websocket(socket: Socket) {
+        this._websocket = socket;
     }
 
-    public getSocket(): Socket {
-        if (this.websocket === undefined) {
+    public get websocket(): Socket {
+        if (this._websocket === undefined) {
             throw new Error("Websocket is not initialized");
         }
 
-        return this.websocket;
+        return this._websocket;
     }
 
     public getStage(): Container {
@@ -117,11 +118,13 @@ class Board {
     }
 }
 
-var boardApplication: Board = new Board();
+var GEventEmitter = new BoardEventEmitter();
 
+var boardApplication: Board = new Board(GEventEmitter);
 
 export async function init(
     options?: Partial<ApplicationOptions>,
+    socket?: Socket,
 ): Promise<Application> {
     const application = new Application();
 
@@ -132,10 +135,11 @@ export async function init(
     if (isDev()) {
         globalThis.__PIXI_APP__ = application;
 
-        console.log("Added init scene");
         const scene = new Scene("init-scene");
         boardApplication.addScene(scene);
         boardApplication.changeScene(scene);
+
+        boardApplication.websocket = SocketioWebsocket.createDefaultSocket();
     }
 
     globalThis.addEventListener("resize", () => {
@@ -147,6 +151,10 @@ export async function init(
         });
     });
 
+    // TODO: setup websocket initialization
+    if (socket) {
+        boardApplication.websocket = socket;
+    }
 
     console.log("Finished board init");
     return boardApplication.getApplication();
@@ -160,7 +168,12 @@ export function destroy(
         .getApplicationOptional()
         ?.destroy(rendererDestroyOptions, options);
 
-    boardApplication = new Board();
+    try {
+        boardApplication.websocket.disconnect();
+    } catch (error) {}
+
+    GEventEmitter.removeAllListeners();
+    boardApplication = new Board(GEventEmitter);
 }
 
-export { boardApplication as GBoard };
+export { boardApplication as GBoard, GEventEmitter };
