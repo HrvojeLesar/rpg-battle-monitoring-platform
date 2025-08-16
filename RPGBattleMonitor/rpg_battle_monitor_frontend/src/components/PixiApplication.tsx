@@ -7,10 +7,12 @@ import {
     getScene,
     getScenes,
     sceneReducer,
-    useStoreDispatch,
-    useStoreSelector,
 } from "../board_react_wrapper/board_store";
 import { ButtonColorType } from "antd/es/button";
+import {
+    useStoreDispatch,
+    useStoreSelector,
+} from "../board_react_wrapper/state_store";
 
 declare global {
     var __PIXI_APP__: Application;

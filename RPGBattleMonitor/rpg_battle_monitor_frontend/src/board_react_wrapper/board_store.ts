@@ -1,7 +1,7 @@
-import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Scene } from "../board_core/scene";
 import { GBoard } from "../board_core/board";
-import { useDispatch, useSelector } from "react-redux";
+import { StoreState } from "./state_store";
 
 function loadSceneNames(): string[] {
     const scenes = GBoard.getScenes().map((scene) => scene.name);
@@ -38,20 +38,10 @@ export const sceneReducer = createSlice({
     },
 });
 
-type StoreDispatch = typeof store.dispatch;
-type StoreState = ReturnType<typeof store.getState>;
-
-export const store = configureStore({
-    reducer: sceneReducer.reducer,
-});
-
-export const useStoreDispatch = useDispatch.withTypes<StoreDispatch>();
-export const useStoreSelector = useSelector.withTypes<StoreState>();
-
 export const getScenes = (state: StoreState): string[] => {
-    return state.scenes;
+    return state.sceneReducer.scenes;
 };
 
 export const getScene = (state: StoreState): Option<string> => {
-    return state.currentScene;
+    return state.sceneReducer.currentScene;
 };
