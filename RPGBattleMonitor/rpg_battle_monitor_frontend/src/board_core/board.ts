@@ -10,9 +10,6 @@ import { Socket } from "socket.io-client";
 import { Scene } from "./scene";
 import { Viewport } from "pixi-viewport";
 import "./mixins/point_mixin";
-import { ClampPositionRegistry } from "./utils/clamp_position_registry";
-import { ContainerExtensionClamp } from "./clamp/container_extensions_clamp";
-import { SelectionHolderClamp } from "./clamp/selection_holder_clamp";
 import { BoardEventEmitter } from "./events/board_event_emitters";
 import { Grid } from "./grid/grid";
 
@@ -122,10 +119,6 @@ class Board {
 
 var boardApplication: Board = new Board();
 
-function registerClampers(): void {
-    ClampPositionRegistry.get().register(new ContainerExtensionClamp());
-    ClampPositionRegistry.get().register(new SelectionHolderClamp());
-}
 
 export async function init(
     options?: Partial<ApplicationOptions>,
@@ -154,7 +147,6 @@ export async function init(
         });
     });
 
-    registerClampers();
 
     console.log("Finished board init");
     return boardApplication.getApplication();

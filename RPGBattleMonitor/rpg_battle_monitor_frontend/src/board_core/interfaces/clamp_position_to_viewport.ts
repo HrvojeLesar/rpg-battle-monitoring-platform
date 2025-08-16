@@ -1,10 +1,9 @@
-import { Container, Point } from "pixi.js";
+import { Point } from "pixi.js";
+import { SelectHandler } from "../handlers/select_handler";
 
 export interface IClampPositionToViewport {
-    supports(container: Container): boolean;
     clampPositionToViewport(
-        container: Container,
         newPosition: Point,
-        data?: any,
+        selectHandler: SelectHandler,
     ): void;
 }

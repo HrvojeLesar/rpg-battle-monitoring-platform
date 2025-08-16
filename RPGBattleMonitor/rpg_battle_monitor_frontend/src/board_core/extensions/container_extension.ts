@@ -10,6 +10,7 @@ import { resize } from "../handlers/resizable";
 import { IGridMove } from "../interfaces/grid_move";
 import { GridCell, GridCellPosition } from "../grid/cell";
 import { Grid } from "../grid/grid";
+import { IClampPositionToViewport } from "../interfaces/clamp_position_to_viewport";
 
 export type ContainerExtensionOptions = {
     isSnapping?: boolean;
@@ -28,7 +29,7 @@ export type Handlers = {
 
 export class ContainerExtension<T extends Container = Container>
     extends Container
-    implements IResizable, IGridMove
+    implements IResizable, IGridMove, IClampPositionToViewport
 {
     protected _isSnapping: boolean = false;
     protected _isDraggable: boolean = false;
@@ -326,5 +327,49 @@ export class ContainerExtension<T extends Container = Container>
 
     public moveToGridCell(position: GridCellPosition): void {
         this._gridCell.moveToGridCell(position);
+    }
+
+    public clampPositionToViewport(
+        newPosition: Point,
+        selectHandler: SelectHandler,
+    ): void {
+        const worldWidth = GBoard.viewport.worldWidth;
+        const worldHeight = GBoard.viewport.worldHeight;
+
+        if (newPosition.x < 0) {
+            newPosition.x = 0;
+        }
+
+        if (newPosition.y < 0) {
+            newPosition.y = 0;
+        }
+
+        const width = this.displayedEntity?.width ?? this.width;
+        if (newPosition.x + width > worldWidth) {
+            newPosition.x = worldWidth - width;
+        }
+
+        const height = this.displayedEntity?.height ?? this.height;
+        if (newPosition.y + height > worldHeight) {
+            newPosition.y = worldHeight - height;
+        }
+
+        // TODO: this.x is not always the correct position
+        // moving the selection container faster can cause the
+        // selected elements to sometimes be incorrectly offset form the
+        // correct point
+        if (
+            selectHandler.getClampWidthLeft() ||
+            selectHandler.getClampWidthRight()
+        ) {
+            newPosition.x = this.x;
+        }
+
+        if (
+            selectHandler.getClampHeightTop() ||
+            selectHandler.getClampHeightBottom()
+        ) {
+            newPosition.y = this.y;
+        }
     }
 }

@@ -1,4 +1,4 @@
-import { Container } from "pixi.js";
+import { Container, Point } from "pixi.js";
 import {
     ContainerExtension,
     ContainerExtensionOptions,
@@ -6,6 +6,8 @@ import {
 import { SelectionOutline } from "./selection_outline";
 import { SelectHandler } from "../handlers/select_handler";
 import { Grid } from "../grid/grid";
+import { GBoard } from "../board";
+import { IClampPositionToViewport } from "../interfaces/clamp_position_to_viewport";
 
 export type SelectionHolder = InstanceType<typeof SelectionHolderInner>;
 
@@ -31,7 +33,10 @@ class SelectionHolderOutline extends SelectionOutline {
     }
 }
 
-export class SelectionHolderContainer extends ContainerExtension {
+export class SelectionHolderContainer
+    extends ContainerExtension
+    implements IClampPositionToViewport
+{
     protected _holder: SelectionHolderInner;
     protected outline: SelectionHolderOutline;
 
@@ -53,6 +58,46 @@ export class SelectionHolderContainer extends ContainerExtension {
 
     public get holder(): SelectionHolderInner {
         return this._holder;
+    }
+
+    public clampPositionToViewport(
+        newPosition: Point,
+        selectHandler: SelectHandler,
+    ): void {
+        const worldWidth = GBoard.viewport.worldWidth;
+        const worldHeight = GBoard.viewport.worldHeight;
+
+        if (newPosition.x < 0) {
+            newPosition.x = 0;
+            selectHandler.setClampWidthLeft(true);
+        } else {
+            selectHandler.setClampWidthLeft(false);
+        }
+
+        if (newPosition.y < 0) {
+            newPosition.y = 0;
+            selectHandler.setClampHeightTop(true);
+        } else {
+            selectHandler.setClampHeightTop(false);
+        }
+
+        const width = this.width;
+        if (newPosition.x + width > worldWidth) {
+            newPosition.x =
+                worldWidth - width + SelectionOutline.OUTLINE_POS_OFFSET;
+            selectHandler.setClampWidthRight(true);
+        } else {
+            selectHandler.setClampWidthRight(false);
+        }
+
+        const height = this.height;
+        if (newPosition.y + height > worldHeight) {
+            newPosition.y =
+                worldHeight - height + SelectionOutline.OUTLINE_POS_OFFSET;
+            selectHandler.setClampHeightBottom(true);
+        } else {
+            selectHandler.setClampHeightBottom(false);
+        }
     }
 }
 

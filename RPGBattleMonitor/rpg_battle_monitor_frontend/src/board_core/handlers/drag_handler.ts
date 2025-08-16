@@ -4,7 +4,6 @@ import { Scene } from "../scene";
 import { SelectHandler } from "./select_handler";
 import { EventStore } from "./registered_event_store";
 import { UniqueCollection } from "../utils/unique_collection";
-import { ClampPositionRegistry } from "../utils/clamp_position_registry";
 
 type OnGlobalPointerMove = {
     handler: DragHandler;
@@ -43,11 +42,11 @@ export class DragHandler {
             localPos.y - this.offset.y,
         );
 
-        ClampPositionRegistry.get().tryClamp(
-            this.container,
+        this.container.clampPositionToViewport(
             newEntityPosition,
             this.handler.selectHandler,
         );
+
         this.handler.isDirty = true;
         this.container.position.set(newEntityPosition.x, newEntityPosition.y);
     }
