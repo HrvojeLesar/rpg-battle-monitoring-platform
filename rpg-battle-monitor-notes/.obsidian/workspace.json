@@ -1,0 +1,202 @@
+{
+  "main": {
+    "id": "1456d4b29e4fcc31",
+    "type": "split",
+    "children": [
+      {
+        "id": "1ce1388aa7d389aa",
+        "type": "tabs",
+        "dimension": 73.42057761732852,
+        "children": [
+          {
+            "id": "499779ec7438bc7c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Client <-> Server/Basic websocket communication.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Basic websocket communication"
+            }
+          }
+        ]
+      },
+      {
+        "id": "7a2148dea5eeefbe",
+        "type": "tabs",
+        "dimension": 26.57942238267148,
+        "children": [
+          {
+            "id": "99743c4f1578d50a",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "cd111cf20d4d0b4a",
+    "type": "split",
+    "children": [
+      {
+        "id": "868c7f0320ffd34f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "ea0d9f0edb9315ec",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "cc58585680edc1ef",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "85977ef0980c543b",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "e0d59eb36756f8cb",
+    "type": "split",
+    "children": [
+      {
+        "id": "016494f5b9548855",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "94b0088d8bb60aff",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Client <-> Server/Basic websocket communication.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Basic websocket communication"
+            }
+          },
+          {
+            "id": "d378d99f60ecf1ba",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Client <-> Server/Basic websocket communication.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Basic websocket communication"
+            }
+          },
+          {
+            "id": "7b54088c2fd116c1",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "8b1c9345ad629242",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Client <-> Server/Basic websocket communication.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Basic websocket communication"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "499779ec7438bc7c",
+  "lastOpenFiles": [
+    "Client <-> Server/Sent messages/Action.md",
+    "Client <-> Server/Basic websocket communication.md",
+    "Token.md",
+    "token.md",
+    "Client <-> Server/Recieved messages",
+    "Client <-> Server/Sent messages",
+    "Action example.md",
+    "Welcome.md",
+    "Action-update.md",
+    "Client <-> Server"
+  ]
+}
