@@ -4,13 +4,13 @@ export class SocketioWebsocket extends Socket {
     public static createSocket(
         uri?: string,
         opts?: Partial<ManagerOptions & SocketOptions>,
-    ): Socket {
+    ): SocketioWebsocket {
         const socket = io(uri, opts);
 
         return socket;
     }
 
-    public static createDefaultSocket(): Socket {
+    public static createDefaultSocket(): SocketioWebsocket {
         return SocketioWebsocket.createSocket("ws://localhost:3000", {
             path: "/api/socket.io",
         });

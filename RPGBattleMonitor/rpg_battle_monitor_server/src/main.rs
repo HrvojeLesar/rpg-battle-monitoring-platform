@@ -1,3 +1,12 @@
+use rpg_battle_monitor_lib::{
+    cdn::filesystem::local_adapter::Local,
+    webserver::router::{
+        app_state::{AppState, AppStateConfig},
+        battle_monitor_server::BattleMonitorWebServer,
+    },
+};
+use tracing_subscriber::filter::LevelFilter;
+
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt()

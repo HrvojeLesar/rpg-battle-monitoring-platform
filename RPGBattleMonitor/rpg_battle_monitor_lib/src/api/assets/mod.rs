@@ -5,7 +5,7 @@ use crate::{
     },
     webserver::router::app_state::AppStateTrait,
 };
-use axum::{extract::DefaultBodyLimit, routing};
+use axum::{extract::DefaultBodyLimit, response::IntoResponse, routing};
 use tower_http::limit::RequestBodyLimitLayer;
 
 pub mod serve;

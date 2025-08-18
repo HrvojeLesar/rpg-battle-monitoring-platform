@@ -1,42 +1,27 @@
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 
-use bevy_ecs::world::World;
-use serde::{Deserialize, Serialize};
 use socketioxide::{
     SocketIoBuilder,
-    extract::{AckSender, Data, SocketRef, State},
+    extract::{Data, SocketRef},
     socket::DisconnectReason,
 };
 use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 
-use crate::{game::GameManager, webserver::router::app_state::AppStateTrait};
+use crate::{entity::Entity, webserver::router::app_state::AppStateTrait};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct Join {
-    session_id: u64,
-}
-
-async fn join_handler<T: AppStateTrait>(
+async fn action_handler<T: AppStateTrait>(
     socket: SocketRef,
-    Data(join): Data<Join>,
-    State(app_state): State<T>,
+    Data(entity): Data<Entity>,
+    // State(app_state): State<T>,
 ) {
-    dbg!(join);
-    let game_manager = if let Some(gm) = socket.extensions.get::<GameManager<T>>() {
-        gm
-    } else {
-        let gm = GameManager::new(app_state).await.unwrap();
-        socket.extensions.insert(gm.clone());
-        gm
-    };
-
-    socket.emit("board", &game_manager.get_board()).ok();
+    dbg!(&entity);
+    socket.broadcast().emit("action", &entity).await.ok();
 }
 
 pub fn on_connect<T: AppStateTrait>(socket: SocketRef) {
     println!(
-        "Socket connected on dynamic namespace with namespace path: {}",
+        "Socket connected on namespace with namespace path: {}",
         socket.ns()
     );
 
@@ -48,7 +33,7 @@ pub fn on_connect<T: AppStateTrait>(socket: SocketRef) {
         );
     });
 
-    socket.on("join", join_handler::<T>);
+    socket.on("action", action_handler::<T>);
 }
 
 pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {

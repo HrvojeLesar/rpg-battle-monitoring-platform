@@ -4960,6 +4960,7 @@ dependencies = [
  "bevy_ecs",
  "chrono",
  "dashmap",
+ "flate2",
  "futures-util",
  "image",
  "infer",

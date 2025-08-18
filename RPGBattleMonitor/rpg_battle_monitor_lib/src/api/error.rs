@@ -42,9 +42,6 @@ pub enum Error {
 
     #[error("SocketIo state not found")]
     SocketIoStateNotFound,
-
-    #[error(transparent)]
-    GameError(#[from] crate::game::error::Error),
 }
 
 impl<T: AppStateTrait> From<socketioxide::extract::StateNotFound<T>> for Error {
