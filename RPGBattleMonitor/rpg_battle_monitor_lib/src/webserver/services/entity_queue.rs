@@ -89,7 +89,7 @@ impl EntityQueue {
             }
         }
 
-        let comporessed_entity = entity.to_compressed()?;
+        let comporessed_entity = entity.try_into()?;
         self.entities.insert(id, comporessed_entity);
 
         Ok(())

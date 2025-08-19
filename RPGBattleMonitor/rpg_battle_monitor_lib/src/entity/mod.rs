@@ -1,6 +1,7 @@
-use std::io::Write;
+use std::io::{Read, Write};
 
-use flate2::{Compression, write::ZlibEncoder};
+use flate2::{Compression, read::GzDecoder, write::GzEncoder};
+use image::EncodableLayout;
 use serde::{Deserialize, Serialize};
 
 pub mod error;
@@ -25,18 +26,42 @@ pub struct Entity {
     pub other_values: serde_json::Value,
 }
 
-impl Entity {
-    pub fn to_compressed(self) -> Result<CompressedEntityModel> {
-        let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
+impl TryFrom<Entity> for CompressedEntityModel {
+    type Error = Error;
+
+    fn try_from(value: Entity) -> std::result::Result<Self, Self::Error> {
+        let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
         encoder
-            .write_all(self.other_values.to_string().as_bytes())
+            .write_all(value.other_values.to_string().as_bytes())
             .map_err(Error::EntityCompressionFailed)?;
         Ok(CompressedEntityModel {
-            uid: self.uid.0,
-            game: self.game,
-            kind: self.kind,
-            timestamp: self.timestamp.0,
+            uid: value.uid.0,
+            game: value.game,
+            kind: value.kind,
+            timestamp: value.timestamp.0,
             data: encoder.finish().map_err(Error::EntityCompressionFailed)?,
+        })
+    }
+}
+
+impl TryFrom<CompressedEntityModel> for Entity {
+    type Error = Error;
+
+    fn try_from(value: CompressedEntityModel) -> std::result::Result<Self, Self::Error> {
+        let mut decoder = GzDecoder::new(value.data.as_slice());
+        let mut data = Vec::new();
+        decoder
+            .read_to_end(&mut data)
+            .map_err(Error::EntityDecompressionFailed)?;
+
+        let other_values = serde_json::from_reader(data.as_bytes())?;
+
+        Ok(Entity {
+            uid: UId(value.uid),
+            game: value.game,
+            kind: value.kind,
+            timestamp: UtcTimestamp(value.timestamp),
+            other_values,
         })
     }
 }
