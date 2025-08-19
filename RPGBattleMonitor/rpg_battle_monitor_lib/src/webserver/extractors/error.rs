@@ -7,6 +7,9 @@ pub type Result<T> = core::result::Result<T, Error>;
 pub enum Error {
     #[error("Missing axum extension")]
     MissingExtension,
+
+    #[error("Raw value extraction failed")]
+    RawWebocketMessageExtractionFailed,
 }
 
 impl IntoResponse for Error {

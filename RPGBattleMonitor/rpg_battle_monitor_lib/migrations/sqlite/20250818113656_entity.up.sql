@@ -6,7 +6,7 @@ CREATE TABLE game (
 
 CREATE TABLE entity (
     uid TEXT NOT NULL
-    , game INTEGER REFERENCES game (id)
+    , game INTEGER
     , timestamp INTEGER NOT NULL
     , kind TEXT NOT NULL
     , data BLOB

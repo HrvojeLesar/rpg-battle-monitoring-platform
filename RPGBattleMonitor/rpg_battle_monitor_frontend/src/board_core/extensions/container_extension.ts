@@ -12,12 +12,15 @@ import { GridCell, GridCellPosition } from "../grid/cell";
 import { Grid } from "../grid/grid";
 import { IClampPositionToViewport } from "../interfaces/clamp_position_to_viewport";
 
+export type DragEndCallback = () => void;
+
 export type ContainerExtensionOptions = {
     isSnapping?: boolean;
     isDraggable?: boolean;
     isSelectable?: boolean;
     selectionOutline?: SelectionOutline;
     isResizable?: boolean;
+    dragEndCallback?: DragEndCallback;
 } & ContainerOptions;
 
 export type Ghost = ContainerExtension;
@@ -40,6 +43,7 @@ export class ContainerExtension<T extends Container = Container>
         new UniqueCollection();
     protected _grid: Grid;
     protected _gridCell: GridCell;
+    protected _dragEndCallback?: DragEndCallback;
 
     public constructor(grid: Grid, options?: ContainerExtensionOptions) {
         super(options);
@@ -52,6 +56,7 @@ export class ContainerExtension<T extends Container = Container>
         this._grid = grid;
 
         this._gridCell = new GridCell(this);
+        this._dragEndCallback = options?.dragEndCallback;
     }
 
     public get isSnapping(): boolean {
@@ -371,5 +376,13 @@ export class ContainerExtension<T extends Container = Container>
         ) {
             newPosition.y = this.y;
         }
+    }
+
+    public set dragEndCallback(callback: Maybe<DragEndCallback>) {
+        this._dragEndCallback = callback;
+    }
+
+    public get dragEndCallback(): Maybe<DragEndCallback> {
+        return this._dragEndCallback;
     }
 }

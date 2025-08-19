@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use socketioxide::{
     SocketIoBuilder,
-    extract::{Data, SocketRef},
+    extract::{Data, SocketRef, State},
     socket::DisconnectReason,
 };
 use tower::ServiceBuilder;
@@ -13,10 +13,14 @@ use crate::{entity::Entity, webserver::router::app_state::AppStateTrait};
 async fn action_handler<T: AppStateTrait>(
     socket: SocketRef,
     Data(entity): Data<Entity>,
-    // State(app_state): State<T>,
+    State(app_state): State<T>,
 ) {
-    dbg!(&entity);
     socket.broadcast().emit("action", &entity).await.ok();
+
+    let queue = app_state.get_entity_queue();
+    if let Err(e) = queue.lock().await.push(entity) {
+        tracing::error!(error = %e, "Failed to push entity to queue");
+    }
 }
 
 pub fn on_connect<T: AppStateTrait>(socket: SocketRef) {

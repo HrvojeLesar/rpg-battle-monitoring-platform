@@ -1,12 +1,18 @@
+use std::sync::Arc;
+
 use axum::Router;
 use axum_test::TestServer;
 use sea_orm::{Database, DatabaseConnection};
+use tokio::sync::Mutex;
 use uuid::Uuid;
 
 use crate::{
     cdn::filesystem::temp_file_adapter::TempFileStore,
     database::setup::{create_database, run_migrations},
-    webserver::router::app_state::{AppState, AppStateConfig},
+    webserver::{
+        router::app_state::{AppState, AppStateConfig},
+        services::entity_queue::EntityQueue,
+    },
 };
 
 pub(crate) const TEST_IMAGE_BYTES: &[u8] = include_bytes!("../../tests/assets/WIP.png");
@@ -42,9 +48,11 @@ async fn create_test_database() -> DatabaseConnection {
 
 impl AppStateConfig<TempFileStore> {
     pub async fn get_test_config() -> AppStateConfig<TempFileStore> {
+        let database = create_test_database().await;
         Self {
             file_system_handler: TempFileStore::new(),
-            database: create_test_database().await,
+            database: database.clone(),
+            entity_queue: Arc::new(Mutex::new(EntityQueue::new(database))),
         }
     }
 }

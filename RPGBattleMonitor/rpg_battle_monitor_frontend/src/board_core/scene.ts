@@ -92,11 +92,11 @@ export class Scene {
         this.addToken({ x: 256, y: 256, tint: "red" });
         this.addToken({ x: 256, y: 512, tint: "blue" });
 
-        const timeout = setTimeout(() => {
-            this.tokens[0].container.moveToGridCell(new Point(7, 1));
-            // this.addToken({ x: 256, y: 512, tint: "green" });
-            // clearTimeout(timeout);
-        }, 5000);
+        // const timeout = setTimeout(() => {
+        // this.tokens[0].container.moveToGridCell(new Point(7, 1));
+        // this.addToken({ x: 256, y: 512, tint: "green" });
+        // clearTimeout(timeout);
+        // }, 5000);
     }
 
     public setActive(): void {

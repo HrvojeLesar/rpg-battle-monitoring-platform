@@ -1,3 +1,4 @@
+import { GBoard } from "../board";
 import { ContainerExtension } from "../extensions/container_extension";
 import { Grid } from "../grid/grid";
 import { IMessagable, type TypedJson } from "../interfaces/messagable";
@@ -22,7 +23,7 @@ export class Token implements IMessagable {
         this._grid = grid;
         this._uid = uid ?? newUId();
         this._tokenData = tokenData ?? new TokenDataBase();
-        console.log(JSON.stringify(this));
+        this.container.dragEndCallback = this.dragCallback.bind(this);
     }
 
     public get container(): ContainerExtension {
@@ -40,12 +41,14 @@ export class Token implements IMessagable {
     public toJSON(): TypedJson {
         return {
             ...this.getAttributes(),
-            type: this.getType(),
+            kind: this.getKind(),
             uid: this.getUId(),
+            timestamp: Date.now(),
+            game: 0,
         };
     }
 
-    public getType(): string {
+    public getKind(): string {
         return "Token";
     }
 
@@ -54,6 +57,24 @@ export class Token implements IMessagable {
     }
 
     public getAttributes(): Record<string, unknown> {
-        return {};
+        return {
+            _container: {
+                position: {
+                    x: this._container.position.x,
+                    y: this._container.position.y,
+                },
+                width: this._container.width,
+                height: this._container.height,
+            },
+        };
+    }
+
+    public dragCallback(): void {
+        GBoard.websocket.emit("action", this);
+    }
+
+    public applyChanges(changes: Record<string, unknown>): void {
+        this._container.position.x = changes._container?.position?.x;
+        this._container.position.y = changes._container?.position?.y;
     }
 }

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
-use dashmap::DashMap;
 use sea_orm::DatabaseConnection;
+use tokio::sync::Mutex;
 
 use crate::{
     cdn::filesystem::{
@@ -10,6 +10,7 @@ use crate::{
     },
     config,
     database::get_sea_orm_database,
+    webserver::services::entity_queue::EntityQueue,
 };
 
 pub struct AppStateConfig<F>
@@ -18,13 +19,17 @@ where
 {
     pub file_system_handler: F,
     pub database: DatabaseConnection,
+    pub entity_queue: Arc<Mutex<EntityQueue>>,
 }
 
 impl AppStateConfig<local_adapter::Local> {
     pub async fn get_default_config() -> AppStateConfig<local_adapter::Local> {
+        let database = Self::get_database().await;
+        let entity_queue = Arc::new(Mutex::new(EntityQueue::new(database.clone())));
         Self {
             file_system_handler: Self::get_fs_handler_from_config(),
-            database: Self::get_database().await,
+            database,
+            entity_queue,
         }
     }
 
@@ -49,6 +54,7 @@ pub trait AppStateTrait: Clone + Send + Sync + 'static {
 
     fn get_fs_handler(&self) -> Self::FsHandler;
     fn get_db(&self) -> DatabaseConnection;
+    fn get_entity_queue(&self) -> Arc<Mutex<EntityQueue>>;
 }
 
 #[derive(Debug)]
@@ -58,6 +64,7 @@ where
 {
     pub fs_handler: F,
     pub database: DatabaseConnection,
+    pub entity_queue: Arc<Mutex<EntityQueue>>,
 }
 
 impl<F> Clone for AppState<F>
@@ -68,6 +75,7 @@ where
         Self {
             fs_handler: self.fs_handler.clone(),
             database: self.database.clone(),
+            entity_queue: self.entity_queue.clone(),
         }
     }
 }
@@ -80,6 +88,7 @@ where
         Self {
             fs_handler: config.file_system_handler,
             database: config.database,
+            entity_queue: config.entity_queue,
         }
     }
 }
@@ -96,5 +105,9 @@ where
 
     fn get_db(&self) -> DatabaseConnection {
         self.database.clone()
+    }
+
+    fn get_entity_queue(&self) -> Arc<Mutex<EntityQueue>> {
+        self.entity_queue.clone()
     }
 }

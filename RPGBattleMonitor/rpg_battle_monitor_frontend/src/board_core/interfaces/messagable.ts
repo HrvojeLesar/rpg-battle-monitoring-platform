@@ -1,8 +1,14 @@
-export type TypedJson = { type: string; uid: string } & Record<string, unknown>;
+export type TypedJson = {
+    kind: string;
+    uid: string;
+    timestamp: number;
+    game: number;
+} & Record<string, unknown>;
 
 export interface IMessagable {
-    getType(): string;
+    getKind(): string;
     getUId(): string;
     toJSON(): TypedJson;
     getAttributes(): Record<string, unknown>;
+    applyChanges(changes: Record<string, unknown>): void;
 }

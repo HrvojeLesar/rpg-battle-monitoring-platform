@@ -114,9 +114,15 @@ export class DragHandler {
             for (const container of selectedItems) {
                 if (this.isDirty) {
                     container.snapToGrid();
+                    try {
+                        if (container.dragEndCallback) {
+                            container.dragEndCallback();
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
                 }
                 container.clearGhosts();
-                container.getGridCellPosition();
             }
 
             this.selectHandler.drawSelectionOutline();

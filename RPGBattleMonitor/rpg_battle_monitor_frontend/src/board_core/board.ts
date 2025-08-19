@@ -140,6 +140,7 @@ export async function init(
         boardApplication.changeScene(scene);
 
         boardApplication.websocket = SocketioWebsocket.createDefaultSocket();
+        initWebsocketListeners();
     }
 
     globalThis.addEventListener("resize", () => {
@@ -174,6 +175,18 @@ export function destroy(
 
     GEventEmitter.removeAllListeners();
     boardApplication = new Board(GEventEmitter);
+}
+
+function initWebsocketListeners() {
+    boardApplication.websocket.on("action", (data) => {
+        boardApplication.scenes.forEach((scene) => {
+            scene.tokens.forEach((token) => {
+                if (token.getUId() === data.uid) {
+                    token.applyChanges(data);
+                }
+            });
+        });
+    });
 }
 
 export { boardApplication as GBoard, GEventEmitter };

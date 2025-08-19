@@ -28,12 +28,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Save system.md",
+                "file": "Joining a game.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Save system"
+              "title": "Joining a game"
             }
           },
           {
@@ -51,7 +51,7 @@
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       },
       {
         "id": "7a2148dea5eeefbe",
@@ -215,9 +215,10 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "e6483d8439aeb0a4",
+  "active": "85efdac0495f68ba",
   "lastOpenFiles": [
     "Save system.md",
+    "Joining a game.md",
     "Entity queue.md",
     "Client <-> Server/Basic websocket communication.md",
     "Client <-> Server/Sent messages/Action.md",
