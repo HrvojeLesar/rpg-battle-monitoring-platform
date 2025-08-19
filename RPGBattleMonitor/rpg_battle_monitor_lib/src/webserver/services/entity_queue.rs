@@ -1,5 +1,4 @@
 use std::iter::{Skip, Take};
-use std::time::Duration;
 
 use dashmap::DashMap;
 use dashmap::iter::Iter;
@@ -61,18 +60,14 @@ impl GameIdAndUIdCombo {
 #[derive(Debug)]
 pub struct EntityQueue {
     entities: DashMap<GameIdAndUIdCombo, CompressedEntityModel>,
-    pub bytes_used: usize,
     db: DatabaseConnection,
-    interval_duration: Duration,
 }
 
 impl Default for EntityQueue {
     fn default() -> Self {
         Self {
             entities: DashMap::new(),
-            bytes_used: 0,
             db: DatabaseConnection::default(),
-            interval_duration: Duration::from_secs(5),
         }
     }
 }
@@ -95,7 +90,6 @@ impl EntityQueue {
         }
 
         let comporessed_entity = entity.to_compressed()?;
-        self.bytes_used += comporessed_entity.data.len();
         self.entities.insert(id, comporessed_entity);
 
         Ok(())
@@ -106,14 +100,14 @@ impl EntityQueue {
             .contains_key(&GameIdAndUIdCombo::from_entity(entity))
     }
 
-    pub fn iter_chunked(&self) -> ChunkedEntityQueueIterator {
-        ChunkedEntityQueueIterator::new(self, 50)
-    }
-
     pub async fn flush(&mut self) {
+        if self.entities.is_empty() {
+            tracing::debug!("Empty flush");
+            return;
+        }
+
         let map = std::mem::take(&mut self.entities);
         let database = self.db.clone();
-        self.bytes_used = 0;
 
         tokio::spawn(async move {
             tracing::info!("Flushing EntityQueue");

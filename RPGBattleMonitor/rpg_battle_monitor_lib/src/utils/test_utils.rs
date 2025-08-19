@@ -11,7 +11,7 @@ use crate::{
     database::setup::{create_database, run_migrations},
     webserver::{
         router::app_state::{AppState, AppStateConfig},
-        services::entity_queue::EntityQueue,
+        services::{entity_queue::EntityQueue, scheduler::Scheduler},
     },
 };
 
@@ -53,6 +53,7 @@ impl AppStateConfig<TempFileStore> {
             file_system_handler: TempFileStore::new(),
             database: database.clone(),
             entity_queue: Arc::new(Mutex::new(EntityQueue::new(database))),
+            scheduler: Scheduler::new(),
         }
     }
 }

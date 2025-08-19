@@ -10,7 +10,7 @@ use crate::{
     },
     config,
     database::get_sea_orm_database,
-    webserver::services::entity_queue::EntityQueue,
+    webserver::services::{entity_queue::EntityQueue, scheduler::Scheduler},
 };
 
 pub struct AppStateConfig<F>
@@ -20,6 +20,7 @@ where
     pub file_system_handler: F,
     pub database: DatabaseConnection,
     pub entity_queue: Arc<Mutex<EntityQueue>>,
+    pub scheduler: Scheduler,
 }
 
 impl AppStateConfig<local_adapter::Local> {
@@ -30,6 +31,7 @@ impl AppStateConfig<local_adapter::Local> {
             file_system_handler: Self::get_fs_handler_from_config(),
             database,
             entity_queue,
+            scheduler: Scheduler::new(),
         }
     }
 
@@ -55,6 +57,7 @@ pub trait AppStateTrait: Clone + Send + Sync + 'static {
     fn get_fs_handler(&self) -> Self::FsHandler;
     fn get_db(&self) -> DatabaseConnection;
     fn get_entity_queue(&self) -> Arc<Mutex<EntityQueue>>;
+    fn get_scheduler(&self) -> Scheduler;
 }
 
 #[derive(Debug)]
@@ -65,6 +68,7 @@ where
     pub fs_handler: F,
     pub database: DatabaseConnection,
     pub entity_queue: Arc<Mutex<EntityQueue>>,
+    pub scheduler: Scheduler,
 }
 
 impl<F> Clone for AppState<F>
@@ -76,6 +80,7 @@ where
             fs_handler: self.fs_handler.clone(),
             database: self.database.clone(),
             entity_queue: self.entity_queue.clone(),
+            scheduler: self.scheduler.clone(),
         }
     }
 }
@@ -89,6 +94,7 @@ where
             fs_handler: config.file_system_handler,
             database: config.database,
             entity_queue: config.entity_queue,
+            scheduler: config.scheduler,
         }
     }
 }
@@ -109,5 +115,9 @@ where
 
     fn get_entity_queue(&self) -> Arc<Mutex<EntityQueue>> {
         self.entity_queue.clone()
+    }
+
+    fn get_scheduler(&self) -> Scheduler {
+        self.scheduler.clone()
     }
 }

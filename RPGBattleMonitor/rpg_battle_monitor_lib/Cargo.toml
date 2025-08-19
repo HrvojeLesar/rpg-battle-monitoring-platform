@@ -34,6 +34,7 @@ infer = "0.19.0"
 dashmap = "6.1.0"
 bevy_ecs = { version = "0.16.1", features = ["trace"] }
 flate2 = "1.1.2"
+tokio-stream = { version = "0.1.17", features = ["time"] }
 
 [features]
 default = ["db_sqlite", "api_doc"]
