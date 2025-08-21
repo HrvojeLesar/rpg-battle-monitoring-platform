@@ -59,7 +59,7 @@ impl GameIdAndUIdCombo {
 
 #[derive(Debug)]
 pub struct EntityQueue {
-    entities: DashMap<GameIdAndUIdCombo, CompressedEntityModel>,
+    pub(crate) entities: DashMap<GameIdAndUIdCombo, CompressedEntityModel>,
     db: DatabaseConnection,
 }
 

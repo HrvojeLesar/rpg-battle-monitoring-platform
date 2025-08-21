@@ -5,8 +5,9 @@ use image::EncodableLayout;
 use serde::{Deserialize, Serialize};
 
 pub mod error;
+pub mod kind;
 
-use crate::models::entity::CompressedEntityModel;
+use crate::{entity::kind::EntityKind, models::entity::CompressedEntityModel};
 
 use self::error::{Error, Result};
 
@@ -20,10 +21,27 @@ pub struct UtcTimestamp(pub i64);
 pub struct Entity {
     pub uid: UId,
     pub game: i32,
-    pub kind: String,
+    pub kind: EntityKind,
     pub timestamp: UtcTimestamp,
     #[serde(flatten)]
     pub other_values: serde_json::Value,
+}
+
+impl Entity {
+    pub fn decompress_vec(compressed: Vec<CompressedEntityModel>) -> Result<Vec<Entity>> {
+        let mut decompressed = Vec::with_capacity(compressed.len());
+        for entity in compressed {
+            decompressed.push(entity.try_into()?);
+        }
+
+        Ok(decompressed)
+    }
+
+    pub fn sort_entities(mut entities: Vec<Entity>) -> Vec<Entity> {
+        entities.sort_by_key(|e| e.kind.get_sort_order());
+
+        entities
+    }
 }
 
 impl TryFrom<Entity> for CompressedEntityModel {
@@ -37,7 +55,7 @@ impl TryFrom<Entity> for CompressedEntityModel {
         Ok(CompressedEntityModel {
             uid: value.uid.0,
             game: value.game,
-            kind: value.kind,
+            kind: value.kind.to_string(),
             timestamp: value.timestamp.0,
             data: encoder.finish().map_err(Error::EntityCompressionFailed)?,
         })
@@ -59,7 +77,7 @@ impl TryFrom<CompressedEntityModel> for Entity {
         Ok(Entity {
             uid: UId(value.uid),
             game: value.game,
-            kind: value.kind,
+            kind: value.kind.parse()?,
             timestamp: UtcTimestamp(value.timestamp),
             other_values,
         })

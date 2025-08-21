@@ -1,0 +1,1 @@
+Message emitted by the **server** after which the client can start processing [[Action|action]] messages.

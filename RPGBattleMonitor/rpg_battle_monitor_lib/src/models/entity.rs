@@ -121,5 +121,16 @@ mod inner {
 
             Ok(valid_entities)
         }
+
+        pub async fn load_entities(
+            &self,
+            conn: &impl ConnectionTrait,
+            game_id: i32,
+        ) -> Result<Vec<CompressedEntityModel>> {
+            Ok(Entity::find()
+                .filter(Column::Game.eq(game_id))
+                .all(conn)
+                .await?)
+        }
     }
 }

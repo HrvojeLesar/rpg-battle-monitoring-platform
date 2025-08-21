@@ -16,16 +16,6 @@ Basic requirements
 - Any message just calls a function that applies that messages payload:
 	- e.g. moving position would message of **type** action, with **function** that defines setting the position of an entity
 
-## Sent
-- Connect
+## Message List
+- [[Join]]
 - [[Action]]
-### [[Action]]
-
-
-## Received
-- Action
-### Action-update
-
-- Response to [[#Action]]
-- Expected response to [[#^951397|action example]] is:
-	- 

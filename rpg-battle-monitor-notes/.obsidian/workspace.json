@@ -6,60 +6,31 @@
       {
         "id": "1ce1388aa7d389aa",
         "type": "tabs",
-        "dimension": 73.42057761732852,
+        "dimension": 74.63898916967509,
+        "children": [
+          {
+            "id": "a1b0c0c80ef4eaf1",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Entity kind.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Entity kind"
+            }
+          }
+        ]
+      },
+      {
+        "id": "6bdaed3d920d7459",
+        "type": "tabs",
+        "dimension": 25.361010830324908,
         "children": [
           {
             "id": "499779ec7438bc7c",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Client <-> Server/Basic websocket communication.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Basic websocket communication"
-            }
-          },
-          {
-            "id": "85efdac0495f68ba",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Joining a game.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Joining a game"
-            }
-          },
-          {
-            "id": "e6483d8439aeb0a4",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Entity queue.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Entity queue"
-            }
-          }
-        ],
-        "currentTab": 1
-      },
-      {
-        "id": "7a2148dea5eeefbe",
-        "type": "tabs",
-        "dimension": 26.57942238267148,
-        "children": [
-          {
-            "id": "99743c4f1578d50a",
             "type": "leaf",
             "state": {
               "type": "graph",
@@ -207,6 +178,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "bases:Create new base": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
@@ -215,15 +187,19 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "85efdac0495f68ba",
+  "active": "a1b0c0c80ef4eaf1",
   "lastOpenFiles": [
-    "Save system.md",
+    "Client <-> Server/Messages/Join.md",
+    "Client <-> Server/Messages/Join finished.md",
+    "Client <-> Server/Basic websocket communication.md",
+    "Entity kind.md",
+    "Room.md",
     "Joining a game.md",
     "Entity queue.md",
-    "Client <-> Server/Basic websocket communication.md",
-    "Client <-> Server/Sent messages/Action.md",
+    "Save system.md",
+    "Client <-> Server/Messages/Action.md",
     "Token.md",
-    "Client <-> Server/Sent messages",
+    "Client <-> Server/Messages",
     "token.md",
     "Client <-> Server/Recieved messages",
     "Action example.md",

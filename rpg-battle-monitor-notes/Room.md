@@ -1,0 +1,1 @@
+Refers to a socket.io [room](https://socket.io/docs/v4/rooms/)
