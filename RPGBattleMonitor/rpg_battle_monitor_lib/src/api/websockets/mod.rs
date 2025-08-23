@@ -19,6 +19,9 @@ use crate::{
     },
 };
 
+#[derive(Clone)]
+struct JoinedFlag;
+
 async fn action_handler<T: AppStateTrait>(
     socket: SocketRef,
     Data(entity): Data<Entity>,
@@ -45,6 +48,10 @@ async fn join_handler<T: AppStateTrait>(
         entities.append(&mut other);
 
         Entity::decompress_vec(entities)
+    }
+
+    if socket.extensions.get::<JoinedFlag>().is_some() {
+        return;
     }
 
     socket.on("action", action_handler::<T>);
@@ -97,7 +104,7 @@ async fn join_handler<T: AppStateTrait>(
 
     let entities = match join_and_decompress_entities(db_comporessed_entities, compressed_entities)
     {
-        Ok(e) => Entity::sort_entities(e),
+        Ok(e) => e,
         Err(e) => {
             tracing::error!("Failed to decompress entities: {}", e);
             return;
@@ -108,16 +115,23 @@ async fn join_handler<T: AppStateTrait>(
     let mut sent = 0;
     entities.chunks(50).for_each(|chunk| {
         sent += chunk.len();
-        socket.emit("join", &chunk).ok();
         socket
             .emit(
-                "join-progress",
-                &serde_json::json!({"progress": sent, "total": total}),
+                "join",
+                &serde_json::json!({
+                    "progress": {
+                        "sent": sent,
+                        "total": total
+                    },
+                    "data": chunk
+                }),
             )
             .ok();
     });
 
     socket.emit("join-finished", &()).ok();
+
+    socket.extensions.insert(JoinedFlag);
 }
 
 pub fn on_connect<T: AppStateTrait>(socket: SocketRef) {
@@ -133,6 +147,7 @@ pub fn on_connect<T: AppStateTrait>(socket: SocketRef) {
             socket_clone.id,
             reason
         );
+        socket_clone.extensions.remove::<JoinedFlag>();
     });
 
     socket.on("join", join_handler::<T>);
