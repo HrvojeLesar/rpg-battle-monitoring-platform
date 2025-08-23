@@ -32,7 +32,7 @@ class Board {
         this.scenes = [];
         this._eventEmitter = eventEmitter;
 
-        this._entityRegistry = new EntityRegistry();
+        this._entityRegistry = EntityRegistry.defaultEntityRegistry();
     }
 
     public setApplication(application: Application) {
@@ -151,8 +151,6 @@ export async function init(
         initWebsocketListeners();
     }
 
-    console.log(Grid.getKindStatic());
-
     globalThis.addEventListener("resize", () => {
         boardApplication.scenes.forEach((scene) => {
             scene.viewport.resize(
@@ -166,6 +164,7 @@ export async function init(
     if (socket) {
         boardApplication.websocket = socket;
     }
+    boardApplication.websocket.initJoin();
 
     console.log("Finished board init");
     return boardApplication.getApplication();

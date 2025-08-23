@@ -36,6 +36,10 @@ export abstract class BaseEntity<T = DefaultAttributes>
         return this._uid;
     }
 
+    public setUId(uid: UId) {
+        this._uid = uid;
+    }
+
     public toJSON(): TypedJson<T> {
         return {
             ...this.getAttributes(),

@@ -1,12 +1,28 @@
-import { Sprite, SpriteOptions } from "pixi.js";
+import {
+    ColorSource,
+    Sprite,
+    SpriteOptions,
+    Texture,
+    TextureSource,
+} from "pixi.js";
 import {
     ContainerExtension,
+    ContainerExtensionAttributes,
     ContainerExtensionOptions,
     Ghost,
 } from "./container_extension";
 import { Grid } from "../grid/grid";
 
-export class SpriteExtension extends ContainerExtension<Sprite> {
+export type SpriteExtensionAttributes = {
+    alpha?: number;
+    tint?: ColorSource;
+    texture?: Texture<TextureSource<any>>;
+} & ContainerExtensionAttributes;
+
+export class SpriteExtension extends ContainerExtension<
+    Sprite,
+    SpriteExtensionAttributes
+> {
     public constructor(
         grid: Grid,
         spriteOptions?: SpriteOptions,
@@ -45,6 +61,15 @@ export class SpriteExtension extends ContainerExtension<Sprite> {
             height: container.height,
             eventMode: "passive",
             texture: container.texture,
+        };
+    }
+
+    public getAttributes(): SpriteExtensionAttributes {
+        return {
+            alpha: this.displayedEntity?.alpha,
+            tint: this.displayedEntity?.tint,
+            texture: this.displayedEntity?.texture,
+            ...super.getAttributes(),
         };
     }
 }

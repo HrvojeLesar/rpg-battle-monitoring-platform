@@ -10,6 +10,7 @@ export type TypedJson<Attributes = DefaultAttributes> = {
 export interface IMessagable<Attributes = DefaultAttributes> {
     getKind(): string;
     getUId(): UId;
+    setUId(uid: UId): void;
     toJSON(): TypedJson<Attributes>;
     getAttributes(): Attributes;
     applyChanges(changes: TypedJson<Attributes>): void;

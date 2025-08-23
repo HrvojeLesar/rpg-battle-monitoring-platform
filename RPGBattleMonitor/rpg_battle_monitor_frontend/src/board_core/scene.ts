@@ -12,11 +12,17 @@ import { EmptyTokenData } from "./token/empty_token_data";
 import { BaseEntity } from "./entity/base_entity";
 import { TypedJson } from "./interfaces/messagable";
 
-type Attributes = {
-    grid_uid: string;
+export type SceneAttributes = {
+    gridUid: string;
+    name: string;
 };
 
-export class Scene extends BaseEntity<Attributes> {
+export type SceneOptions = {
+    name: string;
+    grid?: Grid;
+};
+
+export class Scene extends BaseEntity<SceneAttributes> {
     public readonly name: string;
     protected _viewport: Viewport;
     protected _grid: Grid;
@@ -26,10 +32,10 @@ export class Scene extends BaseEntity<Attributes> {
     protected _eventStore: EventStore;
     protected _selectHandler: SelectHandler;
 
-    public constructor(name: string) {
+    public constructor(options: SceneOptions) {
         super();
-        this.name = name;
-        this._grid = new Grid();
+        this.name = options.name;
+        this._grid = options.grid ?? new Grid();
 
         const gridSize = this._grid.container.size;
 
@@ -171,13 +177,14 @@ export class Scene extends BaseEntity<Attributes> {
         this._viewport.addChild(token.container);
     }
 
-    public getAttributes(): Attributes {
+    public getAttributes(): SceneAttributes {
         return {
-            grid_uid: this._grid.getUId(),
+            gridUid: this._grid.getUId(),
+            name: this.name,
         };
     }
 
-    public applyChanges(changes: TypedJson<Attributes>): void {
+    public applyChanges(changes: TypedJson<SceneAttributes>): void {
         super.applyChanges(changes);
     }
 }

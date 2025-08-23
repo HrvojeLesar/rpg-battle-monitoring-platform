@@ -5,7 +5,7 @@ import { type TypedJson } from "../interfaces/messagable";
 import { Scene } from "../scene";
 import { TokenDataBase } from "./token_data";
 
-type Attributes = {
+export type TokenAttributes = {
     _container: {
         position: {
             x: number;
@@ -14,10 +14,12 @@ type Attributes = {
         width: number;
         height: number;
     };
-    scene_uid: string;
+    sceneUid: string;
+    tokenData: string;
+    containerUid: string;
 };
 
-export class Token extends BaseEntity<Attributes> {
+export class Token extends BaseEntity<TokenAttributes> {
     protected _container: ContainerExtension;
     protected _scene: Scene;
     protected _tokenData: TokenDataBase<any>;
@@ -47,7 +49,7 @@ export class Token extends BaseEntity<Attributes> {
         this._scene = value;
     }
 
-    public getAttributes(): Attributes {
+    public getAttributes(): TokenAttributes {
         return {
             _container: {
                 position: {
@@ -57,15 +59,17 @@ export class Token extends BaseEntity<Attributes> {
                 width: this._container.width,
                 height: this._container.height,
             },
-            scene_uid: this.scene.getUId(),
+            containerUid: this._container.getUId(),
+            sceneUid: this.scene.getUId(),
+            tokenData: this._tokenData.getUId(),
         };
     }
 
     public dragCallback(): void {
-        GBoard.websocket.emit("action", this);
+        GBoard.websocket.socket.emit("action", this);
     }
 
-    public applyChanges(changes: TypedJson<Attributes>): void {
+    public applyChanges(changes: TypedJson<TokenAttributes>): void {
         super.applyChanges(changes);
         this._container.position.x = changes._container.position.x;
         this._container.position.y = changes._container.position.y;

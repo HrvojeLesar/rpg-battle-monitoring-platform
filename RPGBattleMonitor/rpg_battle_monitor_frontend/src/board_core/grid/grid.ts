@@ -12,20 +12,21 @@ export type GridSize = {
     height: number;
 };
 
-type Attributes = {
+export type GridAttributes = {
     _container: {
         _cellSize: number;
         _size: GridSize;
+        hover: boolean;
     };
 };
 
-export class Grid extends BaseEntity<Attributes> {
+export class Grid extends BaseEntity<GridAttributes> {
     protected _container: GridContainer;
 
-    public constructor() {
+    public constructor(options?: GridOptions) {
         super();
 
-        this._container = new GridContainer();
+        this._container = new GridContainer(options);
     }
 
     public get grid(): GridContainer {
@@ -36,11 +37,12 @@ export class Grid extends BaseEntity<Attributes> {
         return this._container;
     }
 
-    public getAttributes(): Attributes {
+    public getAttributes(): GridAttributes {
         return {
             _container: {
                 _cellSize: this._container.cellSize,
                 _size: this._container.size,
+                hover: this._container.hover,
             },
         };
     }
@@ -49,7 +51,7 @@ export class Grid extends BaseEntity<Attributes> {
 export class GridContainer extends Container {
     protected gridSprite: Container;
     protected hoveredCell: Graphics;
-    protected hover: boolean = true;
+    public hover: boolean = true;
 
     protected _cellSize: number = 100;
     protected _size: GridSize = {

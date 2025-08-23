@@ -11,6 +11,8 @@ import { IGridMove } from "../interfaces/grid_move";
 import { GridCell, GridCellPosition } from "../grid/cell";
 import { Grid } from "../grid/grid";
 import { IClampPositionToViewport } from "../interfaces/clamp_position_to_viewport";
+import { IMessagable, TypedJson, UId } from "../interfaces/messagable";
+import newUId from "../utils/uuid_generator";
 
 export type DragEndCallback = () => void;
 
@@ -30,9 +32,23 @@ export type Handlers = {
     selectHandler: SelectHandler;
 };
 
-export class ContainerExtension<T extends Container = Container>
+export type ContainerExtensionAttributes = {
+    gridUid: UId;
+    width: number;
+    height: number;
+};
+
+export abstract class ContainerExtension<
+        T extends Container = Container,
+        Attributes extends
+            ContainerExtensionAttributes = ContainerExtensionAttributes,
+    >
     extends Container
-    implements IResizable, IGridMove, IClampPositionToViewport
+    implements
+        IResizable,
+        IGridMove,
+        IClampPositionToViewport,
+        IMessagable<Attributes>
 {
     protected _isSnapping: boolean = false;
     protected _isDraggable: boolean = false;
@@ -44,6 +60,7 @@ export class ContainerExtension<T extends Container = Container>
     protected _grid: Grid;
     protected _gridCell: GridCell;
     protected _dragEndCallback?: DragEndCallback;
+    protected _uid: UId;
 
     public constructor(grid: Grid, options?: ContainerExtensionOptions) {
         super(options);
@@ -55,8 +72,9 @@ export class ContainerExtension<T extends Container = Container>
 
         this._grid = grid;
 
-        this._gridCell = new GridCell(this);
+        this._gridCell = new GridCell(this as ContainerExtension);
         this._dragEndCallback = options?.dragEndCallback;
+        this._uid = newUId();
     }
 
     public get isSnapping(): boolean {
@@ -192,7 +210,8 @@ export class ContainerExtension<T extends Container = Container>
             if (kind === ResizeKind.Right) {
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width / (this._grid.container.cellSize / 2),
+                        this.displayedEntity.width /
+                            (this._grid.container.cellSize / 2),
                     ) *
                     (this._grid.container.cellSize / 2);
             }
@@ -200,29 +219,36 @@ export class ContainerExtension<T extends Container = Container>
             if (kind === ResizeKind.Bottom) {
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height / (this._grid.container.cellSize / 2),
+                        this.displayedEntity.height /
+                            (this._grid.container.cellSize / 2),
                     ) *
                     (this._grid.container.cellSize / 2);
             }
 
             if (kind === ResizeKind.Left) {
                 this.position.x =
-                    Math.round(this.position.x / (this._grid.container.cellSize / 2)) *
+                    Math.round(
+                        this.position.x / (this._grid.container.cellSize / 2),
+                    ) *
                     (this._grid.container.cellSize / 2);
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width / (this._grid.container.cellSize / 2),
+                        this.displayedEntity.width /
+                            (this._grid.container.cellSize / 2),
                     ) *
                     (this._grid.container.cellSize / 2);
             }
 
             if (kind === ResizeKind.Top) {
                 this.position.y =
-                    Math.round(this.position.y / (this._grid.container.cellSize / 2)) *
+                    Math.round(
+                        this.position.y / (this._grid.container.cellSize / 2),
+                    ) *
                     (this._grid.container.cellSize / 2);
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height / (this._grid.container.cellSize / 2),
+                        this.displayedEntity.height /
+                            (this._grid.container.cellSize / 2),
                     ) *
                     (this._grid.container.cellSize / 2);
             }
@@ -230,28 +256,34 @@ export class ContainerExtension<T extends Container = Container>
             if (kind === ResizeKind.BottomRight) {
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width / (this._grid.container.cellSize / 2),
+                        this.displayedEntity.width /
+                            (this._grid.container.cellSize / 2),
                     ) *
                     (this._grid.container.cellSize / 2);
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height / (this._grid.container.cellSize / 2),
+                        this.displayedEntity.height /
+                            (this._grid.container.cellSize / 2),
                     ) *
                     (this._grid.container.cellSize / 2);
             }
 
             if (kind === ResizeKind.TopRight) {
                 this.position.y =
-                    Math.round(this.position.y / (this._grid.container.cellSize / 2)) *
+                    Math.round(
+                        this.position.y / (this._grid.container.cellSize / 2),
+                    ) *
                     (this._grid.container.cellSize / 2);
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height / (this._grid.container.cellSize / 2),
+                        this.displayedEntity.height /
+                            (this._grid.container.cellSize / 2),
                     ) *
                     (this._grid.container.cellSize / 2);
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width / (this._grid.container.cellSize / 2),
+                        this.displayedEntity.width /
+                            (this._grid.container.cellSize / 2),
                     ) *
                     (this._grid.container.cellSize / 2);
             }
@@ -259,47 +291,51 @@ export class ContainerExtension<T extends Container = Container>
             if (kind === ResizeKind.BottomLeft) {
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height / (this._grid.container.cellSize / 2),
+                        this.displayedEntity.height /
+                            (this._grid.container.cellSize / 2),
                     ) *
                     (this._grid.container.cellSize / 2);
                 this.position.x =
-                    Math.round(this.position.x / (this._grid.container.cellSize / 2)) *
+                    Math.round(
+                        this.position.x / (this._grid.container.cellSize / 2),
+                    ) *
                     (this._grid.container.cellSize / 2);
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width / (this._grid.container.cellSize / 2),
+                        this.displayedEntity.width /
+                            (this._grid.container.cellSize / 2),
                     ) *
                     (this._grid.container.cellSize / 2);
             }
 
             if (kind === ResizeKind.TopLeft) {
                 this.position.y =
-                    Math.round(this.position.y / (this._grid.container.cellSize / 2)) *
+                    Math.round(
+                        this.position.y / (this._grid.container.cellSize / 2),
+                    ) *
                     (this._grid.container.cellSize / 2);
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height / (this._grid.container.cellSize / 2),
+                        this.displayedEntity.height /
+                            (this._grid.container.cellSize / 2),
                     ) *
                     (this._grid.container.cellSize / 2);
                 this.position.x =
-                    Math.round(this.position.x / (this._grid.container.cellSize / 2)) *
+                    Math.round(
+                        this.position.x / (this._grid.container.cellSize / 2),
+                    ) *
                     (this._grid.container.cellSize / 2);
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width / (this._grid.container.cellSize / 2),
+                        this.displayedEntity.width /
+                            (this._grid.container.cellSize / 2),
                     ) *
                     (this._grid.container.cellSize / 2);
             }
         }
     }
 
-    protected createGhostContainer(): Ghost {
-        if (this instanceof ContainerExtension) {
-            return new ContainerExtension(this.grid, this);
-        }
-
-        throw new Error("Creating a ghost of an unhandled type:", this);
-    }
+    protected abstract createGhostContainer(): Ghost;
 
     protected cloneContainerOptions(
         container: ContainerExtension,
@@ -384,5 +420,44 @@ export class ContainerExtension<T extends Container = Container>
 
     public get dragEndCallback(): Maybe<DragEndCallback> {
         return this._dragEndCallback;
+    }
+
+    public getKind(): string {
+        return this.constructor.name;
+    }
+
+    public getAttributes(): Attributes {
+        return {
+            gridUid: this._grid.getUId(),
+            width: this.width,
+            height: this.height,
+        } as Attributes;
+    }
+
+    public applyChanges(changes: TypedJson<Attributes>): void {
+        this._uid = changes.uid;
+        this.width = changes.width;
+        this.height = changes.height;
+    }
+
+    public getUId(): UId {
+        return this._uid;
+    }
+
+    public setUId(uid: UId) {
+        this._uid = uid;
+    }
+
+    public toJSON(): TypedJson<Attributes> {
+        return {
+            ...this.getAttributes(),
+            kind: this.getKind(),
+            uid: this.getUId(),
+            timestamp: Date.now(),
+        };
+    }
+
+    public static getKindStatic(): string {
+        return this.name;
     }
 }
