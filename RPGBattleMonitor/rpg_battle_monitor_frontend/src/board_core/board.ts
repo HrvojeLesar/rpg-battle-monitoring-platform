@@ -12,7 +12,7 @@ import { Viewport } from "pixi-viewport";
 import "./mixins/point_mixin";
 import { BoardEventEmitter } from "./events/board_event_emitters";
 import { Grid } from "./grid/grid";
-import { SocketioWebsocket } from "../websocket/websocket";
+import { Websocket } from "../websocket/websocket";
 
 export type GameBoard = Board;
 
@@ -24,7 +24,7 @@ class Board {
 
     protected _eventEmitter: BoardEventEmitter;
 
-    protected _websocket?: Socket;
+    protected _websocket?: Websocket;
 
     public constructor(eventEmitter: BoardEventEmitter) {
         this.scenes = [];
@@ -47,11 +47,11 @@ class Board {
         return this.application;
     }
 
-    public set websocket(socket: Socket) {
+    public set websocket(socket: Websocket) {
         this._websocket = socket;
     }
 
-    public get websocket(): Socket {
+    public get websocket(): Websocket {
         if (this._websocket === undefined) {
             throw new Error("Websocket is not initialized");
         }
@@ -124,7 +124,7 @@ var boardApplication: Board = new Board(GEventEmitter);
 
 export async function init(
     options?: Partial<ApplicationOptions>,
-    socket?: Socket,
+    socket?: Websocket,
 ): Promise<Application> {
     const application = new Application();
 
@@ -139,7 +139,7 @@ export async function init(
         boardApplication.addScene(scene);
         boardApplication.changeScene(scene);
 
-        boardApplication.websocket = SocketioWebsocket.createDefaultSocket();
+        boardApplication.websocket = Websocket.createDefaultSocket();
         initWebsocketListeners();
     }
 
@@ -170,7 +170,7 @@ export function destroy(
         ?.destroy(rendererDestroyOptions, options);
 
     try {
-        boardApplication.websocket.disconnect();
+        boardApplication.websocket.socket.disconnect();
     } catch (error) {}
 
     GEventEmitter.removeAllListeners();
@@ -178,7 +178,7 @@ export function destroy(
 }
 
 function initWebsocketListeners() {
-    boardApplication.websocket.on("action", (data) => {
+    boardApplication.websocket.socket.on("action", (data) => {
         boardApplication.scenes.forEach((scene) => {
             scene.tokens.forEach((token) => {
                 if (token.getUId() === data.uid) {

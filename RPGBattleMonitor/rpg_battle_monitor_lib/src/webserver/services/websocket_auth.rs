@@ -44,7 +44,7 @@ pub struct WebsocketAuthMessage {
 }
 
 impl WebsocketAuthMessage {
-    pub fn authenticate(self, state: &impl AppStateTrait) -> Result<(), Error> {
+    pub fn authenticate(&self, state: &impl AppStateTrait) -> Result<(), Error> {
         // TODO: implement
         tracing::error!("IMPLEMENT ME | Authenticating user: {}", self.user_token);
         // Err(Error::AuthenticationFailed)
@@ -107,6 +107,7 @@ where
     }
 
     fn call(&mut self, req: Request) -> Self::Future {
+        // TODO: Idenfity when the request is actual websocket upgrade
         if req.method() != Method::POST {
             return self.inner.call(req).boxed();
         }
@@ -126,6 +127,11 @@ where
                 }
             };
 
+            if bytes.len() < 2 {
+                return Ok(Error::AuthenticationFailed.into_response(B::default()));
+            }
+
+            // TODO: This still can fail sometimes
             let slice = bytes.slice(2..);
             let message = match serde_json::from_slice::<WebsocketAuthMessage>(&slice)
                 .map_err(Error::SerdeJsonError)
@@ -143,7 +149,10 @@ where
                 }
             }
 
-            inner.call(Request::from_parts(parts, bytes.into())).await
+            let mut req = Request::from_parts(parts, bytes.into());
+            // req.extensions_mut().insert(message);
+
+            inner.call(req).await
         };
 
         Box::pin(future)

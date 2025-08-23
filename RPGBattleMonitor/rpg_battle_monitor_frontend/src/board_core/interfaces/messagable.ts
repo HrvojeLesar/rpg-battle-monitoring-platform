@@ -1,14 +1,16 @@
-export type TypedJson = {
+type DefaultAttributes = Record<string, unknown>;
+
+export type TypedJson<Attributes = DefaultAttributes> = {
     kind: string;
     uid: string;
     timestamp: number;
     game: number;
-} & Record<string, unknown>;
+} & Attributes;
 
-export interface IMessagable {
+export interface IMessagable<Attributes = DefaultAttributes> {
     getKind(): string;
     getUId(): string;
     toJSON(): TypedJson;
-    getAttributes(): Record<string, unknown>;
-    applyChanges(changes: Record<string, unknown>): void;
+    getAttributes(): Attributes;
+    applyChanges(changes: Attributes): void;
 }

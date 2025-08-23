@@ -3,7 +3,7 @@ use std::time::Duration;
 use sea_orm::TransactionTrait;
 use socketioxide::{
     SocketIoBuilder,
-    extract::{Data, SocketRef, State},
+    extract::{Data, Extension, HttpExtension, SocketRef, State},
     handler::ConnectHandler,
     socket::DisconnectReason,
 };
@@ -18,6 +18,8 @@ use crate::{
         services::websocket_auth::{self, WebsocketAuthLayer, WebsocketAuthMessage},
     },
 };
+
+const CHUNK_SIZE: usize = 50;
 
 #[derive(Clone)]
 struct JoinedFlag;
@@ -36,10 +38,11 @@ async fn action_handler<T: AppStateTrait>(
     }
 }
 
+#[tracing::instrument(skip(socket, app_state))]
 async fn join_handler<T: AppStateTrait>(
     socket: SocketRef,
     State(app_state): State<T>,
-    Data(auth): Data<WebsocketAuthMessage>,
+    Extension(auth): Extension<WebsocketAuthMessage>,
 ) {
     fn join_and_decompress_entities(
         mut entities: Vec<CompressedEntityModel>,
@@ -50,15 +53,19 @@ async fn join_handler<T: AppStateTrait>(
         Entity::decompress_vec(entities)
     }
 
+    let game_id = auth.game;
+    let room = format!("room-{game_id}");
+
+    tracing::debug!("Socket {} joining room {}", socket.id, auth.game);
     if socket.extensions.get::<JoinedFlag>().is_some() {
+        tracing::debug!("Socket {} double join, ignoring", socket.id);
         return;
     }
 
     socket.on("action", action_handler::<T>);
-    socket.join(format!("room-{}", auth.game));
+    socket.join(room);
 
-    let game_id = auth.game;
-
+    tracing::debug!("Fetching queued entities");
     let queue = app_state.get_entity_queue();
     let compressed_entities;
     {
@@ -76,6 +83,7 @@ async fn join_handler<T: AppStateTrait>(
             .collect::<Vec<_>>();
     }
 
+    tracing::debug!("Starting database entity fetch");
     let db = app_state.get_db();
     let transaction = match db.begin().await {
         Ok(t) => t,
@@ -101,6 +109,7 @@ async fn join_handler<T: AppStateTrait>(
             return;
         }
     }
+    tracing::debug!("Finished database entity fetch");
 
     let entities = match join_and_decompress_entities(db_comporessed_entities, compressed_entities)
     {
@@ -113,7 +122,8 @@ async fn join_handler<T: AppStateTrait>(
 
     let total = entities.len();
     let mut sent = 0;
-    entities.chunks(50).for_each(|chunk| {
+    tracing::debug!("Sending entities in {} chunks", total / CHUNK_SIZE);
+    entities.chunks(CHUNK_SIZE).for_each(|chunk| {
         sent += chunk.len();
         socket
             .emit(
@@ -129,9 +139,11 @@ async fn join_handler<T: AppStateTrait>(
             .ok();
     });
 
+    tracing::debug!("Socket join finished sent");
     socket.emit("join-finished", &()).ok();
 
     socket.extensions.insert(JoinedFlag);
+    tracing::debug!("Socket joined");
 }
 
 pub fn on_connect<T: AppStateTrait>(socket: SocketRef) {
@@ -154,10 +166,18 @@ pub fn on_connect<T: AppStateTrait>(socket: SocketRef) {
 }
 
 fn auth_middleware<T: AppStateTrait>(
+    socket: SocketRef,
     State(app_state): State<T>,
     Data(auth): Data<WebsocketAuthMessage>,
 ) -> Result<(), websocket_auth::Error> {
-    auth.authenticate(&app_state)
+    tracing::debug!("Authenticating user: {}", auth.user_token);
+    match auth.authenticate(&app_state) {
+        Ok(()) => {
+            socket.extensions.insert(auth);
+            Ok(())
+        }
+        Err(e) => Err(e),
+    }
 }
 
 pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
@@ -174,7 +194,7 @@ pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
         "/socket.io/",
         ServiceBuilder::new()
             .layer(CorsLayer::permissive())
-            .layer(WebsocketAuthLayer::new(state))
+            // .layer(WebsocketAuthLayer::new(state))
             .service(service),
     )
 }
