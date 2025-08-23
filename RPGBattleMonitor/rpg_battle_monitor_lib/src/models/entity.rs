@@ -43,7 +43,7 @@ mod inner {
             Self {}
         }
 
-        #[tracing::instrument(skip(self, conn))]
+        #[tracing::instrument(skip(self, conn, valid_entities))]
         pub async fn save_valid_entities(
             &self,
             conn: &impl ConnectionTrait,
@@ -73,7 +73,7 @@ mod inner {
             Ok(())
         }
 
-        #[tracing::instrument(skip(self, conn))]
+        #[tracing::instrument(skip(self, conn, compressed_entities))]
         pub async fn filter_out_outdated_entities(
             &self,
             conn: &impl ConnectionTrait,
@@ -122,6 +122,7 @@ mod inner {
             Ok(valid_entities)
         }
 
+        #[tracing::instrument(skip(self, conn))]
         pub async fn load_entities(
             &self,
             conn: &impl ConnectionTrait,

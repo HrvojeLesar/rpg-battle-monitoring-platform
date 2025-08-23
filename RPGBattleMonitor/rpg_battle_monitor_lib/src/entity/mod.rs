@@ -18,6 +18,15 @@ pub struct UId(pub String);
 pub struct UtcTimestamp(pub i64);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClientsideEntity {
+    pub uid: UId,
+    pub kind: EntityKind,
+    pub timestamp: UtcTimestamp,
+    #[serde(flatten)]
+    pub other_values: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Entity {
     pub uid: UId,
     pub game: i32,

@@ -8,8 +8,6 @@ export class Websocket {
         opts?: Partial<ManagerOptions & SocketOptions>,
     ) {
         const socket = io(uri, opts) as Socket<{}>;
-        console.log("create socket");
-        console.trace();
 
         this._socket = socket;
     }

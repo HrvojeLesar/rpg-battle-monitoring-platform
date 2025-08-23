@@ -3,7 +3,7 @@ use std::time::Duration;
 use sea_orm::TransactionTrait;
 use socketioxide::{
     SocketIoBuilder,
-    extract::{Data, Extension, HttpExtension, SocketRef, State},
+    extract::{Data, Extension, SocketRef, State},
     handler::ConnectHandler,
     socket::DisconnectReason,
 };
@@ -11,11 +11,11 @@ use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 
 use crate::{
-    entity::Entity,
+    entity::{ClientsideEntity, Entity},
     models::entity::{CompressedEntityModel, EntityManager},
     webserver::{
         router::app_state::AppStateTrait,
-        services::websocket_auth::{self, WebsocketAuthLayer, WebsocketAuthMessage},
+        services::websocket_auth::{self, WebsocketAuthMessage},
     },
 };
 
@@ -26,11 +26,20 @@ struct JoinedFlag;
 
 async fn action_handler<T: AppStateTrait>(
     socket: SocketRef,
-    Data(entity): Data<Entity>,
+    Data(entity): Data<ClientsideEntity>,
     State(app_state): State<T>,
+    Extension(auth): Extension<WebsocketAuthMessage>,
 ) {
     let rooms = socket.rooms();
     socket.to(rooms).emit("action", &entity).await.ok();
+
+    let entity = Entity {
+        game: auth.game,
+        uid: entity.uid,
+        kind: entity.kind,
+        timestamp: entity.timestamp,
+        other_values: entity.other_values,
+    };
 
     let queue = app_state.get_entity_queue();
     if let Err(e) = queue.lock().await.push(entity) {
@@ -194,7 +203,6 @@ pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
         "/socket.io/",
         ServiceBuilder::new()
             .layer(CorsLayer::permissive())
-            // .layer(WebsocketAuthLayer::new(state))
             .service(service),
     )
 }

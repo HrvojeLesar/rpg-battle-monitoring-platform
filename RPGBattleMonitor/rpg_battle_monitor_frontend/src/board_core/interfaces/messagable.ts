@@ -1,16 +1,16 @@
-type DefaultAttributes = Record<string, unknown>;
+export type UId = string;
+export type DefaultAttributes = Record<string, unknown>;
 
 export type TypedJson<Attributes = DefaultAttributes> = {
     kind: string;
-    uid: string;
+    uid: UId;
     timestamp: number;
-    game: number;
 } & Attributes;
 
 export interface IMessagable<Attributes = DefaultAttributes> {
     getKind(): string;
-    getUId(): string;
-    toJSON(): TypedJson;
+    getUId(): UId;
+    toJSON(): TypedJson<Attributes>;
     getAttributes(): Attributes;
-    applyChanges(changes: Attributes): void;
+    applyChanges(changes: TypedJson<Attributes>): void;
 }

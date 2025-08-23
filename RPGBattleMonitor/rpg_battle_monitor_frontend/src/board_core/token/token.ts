@@ -1,10 +1,8 @@
 import { GBoard } from "../board";
 import { BaseEntity } from "../entity/base_entity";
 import { ContainerExtension } from "../extensions/container_extension";
-import { Grid } from "../grid/grid";
 import { type TypedJson } from "../interfaces/messagable";
 import { Scene } from "../scene";
-import newUId from "../utils/uuid_generator";
 import { TokenDataBase } from "./token_data";
 
 type Attributes = {
@@ -16,26 +14,23 @@ type Attributes = {
         width: number;
         height: number;
     };
+    scene_uid: string;
 };
 
 export class Token extends BaseEntity<Attributes> {
     protected _container: ContainerExtension;
-    protected _grid: Grid;
-    protected _scene?: Scene;
-    protected _tokenData: TokenDataBase;
-    protected _uid: string;
+    protected _scene: Scene;
+    protected _tokenData: TokenDataBase<any>;
 
     public constructor(
         container: ContainerExtension,
-        grid: Grid,
-        tokenData: TokenDataBase,
-        uid?: string,
+        scene: Scene,
+        tokenData: TokenDataBase<any>,
     ) {
         super();
 
+        this._scene = scene;
         this._container = container;
-        this._grid = grid;
-        this._uid = uid ?? newUId();
         this._tokenData = tokenData;
         this.container.dragEndCallback = this.dragCallback.bind(this);
     }
@@ -44,30 +39,12 @@ export class Token extends BaseEntity<Attributes> {
         return this._container;
     }
 
-    public get scene(): Maybe<Scene> {
+    public get scene(): Scene {
         return this._scene;
     }
 
-    public set scene(value: Maybe<Scene>) {
+    public set scene(value: Scene) {
         this._scene = value;
-    }
-
-    public toJSON(): TypedJson {
-        return {
-            ...this.getAttributes(),
-            kind: this.getKind(),
-            uid: this.getUId(),
-            timestamp: Date.now(),
-            game: 0,
-        };
-    }
-
-    public getKind(): string {
-        return "Token";
-    }
-
-    public getUId(): string {
-        return this._uid;
     }
 
     public getAttributes(): Attributes {
@@ -80,6 +57,7 @@ export class Token extends BaseEntity<Attributes> {
                 width: this._container.width,
                 height: this._container.height,
             },
+            scene_uid: this.scene.getUId(),
         };
     }
 
@@ -87,7 +65,8 @@ export class Token extends BaseEntity<Attributes> {
         GBoard.websocket.emit("action", this);
     }
 
-    public applyChanges(changes: Attributes): void {
+    public applyChanges(changes: TypedJson<Attributes>): void {
+        super.applyChanges(changes);
         this._container.position.x = changes._container.position.x;
         this._container.position.y = changes._container.position.y;
         this._container.width = changes._container.width;

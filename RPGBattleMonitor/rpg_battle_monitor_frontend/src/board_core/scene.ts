@@ -1,15 +1,22 @@
 import { Viewport } from "pixi-viewport";
 import { GBoard } from "./board";
 import { UniqueCollection } from "./utils/unique_collection";
-import { Assets, Point, Texture } from "pixi.js";
+import { Assets, Texture } from "pixi.js";
 import { SpriteExtension } from "./extensions/sprite_extension";
 import { DragHandler } from "./handlers/drag_handler";
 import { EventStore } from "./handlers/registered_event_store";
 import { SelectHandler } from "./handlers/select_handler";
 import { Grid } from "./grid/grid";
 import { Token } from "./token/token";
+import { EmptyTokenData } from "./token/empty_token_data";
+import { BaseEntity } from "./entity/base_entity";
+import { TypedJson } from "./interfaces/messagable";
 
-export class Scene {
+type Attributes = {
+    grid_uid: string;
+};
+
+export class Scene extends BaseEntity<Attributes> {
     public readonly name: string;
     protected _viewport: Viewport;
     protected _grid: Grid;
@@ -20,10 +27,11 @@ export class Scene {
     protected _selectHandler: SelectHandler;
 
     public constructor(name: string) {
+        super();
         this.name = name;
         this._grid = new Grid();
 
-        const gridSize = this._grid.size;
+        const gridSize = this._grid.container.size;
 
         function getWorldSize() {
             return Math.round(
@@ -60,7 +68,7 @@ export class Scene {
                 underflow: "center",
             });
 
-        this._viewport.addChild(this._grid);
+        this._viewport.addChild(this._grid.container);
         this._viewport.pause = true;
 
         this._eventStore = new EventStore(this);
@@ -138,8 +146,8 @@ export class Scene {
             {
                 texture: texture ?? Texture.WHITE,
                 tint: tint,
-                width: width ?? this._grid.cellSize * 3,
-                height: height ?? this._grid.cellSize * 3,
+                width: width ?? this._grid.container.cellSize * 3,
+                height: height ?? this._grid.container.cellSize * 3,
                 alpha: 0.5,
             },
             {
@@ -153,7 +161,7 @@ export class Scene {
             },
         );
 
-        const token = new Token(sprite, this.grid);
+        const token = new Token(sprite, this, new EmptyTokenData());
 
         // WARN: Order matters, try changing so any order is valid
         this._selectHandler.registerSelect(token.container);
@@ -161,5 +169,15 @@ export class Scene {
 
         this._tokens.add(token);
         this._viewport.addChild(token.container);
+    }
+
+    public getAttributes(): Attributes {
+        return {
+            grid_uid: this._grid.getUId(),
+        };
+    }
+
+    public applyChanges(changes: TypedJson<Attributes>): void {
+        super.applyChanges(changes);
     }
 }

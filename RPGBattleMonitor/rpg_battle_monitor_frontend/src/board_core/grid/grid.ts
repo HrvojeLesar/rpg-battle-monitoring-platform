@@ -1,4 +1,5 @@
 import { Container, Graphics, Point, Sprite, Texture } from "pixi.js";
+import { BaseEntity } from "../entity/base_entity";
 
 type GridOptions = {
     hover?: boolean;
@@ -11,7 +12,41 @@ export type GridSize = {
     height: number;
 };
 
-export class Grid extends Container {
+type Attributes = {
+    _container: {
+        _cellSize: number;
+        _size: GridSize;
+    };
+};
+
+export class Grid extends BaseEntity<Attributes> {
+    protected _container: GridContainer;
+
+    public constructor() {
+        super();
+
+        this._container = new GridContainer();
+    }
+
+    public get grid(): GridContainer {
+        return this._container;
+    }
+
+    public get container(): GridContainer {
+        return this._container;
+    }
+
+    public getAttributes(): Attributes {
+        return {
+            _container: {
+                _cellSize: this._container.cellSize,
+                _size: this._container.size,
+            },
+        };
+    }
+}
+
+export class GridContainer extends Container {
     protected gridSprite: Container;
     protected hoveredCell: Graphics;
     protected hover: boolean = true;

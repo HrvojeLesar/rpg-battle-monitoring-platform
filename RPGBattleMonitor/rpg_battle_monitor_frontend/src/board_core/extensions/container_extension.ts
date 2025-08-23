@@ -148,11 +148,11 @@ export class ContainerExtension<T extends Container = Container>
         }
 
         this.position.x =
-            Math.round(this.position.x / this._grid.cellSize) *
-            this._grid.cellSize;
+            Math.round(this.position.x / this._grid.container.cellSize) *
+            this._grid.container.cellSize;
         this.position.y =
-            Math.round(this.position.y / this._grid.cellSize) *
-            this._grid.cellSize;
+            Math.round(this.position.y / this._grid.container.cellSize) *
+            this._grid.container.cellSize;
     }
 
     getInitialPosition(): ObservablePoint {
@@ -192,103 +192,103 @@ export class ContainerExtension<T extends Container = Container>
             if (kind === ResizeKind.Right) {
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width / (this._grid.cellSize / 2),
+                        this.displayedEntity.width / (this._grid.container.cellSize / 2),
                     ) *
-                    (this._grid.cellSize / 2);
+                    (this._grid.container.cellSize / 2);
             }
 
             if (kind === ResizeKind.Bottom) {
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height / (this._grid.cellSize / 2),
+                        this.displayedEntity.height / (this._grid.container.cellSize / 2),
                     ) *
-                    (this._grid.cellSize / 2);
+                    (this._grid.container.cellSize / 2);
             }
 
             if (kind === ResizeKind.Left) {
                 this.position.x =
-                    Math.round(this.position.x / (this._grid.cellSize / 2)) *
-                    (this._grid.cellSize / 2);
+                    Math.round(this.position.x / (this._grid.container.cellSize / 2)) *
+                    (this._grid.container.cellSize / 2);
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width / (this._grid.cellSize / 2),
+                        this.displayedEntity.width / (this._grid.container.cellSize / 2),
                     ) *
-                    (this._grid.cellSize / 2);
+                    (this._grid.container.cellSize / 2);
             }
 
             if (kind === ResizeKind.Top) {
                 this.position.y =
-                    Math.round(this.position.y / (this._grid.cellSize / 2)) *
-                    (this._grid.cellSize / 2);
+                    Math.round(this.position.y / (this._grid.container.cellSize / 2)) *
+                    (this._grid.container.cellSize / 2);
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height / (this._grid.cellSize / 2),
+                        this.displayedEntity.height / (this._grid.container.cellSize / 2),
                     ) *
-                    (this._grid.cellSize / 2);
+                    (this._grid.container.cellSize / 2);
             }
 
             if (kind === ResizeKind.BottomRight) {
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width / (this._grid.cellSize / 2),
+                        this.displayedEntity.width / (this._grid.container.cellSize / 2),
                     ) *
-                    (this._grid.cellSize / 2);
+                    (this._grid.container.cellSize / 2);
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height / (this._grid.cellSize / 2),
+                        this.displayedEntity.height / (this._grid.container.cellSize / 2),
                     ) *
-                    (this._grid.cellSize / 2);
+                    (this._grid.container.cellSize / 2);
             }
 
             if (kind === ResizeKind.TopRight) {
                 this.position.y =
-                    Math.round(this.position.y / (this._grid.cellSize / 2)) *
-                    (this._grid.cellSize / 2);
+                    Math.round(this.position.y / (this._grid.container.cellSize / 2)) *
+                    (this._grid.container.cellSize / 2);
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height / (this._grid.cellSize / 2),
+                        this.displayedEntity.height / (this._grid.container.cellSize / 2),
                     ) *
-                    (this._grid.cellSize / 2);
+                    (this._grid.container.cellSize / 2);
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width / (this._grid.cellSize / 2),
+                        this.displayedEntity.width / (this._grid.container.cellSize / 2),
                     ) *
-                    (this._grid.cellSize / 2);
+                    (this._grid.container.cellSize / 2);
             }
 
             if (kind === ResizeKind.BottomLeft) {
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height / (this._grid.cellSize / 2),
+                        this.displayedEntity.height / (this._grid.container.cellSize / 2),
                     ) *
-                    (this._grid.cellSize / 2);
+                    (this._grid.container.cellSize / 2);
                 this.position.x =
-                    Math.round(this.position.x / (this._grid.cellSize / 2)) *
-                    (this._grid.cellSize / 2);
+                    Math.round(this.position.x / (this._grid.container.cellSize / 2)) *
+                    (this._grid.container.cellSize / 2);
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width / (this._grid.cellSize / 2),
+                        this.displayedEntity.width / (this._grid.container.cellSize / 2),
                     ) *
-                    (this._grid.cellSize / 2);
+                    (this._grid.container.cellSize / 2);
             }
 
             if (kind === ResizeKind.TopLeft) {
                 this.position.y =
-                    Math.round(this.position.y / (this._grid.cellSize / 2)) *
-                    (this._grid.cellSize / 2);
+                    Math.round(this.position.y / (this._grid.container.cellSize / 2)) *
+                    (this._grid.container.cellSize / 2);
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height / (this._grid.cellSize / 2),
+                        this.displayedEntity.height / (this._grid.container.cellSize / 2),
                     ) *
-                    (this._grid.cellSize / 2);
+                    (this._grid.container.cellSize / 2);
                 this.position.x =
-                    Math.round(this.position.x / (this._grid.cellSize / 2)) *
-                    (this._grid.cellSize / 2);
+                    Math.round(this.position.x / (this._grid.container.cellSize / 2)) *
+                    (this._grid.container.cellSize / 2);
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width / (this._grid.cellSize / 2),
+                        this.displayedEntity.width / (this._grid.container.cellSize / 2),
                     ) *
-                    (this._grid.cellSize / 2);
+                    (this._grid.container.cellSize / 2);
             }
         }
     }
