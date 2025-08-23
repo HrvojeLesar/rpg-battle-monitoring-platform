@@ -58,4 +58,8 @@ export class UniqueCollection<T> implements IUniqueCollection<T> {
 
         return old;
     }
+
+    public getCopy(): T[] {
+        return [...this._items];
+    }
 }

@@ -6,13 +6,13 @@ import {
     RendererDestroyOptions,
 } from "pixi.js";
 import { isDev } from "../utils/dev_mode";
-import { Socket } from "socket.io-client";
 import { Scene } from "./scene";
 import { Viewport } from "pixi-viewport";
 import "./mixins/point_mixin";
 import { BoardEventEmitter } from "./events/board_event_emitters";
 import { Grid } from "./grid/grid";
 import { Websocket } from "../websocket/websocket";
+import { EntityRegistry } from "./registry/entity_registry";
 
 export type GameBoard = Board;
 
@@ -26,9 +26,13 @@ class Board {
 
     protected _websocket?: Websocket;
 
+    protected _entityRegistry: EntityRegistry;
+
     public constructor(eventEmitter: BoardEventEmitter) {
         this.scenes = [];
         this._eventEmitter = eventEmitter;
+
+        this._entityRegistry = new EntityRegistry();
     }
 
     public setApplication(application: Application) {
@@ -116,6 +120,10 @@ class Board {
     public get eventEmitter(): BoardEventEmitter {
         return this._eventEmitter;
     }
+
+    public get entityRegistry(): EntityRegistry {
+        return this._entityRegistry;
+    }
 }
 
 var GEventEmitter = new BoardEventEmitter();
@@ -142,6 +150,8 @@ export async function init(
         boardApplication.websocket = Websocket.createDefaultSocket();
         initWebsocketListeners();
     }
+
+    console.log(Grid.getKindStatic());
 
     globalThis.addEventListener("resize", () => {
         boardApplication.scenes.forEach((scene) => {

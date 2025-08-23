@@ -44,4 +44,8 @@ export abstract class BaseEntity<T = DefaultAttributes>
             timestamp: Date.now(),
         };
     }
+
+    public static getKindStatic(): string {
+        return this.name;
+    }
 }

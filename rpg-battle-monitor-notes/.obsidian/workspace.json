@@ -14,12 +14,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Entity queue.md",
+                "file": "Entity kind.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Entity queue"
+              "title": "Entity kind"
             }
           }
         ]
@@ -189,11 +189,11 @@
   },
   "active": "ec89e6208fc60141",
   "lastOpenFiles": [
+    "Entity queue.md",
     "Entity kind.md",
     "Room.md",
     "Save system.md",
     "Token.md",
-    "Entity queue.md",
     "Client <-> Server/Messages/Join.md",
     "Client <-> Server/Messages/Join finished.md",
     "Client <-> Server/Basic websocket communication.md",
