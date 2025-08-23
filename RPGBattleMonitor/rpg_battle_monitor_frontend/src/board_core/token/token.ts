@@ -56,8 +56,12 @@ export class Token extends BaseEntity<TokenAttributes> {
                     x: this._container.position.x,
                     y: this._container.position.y,
                 },
-                width: this._container.width,
-                height: this._container.height,
+                width:
+                    this._container.displayedEntity?.width ??
+                    this._container.width,
+                height:
+                    this._container.displayedEntity?.height ??
+                    this._container.height,
             },
             containerUid: this._container.getUId(),
             sceneUid: this.scene.getUId(),
@@ -73,7 +77,12 @@ export class Token extends BaseEntity<TokenAttributes> {
         super.applyChanges(changes);
         this._container.position.x = changes._container.position.x;
         this._container.position.y = changes._container.position.y;
-        this._container.width = changes._container.width;
-        this._container.height = changes._container.height;
+        if (this._container.displayedEntity) {
+            this._container.displayedEntity.width = changes._container.width;
+            this._container.displayedEntity.height = changes._container.height;
+        } else {
+            this._container.width = changes._container.width;
+            this._container.height = changes._container.height;
+        }
     }
 }
