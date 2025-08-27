@@ -4,12 +4,15 @@ import {
     TypedJson,
     UId,
 } from "../interfaces/messagable";
+import { UniqueCollection } from "../utils/unique_collection";
 import newUId from "../utils/uuid_generator";
 
 export abstract class BaseEntity<T = DefaultAttributes>
     implements IMessagable<T>
 {
     protected _uid: UId;
+    protected _dependants: UniqueCollection<IMessagable> =
+        new UniqueCollection();
 
     public constructor() {
         this._uid = newUId();
@@ -28,7 +31,7 @@ export abstract class BaseEntity<T = DefaultAttributes>
     }
 
     public abstract getAttributes(): T;
-    public applyChanges(changes: TypedJson<T>): void {
+    public applyUpdateAction(changes: TypedJson<T>): void {
         this._uid = changes.uid;
     }
 
@@ -51,5 +54,11 @@ export abstract class BaseEntity<T = DefaultAttributes>
 
     public static getKindStatic(): string {
         return this.name;
+    }
+
+    public abstract deleteAction(): void;
+
+    public addDependant(entity: IMessagable): void {
+        this._dependants.add(entity);
     }
 }

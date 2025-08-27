@@ -12,11 +12,12 @@ import {
     Ghost,
 } from "./container_extension";
 import { Grid } from "../grid/grid";
+import { TypedJson } from "../interfaces/messagable";
 
 export type SpriteExtensionAttributes = {
-    alpha?: number;
-    tint?: ColorSource;
-    texture?: Texture<TextureSource<any>>;
+    alpha: number;
+    tint: ColorSource;
+    texture: Texture<TextureSource<any>>;
 } & ContainerExtensionAttributes;
 
 export class SpriteExtension extends ContainerExtension<
@@ -65,11 +66,26 @@ export class SpriteExtension extends ContainerExtension<
     }
 
     public getAttributes(): SpriteExtensionAttributes {
+        if (this.displayedEntity === undefined) {
+            throw new Error("Sprite extension has no displayed entity");
+        }
+
         return {
-            alpha: this.displayedEntity?.alpha,
-            tint: this.displayedEntity?.tint,
-            texture: this.displayedEntity?.texture,
             ...super.getAttributes(),
+            alpha: this.displayedEntity.alpha,
+            tint: this.displayedEntity.tint,
+            // TODO: figure out texture serialization
+            // texture: this.displayedEntity.texture,
         };
+    }
+
+    public applyUpdateAction(changes: TypedJson<SpriteExtensionAttributes>): void {
+        super.applyUpdateAction(changes);
+        if (this.displayedEntity) {
+            this.displayedEntity.alpha = changes.alpha;
+            this.displayedEntity.tint = changes.tint;
+            // TODO: figure out texture serialization
+            // this.displayedEntity.texture = changes.texture;
+        }
     }
 }

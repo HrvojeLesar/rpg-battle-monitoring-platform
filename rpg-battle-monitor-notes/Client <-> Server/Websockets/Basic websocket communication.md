@@ -2,7 +2,7 @@ Basic requirements
 - Client connects to server
 - While loading all data display loading screen/text before rendering any scenes
 - Server holds a list of entities, each with a unique id and the type of entity a client can load
-	- Some basic entities are [[scene]], [[grid]], [[token]]
+	- Some basic entities are [[scene]], [[grid]], [[Token]]
 	- On the server store these in a table with columns 
 		- game id, 
 		- unique object id,
@@ -19,3 +19,8 @@ Basic requirements
 ## Message List
 - [[Join]]
 - [[Action]]
+
+## Websocket connection flow
+[[Client]] connects to a websocket and [[Websocket authorization|authorizes]]. After a successful authorization a socket connection is established. Socket connection [[Websocket authorization#^43deb3|lasts for 60 seconds]] if the client does not emit a [[Join|join]] message.
+
+After [[Join|join]] message is received server will start sending 

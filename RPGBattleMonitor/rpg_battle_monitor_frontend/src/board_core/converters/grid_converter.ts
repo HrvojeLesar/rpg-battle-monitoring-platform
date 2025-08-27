@@ -9,7 +9,7 @@ export class GridConverter {
         );
 
         if (existingEntity instanceof Grid) {
-            existingEntity.applyChanges(attributes);
+            existingEntity.applyUpdateAction(attributes);
 
             return existingEntity;
         }

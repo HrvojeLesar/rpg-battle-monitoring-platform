@@ -46,11 +46,11 @@ impl Entity {
         Ok(decompressed)
     }
 
-    pub fn sort_entities(mut entities: Vec<Entity>) -> Vec<Entity> {
-        entities.sort_by_key(|e| e.kind.get_sort_order());
-
-        entities
-    }
+    // pub fn sort_entities(mut entities: Vec<Entity>) -> Vec<Entity> {
+    //     entities.sort_by_key(|e| e.kind.get_sort_order());
+    //
+    //     entities
+    // }
 }
 
 impl TryFrom<Entity> for CompressedEntityModel {
@@ -64,7 +64,7 @@ impl TryFrom<Entity> for CompressedEntityModel {
         Ok(CompressedEntityModel {
             uid: value.uid.0,
             game: value.game,
-            kind: value.kind.to_string(),
+            kind: value.kind.0,
             timestamp: value.timestamp.0,
             data: encoder.finish().map_err(Error::EntityCompressionFailed)?,
         })
@@ -86,7 +86,7 @@ impl TryFrom<CompressedEntityModel> for Entity {
         Ok(Entity {
             uid: UId(value.uid),
             game: value.game,
-            kind: value.kind.parse()?,
+            kind: EntityKind(value.kind),
             timestamp: UtcTimestamp(value.timestamp),
             other_values,
         })

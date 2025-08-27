@@ -36,6 +36,10 @@ export type ContainerExtensionAttributes = {
     gridUid: UId;
     width: number;
     height: number;
+    position: {
+        x: number;
+        y: number;
+    };
 };
 
 export abstract class ContainerExtension<
@@ -61,6 +65,8 @@ export abstract class ContainerExtension<
     protected _gridCell: GridCell;
     protected _dragEndCallback?: DragEndCallback;
     protected _uid: UId;
+    protected _dependants: UniqueCollection<IMessagable> =
+        new UniqueCollection();
 
     public constructor(grid: Grid, options?: ContainerExtensionOptions) {
         super(options);
@@ -429,15 +435,26 @@ export abstract class ContainerExtension<
     public getAttributes(): Attributes {
         return {
             gridUid: this._grid.getUId(),
-            width: this.width,
-            height: this.height,
+            width: this.displayedEntity?.width ?? this.width,
+            height: this.displayedEntity?.height ?? this.height,
+            position: {
+                x: this.x,
+                y: this.y,
+            },
         } as Attributes;
     }
 
-    public applyChanges(changes: TypedJson<Attributes>): void {
+    public applyUpdateAction(changes: TypedJson<Attributes>): void {
         this._uid = changes.uid;
-        this.width = changes.width;
-        this.height = changes.height;
+        if (this.displayedEntity) {
+            this.displayedEntity.width = changes.width;
+            this.displayedEntity.height = changes.height;
+        } else {
+            this.width = changes.width;
+            this.height = changes.height;
+        }
+        this.position.x = changes.position.x;
+        this.position.y = changes.position.y;
     }
 
     public getUId(): UId {
@@ -459,5 +476,13 @@ export abstract class ContainerExtension<
 
     public static getKindStatic(): string {
         return this.name;
+    }
+
+    public deleteAction(): void {
+        GBoard.websocket.socket.emit("delete", this);
+    }
+
+    public addDependant(entity: IMessagable): void {
+        this._dependants.add(entity);
     }
 }

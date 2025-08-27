@@ -24,14 +24,18 @@ const CHUNK_SIZE: usize = 50;
 #[derive(Clone)]
 struct JoinedFlag;
 
-async fn action_handler<T: AppStateTrait>(
+const UPDATE_EVENT: &str = "update";
+const JOIN_EVENT: &str = "join";
+const JOIN_FINISHED_EVENT: &str = "join-finished";
+
+async fn update_handler<T: AppStateTrait>(
     socket: SocketRef,
     Data(entity): Data<ClientsideEntity>,
     State(app_state): State<T>,
     Extension(auth): Extension<WebsocketAuthMessage>,
 ) {
     let rooms = socket.rooms();
-    socket.to(rooms).emit("action", &entity).await.ok();
+    socket.to(rooms).emit(UPDATE_EVENT, &entity).await.ok();
 
     let entity = Entity {
         game: auth.game,
@@ -71,7 +75,7 @@ async fn join_handler<T: AppStateTrait>(
         return;
     }
 
-    socket.on("action", action_handler::<T>);
+    socket.on(UPDATE_EVENT, update_handler::<T>);
     socket.join(room);
 
     tracing::debug!("Fetching queued entities");
@@ -136,7 +140,7 @@ async fn join_handler<T: AppStateTrait>(
         sent += chunk.len();
         socket
             .emit(
-                "join",
+                JOIN_EVENT,
                 &serde_json::json!({
                     "progress": {
                         "sent": sent,
@@ -149,7 +153,7 @@ async fn join_handler<T: AppStateTrait>(
     });
 
     tracing::debug!("Socket join finished sent");
-    socket.emit("join-finished", &()).ok();
+    socket.emit(JOIN_FINISHED_EVENT, &()).ok();
 
     socket.extensions.insert(JoinedFlag);
     tracing::debug!("Socket joined");
@@ -171,7 +175,7 @@ pub fn on_connect<T: AppStateTrait>(socket: SocketRef) {
         socket_clone.extensions.remove::<JoinedFlag>();
     });
 
-    socket.on("join", join_handler::<T>);
+    socket.on(JOIN_EVENT, join_handler::<T>);
 }
 
 fn auth_middleware<T: AppStateTrait>(

@@ -1,8 +1,8 @@
 - Action that will be propagated to other clients
-- Action can modify data on the server (e.g. update position of a [[token]])
+- Action can modify data on the server (e.g. update position of a [[Token]])
 
 # Message fields
-- Target [[token]], [[scene]], [[board]]... unique id
+- Target [[Token]], [[scene]], [[board]]... unique id
 - Action type
 
 # Example

@@ -15,7 +15,7 @@ export class SpriteExtensionConverter {
         );
 
         if (existingEntity instanceof SpriteExtension) {
-            existingEntity.applyChanges(attributes);
+            existingEntity.applyUpdateAction(attributes);
 
             return existingEntity;
         }
@@ -28,7 +28,7 @@ export class SpriteExtensionConverter {
             return entity;
         }
 
-        console.error(
+        console.warn(
             "SpriteExtension conversion failed with attributes",
             attributes,
         );

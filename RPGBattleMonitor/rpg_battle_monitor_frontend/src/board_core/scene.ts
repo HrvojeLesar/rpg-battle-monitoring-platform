@@ -169,9 +169,12 @@ export class Scene extends BaseEntity<SceneAttributes> {
 
         const token = new Token(sprite, this, new EmptyTokenData());
 
+        GBoard.entityRegistry.entities.add(token);
+        GBoard.entityRegistry.entities.add(token.container);
+
         // WARN: Order matters, try changing so any order is valid
-        this._selectHandler.registerSelect(token.container);
-        this._dragHandler.registerDrag(token.container);
+        this._selectHandler.registerSelect(token);
+        this._dragHandler.registerDrag(token);
 
         this._tokens.add(token);
         this._viewport.addChild(token.container);
@@ -184,7 +187,14 @@ export class Scene extends BaseEntity<SceneAttributes> {
         };
     }
 
-    public applyChanges(changes: TypedJson<SceneAttributes>): void {
-        super.applyChanges(changes);
+    public applyUpdateAction(changes: TypedJson<SceneAttributes>): void {
+        super.applyUpdateAction(changes);
+    }
+
+    public deleteAction(): void {
+        this._dependants.items.forEach((entity) => {
+            entity.deleteAction();
+        });
+        GBoard.websocket.socket.emit("delete", this);
     }
 }

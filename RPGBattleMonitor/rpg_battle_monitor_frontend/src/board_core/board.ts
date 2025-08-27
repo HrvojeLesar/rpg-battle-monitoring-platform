@@ -187,14 +187,11 @@ export function destroy(
 }
 
 function initWebsocketListeners() {
-    boardApplication.websocket.socket.on("action", (data) => {
-        boardApplication.scenes.forEach((scene) => {
-            scene.tokens.forEach((token) => {
-                if (token.getUId() === data.uid) {
-                    token.applyChanges(data);
-                }
-            });
-        });
+    boardApplication.websocket.socket.on("update", (data) => {
+        const entity = boardApplication.entityRegistry.entities.get(data.uid);
+        if (entity) {
+            entity.applyUpdateAction(data);
+        }
     });
 }
 

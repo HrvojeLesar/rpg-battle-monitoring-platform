@@ -1,9 +1,14 @@
+import { GBoard } from "../board";
 import { TokenDataBase } from "./token_data";
 
 export class EmptyTokenData extends TokenDataBase<{}> {
-    getAttributes() {
+    public getAttributes() {
         return {};
     }
 
-    applyChanges(_changes: unknown): void {}
+    public applyUpdateAction(_changes: unknown): void {}
+
+    public deleteAction(): void {
+        GBoard.websocket.socket.emit("delete", this);
+    }
 }

@@ -6,14 +6,6 @@ import { Scene } from "../scene";
 import { TokenDataBase } from "./token_data";
 
 export type TokenAttributes = {
-    _container: {
-        position: {
-            x: number;
-            y: number;
-        };
-        width: number;
-        height: number;
-    };
     sceneUid: string;
     tokenData: string;
     containerUid: string;
@@ -35,6 +27,9 @@ export class Token extends BaseEntity<TokenAttributes> {
         this._container = container;
         this._tokenData = tokenData;
         this.container.dragEndCallback = this.dragCallback.bind(this);
+
+        this._scene.addDependant(this);
+        this._tokenData.addDependant(this);
     }
 
     public get container(): ContainerExtension {
@@ -51,18 +46,6 @@ export class Token extends BaseEntity<TokenAttributes> {
 
     public getAttributes(): TokenAttributes {
         return {
-            _container: {
-                position: {
-                    x: this._container.position.x,
-                    y: this._container.position.y,
-                },
-                width:
-                    this._container.displayedEntity?.width ??
-                    this._container.width,
-                height:
-                    this._container.displayedEntity?.height ??
-                    this._container.height,
-            },
             containerUid: this._container.getUId(),
             sceneUid: this.scene.getUId(),
             tokenData: this._tokenData.getUId(),
@@ -70,19 +53,15 @@ export class Token extends BaseEntity<TokenAttributes> {
     }
 
     public dragCallback(): void {
-        GBoard.websocket.socket.emit("action", this);
+        GBoard.websocket.socket.emit("update", this._container);
     }
 
-    public applyChanges(changes: TypedJson<TokenAttributes>): void {
-        super.applyChanges(changes);
-        this._container.position.x = changes._container.position.x;
-        this._container.position.y = changes._container.position.y;
-        if (this._container.displayedEntity) {
-            this._container.displayedEntity.width = changes._container.width;
-            this._container.displayedEntity.height = changes._container.height;
-        } else {
-            this._container.width = changes._container.width;
-            this._container.height = changes._container.height;
-        }
+    public applyUpdateAction(changes: TypedJson<TokenAttributes>): void {
+        super.applyUpdateAction(changes);
+    }
+
+    public deleteAction(): void {
+        GBoard.websocket.socket.emit("delete", this);
+        this._container.deleteAction();
     }
 }

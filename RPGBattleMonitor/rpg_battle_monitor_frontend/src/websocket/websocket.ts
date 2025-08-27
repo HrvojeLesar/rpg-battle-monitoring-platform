@@ -1,6 +1,6 @@
 import { io, ManagerOptions, Socket, SocketOptions } from "socket.io-client";
 import { GBoard } from "../board_core/board";
-import { TypedJson } from "../board_core/interfaces/messagable";
+import { IMessagable, TypedJson } from "../board_core/interfaces/messagable";
 
 export type JoinData = {
     data: TypedJson[];
@@ -13,10 +13,14 @@ export type JoinData = {
 export type ListenEvents = {
     "join-finished": () => void;
     join: (joinData: JoinData) => void;
+    update: (data: TypedJson) => void;
 };
 
 export type EmitEvents = {
     join: () => void;
+    create: (data: IMessagable) => void;
+    update: (data: IMessagable) => void;
+    delete: (data: IMessagable) => void;
 };
 
 export class Websocket {

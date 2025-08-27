@@ -71,7 +71,7 @@ class RegisteredEntityKinds {
                 return converter.converter(entityData);
             }
         } catch (e) {
-            console.error(e);
+            console.warn(e);
         }
 
         return undefined;

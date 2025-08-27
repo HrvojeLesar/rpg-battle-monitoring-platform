@@ -12,7 +12,7 @@ export class TokenConverter {
         );
 
         if (existingEntity instanceof Token) {
-            existingEntity.applyChanges(attributes);
+            existingEntity.applyUpdateAction(attributes);
 
             return existingEntity;
         }
@@ -35,7 +35,7 @@ export class TokenConverter {
             return token;
         }
 
-        console.error("Token conversion failed with attributes", attributes);
+        console.warn("Token conversion failed with attributes", attributes);
 
         throw new Error("Token conversion failed");
     }

@@ -13,5 +13,7 @@ export interface IMessagable<Attributes = DefaultAttributes> {
     setUId(uid: UId): void;
     toJSON(): TypedJson<Attributes>;
     getAttributes(): Attributes;
-    applyChanges(changes: TypedJson<Attributes>): void;
+    applyUpdateAction(changes: TypedJson<Attributes>): void;
+    deleteAction(): void;
+    addDependant(entity: IMessagable): void;
 }

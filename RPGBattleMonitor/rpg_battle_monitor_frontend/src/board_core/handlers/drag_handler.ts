@@ -4,6 +4,7 @@ import { Scene } from "../scene";
 import { SelectHandler } from "./select_handler";
 import { EventStore } from "./registered_event_store";
 import { UniqueCollection } from "../utils/unique_collection";
+import { Token } from "../token/token";
 
 type OnGlobalPointerMove = {
     handler: DragHandler;
@@ -51,7 +52,12 @@ export class DragHandler {
         this.container.position.set(newEntityPosition.x, newEntityPosition.y);
     }
 
-    public registerDrag(container: ContainerExtension) {
+    public registerDrag(token: Token): void;
+    public registerDrag(container: ContainerExtension | Token) {
+        if (container instanceof Token) {
+            container = container.container;
+        }
+
         const onPointerDown = (event: FederatedPointerEvent) => {
             if (event.pointerType === "mouse" && event.button !== 0) {
                 return;

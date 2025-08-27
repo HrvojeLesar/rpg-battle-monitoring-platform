@@ -10,7 +10,7 @@ export class SceneConverter {
         );
 
         if (existingEntity instanceof Scene) {
-            existingEntity.applyChanges(attributes);
+            existingEntity.applyUpdateAction(attributes);
 
             return existingEntity;
         }
@@ -23,7 +23,7 @@ export class SceneConverter {
             return entity;
         }
 
-        console.error("Scene conversion failed with attributes", attributes);
+        console.warn("Scene conversion failed with attributes", attributes);
 
         throw new Error("Scene conversion failed");
     }
