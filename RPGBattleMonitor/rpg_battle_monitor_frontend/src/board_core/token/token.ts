@@ -53,7 +53,7 @@ export class Token extends BaseEntity<TokenAttributes> {
     }
 
     public dragCallback(): void {
-        GBoard.websocket.socket.emit("update", this._container);
+        GBoard.websocket.queueUpdate(this._container);
     }
 
     public applyUpdateAction(changes: TypedJson<TokenAttributes>): void {

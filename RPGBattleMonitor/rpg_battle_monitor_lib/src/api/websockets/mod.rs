@@ -30,24 +30,28 @@ const JOIN_FINISHED_EVENT: &str = "join-finished";
 
 async fn update_handler<T: AppStateTrait>(
     socket: SocketRef,
-    Data(entity): Data<ClientsideEntity>,
+    Data(entities): Data<Vec<ClientsideEntity>>,
     State(app_state): State<T>,
     Extension(auth): Extension<WebsocketAuthMessage>,
 ) {
     let rooms = socket.rooms();
-    socket.to(rooms).emit(UPDATE_EVENT, &entity).await.ok();
-
-    let entity = Entity {
-        game: auth.game,
-        uid: entity.uid,
-        kind: entity.kind,
-        timestamp: entity.timestamp,
-        other_values: entity.other_values,
-    };
+    socket.to(rooms).emit(UPDATE_EVENT, &entities).await.ok();
 
     let queue = app_state.get_entity_queue();
-    if let Err(e) = queue.lock().await.push(entity) {
-        tracing::error!(error = %e, "Failed to push entity to queue");
+    let mut lock = queue.lock().await;
+
+    for entity in entities {
+        let entity = Entity {
+            game: auth.game,
+            uid: entity.uid,
+            kind: entity.kind,
+            timestamp: entity.timestamp,
+            other_values: entity.other_values,
+        };
+
+        if let Err(e) = lock.push(entity) {
+            tracing::error!(error = %e, "Failed to push entity to queue");
+        }
     }
 }
 

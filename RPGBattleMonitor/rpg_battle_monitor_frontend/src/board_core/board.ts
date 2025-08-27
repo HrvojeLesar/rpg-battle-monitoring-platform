@@ -143,7 +143,7 @@ export async function init(
     if (isDev()) {
         globalThis.__PIXI_APP__ = application;
 
-        const scene = new Scene("init-scene");
+        const scene = new Scene({ name: "init-scene" });
         boardApplication.addScene(scene);
         boardApplication.changeScene(scene);
 
@@ -188,10 +188,15 @@ export function destroy(
 
 function initWebsocketListeners() {
     boardApplication.websocket.socket.on("update", (data) => {
-        const entity = boardApplication.entityRegistry.entities.get(data.uid);
-        if (entity) {
-            entity.applyUpdateAction(data);
-        }
+        data.forEach((data) => {
+            const entity = boardApplication.entityRegistry.entities.get(
+                data.uid,
+            );
+            // TODO: only apply if timestamp is not behind the current timestamp
+            if (entity) {
+                entity.applyUpdateAction(data);
+            }
+        });
     });
 }
 

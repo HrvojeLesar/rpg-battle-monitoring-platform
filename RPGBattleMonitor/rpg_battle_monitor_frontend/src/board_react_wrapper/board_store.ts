@@ -18,7 +18,7 @@ export const sceneReducer = createSlice({
     reducers: {
         addScene: (state, action: PayloadAction<string>) => {
             const name = action.payload;
-            const scene = new Scene(name);
+            const scene = new Scene({ name });
             GBoard.addScene(scene);
 
             state.scenes.push(name);
@@ -34,6 +34,12 @@ export const sceneReducer = createSlice({
         clearScenes: (state) => {
             state.scenes = [];
             state.currentScene = null;
+        },
+        refreshScenes: (state) => {
+            state.scenes = GBoard.getScenes().map((scene) => scene.name);
+            if (state.currentScene === null && state.scenes.length > 0) {
+                state.currentScene = state.scenes[0];
+            }
         },
     },
 });

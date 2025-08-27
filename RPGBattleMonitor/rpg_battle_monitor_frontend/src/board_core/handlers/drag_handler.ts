@@ -5,6 +5,7 @@ import { SelectHandler } from "./select_handler";
 import { EventStore } from "./registered_event_store";
 import { UniqueCollection } from "../utils/unique_collection";
 import { Token } from "../token/token";
+import { GBoard } from "../board";
 
 type OnGlobalPointerMove = {
     handler: DragHandler;
@@ -134,6 +135,8 @@ export class DragHandler {
             this.selectHandler.drawSelectionOutline();
 
             this.isDirty = false;
+
+            GBoard.websocket.flush();
         };
 
         container.on("pointerdown", onPointerDown);

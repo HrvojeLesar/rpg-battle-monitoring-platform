@@ -13,19 +13,20 @@ export type JoinData = {
 export type ListenEvents = {
     "join-finished": () => void;
     join: (joinData: JoinData) => void;
-    update: (data: TypedJson) => void;
+    update: (data: TypedJson[]) => void;
 };
 
 export type EmitEvents = {
     join: () => void;
     create: (data: IMessagable) => void;
-    update: (data: IMessagable) => void;
+    update: (data: IMessagable[]) => void;
     delete: (data: IMessagable) => void;
 };
 
 export class Websocket {
     protected _socket: Socket<ListenEvents, EmitEvents>;
     public joined: boolean = false;
+    protected updateQueue: IMessagable[] = [];
 
     public constructor(
         uri?: string,
@@ -48,6 +49,17 @@ export class Websocket {
 
     public get socket(): Socket<ListenEvents, EmitEvents> {
         return this._socket;
+    }
+
+    public queueUpdate(data: IMessagable) {
+        this.updateQueue.push(data);
+    }
+
+    public flush() {
+        if (this.updateQueue.length > 0) {
+            this.socket.emit("update", this.updateQueue);
+            this.updateQueue = [];
+        }
     }
 
     public initJoin() {

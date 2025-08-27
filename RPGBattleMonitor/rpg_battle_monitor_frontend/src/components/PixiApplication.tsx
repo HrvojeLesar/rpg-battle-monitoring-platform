@@ -112,6 +112,8 @@ export const PixiApplication = (props: PixiApplicationProps) => {
 
             applicationRef.current = application;
 
+            dispatch(sceneReducer.actions.refreshScenes());
+
             return application;
         }
 
