@@ -102,7 +102,6 @@ impl EntityQueue {
 
     pub async fn flush(&mut self) {
         if self.entities.is_empty() {
-            tracing::debug!("Empty flush");
             return;
         }
 

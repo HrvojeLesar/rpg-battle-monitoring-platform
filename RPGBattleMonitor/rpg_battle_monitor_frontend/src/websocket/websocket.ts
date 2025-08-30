@@ -10,6 +10,14 @@ export type JoinData = {
     };
 };
 
+export enum WebsocketQueues {
+    updateQueue = "update",
+    createQueue = "create",
+    deleteQueue = "delete",
+}
+
+type QueueMap = Record<keyof typeof WebsocketQueues, IMessagable[]>;
+
 export type ListenEvents = {
     "join-finished": () => void;
     join: (joinData: JoinData) => void;
@@ -26,7 +34,7 @@ export type EmitEvents = {
 export class Websocket {
     protected _socket: Socket<ListenEvents, EmitEvents>;
     public joined: boolean = false;
-    protected updateQueue: IMessagable[] = [];
+    protected queues: QueueMap;
 
     public constructor(
         uri?: string,
@@ -35,6 +43,11 @@ export class Websocket {
         const socket = io(uri, opts);
 
         this._socket = socket;
+
+        this.queues = {} as QueueMap;
+        for (const key of Object.keys(WebsocketQueues)) {
+            this.queues[key as keyof QueueMap] = [];
+        }
     }
 
     public static createDefaultSocket(): Websocket {
@@ -51,14 +64,17 @@ export class Websocket {
         return this._socket;
     }
 
-    public queueUpdate(data: IMessagable) {
-        this.updateQueue.push(data);
+    public queue(data: IMessagable, queue: keyof QueueMap) {
+        this.queues[queue].push(data);
     }
 
     public flush() {
-        if (this.updateQueue.length > 0) {
-            this.socket.emit("update", this.updateQueue);
-            this.updateQueue = [];
+        for (const [key, value] of Object.entries(WebsocketQueues)) {
+            const queue = this.queues[key as keyof QueueMap];
+            if (queue.length > 0) {
+                this.socket.emit(value, queue);
+                this.queues[key as keyof QueueMap] = [];
+            }
         }
     }
 
