@@ -187,16 +187,18 @@ export function destroy(
 }
 
 function initWebsocketListeners() {
-    boardApplication.websocket.socket.on("update", (data) => {
-        data.forEach((data) => {
-            const entity = boardApplication.entityRegistry.entities.get(
-                data.uid,
-            );
-            // TODO: only apply if timestamp is not behind the current timestamp
-            if (entity) {
-                entity.applyUpdateAction(data);
-            }
-        });
+    boardApplication.websocket.socket.on("action", (message) => {
+        if (message.action === "update") {
+            message.data.forEach((data) => {
+                const entity = boardApplication.entityRegistry.entities.get(
+                    data.uid,
+                );
+                // TODO: only apply if timestamp is not behind the current timestamp
+                if (entity) {
+                    entity.applyUpdateAction(data);
+                }
+            });
+        }
     });
 }
 

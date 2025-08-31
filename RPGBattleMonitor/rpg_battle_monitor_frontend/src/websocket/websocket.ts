@@ -21,14 +21,22 @@ type QueueMap = Record<keyof typeof WebsocketQueues, IMessagable[]>;
 export type ListenEvents = {
     "join-finished": () => void;
     join: (joinData: JoinData) => void;
-    update: (data: TypedJson[]) => void;
+    action: (data: ActionMessageListen) => void;
 };
 
 export type EmitEvents = {
     join: () => void;
-    create: (data: IMessagable) => void;
-    update: (data: IMessagable[]) => void;
-    delete: (data: IMessagable) => void;
+    action: (data: ActionMessageEmit) => void;
+};
+
+export type ActionMessageEmit = {
+    action: WebsocketQueues;
+    data: IMessagable[];
+};
+
+export type ActionMessageListen = {
+    action: WebsocketQueues;
+    data: TypedJson[];
 };
 
 export class Websocket {
@@ -72,7 +80,7 @@ export class Websocket {
         for (const [key, value] of Object.entries(WebsocketQueues)) {
             const queue = this.queues[key as keyof QueueMap];
             if (queue.length > 0) {
-                this.socket.emit(value, queue);
+                this.socket.emit("action", { action: value, data: queue });
                 this.queues[key as keyof QueueMap] = [];
             }
         }

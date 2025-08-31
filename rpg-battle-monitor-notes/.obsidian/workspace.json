@@ -6,7 +6,7 @@
       {
         "id": "6bdaed3d920d7459",
         "type": "tabs",
-        "dimension": 75.09025270758123,
+        "dimension": 67.28060671722643,
         "children": [
           {
             "id": "e1e75e734460e9ec",
@@ -27,7 +27,7 @@
       {
         "id": "e3b4661f1e27bbd9",
         "type": "tabs",
-        "dimension": 24.90974729241877,
+        "dimension": 32.71939328277356,
         "children": [
           {
             "id": "499779ec7438bc7c",
@@ -187,11 +187,12 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "e1e75e734460e9ec",
+  "active": "499779ec7438bc7c",
   "lastOpenFiles": [
-    "Client <-> Server/Websockets/Messages/Join.md",
-    "Client <-> Server/Websockets/Messages/Join finished.md",
     "Client <-> Server/Websockets/Messages/Action.md",
+    "Client <-> Server/Websockets/Messages/Join finished.md",
+    "Entities/Token.md",
+    "Client <-> Server/Websockets/Messages/Join.md",
     "Client <-> Server/Client.md",
     "Client <-> Server/Websockets/Websocket authorization.md",
     "Client <-> Server/Websockets/Basic websocket communication.md",
@@ -202,7 +203,6 @@
     "Entities/Save system.md",
     "Entities/Room.md",
     "Entities/Entity queue.md",
-    "Entities/Token.md",
     "Joining a game.md",
     "Client <-> Server/Websockets/Messages",
     "token.md",

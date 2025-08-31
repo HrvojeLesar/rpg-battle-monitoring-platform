@@ -7,8 +7,8 @@ pub enum Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::Image(e) => write!(f, "Image error occurred: {}", e),
-            Error::Io(e) => write!(f, "Io error occurred: {}", e),
+            Error::Image(e) => write!(f, "Image error occurred: {e}"),
+            Error::Io(e) => write!(f, "Io error occurred: {e}"),
         }
     }
 }

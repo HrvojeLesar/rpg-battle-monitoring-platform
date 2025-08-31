@@ -150,7 +150,7 @@ where
             }
 
             let mut req = Request::from_parts(parts, bytes.into());
-            // req.extensions_mut().insert(message);
+            req.extensions_mut().insert(message);
 
             inner.call(req).await
         };

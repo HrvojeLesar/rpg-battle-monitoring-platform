@@ -137,12 +137,12 @@ mod assets_inner {
                 let extension = image_format.extensions_str().first().unwrap_or(&"");
 
                 let mime = image_format.to_mime_type().to_string();
-                let name = format!("{uuid}.{}", extension);
+                let name = format!("{uuid}.{extension}");
 
                 (mime, name)
             } else {
                 let extension = mime_type.extension();
-                let name = format!("{uuid}.{}", extension);
+                let name = format!("{uuid}.{extension}");
                 (mime_type.mime_type().to_string(), name)
             };
 

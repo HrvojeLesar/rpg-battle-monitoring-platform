@@ -1,4 +1,4 @@
-use std::{pin::Pin, time::Duration};
+use std::time::Duration;
 
 use axum::http::{StatusCode, Uri};
 

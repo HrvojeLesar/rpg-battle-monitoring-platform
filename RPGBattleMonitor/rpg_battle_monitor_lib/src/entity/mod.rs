@@ -1,4 +1,7 @@
-use std::io::{Read, Write};
+use std::{
+    io::{Read, Write},
+    sync::Arc,
+};
 
 use flate2::{Compression, read::GzDecoder, write::GzEncoder};
 use image::EncodableLayout;
@@ -7,7 +10,9 @@ use serde::{Deserialize, Serialize};
 pub mod error;
 pub mod kind;
 
-use crate::{entity::kind::EntityKind, models::entity::CompressedEntityModel};
+use crate::{
+    api::websockets::Action, entity::kind::EntityKind, models::entity::CompressedEntityModel,
+};
 
 use self::error::{Error, Result};
 
@@ -32,6 +37,7 @@ pub struct Entity {
     pub game: i32,
     pub kind: EntityKind,
     pub timestamp: UtcTimestamp,
+    pub action: Option<Arc<Action>>,
     #[serde(flatten)]
     pub other_values: serde_json::Value,
 }
@@ -45,12 +51,6 @@ impl Entity {
 
         Ok(decompressed)
     }
-
-    // pub fn sort_entities(mut entities: Vec<Entity>) -> Vec<Entity> {
-    //     entities.sort_by_key(|e| e.kind.get_sort_order());
-    //
-    //     entities
-    // }
 }
 
 impl TryFrom<Entity> for CompressedEntityModel {
@@ -66,6 +66,7 @@ impl TryFrom<Entity> for CompressedEntityModel {
             game: value.game,
             kind: value.kind.0,
             timestamp: value.timestamp.0,
+            action: value.action,
             data: encoder.finish().map_err(Error::EntityCompressionFailed)?,
         })
     }
@@ -88,6 +89,7 @@ impl TryFrom<CompressedEntityModel> for Entity {
             game: value.game,
             kind: EntityKind(value.kind),
             timestamp: UtcTimestamp(value.timestamp),
+            action: value.action,
             other_values,
         })
     }

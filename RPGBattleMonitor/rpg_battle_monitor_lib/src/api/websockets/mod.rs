@@ -1,6 +1,7 @@
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 
 use sea_orm::TransactionTrait;
+use serde::{Deserialize, Serialize};
 use socketioxide::{
     SocketIoBuilder,
     extract::{Data, Extension, SocketRef, State},
@@ -12,7 +13,7 @@ use tower_http::cors::CorsLayer;
 
 use crate::{
     entity::{ClientsideEntity, Entity},
-    models::entity::{CompressedEntityModel, EntityManager},
+    models::entity::EntityManager,
     webserver::{
         router::app_state::AppStateTrait,
         services::websocket_auth::{self, WebsocketAuthMessage},
@@ -24,34 +25,72 @@ const CHUNK_SIZE: usize = 50;
 #[derive(Clone)]
 struct JoinedFlag;
 
-const UPDATE_EVENT: &str = "update";
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+#[serde(untagged)]
+pub enum Action {
+    Update,
+    Create,
+    Delete,
+    Other(serde_json::Value),
+}
+
+impl Action {
+    pub fn is_other(&self) -> bool {
+        matches!(self, Action::Other(_))
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ActionMessage {
+    action: Action,
+    data: Vec<ClientsideEntity>,
+}
+
+const ACTION: &str = "action";
 const JOIN_EVENT: &str = "join";
 const JOIN_FINISHED_EVENT: &str = "join-finished";
 
 async fn update_handler<T: AppStateTrait>(
-    socket: SocketRef,
-    Data(entities): Data<Vec<ClientsideEntity>>,
-    State(app_state): State<T>,
-    Extension(auth): Extension<WebsocketAuthMessage>,
+    data: ActionMessage,
+    app_state: T,
+    auth: WebsocketAuthMessage,
 ) {
-    let rooms = socket.rooms();
-    socket.to(rooms).emit(UPDATE_EVENT, &entities).await.ok();
-
     let queue = app_state.get_entity_queue();
     let mut lock = queue.lock().await;
 
-    for entity in entities {
+    let shared_action = Arc::new(data.action);
+
+    for entity in data.data {
         let entity = Entity {
             game: auth.game,
             uid: entity.uid,
             kind: entity.kind,
             timestamp: entity.timestamp,
             other_values: entity.other_values,
+            action: Some(shared_action.clone()),
         };
 
         if let Err(e) = lock.push(entity) {
             tracing::error!(error = %e, "Failed to push entity to queue");
         }
+    }
+}
+
+async fn action_handler<T: AppStateTrait>(
+    socket: SocketRef,
+    Data(data): Data<ActionMessage>,
+    State(app_state): State<T>,
+    Extension(auth): Extension<WebsocketAuthMessage>,
+) {
+    let rooms = socket.rooms();
+    socket.to(rooms).emit(ACTION, &data).await.ok();
+
+    match data.action {
+        Action::Update => update_handler(data, app_state, auth).await,
+        Action::Create => unimplemented!("Implement create action"),
+        Action::Delete => unimplemented!("Implement delete action"),
+        Action::Other(_) => tracing::warn!("Received unknown action: {:?}", data.action),
     }
 }
 
@@ -61,15 +100,6 @@ async fn join_handler<T: AppStateTrait>(
     State(app_state): State<T>,
     Extension(auth): Extension<WebsocketAuthMessage>,
 ) {
-    fn join_and_decompress_entities(
-        mut entities: Vec<CompressedEntityModel>,
-        mut other: Vec<CompressedEntityModel>,
-    ) -> Result<Vec<Entity>, crate::entity::error::Error> {
-        entities.append(&mut other);
-
-        Entity::decompress_vec(entities)
-    }
-
     let game_id = auth.game;
     let room = format!("room-{game_id}");
 
@@ -79,25 +109,16 @@ async fn join_handler<T: AppStateTrait>(
         return;
     }
 
-    socket.on(UPDATE_EVENT, update_handler::<T>);
+    socket.on(ACTION, action_handler::<T>);
     socket.join(room);
 
     tracing::debug!("Fetching queued entities");
     let queue = app_state.get_entity_queue();
-    let compressed_entities;
     {
-        let lock = queue.lock().await;
-        compressed_entities = lock
-            .entities
-            .iter()
-            .filter_map(|e| {
-                if e.game != game_id {
-                    None
-                } else {
-                    Some(e.clone())
-                }
-            })
-            .collect::<Vec<_>>();
+        let mut lock = queue.lock().await;
+        if let Some(handle) = lock.flush().await {
+            handle.await.ok();
+        }
     }
 
     tracing::debug!("Starting database entity fetch");
@@ -128,8 +149,7 @@ async fn join_handler<T: AppStateTrait>(
     }
     tracing::debug!("Finished database entity fetch");
 
-    let entities = match join_and_decompress_entities(db_comporessed_entities, compressed_entities)
-    {
+    let entities = match Entity::decompress_vec(db_comporessed_entities) {
         Ok(e) => e,
         Err(e) => {
             tracing::error!("Failed to decompress entities: {}", e);

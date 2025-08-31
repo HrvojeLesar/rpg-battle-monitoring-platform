@@ -3,7 +3,9 @@ use std::iter::{Skip, Take};
 use dashmap::DashMap;
 use dashmap::iter::Iter;
 use sea_orm::{DatabaseConnection, TransactionTrait};
+use tokio::task::JoinHandle;
 
+use crate::api::websockets::Action;
 use crate::entity::error::{Error, Result};
 use crate::entity::{Entity, UId};
 use crate::models::entity::{CompressedEntityModel, EntityManager};
@@ -100,15 +102,20 @@ impl EntityQueue {
             .contains_key(&GameIdAndUIdCombo::from_entity(entity))
     }
 
-    pub async fn flush(&mut self) {
+    pub async fn flush(&mut self) -> Option<JoinHandle<()>> {
         if self.entities.is_empty() {
-            return;
+            return None;
         }
 
         let map = std::mem::take(&mut self.entities);
         let database = self.db.clone();
 
-        tokio::spawn(async move {
+        let save_task_handle = tokio::spawn(async move {
+            struct Accumulator {
+                save_entities: Vec<CompressedEntityModel>,
+                delete_entities: Vec<CompressedEntityModel>,
+            }
+
             tracing::info!("Flushing EntityQueue");
             let transaction = match database.begin().await {
                 Ok(t) => t,
@@ -133,11 +140,37 @@ impl EntityQueue {
                 }
             };
 
+            let init = Accumulator {
+                save_entities: Vec::new(),
+                delete_entities: Vec::new(),
+            };
+
+            let accumulator = valid_entities.into_iter().fold(init, |mut acc, entity| {
+                if let Some(action) = entity.action.as_ref() {
+                    if **action == Action::Delete {
+                        acc.delete_entities.push(entity);
+                    } else {
+                        acc.save_entities.push(entity);
+                    }
+                }
+                acc
+            });
+
+            let save_entities = accumulator.save_entities;
+            let delete_entities = accumulator.delete_entities;
+
             if let Err(e) = entity_manager
-                .save_valid_entities(&transaction, valid_entities)
+                .save_valid_entities(&transaction, save_entities)
                 .await
             {
-                tracing::error!("Failed to insert entities: {}", e);
+                tracing::error!("Failed to create/update entities: {}", e);
+            }
+
+            if let Err(e) = entity_manager
+                .delete_entities(&transaction, delete_entities)
+                .await
+            {
+                tracing::error!("Failed to delete entities: {}", e);
             }
 
             if let Err(e) = transaction.commit().await {
@@ -145,5 +178,7 @@ impl EntityQueue {
             }
             tracing::info!("Flushed");
         });
+
+        Some(save_task_handle)
     }
 }

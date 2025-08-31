@@ -27,8 +27,7 @@ mod inner {
     use sea_orm::{
         ActiveModelTrait,
         ActiveValue::{NotSet, Set},
-        ColumnTrait, ConnectionTrait, EntityTrait, QueryFilter, TryIntoModel,
-        sea_query::ValueType,
+        ColumnTrait, ConnectionTrait, EntityTrait, QueryFilter,
     };
 
     use crate::models::board::{ActiveModel, Column, Entity, Model};
