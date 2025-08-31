@@ -1,10 +1,4 @@
-import {
-    ColorSource,
-    Sprite,
-    SpriteOptions,
-    Texture,
-    TextureSource,
-} from "pixi.js";
+import { ColorSource, Sprite, SpriteOptions } from "pixi.js";
 import {
     ContainerExtension,
     ContainerExtensionAttributes,
@@ -13,11 +7,12 @@ import {
 } from "./container_extension";
 import { Grid } from "../grid/grid";
 import { TypedJson } from "../interfaces/messagable";
+import { TextureConverter } from "../converters/texture_converter";
 
 export type SpriteExtensionAttributes = {
     alpha: number;
     tint: ColorSource;
-    texture: Texture<TextureSource<any>>;
+    texture: string;
 } & ContainerExtensionAttributes;
 
 export class SpriteExtension extends ContainerExtension<
@@ -74,8 +69,7 @@ export class SpriteExtension extends ContainerExtension<
             ...super.getAttributes(),
             alpha: this.displayedEntity.alpha,
             tint: this.displayedEntity.tint,
-            // TODO: figure out texture serialization
-            // texture: this.displayedEntity.texture,
+            texture: TextureConverter.fromTexture(this.displayedEntity.texture),
         };
     }
 
@@ -84,10 +78,13 @@ export class SpriteExtension extends ContainerExtension<
     ): void {
         super.applyUpdateAction(changes);
         if (this.displayedEntity) {
+            const texture = TextureConverter.toTexture(
+                changes.texture,
+                this.displayedEntity,
+            );
             this.displayedEntity.alpha = changes.alpha;
             this.displayedEntity.tint = changes.tint;
-            // TODO: figure out texture serialization
-            // this.displayedEntity.texture = changes.texture;
+            this.displayedEntity.texture = texture;
         }
     }
 }
