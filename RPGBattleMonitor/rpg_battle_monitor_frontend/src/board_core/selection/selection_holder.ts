@@ -2,6 +2,7 @@ import { Container, Point } from "pixi.js";
 import {
     ContainerExtension,
     ContainerExtensionOptions,
+    Ghost,
 } from "../extensions/container_extension";
 import { SelectionOutline } from "./selection_outline";
 import { SelectHandler } from "../handlers/select_handler";
@@ -98,6 +99,10 @@ export class SelectionHolderContainer
         } else {
             selectHandler.setClampHeightBottom(false);
         }
+    }
+
+    protected createGhostContainer(): Ghost {
+        throw new Error("Method should not be used");
     }
 }
 

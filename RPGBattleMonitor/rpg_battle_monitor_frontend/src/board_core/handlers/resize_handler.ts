@@ -77,6 +77,10 @@ export class ResizeHandler {
                 "globalmousemove",
                 this.onGlobalPointerMove,
             );
+
+            container.eventEmitter.emit("resize-end");
+
+            GBoard.websocket.flush();
         };
 
         resizeDragPoint.on("pointerdown", onPointerDown);

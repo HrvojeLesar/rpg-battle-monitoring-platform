@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import { Point } from "pixi.js";
-import { Slider } from "./Inputs/Slider";
 import { useEventEmitter } from "../hooks/bridge_context_hooks";
 import { ReactPixiJsBridgeEventEmitter } from "../types/event_emitter";
 import {

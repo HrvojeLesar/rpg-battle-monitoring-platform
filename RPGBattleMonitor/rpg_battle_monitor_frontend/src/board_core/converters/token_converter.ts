@@ -1,5 +1,5 @@
 import { GBoard } from "../board";
-import { ContainerExtension } from "../extensions/container_extension";
+import { Grid } from "../grid/grid";
 import { TypedJson } from "../interfaces/messagable";
 import { Scene } from "../scene";
 import { Token, TokenAttributes } from "../token/token";
@@ -17,20 +17,19 @@ export class TokenConverter {
             return existingEntity;
         }
 
+        const grid = GBoard.entityRegistry.entities.get(attributes.gridUid);
         const scene = GBoard.entityRegistry.entities.get(attributes.sceneUid);
         const tokenData = GBoard.entityRegistry.entities.get(
             attributes.tokenData,
         );
-        const container = GBoard.entityRegistry.entities.get(
-            attributes.containerUid,
-        );
 
         if (
-            container instanceof ContainerExtension &&
+            grid instanceof Grid &&
             scene instanceof Scene &&
             tokenData instanceof TokenDataBase
         ) {
-            const token = new Token(container, scene, tokenData);
+            const token = new Token(grid, scene, tokenData);
+            token.applyUpdateAction(attributes);
 
             return token;
         }

@@ -1,5 +1,5 @@
 export type EventNames = {
-    "resize-finished": {};
+    "resize-finished": () => void;
 };
 
 export type EventEmitterTypes = {

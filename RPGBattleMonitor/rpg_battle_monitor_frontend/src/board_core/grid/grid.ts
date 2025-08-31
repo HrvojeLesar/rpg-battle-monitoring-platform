@@ -1,5 +1,7 @@
 import { Container, Graphics, Point, Sprite, Texture } from "pixi.js";
-import { BaseEntity } from "../entity/base_entity";
+import { IMessagable, TypedJson, UId } from "../interfaces/messagable";
+import { UniqueCollection } from "../utils/unique_collection";
+import newUId from "../utils/uuid_generator";
 
 type GridOptions = {
     hover?: boolean;
@@ -13,42 +15,12 @@ export type GridSize = {
 };
 
 export type GridAttributes = {
-    _container: {
-        _cellSize: number;
-        _size: GridSize;
-        hover: boolean;
-    };
+    _cellSize: number;
+    _size: GridSize;
+    hover: boolean;
 };
 
-export class Grid extends BaseEntity<GridAttributes> {
-    protected _container: GridContainer;
-
-    public constructor(options?: GridOptions) {
-        super();
-
-        this._container = new GridContainer(options);
-    }
-
-    public get grid(): GridContainer {
-        return this._container;
-    }
-
-    public get container(): GridContainer {
-        return this._container;
-    }
-
-    public getAttributes(): GridAttributes {
-        return {
-            _container: {
-                _cellSize: this._container.cellSize,
-                _size: this._container.size,
-                hover: this._container.hover,
-            },
-        };
-    }
-}
-
-export class GridContainer extends Container {
+export class Grid extends Container implements IMessagable<GridAttributes> {
     protected gridSprite: Container;
     protected hoveredCell: Graphics;
     public hover: boolean = true;
@@ -59,9 +31,14 @@ export class GridContainer extends Container {
         height: 1000,
     };
 
+    private _uid: UId;
+    protected _dependants: UniqueCollection<IMessagable> =
+        new UniqueCollection();
+
     constructor(options?: GridOptions) {
         super();
 
+        this._uid = newUId();
         this.hover = options?.hover ?? this.hover;
         this._cellSize = options?.cellSize ?? this._cellSize;
         this._size = options?.gridSize ?? this._size;
@@ -159,6 +136,52 @@ export class GridContainer extends Container {
         } else {
             this.hoveredCell.height = this._cellSize;
         }
+    }
+
+    public getKind(): string {
+        return this.constructor.name;
+    }
+
+    public getUId(): UId {
+        return this._uid;
+    }
+
+    public setUId(uid: UId): void {
+        this._uid = uid;
+    }
+
+    public toJSON(): TypedJson<GridAttributes> {
+        return {
+            ...this.getAttributes(),
+            kind: this.getKind(),
+            uid: this.getUId(),
+            timestamp: Date.now(),
+        };
+    }
+
+    public getAttributes(): GridAttributes {
+        return {
+            _cellSize: this.cellSize,
+            _size: this.size,
+            hover: this.hover,
+        };
+    }
+
+    public applyUpdateAction(changes: TypedJson<GridAttributes>): void {
+        this._uid = changes.uid;
+        this._cellSize = changes._cellSize;
+        this._size = changes._size;
+        this.hover = changes.hover;
+    }
+
+    public deleteAction(): void {}
+
+    public addDependant(entity: IMessagable): void {
+        this.addDependant(entity);
+    }
+
+    public static getKindStatic(): string {
+        return this.name;
     }
 }
 

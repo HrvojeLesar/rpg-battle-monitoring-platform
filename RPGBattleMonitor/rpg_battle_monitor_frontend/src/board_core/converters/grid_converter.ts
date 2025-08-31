@@ -14,6 +14,6 @@ export class GridConverter {
             return existingEntity;
         }
 
-        return new Grid(attributes._container);
+        return new Grid(attributes);
     }
 }

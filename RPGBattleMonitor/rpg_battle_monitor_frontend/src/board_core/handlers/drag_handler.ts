@@ -4,7 +4,6 @@ import { Scene } from "../scene";
 import { SelectHandler } from "./select_handler";
 import { EventStore } from "./registered_event_store";
 import { UniqueCollection } from "../utils/unique_collection";
-import { Token } from "../token/token";
 import { GBoard } from "../board";
 
 type OnGlobalPointerMove = {
@@ -53,12 +52,7 @@ export class DragHandler {
         this.container.position.set(newEntityPosition.x, newEntityPosition.y);
     }
 
-    public registerDrag(token: Token): void;
-    public registerDrag(container: ContainerExtension | Token) {
-        if (container instanceof Token) {
-            container = container.container;
-        }
-
+    public registerDrag(container: ContainerExtension) {
         const onPointerDown = (event: FederatedPointerEvent) => {
             if (event.pointerType === "mouse" && event.button !== 0) {
                 return;
@@ -121,13 +115,7 @@ export class DragHandler {
             for (const container of selectedItems) {
                 if (this.isDirty) {
                     container.snapToGrid();
-                    try {
-                        if (container.dragEndCallback) {
-                            container.dragEndCallback();
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    }
+                    container.eventEmitter.emit("drag-end");
                 }
                 container.clearGhosts();
             }

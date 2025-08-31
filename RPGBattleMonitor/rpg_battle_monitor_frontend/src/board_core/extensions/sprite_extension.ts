@@ -79,7 +79,9 @@ export class SpriteExtension extends ContainerExtension<
         };
     }
 
-    public applyUpdateAction(changes: TypedJson<SpriteExtensionAttributes>): void {
+    public applyUpdateAction(
+        changes: TypedJson<SpriteExtensionAttributes>,
+    ): void {
         super.applyUpdateAction(changes);
         if (this.displayedEntity) {
             this.displayedEntity.alpha = changes.alpha;

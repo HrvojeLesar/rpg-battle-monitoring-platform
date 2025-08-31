@@ -9,7 +9,6 @@ import { ResizeHandler } from "./resize_handler";
 import { SelectionBox } from "../selection/selection_box";
 import { SelectedMap } from "../utils/selected_map";
 import { SelectionHolderContainer } from "../selection/selection_holder";
-import { Token } from "../token/token";
 
 export enum SelectionState {
     None = "None",
@@ -91,12 +90,7 @@ export class SelectHandler {
         return this._selected.get(container) !== undefined;
     }
 
-    public registerSelect(token: Token): void;
-    public registerSelect(container: ContainerExtension | Token): void {
-        if (container instanceof Token) {
-            container = container.container;
-        }
-
+    public registerSelect(container: ContainerExtension): void {
         const onPointerDown = (event: FederatedPointerEvent) => {
             if (event.pointerType === "mouse" && event.button !== 0) {
                 return;

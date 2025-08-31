@@ -1,4 +1,10 @@
-import { Container, ContainerOptions, ObservablePoint, Point } from "pixi.js";
+import {
+    Container,
+    ContainerOptions,
+    EventEmitter,
+    ObservablePoint,
+    Point,
+} from "pixi.js";
 import { DragHandler } from "../handlers/drag_handler";
 import { SelectHandler } from "../handlers/select_handler";
 import { UniqueCollection } from "../utils/unique_collection";
@@ -13,8 +19,7 @@ import { Grid } from "../grid/grid";
 import { IClampPositionToViewport } from "../interfaces/clamp_position_to_viewport";
 import { IMessagable, TypedJson, UId } from "../interfaces/messagable";
 import newUId from "../utils/uuid_generator";
-
-export type DragEndCallback = () => void;
+import { ContainerEventTypes } from "../events/container_extensions_events";
 
 export type ContainerExtensionOptions = {
     isSnapping?: boolean;
@@ -22,7 +27,6 @@ export type ContainerExtensionOptions = {
     isSelectable?: boolean;
     selectionOutline?: SelectionOutline;
     isResizable?: boolean;
-    dragEndCallback?: DragEndCallback;
 } & ContainerOptions;
 
 export type Ghost = ContainerExtension;
@@ -40,6 +44,17 @@ export type ContainerExtensionAttributes = {
         x: number;
         y: number;
     };
+    isSnapping?: boolean;
+    isDraggable?: boolean;
+    isSelectable?: boolean;
+    isResizable?: boolean;
+};
+
+export const DEFAULTS = {
+    isSnapping: false,
+    isDraggable: false,
+    isSelectable: false,
+    isResizable: false,
 };
 
 export abstract class ContainerExtension<
@@ -54,33 +69,34 @@ export abstract class ContainerExtension<
         IClampPositionToViewport,
         IMessagable<Attributes>
 {
-    protected _isSnapping: boolean = false;
-    protected _isDraggable: boolean = false;
-    protected _isSelectable: boolean = false;
-    protected _isResizable: boolean = false;
+    protected _isSnapping: boolean = DEFAULTS.isSnapping;
+    protected _isDraggable: boolean = DEFAULTS.isDraggable;
+    protected _isSelectable: boolean = DEFAULTS.isSelectable;
+    protected _isResizable: boolean = DEFAULTS.isResizable;
     protected _displayedEntity?: T;
     protected _ghots: UniqueCollection<ContainerExtension> =
         new UniqueCollection();
     protected _grid: Grid;
     protected _gridCell: GridCell;
-    protected _dragEndCallback?: DragEndCallback;
     protected _uid: UId;
     protected _dependants: UniqueCollection<IMessagable> =
         new UniqueCollection();
+    private _eventEmitter = new EventEmitter<ContainerEventTypes>();
 
     public constructor(grid: Grid, options?: ContainerExtensionOptions) {
         super(options);
 
-        this.isSnapping = options?.isSnapping ?? false;
-        this.isDraggable = options?.isDraggable ?? false;
-        this.isSelectable = options?.isSelectable ?? false;
-        this.isResizable = options?.isResizable ?? false;
+        this.isSnapping = options?.isSnapping ?? DEFAULTS.isSnapping;
+        this.isDraggable = options?.isDraggable ?? DEFAULTS.isDraggable;
+        this.isSelectable = options?.isSelectable ?? DEFAULTS.isSelectable;
+        this.isResizable = options?.isResizable ?? DEFAULTS.isResizable;
 
         this._grid = grid;
 
         this._gridCell = new GridCell(this as ContainerExtension);
-        this._dragEndCallback = options?.dragEndCallback;
         this._uid = newUId();
+
+        this.emit("added", this);
     }
 
     public get isSnapping(): boolean {
@@ -172,11 +188,11 @@ export abstract class ContainerExtension<
         }
 
         this.position.x =
-            Math.round(this.position.x / this._grid.container.cellSize) *
-            this._grid.container.cellSize;
+            Math.round(this.position.x / this._grid.cellSize) *
+            this._grid.cellSize;
         this.position.y =
-            Math.round(this.position.y / this._grid.container.cellSize) *
-            this._grid.container.cellSize;
+            Math.round(this.position.y / this._grid.cellSize) *
+            this._grid.cellSize;
     }
 
     getInitialPosition(): ObservablePoint {
@@ -216,127 +232,103 @@ export abstract class ContainerExtension<
             if (kind === ResizeKind.Right) {
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width /
-                            (this._grid.container.cellSize / 2),
+                        this.displayedEntity.width / (this._grid.cellSize / 2),
                     ) *
-                    (this._grid.container.cellSize / 2);
+                    (this._grid.cellSize / 2);
             }
 
             if (kind === ResizeKind.Bottom) {
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height /
-                            (this._grid.container.cellSize / 2),
+                        this.displayedEntity.height / (this._grid.cellSize / 2),
                     ) *
-                    (this._grid.container.cellSize / 2);
+                    (this._grid.cellSize / 2);
             }
 
             if (kind === ResizeKind.Left) {
                 this.position.x =
-                    Math.round(
-                        this.position.x / (this._grid.container.cellSize / 2),
-                    ) *
-                    (this._grid.container.cellSize / 2);
+                    Math.round(this.position.x / (this._grid.cellSize / 2)) *
+                    (this._grid.cellSize / 2);
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width /
-                            (this._grid.container.cellSize / 2),
+                        this.displayedEntity.width / (this._grid.cellSize / 2),
                     ) *
-                    (this._grid.container.cellSize / 2);
+                    (this._grid.cellSize / 2);
             }
 
             if (kind === ResizeKind.Top) {
                 this.position.y =
-                    Math.round(
-                        this.position.y / (this._grid.container.cellSize / 2),
-                    ) *
-                    (this._grid.container.cellSize / 2);
+                    Math.round(this.position.y / (this._grid.cellSize / 2)) *
+                    (this._grid.cellSize / 2);
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height /
-                            (this._grid.container.cellSize / 2),
+                        this.displayedEntity.height / (this._grid.cellSize / 2),
                     ) *
-                    (this._grid.container.cellSize / 2);
+                    (this._grid.cellSize / 2);
             }
 
             if (kind === ResizeKind.BottomRight) {
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width /
-                            (this._grid.container.cellSize / 2),
+                        this.displayedEntity.width / (this._grid.cellSize / 2),
                     ) *
-                    (this._grid.container.cellSize / 2);
+                    (this._grid.cellSize / 2);
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height /
-                            (this._grid.container.cellSize / 2),
+                        this.displayedEntity.height / (this._grid.cellSize / 2),
                     ) *
-                    (this._grid.container.cellSize / 2);
+                    (this._grid.cellSize / 2);
             }
 
             if (kind === ResizeKind.TopRight) {
                 this.position.y =
-                    Math.round(
-                        this.position.y / (this._grid.container.cellSize / 2),
-                    ) *
-                    (this._grid.container.cellSize / 2);
+                    Math.round(this.position.y / (this._grid.cellSize / 2)) *
+                    (this._grid.cellSize / 2);
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height /
-                            (this._grid.container.cellSize / 2),
+                        this.displayedEntity.height / (this._grid.cellSize / 2),
                     ) *
-                    (this._grid.container.cellSize / 2);
+                    (this._grid.cellSize / 2);
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width /
-                            (this._grid.container.cellSize / 2),
+                        this.displayedEntity.width / (this._grid.cellSize / 2),
                     ) *
-                    (this._grid.container.cellSize / 2);
+                    (this._grid.cellSize / 2);
             }
 
             if (kind === ResizeKind.BottomLeft) {
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height /
-                            (this._grid.container.cellSize / 2),
+                        this.displayedEntity.height / (this._grid.cellSize / 2),
                     ) *
-                    (this._grid.container.cellSize / 2);
+                    (this._grid.cellSize / 2);
                 this.position.x =
-                    Math.round(
-                        this.position.x / (this._grid.container.cellSize / 2),
-                    ) *
-                    (this._grid.container.cellSize / 2);
+                    Math.round(this.position.x / (this._grid.cellSize / 2)) *
+                    (this._grid.cellSize / 2);
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width /
-                            (this._grid.container.cellSize / 2),
+                        this.displayedEntity.width / (this._grid.cellSize / 2),
                     ) *
-                    (this._grid.container.cellSize / 2);
+                    (this._grid.cellSize / 2);
             }
 
             if (kind === ResizeKind.TopLeft) {
                 this.position.y =
-                    Math.round(
-                        this.position.y / (this._grid.container.cellSize / 2),
-                    ) *
-                    (this._grid.container.cellSize / 2);
+                    Math.round(this.position.y / (this._grid.cellSize / 2)) *
+                    (this._grid.cellSize / 2);
                 this.displayedEntity.height =
                     Math.round(
-                        this.displayedEntity.height /
-                            (this._grid.container.cellSize / 2),
+                        this.displayedEntity.height / (this._grid.cellSize / 2),
                     ) *
-                    (this._grid.container.cellSize / 2);
+                    (this._grid.cellSize / 2);
                 this.position.x =
-                    Math.round(
-                        this.position.x / (this._grid.container.cellSize / 2),
-                    ) *
-                    (this._grid.container.cellSize / 2);
+                    Math.round(this.position.x / (this._grid.cellSize / 2)) *
+                    (this._grid.cellSize / 2);
                 this.displayedEntity.width =
                     Math.round(
-                        this.displayedEntity.width /
-                            (this._grid.container.cellSize / 2),
+                        this.displayedEntity.width / (this._grid.cellSize / 2),
                     ) *
-                    (this._grid.container.cellSize / 2);
+                    (this._grid.cellSize / 2);
             }
         }
     }
@@ -420,14 +412,6 @@ export abstract class ContainerExtension<
         }
     }
 
-    public set dragEndCallback(callback: Maybe<DragEndCallback>) {
-        this._dragEndCallback = callback;
-    }
-
-    public get dragEndCallback(): Maybe<DragEndCallback> {
-        return this._dragEndCallback;
-    }
-
     public getKind(): string {
         return this.constructor.name;
     }
@@ -441,6 +425,10 @@ export abstract class ContainerExtension<
                 x: this.x,
                 y: this.y,
             },
+            isSnapping: this.isSnapping,
+            isDraggable: this.isDraggable,
+            isSelectable: this.isSelectable,
+            isResizable: this.isResizable,
         } as Attributes;
     }
 
@@ -455,6 +443,10 @@ export abstract class ContainerExtension<
         }
         this.position.x = changes.position.x;
         this.position.y = changes.position.y;
+        this.isSnapping = changes.isSnapping ?? DEFAULTS.isSnapping;
+        this.isDraggable = changes.isDraggable ?? DEFAULTS.isDraggable;
+        this.isSelectable = changes.isSelectable ?? DEFAULTS.isSelectable;
+        this.isResizable = changes.isResizable ?? DEFAULTS.isResizable;
     }
 
     public getUId(): UId {
@@ -478,11 +470,13 @@ export abstract class ContainerExtension<
         return this.name;
     }
 
-    public deleteAction(): void {
-        GBoard.websocket.socket.emit("delete", this);
-    }
+    public deleteAction(): void {}
 
     public addDependant(entity: IMessagable): void {
         this._dependants.add(entity);
+    }
+
+    public get eventEmitter(): EventEmitter<ContainerEventTypes> {
+        return this._eventEmitter;
     }
 }

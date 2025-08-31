@@ -47,17 +47,17 @@ export class SelectionBox extends Graphics {
             // TODO: This only works for tokens, shoudl be generic for any container
             // that is currently selectable on the scene
             GBoard.scene?.tokens.forEach((token) => {
-                const tokenBounds = token.container.getBounds().rectangle;
+                const tokenBounds = token.getBounds().rectangle;
                 if (bounds.intersects(tokenBounds)) {
                     if (
-                        token.container.isSelectable &&
-                        !this.selectHandler.isSelected(token.container)
+                        token.isSelectable &&
+                        !this.selectHandler.isSelected(token)
                     ) {
-                        this.selectHandler.select(token.container);
+                        this.selectHandler.select(token);
                     }
                 } else {
-                    if (this.selectHandler.isSelected(token.container)) {
-                        this.selectHandler.deselect(token.container);
+                    if (this.selectHandler.isSelected(token)) {
+                        this.selectHandler.deselect(token);
                     }
                 }
             });

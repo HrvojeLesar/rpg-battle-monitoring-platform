@@ -2,15 +2,14 @@ import { Viewport } from "pixi-viewport";
 import { GBoard } from "./board";
 import { UniqueCollection } from "./utils/unique_collection";
 import { Assets, Texture } from "pixi.js";
-import { SpriteExtension } from "./extensions/sprite_extension";
 import { DragHandler } from "./handlers/drag_handler";
 import { EventStore } from "./handlers/registered_event_store";
 import { SelectHandler } from "./handlers/select_handler";
 import { Grid } from "./grid/grid";
 import { Token } from "./token/token";
 import { EmptyTokenData } from "./token/empty_token_data";
-import { BaseEntity } from "./entity/base_entity";
-import { TypedJson } from "./interfaces/messagable";
+import { IMessagable, TypedJson, UId } from "./interfaces/messagable";
+import newUId from "./utils/uuid_generator";
 
 export type SceneAttributes = {
     gridUid: string;
@@ -22,7 +21,7 @@ export type SceneOptions = {
     grid?: Grid;
 };
 
-export class Scene extends BaseEntity<SceneAttributes> {
+export class Scene implements IMessagable<SceneAttributes> {
     public readonly name: string;
     protected _viewport: Viewport;
     protected _grid: Grid;
@@ -32,12 +31,16 @@ export class Scene extends BaseEntity<SceneAttributes> {
     protected _eventStore: EventStore;
     protected _selectHandler: SelectHandler;
 
+    private _uid: UId;
+    protected _dependants: UniqueCollection<IMessagable> =
+        new UniqueCollection();
+
     public constructor(options: SceneOptions) {
-        super();
+        this._uid = newUId();
         this.name = options.name;
         this._grid = options.grid ?? new Grid();
 
-        const gridSize = this._grid.container.size;
+        const gridSize = this._grid.size;
 
         function getWorldSize() {
             return Math.round(
@@ -74,7 +77,7 @@ export class Scene extends BaseEntity<SceneAttributes> {
                 underflow: "center",
             });
 
-        this._viewport.addChild(this._grid.container);
+        this._viewport.addChild(this._grid);
         this._viewport.pause = true;
 
         this._eventStore = new EventStore(this);
@@ -147,13 +150,15 @@ export class Scene extends BaseEntity<SceneAttributes> {
         width = undefined,
         height = undefined,
     }): void {
-        const sprite = new SpriteExtension(
+        const token = new Token(
             this.grid,
+            this,
+            new EmptyTokenData(),
             {
                 texture: texture ?? Texture.WHITE,
                 tint: tint,
-                width: width ?? this._grid.container.cellSize * 3,
-                height: height ?? this._grid.container.cellSize * 3,
+                width: width ?? this._grid.cellSize * 3,
+                height: height ?? this._grid.cellSize * 3,
                 alpha: 0.5,
             },
             {
@@ -167,17 +172,35 @@ export class Scene extends BaseEntity<SceneAttributes> {
             },
         );
 
-        const token = new Token(sprite, this, new EmptyTokenData());
-
         GBoard.entityRegistry.entities.add(token);
-        GBoard.entityRegistry.entities.add(token.container);
 
         // WARN: Order matters, try changing so any order is valid
         this._selectHandler.registerSelect(token);
         this._dragHandler.registerDrag(token);
 
         this._tokens.add(token);
-        this._viewport.addChild(token.container);
+        this._viewport.addChild(token);
+    }
+
+    public getKind(): string {
+        return this.constructor.name;
+    }
+
+    public getUId(): UId {
+        return this._uid;
+    }
+
+    public setUId(uid: UId): void {
+        this._uid = uid;
+    }
+
+    public toJSON(): TypedJson<SceneAttributes> {
+        return {
+            ...this.getAttributes(),
+            kind: this.getKind(),
+            uid: this.getUId(),
+            timestamp: Date.now(),
+        };
     }
 
     public getAttributes(): SceneAttributes {
@@ -187,14 +210,19 @@ export class Scene extends BaseEntity<SceneAttributes> {
         };
     }
 
-    public applyUpdateAction(changes: TypedJson<SceneAttributes>): void {
-        super.applyUpdateAction(changes);
-    }
+    public applyUpdateAction(_changes: TypedJson<SceneAttributes>): void {}
 
     public deleteAction(): void {
         this._dependants.items.forEach((entity) => {
             entity.deleteAction();
         });
-        GBoard.websocket.socket.emit("delete", this);
+    }
+
+    public addDependant(entity: IMessagable): void {
+        this._dependants.add(entity);
+    }
+
+    public static getKindStatic(): string {
+        return this.name;
     }
 }
