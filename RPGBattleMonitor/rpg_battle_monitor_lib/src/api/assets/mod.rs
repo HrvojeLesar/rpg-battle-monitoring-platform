@@ -1,10 +1,4 @@
-use crate::{
-    api::assets::{
-        serve::{serve_file, thumbnails},
-        upload::upload,
-    },
-    webserver::router::app_state::AppStateTrait,
-};
+use crate::webserver::router::app_state::AppStateTrait;
 use axum::{extract::DefaultBodyLimit, routing};
 use tower_http::limit::RequestBodyLimitLayer;
 
@@ -46,15 +40,18 @@ pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
             "/assets/upload",
             #[cfg(debug_assertions)]
             {
-                routing::post(upload).get(upload::upload_form)
+                routing::post(upload::upload).get(upload::upload_form)
             },
             #[cfg(not(debug_assertions))]
             {
-                routing::post(upload)
+                routing::post(upload::upload)
             },
         )
-        .route("/assets/thumbnails/{image_id}", routing::get(thumbnails))
-        .route("/assets/{filename}", routing::get(serve_file))
+        .route(
+            "/assets/thumbnails/{image_id}",
+            routing::get(serve::thumbnails),
+        )
+        .route("/assets/{filename}", routing::get(serve::serve_file))
         .layer(DefaultBodyLimit::disable())
         .layer(RequestBodyLimitLayer::new(FILE_SIZE_LIMIT))
         .with_state(state.clone())
