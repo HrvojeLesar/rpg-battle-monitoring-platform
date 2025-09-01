@@ -16,6 +16,10 @@ import { EntityRegistry } from "./registry/entity_registry";
 
 export type GameBoard = Board;
 
+export type BoardInitOptions = {
+    gameId: number;
+};
+
 class Board {
     public scenes: Scene[];
 
@@ -131,6 +135,7 @@ var GEventEmitter = new BoardEventEmitter();
 var boardApplication: Board = new Board(GEventEmitter);
 
 export async function init(
+    boardInitOptions: BoardInitOptions,
     options?: Partial<ApplicationOptions>,
     socket?: Websocket,
 ): Promise<Application> {
@@ -147,7 +152,9 @@ export async function init(
         boardApplication.addScene(scene);
         boardApplication.changeScene(scene);
 
-        boardApplication.websocket = Websocket.createDefaultSocket();
+        boardApplication.websocket = Websocket.createDefaultSocket(
+            boardInitOptions.gameId,
+        );
         initWebsocketListeners();
     }
 

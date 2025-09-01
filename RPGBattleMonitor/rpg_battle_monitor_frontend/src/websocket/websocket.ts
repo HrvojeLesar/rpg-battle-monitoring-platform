@@ -58,12 +58,12 @@ export class Websocket {
         }
     }
 
-    public static createDefaultSocket(): Websocket {
+    public static createDefaultSocket(gameId: number): Websocket {
         return new Websocket("ws://localhost:3000", {
             path: "/api/socket.io",
             auth: {
                 userToken: "some-session-token",
-                game: 0,
+                game: gameId,
             },
         });
     }

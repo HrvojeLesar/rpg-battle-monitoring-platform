@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Scene } from "../board_core/scene";
-import { GBoard } from "../board_core/board";
 import { StoreState } from "./state_store";
+import { GBoard } from "../../board_core/board";
+import { Scene } from "../../board_core/scene";
 
 function loadSceneNames(): string[] {
     const scenes = GBoard.getScenes().map((scene) => scene.name);

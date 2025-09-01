@@ -7,12 +7,12 @@ import {
     getScene,
     getScenes,
     sceneReducer,
-} from "../board_react_wrapper/board_store";
+} from "../board_react_wrapper/stores/board_store";
 import { ButtonColorType } from "antd/es/button";
 import {
     useStoreDispatch,
     useStoreSelector,
-} from "../board_react_wrapper/state_store";
+} from "../board_react_wrapper/stores/state_store";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -100,10 +100,15 @@ export const PixiApplication = (props: PixiApplicationProps) => {
 
             if (applicationInitCallback !== undefined) {
                 dispatch(sceneReducer.actions.clearScenes());
-                application = await applicationInitCallback({
-                    ...options,
-                    canvas: canvas as HTMLCanvasElement,
-                });
+                application = await applicationInitCallback(
+                    {
+                        gameId: 0,
+                    },
+                    {
+                        ...options,
+                        canvas: canvas as HTMLCanvasElement,
+                    },
+                );
             }
 
             canvas?.addEventListener("wheel", (event) => {
