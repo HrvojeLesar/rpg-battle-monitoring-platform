@@ -17,7 +17,8 @@ pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
 
     let router = router
         .merge(websockets::get_router(state.clone()))
-        .merge(assets::get_router(state))
+        .merge(assets::get_router(state.clone()))
+        .merge(game::get_router(state.clone()))
         .layer(CorsLayer::permissive());
 
     axum::Router::new().nest("/api", router)
