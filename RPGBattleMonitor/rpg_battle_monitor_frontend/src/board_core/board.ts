@@ -130,15 +130,16 @@ class Board {
     }
 }
 
-var GEventEmitter = new BoardEventEmitter();
+const GEventEmitter = new BoardEventEmitter();
 
-var boardApplication: Board = new Board(GEventEmitter);
+let boardApplication: Board = new Board(GEventEmitter);
 
 export async function init(
     boardInitOptions: BoardInitOptions,
     options?: Partial<ApplicationOptions>,
     socket?: Websocket,
 ): Promise<Application> {
+    GEventEmitter.emit("board-init-started");
     const application = new Application();
 
     await application.init(options);
@@ -147,10 +148,6 @@ export async function init(
 
     if (isDev()) {
         globalThis.__PIXI_APP__ = application;
-
-        const scene = new Scene({ name: "init-scene" });
-        boardApplication.addScene(scene);
-        boardApplication.changeScene(scene);
 
         boardApplication.websocket = Websocket.createDefaultSocket(
             boardInitOptions.gameId,
@@ -174,6 +171,8 @@ export async function init(
     boardApplication.websocket.initJoin();
 
     console.log("Finished board init");
+
+    GEventEmitter.emit("board-init-finished");
     return boardApplication.getApplication();
 }
 
@@ -189,7 +188,7 @@ export function destroy(
         boardApplication.websocket.socket.disconnect();
     } catch (error) {}
 
-    GEventEmitter.removeAllListeners();
+    GEventEmitter.emit("board-destoryed");
     boardApplication = new Board(GEventEmitter);
 }
 

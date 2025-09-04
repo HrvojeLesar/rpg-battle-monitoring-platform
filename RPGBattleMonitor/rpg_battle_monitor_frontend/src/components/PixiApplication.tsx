@@ -39,6 +39,8 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         applicationInitCallback,
     } = props;
 
+    console.log("pixi app rendered");
+
     const applicationRef = useRef<Application | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(canvas ?? null);
     const initPromiseRef = useRef<Promise<Application | null> | null>(null);
@@ -53,7 +55,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
             return;
         }
         if (resizeTo === undefined) {
-            // @ts-expect-error
+            // @ts-expect-error resetting resizeto back to an empty value
             application.resizeTo = undefined;
             return;
         }
@@ -99,7 +101,6 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                 applicationOptions ?? defaultOptions({ resizeTo: resize });
 
             if (applicationInitCallback !== undefined) {
-                dispatch(sceneReducer.actions.clearScenes());
                 application = await applicationInitCallback(
                     {
                         gameId: 0,
@@ -116,8 +117,6 @@ export const PixiApplication = (props: PixiApplicationProps) => {
             });
 
             applicationRef.current = application;
-
-            dispatch(sceneReducer.actions.refreshScenes());
 
             return application;
         }
@@ -136,7 +135,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                 destroy();
             });
         };
-    }, []);
+    }, [applicationInitCallback, applicationOptions, resizeTo]);
 
     const buttonColour = (sceneName: string): Maybe<ButtonColorType> => {
         if (sceneName === currentScene) {

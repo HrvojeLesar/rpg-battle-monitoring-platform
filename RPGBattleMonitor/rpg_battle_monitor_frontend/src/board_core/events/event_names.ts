@@ -1,7 +1,9 @@
 export type EventNames = {
-    "resize-finished": () => void;
+    "board-init-started": () => void;
+    "board-init-finished": () => void;
+    "board-destoryed": () => void;
 };
 
 export type EventEmitterTypes = {
-    [K in keyof EventNames]: [event: EventNames[K]];
+    [K in keyof EventNames]: Parameters<EventNames[K]>;
 };

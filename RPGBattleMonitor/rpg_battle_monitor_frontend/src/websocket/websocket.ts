@@ -102,8 +102,6 @@ export class Websocket {
         const joinFinished = () => {
             this.joined = true;
             this.socket.off("join", join);
-
-            console.log(GBoard.entityRegistry.sortedEntities);
         };
 
         this.socket.once("join-finished", joinFinished);
