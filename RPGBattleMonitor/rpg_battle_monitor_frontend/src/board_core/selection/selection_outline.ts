@@ -159,6 +159,10 @@ class ResizeControls extends Container {
             return;
         }
 
+        if (!GBoard.scene) {
+            return;
+        }
+
         const outlineContainerLocalPos = this._outlineContainer
             .toLocal(GBoard.viewport)
             .multiply(NEGATIVE_POINT);
