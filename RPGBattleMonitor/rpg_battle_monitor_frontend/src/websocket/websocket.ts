@@ -1,5 +1,5 @@
 import { io, ManagerOptions, Socket, SocketOptions } from "socket.io-client";
-import { GBoard } from "../board_core/board";
+import { GBoard, GEventEmitter } from "../board_core/board";
 import { IMessagable, TypedJson } from "../board_core/interfaces/messagable";
 
 export type JoinData = {
@@ -77,6 +77,7 @@ export class Websocket {
     }
 
     public flush() {
+        // TODO: add queueing if websocket has not finished joining yet
         for (const [key, value] of Object.entries(WebsocketQueues)) {
             const queue = this.queues[key as keyof QueueMap];
             if (queue.length > 0) {
@@ -87,21 +88,17 @@ export class Websocket {
     }
 
     public initJoin() {
+        GEventEmitter.emit("socket-join-started");
         const join = (joinData: JoinData) => {
-            for (const entityData of joinData.data) {
-                const entity =
-                    GBoard.entityRegistry.registeredEntityKinds.tryConvert(
-                        entityData,
-                    );
-                if (entity !== undefined) {
-                    GBoard.entityRegistry.entities.add(entity);
-                }
-            }
+            GEventEmitter.emit("socket-join", joinData);
+            GBoard.entityRegistry.queue(joinData.data);
         };
 
         const joinFinished = () => {
             this.joined = true;
             this.socket.off("join", join);
+            GBoard.entityRegistry.convertQueuedEntities();
+            GEventEmitter.emit("socket-join-finished");
         };
 
         this.socket.once("join-finished", joinFinished);

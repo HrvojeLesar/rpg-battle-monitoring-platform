@@ -177,7 +177,7 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
     public deleteAction(): void {}
 
     public addDependant(entity: IMessagable): void {
-        this.addDependant(entity);
+        this._dependants.add(entity);
     }
 
     public static getKindStatic(): string {

@@ -26,6 +26,11 @@ export const boardEventMiddleware: Middleware<object, StoreState> = (store) => {
         handleBoardDestoryedEvent(store);
     });
 
+    GEventEmitter.on("socket-join-finished", () => {
+        console.log("test");
+        socketJoinFinished(store);
+    });
+
     return (next) => (action) => next(action);
 };
 
@@ -39,4 +44,8 @@ const handleBoardInitFinishedEvent = (store: StoreStateDispatch) => {
 
 const handleBoardDestoryedEvent = (store: StoreStateDispatch) => {
     store.dispatch(sceneReducer.actions.clearScenes());
+};
+
+const socketJoinFinished = (store: StoreStateDispatch) => {
+    store.dispatch(sceneReducer.actions.refreshScenes());
 };

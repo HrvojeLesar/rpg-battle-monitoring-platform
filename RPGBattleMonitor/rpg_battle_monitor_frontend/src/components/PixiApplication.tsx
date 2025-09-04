@@ -13,6 +13,7 @@ import {
     useStoreDispatch,
     useStoreSelector,
 } from "../board_react_wrapper/stores/state_store";
+import { getGameId } from "../board_react_wrapper/stores/game_store";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -48,6 +49,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
     const scenes = useStoreSelector(getScenes);
     const currentScene = useStoreSelector(getScene);
     const dispatch = useStoreDispatch();
+    const gameId = useStoreSelector(getGameId);
 
     useEffect(() => {
         const application = applicationRef.current;
@@ -103,7 +105,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
             if (applicationInitCallback !== undefined) {
                 application = await applicationInitCallback(
                     {
-                        gameId: 0,
+                        gameId: gameId ?? 0,
                     },
                     {
                         ...options,
@@ -135,7 +137,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                 destroy();
             });
         };
-    }, [applicationInitCallback, applicationOptions, resizeTo]);
+    }, [applicationInitCallback, applicationOptions, resizeTo, gameId]);
 
     const buttonColour = (sceneName: string): Maybe<ButtonColorType> => {
         if (sceneName === currentScene) {

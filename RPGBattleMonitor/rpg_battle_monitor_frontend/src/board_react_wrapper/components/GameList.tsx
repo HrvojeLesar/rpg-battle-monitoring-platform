@@ -2,7 +2,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { QueryKeys } from "../requests/query_keys";
 import { createGame, fetchGames } from "../requests/games";
 import { queryClient } from "../../App";
-import { Button } from "antd";
+import { Button, Flex } from "antd";
+import { useNavigate } from "@tanstack/react-router";
+import { useDispatch } from "react-redux";
+import { gameReducer } from "../stores/game_store";
+import { BOARD_ROUTE_PATH } from "../routes/board";
 
 export const GameList = () => {
     const gameList = useQuery({
@@ -17,6 +21,9 @@ export const GameList = () => {
         },
     });
 
+    const navigate = useNavigate({});
+    const dispatch = useDispatch();
+
     if (gameList.isPending) {
         return <div>Loading...</div>;
     }
@@ -28,15 +35,29 @@ export const GameList = () => {
     }
 
     return (
-        <>
-            <div>
-                {gameList.data.map((game, idx) => {
-                    return <div key={idx}>{game.name}</div>;
-                })}
-            </div>
+        <Flex gap="middle" vertical>
             <Button onClick={() => createGameMutation.mutate()}>
                 Create Game
             </Button>
-        </>
+            <div>
+                <Flex gap="middle" vertical>
+                    {gameList.data.map((game, idx) => {
+                        return (
+                            <Button
+                                key={idx}
+                                onClick={() => {
+                                    dispatch(
+                                        gameReducer.actions.setGameId(game.id),
+                                    );
+                                    navigate({ to: BOARD_ROUTE_PATH });
+                                }}
+                            >
+                                {game.name} - {game.id}
+                            </Button>
+                        );
+                    })}
+                </Flex>
+            </div>
+        </Flex>
     );
 };

@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { StoreState } from "./state_store";
 import { GBoard } from "../../board_core/board";
-import { Scene } from "../../board_core/scene";
+import { SceneFactory } from "../../board_core/factories/scene_factory";
 
 function loadSceneNames(): string[] {
     const scenes = GBoard.getScenes().map((scene) => scene.name);
@@ -18,7 +18,8 @@ export const sceneReducer = createSlice({
     reducers: {
         addScene: (state, action: PayloadAction<string>) => {
             const name = action.payload;
-            const scene = new Scene({ name });
+            const scene = SceneFactory.createScene({ name });
+
             GBoard.addScene(scene);
 
             state.scenes.push(name);
@@ -36,9 +37,10 @@ export const sceneReducer = createSlice({
             state.currentScene = null;
         },
         refreshScenes: (state) => {
+            const currentScene = GBoard.scene;
             state.scenes = GBoard.getScenes().map((scene) => scene.name);
-            if (state.currentScene === null && state.scenes.length > 0) {
-                state.currentScene = state.scenes[0];
+            if (state.currentScene === null && currentScene) {
+                state.currentScene = currentScene.name;
             }
         },
     },

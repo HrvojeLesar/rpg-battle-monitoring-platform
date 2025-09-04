@@ -5,8 +5,20 @@ type GameReducerState = {
     gameId: Option<number>;
 };
 
+const fetchGameIdFromLocalStorage = () => {
+    const gameId = localStorage.getItem("gameId")
+        ? Number(localStorage.getItem("gameId"))
+        : undefined;
+
+    if (gameId === undefined || isNaN(gameId) || !isFinite(gameId)) {
+        return undefined;
+    }
+
+    return gameId;
+};
+
 const initialState: GameReducerState = {
-    gameId: undefined,
+    gameId: fetchGameIdFromLocalStorage(),
 };
 
 export const gameReducer = createSlice({
@@ -14,6 +26,7 @@ export const gameReducer = createSlice({
     initialState,
     reducers: {
         setGameId: (state, action: PayloadAction<Option<number>>) => {
+            localStorage.setItem("gameId", String(action.payload));
             state.gameId = action.payload;
         },
     },

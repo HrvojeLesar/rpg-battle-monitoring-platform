@@ -108,6 +108,7 @@ export class EntityRegistry {
     protected _registeredEntityKinds: RegisteredEntityKinds =
         new RegisteredEntityKinds();
     protected tokenConverter: TokenConverter = new TokenConverter();
+    protected _queuedEntities: TypedJson[] = [];
 
     public constructor() {}
 
@@ -119,22 +120,45 @@ export class EntityRegistry {
         return this._registeredEntityKinds;
     }
 
-    public get sortedEntities(): IMessagable[] {
-        const entities = this._entities.list();
+    public get getSortedQueuedEntities(): TypedJson[] {
+        const entities = [...this._queuedEntities];
 
         entities.sort((a, b) => {
             const aPriority =
-                this._registeredEntityKinds.getPriority(a.getKind()) ??
+                this._registeredEntityKinds.getPriority(a.kind) ??
                 Number.MAX_SAFE_INTEGER;
 
             const bPriority =
-                this._registeredEntityKinds.getPriority(b.getKind()) ??
+                this._registeredEntityKinds.getPriority(b.kind) ??
                 Number.MAX_SAFE_INTEGER;
 
             return aPriority - bPriority;
         });
 
         return entities;
+    }
+
+    public convertQueuedEntities(): void {
+        const entities = this.getSortedQueuedEntities;
+        for (const entityData of entities) {
+            const entity = this._registeredEntityKinds.tryConvert(entityData);
+            if (entity !== undefined) {
+                this._entities.add(entity);
+            }
+        }
+
+        this._queuedEntities = [];
+    }
+
+    public queue(entityData: TypedJson[]): void;
+    public queue(entityData: TypedJson | TypedJson[]): void {
+        if (Array.isArray(entityData)) {
+            for (const entity of entityData) {
+                this._queuedEntities.push(entity);
+            }
+        } else {
+            this._queuedEntities.push(entityData);
+        }
     }
 
     public static defaultEntityRegistry(): EntityRegistry {

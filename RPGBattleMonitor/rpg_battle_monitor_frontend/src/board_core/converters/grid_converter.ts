@@ -14,6 +14,9 @@ export class GridConverter {
             return existingEntity;
         }
 
-        return new Grid(attributes);
+        const grid = new Grid(attributes);
+        grid.applyUpdateAction(attributes);
+
+        return grid;
     }
 }

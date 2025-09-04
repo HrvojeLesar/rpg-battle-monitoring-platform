@@ -39,6 +39,7 @@ export class Scene implements IMessagable<SceneAttributes> {
         this._uid = newUId();
         this.name = options.name;
         this._grid = options.grid ?? new Grid();
+        this.grid.addDependant(this);
 
         const gridSize = this._grid.size;
 

@@ -27,7 +27,6 @@ struct JoinedFlag;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
-#[serde(untagged)]
 pub enum Action {
     Update,
     Create,
@@ -51,7 +50,7 @@ const ACTION: &str = "action";
 const JOIN_EVENT: &str = "join";
 const JOIN_FINISHED_EVENT: &str = "join-finished";
 
-async fn update_handler<T: AppStateTrait>(
+async fn entity_handler<T: AppStateTrait>(
     data: ActionMessage,
     app_state: T,
     auth: WebsocketAuthMessage,
@@ -87,9 +86,9 @@ async fn action_handler<T: AppStateTrait>(
     socket.to(rooms).emit(ACTION, &data).await.ok();
 
     match data.action {
-        Action::Update => update_handler(data, app_state, auth).await,
-        Action::Create => unimplemented!("Implement create action"),
-        Action::Delete => unimplemented!("Implement delete action"),
+        Action::Update | Action::Create | Action::Delete => {
+            entity_handler(data, app_state, auth).await
+        }
         Action::Other(_) => tracing::warn!("Received unknown action: {:?}", data.action),
     }
 }
