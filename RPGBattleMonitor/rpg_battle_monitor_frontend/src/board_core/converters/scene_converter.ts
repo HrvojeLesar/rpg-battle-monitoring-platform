@@ -22,6 +22,8 @@ export class SceneConverter {
 
         if (grid instanceof Grid) {
             const entity = new Scene({ name: attributes.name, grid: grid });
+            entity.applyUpdateAction(attributes);
+
             GBoard.addScene(entity);
 
             return entity;

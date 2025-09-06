@@ -69,7 +69,9 @@ export class SpriteExtension extends ContainerExtension<
             ...super.getAttributes(),
             alpha: this.displayedEntity.alpha,
             tint: this.displayedEntity.tint,
-            spriteTexture: TextureConverter.fromTexture(this.displayedEntity.texture),
+            spriteTexture: TextureConverter.fromTexture(
+                this.displayedEntity.texture,
+            ),
         };
     }
 

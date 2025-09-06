@@ -149,7 +149,9 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                 <canvas ref={canvasRef} className={canvasClass} />
                 <Button
                     onClick={() => {
-                        addScene(`test-scene${scenes.length + 1}`);
+                        addScene({
+                            name: `test-scene${scenes.length + 1}`,
+                        });
                     }}
                 >
                     Add scene

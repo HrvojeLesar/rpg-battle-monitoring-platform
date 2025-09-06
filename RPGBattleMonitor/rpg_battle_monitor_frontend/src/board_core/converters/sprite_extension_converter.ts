@@ -27,6 +27,7 @@ export class SpriteExtensionConverter {
 
         if (grid instanceof Grid) {
             const entity = new SpriteExtension(grid, attributes, attributes);
+            entity.applyUpdateAction(attributes);
 
             return entity;
         }

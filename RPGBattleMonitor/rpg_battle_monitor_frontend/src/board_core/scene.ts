@@ -20,12 +20,14 @@ import { isDev } from "../utils/dev_mode";
 export type SceneAttributes = {
     gridUid: string;
     name: string;
+    sortPosition: Maybe<number>;
 };
 
 export type SceneOptions = {
     name: string;
     grid?: Grid;
     gridOptions?: GridOptions;
+    sortPosition?: number;
 };
 
 export class Scene implements IMessagable<SceneAttributes> {
@@ -44,11 +46,15 @@ export class Scene implements IMessagable<SceneAttributes> {
     protected _dependants: UniqueCollection<IMessagable> =
         new UniqueCollection();
 
+    protected _sortPosition: Maybe<number>;
+
     public constructor(options: SceneOptions) {
         this._uid = newUId();
         this.name = options.name;
         this._grid = options.grid ?? new Grid(options.gridOptions);
         this.grid.addDependant(this);
+
+        this._sortPosition = options.sortPosition;
 
         const gridSize = this._grid.size;
 
@@ -233,10 +239,12 @@ export class Scene implements IMessagable<SceneAttributes> {
         return {
             gridUid: this._grid.getUId(),
             name: this.name,
+            sortPosition: this._sortPosition,
         };
     }
 
     public applyUpdateAction(changes: TypedJson<SceneAttributes>): void {
+        this._uid = changes.uid;
         this._sortPosition = changes.sortPosition;
         this.name = changes.name;
     }

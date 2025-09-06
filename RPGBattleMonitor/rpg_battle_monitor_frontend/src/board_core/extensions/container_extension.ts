@@ -17,7 +17,12 @@ import { IGridMove } from "../interfaces/grid_move";
 import { GridCell, GridCellPosition } from "../grid/cell";
 import { Grid } from "../grid/grid";
 import { IClampPositionToViewport } from "../interfaces/clamp_position_to_viewport";
-import { IMessagable, shouldApplyChanges, TypedJson, UId } from "../interfaces/messagable";
+import {
+    IMessagable,
+    shouldApplyChanges,
+    TypedJson,
+    UId,
+} from "../interfaces/messagable";
 import newUId from "../utils/uuid_generator";
 import { ContainerEventTypes } from "../events/container_extensions_events";
 
