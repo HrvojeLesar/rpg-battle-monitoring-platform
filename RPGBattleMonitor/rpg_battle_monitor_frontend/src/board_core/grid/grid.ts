@@ -3,7 +3,7 @@ import { IMessagable, TypedJson, UId } from "../interfaces/messagable";
 import { UniqueCollection } from "../utils/unique_collection";
 import newUId from "../utils/uuid_generator";
 
-type GridOptions = {
+export type GridOptions = {
     hover?: boolean;
     cellSize?: number;
     gridSize?: GridSize;
@@ -25,10 +25,10 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
     protected hoveredCell: Graphics;
     public hover: boolean = true;
 
-    protected _cellSize: number = 100;
+    protected _cellSize: number = 200;
     protected _size: GridSize = {
-        width: 3000,
-        height: 1000,
+        width: 6000,
+        height: 6000,
     };
 
     private _uid: UId;

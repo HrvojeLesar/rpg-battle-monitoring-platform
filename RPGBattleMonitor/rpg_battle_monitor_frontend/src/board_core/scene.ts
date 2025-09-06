@@ -1,15 +1,16 @@
 import { Viewport } from "pixi-viewport";
 import { GBoard } from "./board";
 import { UniqueCollection } from "./utils/unique_collection";
-import { Assets, Texture } from "pixi.js";
+import { Graphics, Texture } from "pixi.js";
 import { DragHandler } from "./handlers/drag_handler";
 import { EventStore } from "./handlers/registered_event_store";
 import { SelectHandler } from "./handlers/select_handler";
-import { Grid } from "./grid/grid";
+import { Grid, GridOptions } from "./grid/grid";
 import { Token } from "./token/token";
 import { EmptyTokenData } from "./token/empty_token_data";
 import { IMessagable, TypedJson, UId } from "./interfaces/messagable";
 import newUId from "./utils/uuid_generator";
+import { isDev } from "../utils/dev_mode";
 
 export type SceneAttributes = {
     gridUid: string;
@@ -19,6 +20,7 @@ export type SceneAttributes = {
 export type SceneOptions = {
     name: string;
     grid?: Grid;
+    gridOptions?: GridOptions;
 };
 
 export class Scene implements IMessagable<SceneAttributes> {
@@ -38,17 +40,13 @@ export class Scene implements IMessagable<SceneAttributes> {
     public constructor(options: SceneOptions) {
         this._uid = newUId();
         this.name = options.name;
-        this._grid = options.grid ?? new Grid();
+        this._grid = options.grid ?? new Grid(options.gridOptions);
         this.grid.addDependant(this);
 
         const gridSize = this._grid.size;
 
         function getWorldSize() {
-            return Math.round(
-                // TODO: make sure grid is in the center of viewport and create viewport 4 times larger than grid
-                // Math.max(gridSize.width, gridSize.height, Viewport.WORLD_SIZE),
-                Math.max(gridSize.width, gridSize.height),
-            );
+            return Math.round(Math.max(gridSize.width, gridSize.height) * 4);
         }
 
         const worldSize = getWorldSize();
@@ -77,6 +75,26 @@ export class Scene implements IMessagable<SceneAttributes> {
                 direction: "all",
                 underflow: "center",
             });
+
+        this._viewport.moveCenter(worldSize / 2, worldSize / 2);
+
+        this._grid.position.set(
+            worldSize / 2 - this._grid.width / 2,
+            worldSize / 2 - this._grid.height / 2,
+        );
+
+        if (isDev()) {
+            const viewportOutline = new Graphics();
+            viewportOutline
+                .rect(
+                    0,
+                    0,
+                    this._viewport.worldWidth,
+                    this._viewport.worldHeight,
+                )
+                .stroke({ color: "red", width: 25 });
+            this._viewport.addChild(viewportOutline);
+        }
 
         this._viewport.addChild(this._grid);
         this._viewport.pause = true;
