@@ -8,17 +8,42 @@ pub mod taggroups;
 
 #[derive(OpenApi)]
 #[openapi(
-    info(description = "My Api description"),
     modifiers(&ApiDocMod),
     nest(
-        (path = "/api", api = crate::api::assets::ApiDoc, tags = [])
+        (path = "/api", api = crate::api::assets::ApiDoc, tags = []),
+        (path = "/api", api = self::ApiDoc, tags = []),
+        (path = "/public", api = crate::webserver::router::public_files_router::ApiDoc, tags = [])
     )
 )]
 pub struct ApiDocRoot;
 
+#[derive(OpenApi)]
+#[openapi(
+    modifiers(&ModifyDoc),
+    paths(get_api_doc_router),
+    tags((
+        name = "Docs",
+    ))
+)]
+pub struct ApiDoc;
+
+struct ModifyDoc;
+impl Modify for ModifyDoc {
+    fn modify(&self, _openapi: &mut utoipa::openapi::OpenApi) {
+        use std::collections::HashSet;
+
+        use crate::api::doc::taggroups::tag_groups_config;
+
+        tag_groups_config().add(
+            "Documentation".to_string(),
+            HashSet::from(["Docs".to_string()]),
+        );
+    }
+}
+
 #[utoipa::path(
     get,
-    path = "/api/docs", 
+    path = "/docs", 
     responses(
         (status = 200, description = "Api Documentation Page")
     )

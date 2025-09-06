@@ -13,11 +13,11 @@ use utoipa::{Modify, OpenApi};
 #[cfg(feature = "api_doc")]
 #[derive(OpenApi)]
 #[openapi(info(description = "Assets API"), 
-modifiers(&ModifyDoc),
-nest(
-    (path = "/assets", api = upload::ApiDoc, tags = ["Upload"]),
-    (path = "/assets", api = serve::ApiDoc, tags = ["Serve"])
-))]
+    modifiers(&ModifyDoc),
+    nest(
+        (path = "/assets", api = upload::ApiDoc, tags = ["Upload"]),
+        (path = "/assets", api = serve::ApiDoc, tags = ["Serve"])
+    ))]
 pub struct ApiDoc;
 
 #[cfg(feature = "api_doc")]
@@ -57,7 +57,6 @@ pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
         .with_state(state.clone())
 }
 
-#[allow(dead_code)]
 pub(super) fn gen_partial_asset_url(filename: &str) -> String {
     format!("/api/assets/{filename}")
 }
