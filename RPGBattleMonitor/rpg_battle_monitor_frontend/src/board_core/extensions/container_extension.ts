@@ -17,7 +17,7 @@ import { IGridMove } from "../interfaces/grid_move";
 import { GridCell, GridCellPosition } from "../grid/cell";
 import { Grid } from "../grid/grid";
 import { IClampPositionToViewport } from "../interfaces/clamp_position_to_viewport";
-import { IMessagable, TypedJson, UId } from "../interfaces/messagable";
+import { IMessagable, shouldApplyChanges, TypedJson, UId } from "../interfaces/messagable";
 import newUId from "../utils/uuid_generator";
 import { ContainerEventTypes } from "../events/container_extensions_events";
 
@@ -82,6 +82,7 @@ export abstract class ContainerExtension<
     protected _dependants: UniqueCollection<IMessagable> =
         new UniqueCollection();
     private _eventEmitter = new EventEmitter<ContainerEventTypes>();
+    protected _lastChangesTimestamp: Maybe<number> = undefined;
 
     public constructor(grid: Grid, options?: ContainerExtensionOptions) {
         super(options);
@@ -478,5 +479,13 @@ export abstract class ContainerExtension<
 
     public get eventEmitter(): EventEmitter<ContainerEventTypes> {
         return this._eventEmitter;
+    }
+
+    public getLastChangesTimestamp(): Maybe<number> {
+        return this._lastChangesTimestamp;
+    }
+
+    public shouldApplyChanges(changes: TypedJson<Attributes>): boolean {
+        return shouldApplyChanges(this, changes);
     }
 }

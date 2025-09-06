@@ -12,7 +12,7 @@ import { TextureConverter } from "../converters/texture_converter";
 export type SpriteExtensionAttributes = {
     alpha: number;
     tint: ColorSource;
-    texture: string;
+    spriteTexture: string;
 } & ContainerExtensionAttributes;
 
 export class SpriteExtension extends ContainerExtension<
@@ -69,7 +69,7 @@ export class SpriteExtension extends ContainerExtension<
             ...super.getAttributes(),
             alpha: this.displayedEntity.alpha,
             tint: this.displayedEntity.tint,
-            texture: TextureConverter.fromTexture(this.displayedEntity.texture),
+            spriteTexture: TextureConverter.fromTexture(this.displayedEntity.texture),
         };
     }
 
@@ -79,7 +79,7 @@ export class SpriteExtension extends ContainerExtension<
         super.applyUpdateAction(changes);
         if (this.displayedEntity) {
             const texture = TextureConverter.toTexture(
-                changes.texture,
+                changes.spriteTexture,
                 this.displayedEntity,
             );
             this.displayedEntity.alpha = changes.alpha;

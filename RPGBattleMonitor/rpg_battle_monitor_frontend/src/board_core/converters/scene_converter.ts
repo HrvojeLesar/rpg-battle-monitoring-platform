@@ -9,7 +9,10 @@ export class SceneConverter {
             attributes.uid,
         );
 
-        if (existingEntity instanceof Scene) {
+        if (
+            existingEntity instanceof Scene &&
+            existingEntity.shouldApplyChanges(attributes)
+        ) {
             existingEntity.applyUpdateAction(attributes);
 
             return existingEntity;

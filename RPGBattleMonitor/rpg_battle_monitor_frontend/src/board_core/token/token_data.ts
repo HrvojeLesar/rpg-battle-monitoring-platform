@@ -1,6 +1,7 @@
 import {
     DefaultAttributes,
     IMessagable,
+    shouldApplyChanges,
     TypedJson,
     UId,
 } from "../interfaces/messagable";
@@ -13,6 +14,7 @@ export abstract class TokenDataBase<T = DefaultAttributes>
     protected _uid: UId;
     protected _dependants: UniqueCollection<IMessagable> =
         new UniqueCollection();
+    protected _lastChangesTimestamp: Maybe<number> = undefined;
 
     public constructor() {
         this._uid = newUId();
@@ -60,5 +62,13 @@ export abstract class TokenDataBase<T = DefaultAttributes>
 
     public addDependant(entity: IMessagable): void {
         this._dependants.add(entity);
+    }
+
+    public getLastChangesTimestamp(): Maybe<number> {
+        return this._lastChangesTimestamp;
+    }
+
+    public shouldApplyChanges(changes: TypedJson<T>): boolean {
+        return shouldApplyChanges(this, changes);
     }
 }

@@ -11,7 +11,10 @@ export class TokenConverter {
             attributes.uid,
         );
 
-        if (existingEntity instanceof Token) {
+        if (
+            existingEntity instanceof Token &&
+            existingEntity.shouldApplyChanges(attributes)
+        ) {
             existingEntity.applyUpdateAction(attributes);
 
             return existingEntity;

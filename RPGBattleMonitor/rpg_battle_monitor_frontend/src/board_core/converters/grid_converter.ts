@@ -8,7 +8,10 @@ export class GridConverter {
             attributes.uid,
         );
 
-        if (existingEntity instanceof Grid) {
+        if (
+            existingEntity instanceof Grid &&
+            existingEntity.shouldApplyChanges(attributes)
+        ) {
             existingEntity.applyUpdateAction(attributes);
 
             return existingEntity;

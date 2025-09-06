@@ -8,7 +8,12 @@ import { SelectHandler } from "./handlers/select_handler";
 import { Grid, GridOptions } from "./grid/grid";
 import { Token } from "./token/token";
 import { EmptyTokenData } from "./token/empty_token_data";
-import { IMessagable, TypedJson, UId } from "./interfaces/messagable";
+import {
+    IMessagable,
+    shouldApplyChanges,
+    TypedJson,
+    UId,
+} from "./interfaces/messagable";
 import newUId from "./utils/uuid_generator";
 import { isDev } from "../utils/dev_mode";
 
@@ -24,7 +29,7 @@ export type SceneOptions = {
 };
 
 export class Scene implements IMessagable<SceneAttributes> {
-    public readonly name: string;
+    public name: string;
     protected _viewport: Viewport;
     protected _grid: Grid;
     protected _tokens: UniqueCollection<Token> = new UniqueCollection();
@@ -32,6 +37,8 @@ export class Scene implements IMessagable<SceneAttributes> {
     protected _dragHandler: DragHandler;
     protected _eventStore: EventStore;
     protected _selectHandler: SelectHandler;
+
+    protected _lastChangesTimestamp: Maybe<number> = undefined;
 
     private _uid: UId;
     protected _dependants: UniqueCollection<IMessagable> =
@@ -229,7 +236,10 @@ export class Scene implements IMessagable<SceneAttributes> {
         };
     }
 
-    public applyUpdateAction(_changes: TypedJson<SceneAttributes>): void {}
+    public applyUpdateAction(changes: TypedJson<SceneAttributes>): void {
+        this._sortPosition = changes.sortPosition;
+        this.name = changes.name;
+    }
 
     public deleteAction(): void {
         this._dependants.items.forEach((entity) => {
@@ -243,5 +253,21 @@ export class Scene implements IMessagable<SceneAttributes> {
 
     public static getKindStatic(): string {
         return this.name;
+    }
+
+    public get sortPosition(): Maybe<number> {
+        return this._sortPosition;
+    }
+
+    public set sortPosition(sortPosition: Maybe<number>) {
+        this._sortPosition = sortPosition;
+    }
+
+    public getLastChangesTimestamp(): Maybe<number> {
+        return this._lastChangesTimestamp;
+    }
+
+    public shouldApplyChanges(changes: TypedJson<SceneAttributes>): boolean {
+        return shouldApplyChanges(this, changes);
     }
 }

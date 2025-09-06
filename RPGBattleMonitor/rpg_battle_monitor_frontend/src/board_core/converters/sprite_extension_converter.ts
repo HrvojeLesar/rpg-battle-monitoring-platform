@@ -14,7 +14,10 @@ export class SpriteExtensionConverter {
             attributes.uid,
         );
 
-        if (existingEntity instanceof SpriteExtension) {
+        if (
+            existingEntity instanceof SpriteExtension &&
+            existingEntity.shouldApplyChanges(attributes)
+        ) {
             existingEntity.applyUpdateAction(attributes);
 
             return existingEntity;

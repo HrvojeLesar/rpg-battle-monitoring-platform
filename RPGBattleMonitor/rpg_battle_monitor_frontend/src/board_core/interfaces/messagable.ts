@@ -16,4 +16,18 @@ export interface IMessagable<Attributes = DefaultAttributes> {
     applyUpdateAction(changes: TypedJson<Attributes>): void;
     deleteAction(): void;
     addDependant(entity: IMessagable): void;
+    getLastChangesTimestamp(): Maybe<number>;
+    shouldApplyChanges(changes: TypedJson<Attributes>): boolean;
+}
+
+export function shouldApplyChanges<T>(
+    entity: IMessagable<T>,
+    changes: TypedJson<T>,
+): boolean {
+    const lastChanges = entity.getLastChangesTimestamp();
+    if (lastChanges === undefined || lastChanges <= changes.timestamp) {
+        return true;
+    } else {
+        return false;
+    }
 }

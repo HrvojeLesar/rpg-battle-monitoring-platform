@@ -199,8 +199,7 @@ function initWebsocketListeners() {
                 const entity = boardApplication.entityRegistry.entities.get(
                     data.uid,
                 );
-                // TODO: only apply if timestamp is not behind the current timestamp
-                if (entity) {
+                if (entity && entity.shouldApplyChanges(data)) {
                     entity.applyUpdateAction(data);
                 }
             });

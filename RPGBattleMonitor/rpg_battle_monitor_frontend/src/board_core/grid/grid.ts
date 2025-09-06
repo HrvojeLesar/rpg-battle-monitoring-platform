@@ -1,5 +1,10 @@
 import { Container, Graphics, Point, Sprite, Texture } from "pixi.js";
-import { IMessagable, TypedJson, UId } from "../interfaces/messagable";
+import {
+    IMessagable,
+    shouldApplyChanges,
+    TypedJson,
+    UId,
+} from "../interfaces/messagable";
 import { UniqueCollection } from "../utils/unique_collection";
 import newUId from "../utils/uuid_generator";
 
@@ -24,6 +29,7 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
     protected gridSprite: Container;
     protected hoveredCell: Graphics;
     public hover: boolean = true;
+    protected _lastChangesTimestamp: Maybe<number> = undefined;
 
     protected _cellSize: number = 200;
     protected _size: GridSize = {
@@ -92,13 +98,13 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
             }
         };
 
-        this.onpointerenter = (_event) => {
+        this.onpointerenter = () => {
             if (this.hover) {
                 this.hoveredCell.visible = true;
             }
         };
 
-        this.onpointerleave = (_event) => {
+        this.onpointerleave = () => {
             if (this.hover) {
                 this.hoveredCell.visible = false;
             }
@@ -182,6 +188,14 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
 
     public static getKindStatic(): string {
         return this.name;
+    }
+
+    public getLastChangesTimestamp(): Maybe<number> {
+        return this._lastChangesTimestamp;
+    }
+
+    public shouldApplyChanges(changes: TypedJson<GridAttributes>): boolean {
+        return shouldApplyChanges(this, changes);
     }
 }
 
