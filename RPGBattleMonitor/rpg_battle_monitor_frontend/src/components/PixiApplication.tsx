@@ -3,17 +3,10 @@ import { RefObject, useEffect, useRef } from "react";
 import { type PixiApplicationProps } from "../types/pixi_application_props";
 import { destroy } from "../board_core/board";
 import { Button } from "antd";
-import {
-    getScene,
-    getScenes,
-    sceneReducer,
-} from "../board_react_wrapper/stores/board_store";
 import { ButtonColorType } from "antd/es/button";
-import {
-    useStoreDispatch,
-    useStoreSelector,
-} from "../board_react_wrapper/stores/state_store";
-import { getGameId } from "../board_react_wrapper/stores/game_store";
+import { useAtomValue, useSetAtom } from "jotai";
+import { sceneAtoms } from "../board_react_wrapper/stores/board_store";
+import { gameStore } from "../board_react_wrapper/stores/game_store";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -46,10 +39,13 @@ export const PixiApplication = (props: PixiApplicationProps) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(canvas ?? null);
     const initPromiseRef = useRef<Promise<Application | null> | null>(null);
     const canvasRemoved = useRef(false);
-    const scenes = useStoreSelector(getScenes);
-    const currentScene = useStoreSelector(getScene);
-    const dispatch = useStoreDispatch();
-    const gameId = useStoreSelector(getGameId);
+
+    const scenes = useAtomValue(sceneAtoms.getScenes);
+    const changeScene = useSetAtom(sceneAtoms.changeScene);
+    const currentScene = useAtomValue(sceneAtoms.getCurrentScene);
+    const addScene = useSetAtom(sceneAtoms.addScene);
+
+    const gameId = useAtomValue(gameStore.getGameId);
 
     useEffect(() => {
         const application = applicationRef.current;
@@ -140,7 +136,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
     }, [applicationInitCallback, applicationOptions, resizeTo, gameId]);
 
     const buttonColour = (sceneName: string): Maybe<ButtonColorType> => {
-        if (sceneName === currentScene) {
+        if (sceneName === currentScene?.name) {
             return "primary";
         }
 
@@ -153,29 +149,23 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                 <canvas ref={canvasRef} className={canvasClass} />
                 <Button
                     onClick={() => {
-                        dispatch(
-                            sceneReducer.actions.addScene(
-                                `test-scene${scenes.length + 1}`,
-                            ),
-                        );
+                        addScene(`test-scene${scenes.length + 1}`);
                     }}
                 >
                     Add scene
                 </Button>
-                {scenes.map((sceneName) => {
+                {scenes.map((scene, idx) => {
                     return (
                         <Button
-                            key={sceneName}
-                            color={buttonColour(sceneName)}
+                            key={idx}
+                            color={buttonColour(scene.name)}
                             variant="solid"
                             onClick={() => {
-                                console.log("change scene to", sceneName);
-                                dispatch(
-                                    sceneReducer.actions.changeScene(sceneName),
-                                );
+                                console.log("change scene to", scene);
+                                changeScene(scene);
                             }}
                         >
-                            {sceneName}
+                            {scene.name}
                         </Button>
                     );
                 })}

@@ -187,4 +187,10 @@ export class EntityRegistry {
 
         return registry;
     }
+
+    public createEntity<T extends IMessagable>(entity: T): T {
+        this.entities.add(entity);
+
+        return entity;
+    }
 }

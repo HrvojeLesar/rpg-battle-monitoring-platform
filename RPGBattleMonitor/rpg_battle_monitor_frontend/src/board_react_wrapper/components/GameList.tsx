@@ -4,9 +4,9 @@ import { createGame, fetchGames } from "../requests/games";
 import { queryClient } from "../../App";
 import { Button, Flex } from "antd";
 import { useNavigate } from "@tanstack/react-router";
-import { useDispatch } from "react-redux";
-import { gameReducer } from "../stores/game_store";
 import { BOARD_ROUTE_PATH } from "../routes/board";
+import { useSetAtom } from "jotai";
+import { gameStore } from "../stores/game_store";
 
 export const GameList = () => {
     const gameList = useQuery({
@@ -22,7 +22,8 @@ export const GameList = () => {
     });
 
     const navigate = useNavigate({});
-    const dispatch = useDispatch();
+
+    const setGameId = useSetAtom(gameStore.setGameId);
 
     if (gameList.isPending) {
         return <div>Loading...</div>;
@@ -46,9 +47,7 @@ export const GameList = () => {
                             <Button
                                 key={idx}
                                 onClick={() => {
-                                    dispatch(
-                                        gameReducer.actions.setGameId(game.id),
-                                    );
+                                    setGameId(game.id);
                                     navigate({ to: BOARD_ROUTE_PATH });
                                 }}
                             >

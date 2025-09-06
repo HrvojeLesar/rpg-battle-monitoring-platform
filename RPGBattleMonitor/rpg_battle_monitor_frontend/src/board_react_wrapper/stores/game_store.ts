@@ -1,37 +1,18 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { StoreState } from "./state_store";
+import { atomWithStorage } from "jotai/utils";
+import { atom } from "jotai";
 
-type GameReducerState = {
-    gameId: Option<number>;
-};
+const gameIdAtom = atomWithStorage<Maybe<number>>("gameId", undefined);
 
-const fetchGameIdFromLocalStorage = () => {
-    const gameId = localStorage.getItem("gameId")
-        ? Number(localStorage.getItem("gameId"))
-        : undefined;
-
-    if (gameId === undefined || isNaN(gameId) || !isFinite(gameId)) {
-        return undefined;
-    }
-
-    return gameId;
-};
-
-const initialState: GameReducerState = {
-    gameId: fetchGameIdFromLocalStorage(),
-};
-
-export const gameReducer = createSlice({
-    name: "game",
-    initialState,
-    reducers: {
-        setGameId: (state, action: PayloadAction<Option<number>>) => {
-            localStorage.setItem("gameId", String(action.payload));
-            state.gameId = action.payload;
-        },
-    },
+const getGameId = atom((get) => {
+    return get(gameIdAtom);
 });
 
-export const getGameId = (state: StoreState): Option<number> => {
-    return state.gameReducer.gameId;
+const setGameId = atom(null, (_, set, id: Maybe<number>) => {
+    set(gameIdAtom, id);
+});
+
+export const gameStore = {
+    gameIdAtom,
+    getGameId,
+    setGameId,
 };
