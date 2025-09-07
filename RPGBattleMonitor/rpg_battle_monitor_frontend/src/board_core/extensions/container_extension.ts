@@ -194,11 +194,13 @@ export abstract class ContainerExtension<
         }
 
         this.position.x =
-            Math.round(this.position.x / this._grid.cellSize) *
-            this._grid.cellSize;
+            this._grid.x +
+            Math.round((this.position.x - this._grid.x) / this._grid.cellSize) *
+                this._grid.cellSize;
         this.position.y =
-            Math.round(this.position.y / this._grid.cellSize) *
-            this._grid.cellSize;
+            this._grid.y +
+            Math.round((this.position.y - this._grid.y) / this._grid.cellSize) *
+                this._grid.cellSize;
     }
 
     getInitialPosition(): ObservablePoint {
@@ -224,6 +226,7 @@ export abstract class ContainerExtension<
             return;
         }
 
+        // TODO: resize is still a bit janky and sometimes pixel off
         resize(
             this,
             this.displayedEntity,
