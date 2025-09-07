@@ -7,6 +7,8 @@ import { ButtonColorType } from "antd/es/button";
 import { useAtomValue, useSetAtom } from "jotai";
 import { sceneAtoms } from "../board_react_wrapper/stores/board_store";
 import { gameStore } from "../board_react_wrapper/stores/game_store";
+import { GridSettings } from "../board_react_wrapper/components/GridSettings";
+import { TokenFactory } from "../board_core/factories/token_factory";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -143,6 +145,34 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         return undefined;
     };
 
+    const gridSettings = () => {
+        if (!currentScene) {
+            return <></>;
+        }
+
+        return (
+            <>
+                <GridSettings grid={currentScene.grid} />
+            </>
+        );
+    };
+
+    const addTokenButton = () => {
+        if (!currentScene) {
+            return <></>;
+        }
+
+        return (
+            <Button
+                onClick={() => {
+                    TokenFactory.createToken(currentScene);
+                }}
+            >
+                Add token to scene
+            </Button>
+        );
+    };
+
     return (
         <>
             <div style={{ overflow: "hidden", position: "relative" }}>
@@ -156,6 +186,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                 >
                     Add scene
                 </Button>
+                {addTokenButton()}
                 {scenes.map((scene, idx) => {
                     return (
                         <Button
@@ -163,7 +194,6 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                             color={buttonColour(scene.name)}
                             variant="solid"
                             onClick={() => {
-                                console.log("change scene to", scene);
                                 changeScene(scene);
                             }}
                         >
@@ -171,6 +201,16 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                         </Button>
                     );
                 })}
+                {gridSettings()}
+                <Button
+                    onClick={() => {
+                        addScene({
+                            name: `test-scene${scenes.length + 1}`,
+                        });
+                    }}
+                >
+                    Remove current scene
+                </Button>
             </div>
         </>
     );

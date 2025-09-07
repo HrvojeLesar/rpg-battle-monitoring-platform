@@ -13,6 +13,8 @@ import { BoardEventEmitter } from "./events/board_event_emitters";
 import { Grid } from "./grid/grid";
 import { Websocket } from "../websocket/websocket";
 import { EntityRegistry } from "./registry/entity_registry";
+import { GAtomStore } from "../board_react_wrapper/stores/state_store";
+import { sceneAtoms } from "../board_react_wrapper/stores/board_store";
 
 export type GameBoard = Board;
 
@@ -73,6 +75,8 @@ class Board {
 
     public addScene(scene: Scene) {
         this.scenes.push(scene);
+
+        GAtomStore.set(sceneAtoms.refreshScenes);
     }
 
     public changeScene(scene: Scene) {
@@ -195,15 +199,23 @@ export function destroy(
 
 function initWebsocketListeners() {
     boardApplication.websocket.socket.on("action", (message) => {
-        if (message.action === "update") {
-            message.data.forEach((data) => {
-                const entity = boardApplication.entityRegistry.entities.get(
-                    data.uid,
-                );
-                if (entity && entity.shouldApplyChanges(data)) {
-                    entity.applyUpdateAction(data);
-                }
-            });
+        switch (message.action) {
+            case "update": {
+                message.data.forEach((data) => {
+                    const entity = boardApplication.entityRegistry.entities.get(
+                        data.uid,
+                    );
+                    if (entity && entity.shouldApplyChanges(data)) {
+                        entity.applyUpdateAction(data);
+                    }
+                });
+                break;
+            }
+            case "create": {
+                boardApplication.entityRegistry.queue(message.data);
+                boardApplication.entityRegistry.convertQueuedEntities();
+                break;
+            }
         }
     });
 }

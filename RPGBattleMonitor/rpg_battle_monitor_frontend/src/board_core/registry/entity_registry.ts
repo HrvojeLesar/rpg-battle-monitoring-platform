@@ -9,7 +9,6 @@ import { IMessagable, TypedJson, UId } from "../interfaces/messagable";
 import { Scene } from "../scene";
 import { EmptyTokenData } from "../token/empty_token_data";
 import { Token } from "../token/token";
-import { UniqueCollection } from "../utils/unique_collection";
 
 export type EntityKind = string;
 export type OrderPriority = number;
@@ -80,13 +79,11 @@ class RegisteredEntityKinds {
 
 class EntityContainer {
     protected entitiesMap: Map<UId, IMessagable> = new Map();
-    protected entities: UniqueCollection<IMessagable> = new UniqueCollection();
 
     public constructor() {}
 
     public add(entity: IMessagable): void {
         this.entitiesMap.set(entity.getUId(), entity);
-        this.entities.add(entity);
     }
 
     public get(uid: UId): Option<IMessagable> {
@@ -95,11 +92,6 @@ class EntityContainer {
 
     public remove(entity: IMessagable): void {
         this.entitiesMap.delete(entity.getUId());
-        this.entities.remove(entity);
-    }
-
-    public list(): IMessagable[] {
-        return this.entities.getCopy();
     }
 }
 
@@ -186,11 +178,5 @@ export class EntityRegistry {
         );
 
         return registry;
-    }
-
-    public createEntity<T extends IMessagable>(entity: T): T {
-        this.entities.add(entity);
-
-        return entity;
     }
 }

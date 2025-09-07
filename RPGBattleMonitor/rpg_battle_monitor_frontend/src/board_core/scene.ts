@@ -59,7 +59,7 @@ export class Scene implements IMessagable<SceneAttributes> {
         const gridSize = this._grid.size;
 
         function getWorldSize() {
-            return Math.round(Math.max(gridSize.width, gridSize.height) * 4);
+            return Math.round(Math.max(gridSize.width, gridSize.height) * 8);
         }
 
         const worldSize = getWorldSize();
@@ -174,7 +174,7 @@ export class Scene implements IMessagable<SceneAttributes> {
         return this._eventStore;
     }
 
-    protected addToken({
+    protected addTokenOld({
         x = 64,
         y = 64,
         tint = "green",
@@ -183,7 +183,6 @@ export class Scene implements IMessagable<SceneAttributes> {
         height = undefined,
     }): void {
         const token = new Token(
-            this.grid,
             this,
             new EmptyTokenData(),
             {
@@ -277,5 +276,13 @@ export class Scene implements IMessagable<SceneAttributes> {
 
     public shouldApplyChanges(changes: TypedJson<SceneAttributes>): boolean {
         return shouldApplyChanges(this, changes);
+    }
+
+    public addToken(token: Token): void {
+        this._selectHandler.registerSelect(token);
+        this._dragHandler.registerDrag(token);
+
+        this._tokens.add(token);
+        this._viewport.addChild(token);
     }
 }

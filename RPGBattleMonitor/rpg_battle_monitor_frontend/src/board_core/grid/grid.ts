@@ -7,6 +7,8 @@ import {
 } from "../interfaces/messagable";
 import { UniqueCollection } from "../utils/unique_collection";
 import newUId from "../utils/uuid_generator";
+import { GAtomStore } from "../../board_react_wrapper/stores/state_store";
+import { sceneAtoms } from "../../board_react_wrapper/stores/board_store";
 
 export type GridOptions = {
     hover?: boolean;
@@ -175,9 +177,11 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
 
     public applyUpdateAction(changes: TypedJson<GridAttributes>): void {
         this._uid = changes.uid;
-        this._cellSize = changes._cellSize;
-        this._size = changes._size;
+        this.cellSize = changes._cellSize;
+        this.size = changes._size;
         this.hover = changes.hover;
+
+        GAtomStore.set(sceneAtoms.refreshScenes);
     }
 
     public deleteAction(): void {}

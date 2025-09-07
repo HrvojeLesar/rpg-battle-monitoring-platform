@@ -2,6 +2,7 @@ import {
     Container,
     ContainerOptions,
     EventEmitter,
+    EventMode,
     ObservablePoint,
     Point,
 } from "pixi.js";
@@ -53,6 +54,8 @@ export type ContainerExtensionAttributes = {
     isDraggable?: boolean;
     isSelectable?: boolean;
     isResizable?: boolean;
+    eventMode?: EventMode;
+    cursor?: string;
 };
 
 export const DEFAULTS = {
@@ -438,6 +441,8 @@ export abstract class ContainerExtension<
             isDraggable: this.isDraggable,
             isSelectable: this.isSelectable,
             isResizable: this.isResizable,
+            eventMode: this.eventMode,
+            cursor: this.cursor,
         } as Attributes;
     }
 
@@ -456,6 +461,8 @@ export abstract class ContainerExtension<
         this.isDraggable = changes.isDraggable ?? DEFAULTS.isDraggable;
         this.isSelectable = changes.isSelectable ?? DEFAULTS.isSelectable;
         this.isResizable = changes.isResizable ?? DEFAULTS.isResizable;
+        this.eventMode = changes.eventMode;
+        this.cursor = changes.cursor;
     }
 
     public getUId(): UId {

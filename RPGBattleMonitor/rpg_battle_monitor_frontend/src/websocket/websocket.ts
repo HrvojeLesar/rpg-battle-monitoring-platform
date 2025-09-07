@@ -108,3 +108,18 @@ export class Websocket {
         this.socket.emit("join");
     }
 }
+
+export const queueEntityUpdate = (
+    updateFn: () => IMessagable[] | IMessagable,
+) => {
+    let entities = updateFn();
+    if (!Array.isArray(entities)) {
+        entities = [entities];
+    }
+
+    for (const entity of entities) {
+        GBoard.websocket.queue(entity, "updateQueue");
+    }
+
+    GBoard.websocket.flush();
+};

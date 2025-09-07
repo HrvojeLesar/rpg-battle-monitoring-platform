@@ -1,5 +1,6 @@
 import { GBoard } from "../../board_core/board";
 import { SceneFactory } from "../../board_core/factories/scene_factory";
+import { Grid } from "../../board_core/grid/grid";
 import { Scene, SceneOptions } from "../../board_core/scene";
 import { atom } from "jotai";
 
@@ -60,12 +61,10 @@ const addScene = atom(null, (get, set, options: SceneOptions) => {
     }
 
     const sceneSortPosition = options.sortPosition ?? getNextSortPosition();
-    const scene = GBoard.entityRegistry.createEntity(
-        SceneFactory.createScene({
-            ...options,
-            sortPosition: sceneSortPosition,
-        }),
-    );
+    const scene = SceneFactory.createScene({
+        ...options,
+        sortPosition: sceneSortPosition,
+    });
 
     set(sceneAtom, (state) => {
         const scenes = [...state.scenes, scene];

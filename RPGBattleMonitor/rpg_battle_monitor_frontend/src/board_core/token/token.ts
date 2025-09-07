@@ -4,7 +4,6 @@ import {
     SpriteExtension,
     SpriteExtensionAttributes,
 } from "../extensions/sprite_extension";
-import { Grid } from "../grid/grid";
 import { UId, type TypedJson } from "../interfaces/messagable";
 import { Scene } from "../scene";
 import { TokenDataBase } from "./token_data";
@@ -18,16 +17,15 @@ export type TokenAttributes = {
 
 export class Token extends SpriteExtension {
     protected _scene: Scene;
-    protected _tokenData: TokenDataBase<any>;
+    protected _tokenData: TokenDataBase;
 
     public constructor(
-        grid: Grid,
         scene: Scene,
-        tokenData: TokenDataBase<any>,
+        tokenData: TokenDataBase,
         spriteOptions?: SpriteOptions,
         containerOptions?: ContainerExtensionOptions,
     ) {
-        super(grid, spriteOptions, containerOptions);
+        super(scene.grid, spriteOptions, containerOptions);
 
         this._scene = scene;
         this._tokenData = tokenData;
@@ -66,5 +64,9 @@ export class Token extends SpriteExtension {
 
     protected update(): void {
         GBoard.websocket.queue(this, "updateQueue");
+    }
+
+    public get tokenData(): TokenDataBase {
+        return this._tokenData;
     }
 }

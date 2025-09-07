@@ -5,6 +5,8 @@ export class SceneFactory {
     public static createScene(options: SceneOptions): Scene {
         const scene = new Scene(options);
 
+        GBoard.entityRegistry.entities.add(scene);
+
         GBoard.websocket.queue(scene.grid, "createQueue");
         GBoard.websocket.queue(scene, "createQueue");
 
