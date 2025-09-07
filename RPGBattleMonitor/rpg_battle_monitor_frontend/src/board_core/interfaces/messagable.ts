@@ -7,6 +7,11 @@ export type TypedJson<Attributes = DefaultAttributes> = {
     timestamp: number;
 } & Attributes;
 
+export type DeleteAction = {
+    acc: IMessagable[];
+    cleanupCallbacks: (() => void)[];
+};
+
 export interface IMessagable<Attributes = DefaultAttributes> {
     getKind(): string;
     getUId(): UId;
@@ -14,8 +19,7 @@ export interface IMessagable<Attributes = DefaultAttributes> {
     toJSON(): TypedJson<Attributes>;
     getAttributes(): Attributes;
     applyUpdateAction(changes: TypedJson<Attributes>): void;
-    deleteAction(): void;
-    addDependant(entity: IMessagable): void;
+    deleteAction(action: DeleteAction): void;
     getLastChangesTimestamp(): Maybe<number>;
     shouldApplyChanges(changes: TypedJson<Attributes>): boolean;
 }

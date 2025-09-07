@@ -1,6 +1,5 @@
 import { GBoard } from "../../board_core/board";
 import { SceneFactory } from "../../board_core/factories/scene_factory";
-import { Grid } from "../../board_core/grid/grid";
 import { Scene, SceneOptions } from "../../board_core/scene";
 import { atom } from "jotai";
 
@@ -38,7 +37,7 @@ const getCurrentScene = atom((get) => {
     return get(sceneAtom).currentScene;
 });
 
-const addScene = atom(null, (get, set, options: SceneOptions) => {
+const createScene = atom(null, (get, set, options: SceneOptions) => {
     function getNextSortPosition(): Maybe<number> {
         const scenes = get(getScenes);
         const maxSortPosition = scenes.reduce<Maybe<number>>((acc, scene) => {
@@ -75,7 +74,7 @@ const addScene = atom(null, (get, set, options: SceneOptions) => {
     });
 });
 
-const changeScene = atom(null, (_, set, scene: Scene) => {
+const changeScene = atom(null, (_, set, scene: Maybe<Scene>) => {
     GBoard.changeScene(scene);
 
     set(sceneAtom, (state) => {
@@ -96,9 +95,9 @@ const clearScenes = atom(null, (_, set) => {
 
 const refreshScenes = atom(null, (_, set) => {
     set(sceneAtom, (state) => {
-        const currentScene = GBoard.scene;
+        const currentScene = state.currentScene;
 
-        state.scenes = sortedScenes([...GBoard.scenes]);
+        state.scenes = sortedScenes([...state.scenes]);
 
         if (state.currentScene === null && currentScene) {
             state.currentScene = currentScene;
@@ -108,12 +107,48 @@ const refreshScenes = atom(null, (_, set) => {
     });
 });
 
+const removeScene = atom(null, (_, set, scene: Scene) => {
+    const deleteAction = GBoard.entityRegistry.entities.remove(scene);
+
+    for (const entity of deleteAction.acc) {
+        GBoard.websocket.queue(entity, "deleteQueue");
+    }
+
+    GBoard.websocket.flush();
+
+    deleteAction.cleanupCallbacks.forEach((cb) => cb());
+
+    set(sceneAtom, (state) => {
+        state.scenes = state.scenes.filter(
+            (s) => s.getUId() !== scene.getUId(),
+        );
+
+        if (state.currentScene?.getUId() === scene.getUId()) {
+            set(changeScene, state.scenes[0] ?? undefined);
+        }
+
+        return { ...state };
+    });
+});
+
+const addScene = atom(null, (_, set, scene: Scene) => {
+    set(sceneAtom, (state) => {
+        const scenes = [...state.scenes, scene];
+
+        state.scenes = sortedScenes(scenes);
+
+        return { ...state };
+    });
+});
+
 export const sceneAtoms = {
     sceneAtom,
     getScenes,
     getCurrentScene,
-    addScene,
+    createScene,
     changeScene,
     clearScenes,
     refreshScenes,
+    removeScene,
+    addScene,
 };

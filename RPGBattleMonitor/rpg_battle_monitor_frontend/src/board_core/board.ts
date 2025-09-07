@@ -23,8 +23,6 @@ export type BoardInitOptions = {
 };
 
 class Board {
-    public scenes: Scene[];
-
     protected application?: Application;
     protected currentScene?: Scene;
 
@@ -35,7 +33,6 @@ class Board {
     protected _entityRegistry: EntityRegistry;
 
     public constructor(eventEmitter: BoardEventEmitter) {
-        this.scenes = [];
         this._eventEmitter = eventEmitter;
 
         this._entityRegistry = EntityRegistry.defaultEntityRegistry();
@@ -74,12 +71,15 @@ class Board {
     }
 
     public addScene(scene: Scene) {
-        this.scenes.push(scene);
-
-        GAtomStore.set(sceneAtoms.refreshScenes);
+        GAtomStore.set(sceneAtoms.addScene, scene);
     }
 
-    public changeScene(scene: Scene) {
+    public changeScene(scene: Maybe<Scene>) {
+        if (scene === undefined) {
+            this.currentScene = undefined;
+            return;
+        }
+
         if (scene === this.currentScene) {
             return;
         }
@@ -89,18 +89,8 @@ class Board {
         this.currentScene.setActive();
     }
 
-    public getScenes(): Scene[] {
-        return this.scenes;
-    }
-
     public get app(): Application {
         return this.getApplication();
-    }
-
-    public getSceneByName(name: string): Option<Scene> {
-        return this.getScenes().find((scene) => {
-            return scene.name === name;
-        });
     }
 
     public get viewport(): Viewport {
@@ -122,7 +112,7 @@ class Board {
     }
 
     public get scene(): Option<Scene> {
-        return this.currentScene;
+        return GAtomStore.get(sceneAtoms.getCurrentScene);
     }
 
     public get eventEmitter(): BoardEventEmitter {
@@ -131,6 +121,10 @@ class Board {
 
     public get entityRegistry(): EntityRegistry {
         return this._entityRegistry;
+    }
+
+    public removeScene(scene: Scene): void {
+        GAtomStore.set(sceneAtoms.removeScene, scene);
     }
 }
 
@@ -214,6 +208,11 @@ function initWebsocketListeners() {
             case "create": {
                 boardApplication.entityRegistry.queue(message.data);
                 boardApplication.entityRegistry.convertQueuedEntities();
+                break;
+            }
+            case "delete": {
+                boardApplication.entityRegistry.queue(message.data);
+                boardApplication.entityRegistry.removeQueuedEntities();
                 break;
             }
         }

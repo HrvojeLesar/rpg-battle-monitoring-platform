@@ -107,6 +107,10 @@ export class Websocket {
 
         this.socket.emit("join");
     }
+
+    public clear(queue: keyof QueueMap) {
+        this.queues[queue] = [];
+    }
 }
 
 export const queueEntityUpdate = (

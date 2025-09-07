@@ -1,19 +1,17 @@
 import {
     DefaultAttributes,
+    DeleteAction,
     IMessagable,
     shouldApplyChanges,
     TypedJson,
     UId,
 } from "../interfaces/messagable";
-import { UniqueCollection } from "../utils/unique_collection";
 import newUId from "../utils/uuid_generator";
 
 export abstract class TokenDataBase<T = DefaultAttributes>
     implements IMessagable<T>
 {
     protected _uid: UId;
-    protected _dependants: UniqueCollection<IMessagable> =
-        new UniqueCollection();
     protected _lastChangesTimestamp: Maybe<number> = undefined;
 
     public constructor() {
@@ -58,11 +56,7 @@ export abstract class TokenDataBase<T = DefaultAttributes>
         return this.name;
     }
 
-    public abstract deleteAction(): void;
-
-    public addDependant(entity: IMessagable): void {
-        this._dependants.add(entity);
-    }
+    public abstract deleteAction(action: DeleteAction): void;
 
     public getLastChangesTimestamp(): Maybe<number> {
         return this._lastChangesTimestamp;

@@ -9,6 +9,7 @@ import { sceneAtoms } from "../board_react_wrapper/stores/board_store";
 import { gameStore } from "../board_react_wrapper/stores/game_store";
 import { GridSettings } from "../board_react_wrapper/components/GridSettings";
 import { TokenFactory } from "../board_core/factories/token_factory";
+import { Scene } from "../board_core/scene";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -45,7 +46,8 @@ export const PixiApplication = (props: PixiApplicationProps) => {
     const scenes = useAtomValue(sceneAtoms.getScenes);
     const changeScene = useSetAtom(sceneAtoms.changeScene);
     const currentScene = useAtomValue(sceneAtoms.getCurrentScene);
-    const addScene = useSetAtom(sceneAtoms.addScene);
+    const createScene = useSetAtom(sceneAtoms.createScene);
+    const removeScene = useSetAtom(sceneAtoms.removeScene);
 
     const gameId = useAtomValue(gameStore.getGameId);
 
@@ -137,8 +139,8 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         };
     }, [applicationInitCallback, applicationOptions, resizeTo, gameId]);
 
-    const buttonColour = (sceneName: string): Maybe<ButtonColorType> => {
-        if (sceneName === currentScene?.name) {
+    const buttonColour = (scene: Scene): Maybe<ButtonColorType> => {
+        if (scene === currentScene) {
             return "primary";
         }
 
@@ -179,7 +181,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                 <canvas ref={canvasRef} className={canvasClass} />
                 <Button
                     onClick={() => {
-                        addScene({
+                        createScene({
                             name: `test-scene${scenes.length + 1}`,
                         });
                     }}
@@ -191,7 +193,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                     return (
                         <Button
                             key={idx}
-                            color={buttonColour(scene.name)}
+                            color={buttonColour(scene)}
                             variant="solid"
                             onClick={() => {
                                 changeScene(scene);
@@ -204,9 +206,9 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                 {gridSettings()}
                 <Button
                     onClick={() => {
-                        addScene({
-                            name: `test-scene${scenes.length + 1}`,
-                        });
+                        if (currentScene) {
+                            removeScene(currentScene);
+                        }
                     }}
                 >
                     Remove current scene

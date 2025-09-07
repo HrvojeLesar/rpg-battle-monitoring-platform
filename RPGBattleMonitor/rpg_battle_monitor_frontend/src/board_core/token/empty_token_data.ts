@@ -1,3 +1,4 @@
+import { DeleteAction } from "../interfaces/messagable";
 import { TokenDataBase } from "./token_data";
 
 export class EmptyTokenData extends TokenDataBase {
@@ -5,7 +6,8 @@ export class EmptyTokenData extends TokenDataBase {
         return {};
     }
 
-    public deleteAction(): void {
-        // GBoard.websocket.socket.emit("delete", this);
+    public deleteAction(action: DeleteAction): void {
+        // TODO: delete tokens on board
+        action.acc.push(this);
     }
 }

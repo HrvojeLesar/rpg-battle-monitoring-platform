@@ -19,6 +19,7 @@ import { GridCell, GridCellPosition } from "../grid/cell";
 import { Grid } from "../grid/grid";
 import { IClampPositionToViewport } from "../interfaces/clamp_position_to_viewport";
 import {
+    DeleteAction,
     IMessagable,
     shouldApplyChanges,
     TypedJson,
@@ -486,10 +487,12 @@ export abstract class ContainerExtension<
         return this.name;
     }
 
-    public deleteAction(): void {}
+    public deleteAction(action: DeleteAction): void {
+        action.acc.push(this);
 
-    public addDependant(entity: IMessagable): void {
-        this._dependants.add(entity);
+        action.cleanupCallbacks.push(() => {
+            this.destroy(true);
+        });
     }
 
     public get eventEmitter(): EventEmitter<ContainerEventTypes> {

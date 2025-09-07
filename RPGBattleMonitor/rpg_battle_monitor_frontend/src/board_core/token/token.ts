@@ -30,9 +30,6 @@ export class Token extends SpriteExtension {
         this._scene = scene;
         this._tokenData = tokenData;
 
-        this._scene.addDependant(this);
-        this._tokenData.addDependant(this);
-
         this.eventEmitter.on("drag-end", this.update.bind(this));
         this.eventEmitter.on("resize-end", this.update.bind(this));
     }
@@ -56,10 +53,6 @@ export class Token extends SpriteExtension {
 
     public applyUpdateAction(changes: TypedJson<TokenAttributes>): void {
         super.applyUpdateAction(changes);
-    }
-
-    public deleteAction(): void {
-        // this.deleteAction();
     }
 
     protected update(): void {

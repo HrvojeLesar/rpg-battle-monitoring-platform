@@ -1,5 +1,6 @@
 import { Container, Graphics, Point, Sprite, Texture } from "pixi.js";
 import {
+    DeleteAction,
     IMessagable,
     shouldApplyChanges,
     TypedJson,
@@ -40,8 +41,6 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
     };
 
     private _uid: UId;
-    protected _dependants: UniqueCollection<IMessagable> =
-        new UniqueCollection();
 
     constructor(options?: GridOptions) {
         super();
@@ -184,10 +183,12 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
         GAtomStore.set(sceneAtoms.refreshScenes);
     }
 
-    public deleteAction(): void {}
+    public deleteAction(action: DeleteAction): void {
+        action.acc.push(this);
 
-    public addDependant(entity: IMessagable): void {
-        this._dependants.add(entity);
+        action.cleanupCallbacks.push(() => {
+            this.destroy(true);
+        });
     }
 
     public static getKindStatic(): string {

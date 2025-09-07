@@ -1,3 +1,4 @@
+import { GBoard } from "../board";
 import { EmptyTokenDataConverter } from "../converters/empty_token_data_converter";
 import { GridConverter } from "../converters/grid_converter";
 import { SceneConverter } from "../converters/scene_converter";
@@ -5,7 +6,12 @@ import { SpriteExtensionConverter } from "../converters/sprite_extension_convert
 import { TokenConverter } from "../converters/token_converter";
 import { SpriteExtension } from "../extensions/sprite_extension";
 import { Grid } from "../grid/grid";
-import { IMessagable, TypedJson, UId } from "../interfaces/messagable";
+import {
+    DeleteAction,
+    IMessagable,
+    TypedJson,
+    UId,
+} from "../interfaces/messagable";
 import { Scene } from "../scene";
 import { EmptyTokenData } from "../token/empty_token_data";
 import { Token } from "../token/token";
@@ -90,8 +96,23 @@ class EntityContainer {
         return this.entitiesMap.get(uid);
     }
 
-    public remove(entity: IMessagable): void {
-        this.entitiesMap.delete(entity.getUId());
+    public remove(entity: IMessagable): DeleteAction {
+        const deleteAction: DeleteAction = {
+            acc: [],
+            cleanupCallbacks: [],
+        };
+        const existingEntity = this.entitiesMap.get(entity.getUId());
+
+        if (existingEntity) {
+            this.entitiesMap.delete(entity.getUId());
+            existingEntity.deleteAction(deleteAction);
+        }
+
+        for (const removedEntity of deleteAction.acc) {
+            this.entitiesMap.delete(removedEntity.getUId());
+        }
+
+        return deleteAction;
     }
 }
 
@@ -178,5 +199,23 @@ export class EntityRegistry {
         );
 
         return registry;
+    }
+
+    public removeQueuedEntities(): void {
+        const entities = this.getSortedQueuedEntities;
+        entities.reverse();
+
+        for (const entityData of entities) {
+            const entity = this.entities.get(entityData.uid);
+            if (entity) {
+                const deleteAction = this.entities.remove(entity);
+
+                deleteAction.cleanupCallbacks.forEach((cb) => cb());
+            }
+        }
+
+        GBoard.websocket.clear("deleteQueue");
+
+        this._queuedEntities = [];
     }
 }

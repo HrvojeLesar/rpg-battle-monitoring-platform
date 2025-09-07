@@ -9,6 +9,7 @@ import { Grid, GridOptions } from "./grid/grid";
 import { Token } from "./token/token";
 import { EmptyTokenData } from "./token/empty_token_data";
 import {
+    DeleteAction,
     IMessagable,
     shouldApplyChanges,
     TypedJson,
@@ -43,8 +44,6 @@ export class Scene implements IMessagable<SceneAttributes> {
     protected _lastChangesTimestamp: Maybe<number> = undefined;
 
     private _uid: UId;
-    protected _dependants: UniqueCollection<IMessagable> =
-        new UniqueCollection();
 
     protected _sortPosition: Maybe<number>;
 
@@ -52,7 +51,6 @@ export class Scene implements IMessagable<SceneAttributes> {
         this._uid = newUId();
         this.name = options.name;
         this._grid = options.grid ?? new Grid(options.gridOptions);
-        this.grid.addDependant(this);
 
         this._sortPosition = options.sortPosition;
 
@@ -120,26 +118,34 @@ export class Scene implements IMessagable<SceneAttributes> {
             this._eventStore,
         );
 
-        Assets.load("https://pixijs.com/assets/bunny.png").then((texture) => {
-            this.addToken({
-                x: 512,
-                y: 512,
-                texture,
-                tint: "white",
-                height: 300,
-            });
-            // const control = this.tokens[this.tokens.length - 2];
-            // const resizecontainer = this.tokens[this.tokens.length - 1];
-            // control.container.unregisterDraggable();
-            // control.container.unregisterSelectable();
-            // GResizeHandler.registerResize(
-            //     control.container,
-            //     resizecontainer.container,
-            // );
-        });
-        this.addToken({});
-        this.addToken({ x: 256, y: 256, tint: "red" });
-        this.addToken({ x: 256, y: 512, tint: "blue" });
+        // Assets.load("https://pixijs.com/assets/bunny.png").then((texture) => {
+        //     this.addToken({
+        //         x: 512,
+        //         y: 512,
+        //         texture,
+        //         tint: "white",
+        //         height: 300,
+        //     });
+        //     // const control = this.tokens[this.tokens.length - 2];
+        //     // const resizecontainer = this.tokens[this.tokens.length - 1];
+        //     // control.container.unregisterDraggable();
+        //     // control.container.unregisterSelectable();
+        //     // GResizeHandler.registerResize(
+        //     //     control.container,
+        //     //     resizecontainer.container,
+        //     // );
+        // });
+
+        // this.addToken({});
+        // this.addToken({ x: 256, y: 256, tint: "red" });
+        // this.addToken({ x: 256, y: 512, tint: "blue" });
+        //
+        // this.addToken({
+        //     x: 512,
+        //     y: 512,
+        //     tint: "white",
+        //     height: 300,
+        // });
 
         // const timeout = setTimeout(() => {
         // this.tokens[0].container.moveToGridCell(new Point(7, 1));
@@ -248,14 +254,22 @@ export class Scene implements IMessagable<SceneAttributes> {
         this.name = changes.name;
     }
 
-    public deleteAction(): void {
-        this._dependants.items.forEach((entity) => {
-            entity.deleteAction();
-        });
-    }
+    public deleteAction(action: DeleteAction): void {
+        action.acc.push(this);
 
-    public addDependant(entity: IMessagable): void {
-        this._dependants.add(entity);
+        GBoard.removeScene(this);
+
+        this.tokens.forEach((token) => {
+            token.deleteAction(action);
+            this._selectHandler.unregisterSelect(token);
+            this._dragHandler.unregisterDrag(token);
+        });
+
+        this.grid.deleteAction(action);
+
+        action.cleanupCallbacks.push(() => {
+            this.viewport.destroy(true);
+        });
     }
 
     public static getKindStatic(): string {
