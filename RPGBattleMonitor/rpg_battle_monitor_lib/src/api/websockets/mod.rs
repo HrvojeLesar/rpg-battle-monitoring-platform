@@ -31,6 +31,7 @@ pub enum Action {
     Update,
     Create,
     Delete,
+    Transitive,
     Other(serde_json::Value),
 }
 
@@ -89,6 +90,7 @@ async fn action_handler<T: AppStateTrait>(
         Action::Update | Action::Create | Action::Delete => {
             entity_handler(data, app_state, auth).await
         }
+        Action::Transitive => (),
         Action::Other(_) => tracing::warn!("Received unknown action: {:?}", data.action),
     }
 }
