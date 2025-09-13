@@ -1,24 +1,11 @@
-import {
-    createRootRoute,
-    createRouter,
-    Link,
-    Outlet,
-} from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { GAMELIST_ROUTE_PATH, GameListRoute } from "./game_list";
-import { BOARD_ROUTE_PATH, BoardRoute } from "./board";
+import { createRootRoute, createRouter } from "@tanstack/react-router";
 import { HomeRoute } from "./home";
+import { RootRoute } from "../components/routes/Root";
+import { GameListRoute } from "./game_list";
+import { BoardRoute } from "./board";
 
 export const rootRoute = createRootRoute({
-    component: () => (
-        <>
-            <Link to="/">Home</Link>
-            <Link to={GAMELIST_ROUTE_PATH}>Game list</Link>
-            <Link to={BOARD_ROUTE_PATH}>Board</Link>
-            <Outlet />
-            <TanStackRouterDevtools />
-        </>
-    ),
+    component: RootRoute,
 });
 
 export const routeTree = rootRoute.addChildren([
@@ -26,6 +13,7 @@ export const routeTree = rootRoute.addChildren([
     GameListRoute,
     BoardRoute,
 ]);
+
 export const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {
