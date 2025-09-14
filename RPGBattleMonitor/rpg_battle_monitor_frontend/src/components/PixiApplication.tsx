@@ -2,14 +2,11 @@ import { Application, ApplicationOptions } from "pixi.js";
 import { RefObject, useEffect, useRef } from "react";
 import { type PixiApplicationProps } from "../types/pixi_application_props";
 import { destroy } from "../board_core/board";
-import { useAtomValue, useSetAtom } from "jotai";
-import { sceneAtoms } from "../board_react_wrapper/stores/board_store";
+import { useAtomValue } from "jotai";
 import { gameStore } from "../board_react_wrapper/stores/game_store";
-import { GridSettings } from "../board_react_wrapper/components/GridSettings";
-import { TokenFactory } from "../board_core/factories/token_factory";
-import { Scene } from "../board_core/scene";
-import { Resizable } from "re-resizable";
-import { Button } from "@mantine/core";
+import { Flex } from "@mantine/core";
+import { HUD } from "../board_react_wrapper/components/board/HUD";
+import classes from "../css/board.module.css";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -28,13 +25,8 @@ function defaultOptions(
 }
 
 export const PixiApplication = (props: PixiApplicationProps) => {
-    const {
-        canvas,
-        resizeTo,
-        canvasClass,
-        applicationOptions,
-        applicationInitCallback,
-    } = props;
+    const { canvas, resizeTo, applicationOptions, applicationInitCallback } =
+        props;
 
     console.log("pixi app rendered");
 
@@ -42,12 +34,6 @@ export const PixiApplication = (props: PixiApplicationProps) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(canvas ?? null);
     const initPromiseRef = useRef<Promise<Application | null> | null>(null);
     const canvasRemoved = useRef(false);
-
-    const scenes = useAtomValue(sceneAtoms.getScenes);
-    const changeScene = useSetAtom(sceneAtoms.changeScene);
-    const currentScene = useAtomValue(sceneAtoms.getCurrentScene);
-    const createScene = useSetAtom(sceneAtoms.createScene);
-    const removeScene = useSetAtom(sceneAtoms.removeScene);
 
     const gameId = useAtomValue(gameStore.getGameId);
 
@@ -76,11 +62,13 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         if (canvas === null) {
             console.error("CanvasRef not found. Adding canvas to document");
             canvas = document.createElement("canvas");
+            canvas.classList.add(classes.canvas);
             document.body.appendChild(canvas);
         }
 
         if (canvasRemoved.current && canvas) {
             const newCanvas = document.createElement("canvas");
+            newCanvas.classList.add(...canvas.classList.values());
             canvas.replaceWith(newCanvas);
 
             canvasRef.current = newCanvas;
@@ -139,77 +127,14 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         };
     }, [applicationInitCallback, applicationOptions, resizeTo, gameId]);
 
-    const gridSettings = () => {
-        if (!currentScene) {
-            return <></>;
-        }
-
-        return (
-            <>
-                <GridSettings grid={currentScene.grid} />
-            </>
-        );
-    };
-
-    const addTokenButton = () => {
-        if (!currentScene) {
-            return <></>;
-        }
-
-        return (
-            <Button
-                onClick={() => {
-                    TokenFactory.createToken(currentScene);
-                }}
-            >
-                Add token to scene
-            </Button>
-        );
-    };
-
     return (
-        <>
-            <Resizable>
-                <Button>Abc</Button>
-                <Button>Abc</Button>
-                <Button>Abc</Button>
-                <Button>Abc</Button>
-            </Resizable>
-            <div style={{ overflow: "hidden", position: "relative" }}>
-                <canvas ref={canvasRef} className={canvasClass} />
-                <Button
-                    onClick={() => {
-                        createScene({
-                            name: `test-scene${scenes.length + 1}`,
-                        });
-                    }}
-                >
-                    Add scene
-                </Button>
-                {addTokenButton()}
-                {scenes.map((scene, idx) => {
-                    return (
-                        <Button
-                            key={idx}
-                            onClick={() => {
-                                changeScene(scene);
-                            }}
-                        >
-                            {scene.name}
-                        </Button>
-                    );
-                })}
-                {gridSettings()}
-                <Button
-                    onClick={() => {
-                        if (currentScene) {
-                            removeScene(currentScene);
-                        }
-                    }}
-                >
-                    Remove current scene
-                </Button>
-            </div>
-        </>
+        <Flex>
+            <HUD />
+            <canvas
+                id={classes.game}
+                ref={canvasRef}
+                className={classes.game}
+            />
+        </Flex>
     );
 };

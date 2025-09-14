@@ -126,11 +126,24 @@ class Board {
     public removeScene(scene: Scene): void {
         GAtomStore.set(sceneAtoms.removeScene, scene);
     }
+
+    public resize(): void {
+        GAtomStore.get(sceneAtoms.getScenes).forEach((scene) => {
+            scene.viewport.resize(
+                this.app.canvas.width,
+                this.app.canvas.height,
+            );
+        });
+    }
 }
 
 const GEventEmitter = new BoardEventEmitter();
 
 let boardApplication: Board = new Board(GEventEmitter);
+
+function resize() {
+    boardApplication.resize();
+}
 
 export async function init(
     boardInitOptions: BoardInitOptions,
@@ -153,15 +166,9 @@ export async function init(
         initWebsocketListeners();
     }
 
-    globalThis.addEventListener("resize", () => {
-        // TODO: does not always work, manual window resize is still sometimes required
-        GAtomStore.get(sceneAtoms.getScenes).forEach((scene) => {
-            scene.viewport.resize(
-                boardApplication.app.canvas.width,
-                boardApplication.app.canvas.height,
-            );
-        });
-    });
+    // TODO: does not always work, manual window resize is still sometimes required
+    window.addEventListener("resize", resize);
+    window.addEventListener("orientationchange", resize);
 
     // TODO: setup websocket initialization
     if (socket) {
@@ -186,6 +193,9 @@ export function destroy(
     try {
         boardApplication.websocket.socket.disconnect();
     } catch (error) {}
+
+    window.removeEventListener("resize", resize);
+    window.removeEventListener("orientationchange", resize);
 
     GEventEmitter.emit("board-destoryed");
     boardApplication = new Board(GEventEmitter);

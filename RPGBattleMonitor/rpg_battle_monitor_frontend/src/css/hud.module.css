@@ -1,0 +1,8 @@
+.hud {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
+}
