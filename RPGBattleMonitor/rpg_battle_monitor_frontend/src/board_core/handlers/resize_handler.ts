@@ -61,7 +61,7 @@ export class ResizeHandler {
                 return;
             }
 
-            GBoard.viewport.on("globalmousemove", this.onGlobalPointerMove, {
+            GBoard.viewport.on("globalpointermove", this.onGlobalPointerMove, {
                 handler: this,
                 startPoint: event.getLocalPosition(GBoard.viewport),
                 container: container,
@@ -74,7 +74,7 @@ export class ResizeHandler {
 
         const onPointerUp = () => {
             this.scene.viewport.off(
-                "globalmousemove",
+                "globalpointermove",
                 this.onGlobalPointerMove,
             );
 
