@@ -1,12 +1,12 @@
-import { Box, Button } from "@mantine/core";
-import classes from "../../../css/hud.module.css";
-import { Resizable } from "re-resizable";
-import { GridSettings } from "../GridSettings";
-import { TokenFactory } from "../../../board_core/factories/token_factory";
 import { useAtomValue, useSetAtom } from "jotai";
 import { sceneAtoms } from "../../stores/board_store";
+import { Button, ComboboxData, Flex, Select } from "@mantine/core";
+import { sceneAtomsUtils } from "../../stores/utils";
+import { GBoard } from "../../../board_core/board";
+import { Scene } from "../../../board_core/scene";
+import { GridSettings } from "../GridSettings";
 
-export const HUD = () => {
+export const SceneSelection = () => {
     const scenes = useAtomValue(sceneAtoms.getScenes);
     const changeScene = useSetAtom(sceneAtoms.changeScene);
     const currentScene = useAtomValue(sceneAtoms.getCurrentScene);
@@ -24,47 +24,39 @@ export const HUD = () => {
             </>
         );
     };
-
-    const addTokenButton = () => {
-        if (!currentScene) {
-            return <></>;
-        }
-
-        return (
-            <Button
-                onClick={() => {
-                    TokenFactory.createToken(currentScene);
-                }}
-            >
-                Add token to scene
-            </Button>
-        );
+    const sceneData = (): ComboboxData => {
+        return scenes.map((scene) => {
+            return {
+                value: scene.getUId(),
+                label: scene.name,
+            };
+        });
     };
+
     return (
-        <Box className={classes.hud}>
+        <Flex direction="row" gap="xs">
+            <Select
+                data={sceneData()}
+                value={currentScene?.getUId()}
+                onChange={(value) => {
+                    if (value) {
+                        const scene = GBoard.entityRegistry.entities.get(value);
+                        if (scene instanceof Scene) {
+                            changeScene(scene);
+                        }
+                    }
+                }}
+            />
             <Button
                 onClick={() => {
                     createScene({
                         name: `test-scene${scenes.length + 1}`,
+                        sortPositionFunc: sceneAtomsUtils.getNextSortPosition,
                     });
                 }}
             >
                 Add scene
             </Button>
-            {addTokenButton()}
-            {scenes.map((scene, idx) => {
-                return (
-                    <Button
-                        key={idx}
-                        onClick={() => {
-                            changeScene(scene);
-                        }}
-                    >
-                        {scene.name}
-                    </Button>
-                );
-            })}
-            {gridSettings()}
             <Button
                 onClick={() => {
                     if (currentScene) {
@@ -74,6 +66,7 @@ export const HUD = () => {
             >
                 Remove current scene
             </Button>
-        </Box>
+            {gridSettings()}
+        </Flex>
     );
 };

@@ -17,5 +17,8 @@ export const initEventListeners = () => {
 
     GEventEmitter.on("socket-join-finished", () => {
         GAtomStore.set(sceneAtoms.refreshScenes);
+        const scenes = GAtomStore.get(sceneAtoms.getScenes);
+        const firstScene = scenes.at(0);
+        GAtomStore.set(sceneAtoms.changeScene, firstScene);
     });
-}
+};

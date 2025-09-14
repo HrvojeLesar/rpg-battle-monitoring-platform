@@ -37,29 +37,14 @@ const getCurrentScene = atom((get) => {
     return get(sceneAtom).currentScene;
 });
 
-const createScene = atom(null, (get, set, options: SceneOptions) => {
-    function getNextSortPosition(): Maybe<number> {
-        const scenes = get(getScenes);
-        const maxSortPosition = scenes.reduce<Maybe<number>>((acc, scene) => {
-            if (acc === undefined) {
-                return scene.sortPosition;
-            }
+export type SceneOptionsExt = {
+    sortPositionFunc?: () => Maybe<number>;
+} & SceneOptions;
 
-            if (scene.sortPosition && scene.sortPosition > acc) {
-                acc = scene.sortPosition;
-            }
-
-            return acc;
-        }, undefined);
-
-        if (maxSortPosition) {
-            return maxSortPosition + 1;
-        }
-
-        return maxSortPosition;
-    }
-
-    const sceneSortPosition = options.sortPosition ?? getNextSortPosition();
+const createScene = atom(null, (_, set, options: SceneOptionsExt) => {
+    const sceneSortPosition =
+        options.sortPosition ??
+        (options.sortPositionFunc && options.sortPositionFunc());
     const scene = SceneFactory.createScene({
         ...options,
         sortPosition: sceneSortPosition,

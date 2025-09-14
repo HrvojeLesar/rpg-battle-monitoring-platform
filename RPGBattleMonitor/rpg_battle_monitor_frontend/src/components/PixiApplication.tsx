@@ -5,8 +5,8 @@ import { destroy } from "../board_core/board";
 import { useAtomValue } from "jotai";
 import { gameStore } from "../board_react_wrapper/stores/game_store";
 import { Flex } from "@mantine/core";
-import { HUD } from "../board_react_wrapper/components/board/HUD";
 import classes from "../css/board.module.css";
+import { Hud } from "../board_react_wrapper/components/interface/Hud";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -129,7 +129,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
 
     return (
         <Flex>
-            <HUD />
+            <Hud />
             <canvas
                 id={classes.game}
                 ref={canvasRef}
