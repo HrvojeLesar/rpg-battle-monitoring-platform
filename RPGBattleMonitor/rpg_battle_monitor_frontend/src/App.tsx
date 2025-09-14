@@ -12,12 +12,18 @@ export const queryClient = new QueryClient();
 
 initEventListeners();
 
+import "@mantine/core/styles.css";
+
+import { MantineProvider } from "@mantine/core";
+
 function App() {
     return (
         <React.StrictMode>
             <QueryClientProvider client={queryClient}>
                 <Provider store={GAtomStore}>
-                    <RouterProvider router={router} />
+                    <MantineProvider defaultColorScheme="auto">
+                        <RouterProvider router={router} />
+                    </MantineProvider>
                 </Provider>
             </QueryClientProvider>
         </React.StrictMode>

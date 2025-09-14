@@ -2,11 +2,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { QueryKeys } from "../requests/query_keys";
 import { createGame, fetchGames } from "../requests/games";
 import { queryClient } from "../../App";
-import { Button, Flex } from "antd";
 import { useNavigate } from "@tanstack/react-router";
 import { BOARD_ROUTE_PATH } from "../routes/board";
 import { useSetAtom } from "jotai";
 import { gameStore } from "../stores/game_store";
+import { Button, Flex } from "@mantine/core";
 
 export const GameList = () => {
     const gameList = useQuery({
@@ -36,12 +36,12 @@ export const GameList = () => {
     }
 
     return (
-        <Flex gap="middle" vertical>
+        <Flex gap="xs" direction="column">
             <Button onClick={() => createGameMutation.mutate()}>
                 Create Game
             </Button>
             <div>
-                <Flex gap="middle" vertical>
+                <Flex gap="xs" direction="column">
                     {gameList.data.map((game, idx) => {
                         return (
                             <Button

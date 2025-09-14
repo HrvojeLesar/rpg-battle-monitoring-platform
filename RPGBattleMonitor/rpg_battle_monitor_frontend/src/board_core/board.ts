@@ -155,7 +155,7 @@ export async function init(
 
     globalThis.addEventListener("resize", () => {
         // TODO: does not always work, manual window resize is still sometimes required
-        boardApplication.scenes.forEach((scene) => {
+        GAtomStore.get(sceneAtoms.getScenes).forEach((scene) => {
             scene.viewport.resize(
                 boardApplication.app.canvas.width,
                 boardApplication.app.canvas.height,

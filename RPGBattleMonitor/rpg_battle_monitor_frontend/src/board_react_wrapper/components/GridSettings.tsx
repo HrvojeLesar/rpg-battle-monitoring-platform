@@ -1,16 +1,7 @@
 import { useEffect, useState } from "react";
 import { Grid } from "../../board_core/grid/grid";
-import {
-    Slider,
-    InputNumberProps,
-    Row,
-    Col,
-    InputNumber,
-    Typography,
-} from "antd";
-
-import { ValueType } from "rc-input-number";
 import { queueEntityUpdate } from "../../websocket/websocket";
+import { NumberInput, Slider, Text, Grid as MantineGrid } from "@mantine/core";
 
 enum GridSide {
     Width = "width",
@@ -19,15 +10,11 @@ enum GridSide {
 
 type SliderProps = {
     inputValue: number;
-    setInputValue: InputNumberProps["onChange"];
+    setInputValue: (value: number) => void;
     min?: number;
     max?: number;
     label?: string;
 };
-
-type GridSizeHandler =
-    | ((value: ValueType | null, side: GridSide) => void)
-    | undefined;
 
 export const MySlider = (props: SliderProps) => {
     const { inputValue, setInputValue, min, max, label } = {
@@ -37,50 +24,37 @@ export const MySlider = (props: SliderProps) => {
     };
 
     return (
-        <Row align="middle">
-            <Col>
-                <Typography.Text>{label}</Typography.Text>
-            </Col>
-            <Col span={12}>
+        <MantineGrid>
+            <MantineGrid.Col span={2}>
+                <Text>{label}</Text>
+            </MantineGrid.Col>
+            <MantineGrid.Col span={2}>
                 <Slider
                     min={min}
                     max={max}
                     onChange={setInputValue}
                     value={typeof inputValue === "number" ? inputValue : 0}
                 />
-            </Col>
-            <Col span={4}>
-                <InputNumber
+            </MantineGrid.Col>
+            <MantineGrid.Col span={2}>
+                <NumberInput
+                    allowDecimal={false}
+                    allowNegative={false}
                     min={min}
                     max={max}
-                    style={{ margin: "0 16px" }}
                     value={inputValue}
-                    onChange={setInputValue}
+                    onChange={(value) => {
+                        if (typeof value !== "number") {
+                            setInputValue(0);
+                        } else {
+                            setInputValue(value);
+                        }
+                    }}
                 />
-            </Col>
-        </Row>
+            </MantineGrid.Col>
+        </MantineGrid>
     );
 };
-
-export function getPositiveNumber(input: ValueType | null): number | null {
-    if (input === null) {
-        return null;
-    }
-
-    if (typeof input === "string") {
-        input = parseInt(input);
-    }
-
-    if (isNaN(input)) {
-        return null;
-    }
-
-    if (input <= 0) {
-        return null;
-    }
-
-    return input;
-}
 
 type Props = {
     grid: Grid;
@@ -96,12 +70,7 @@ export const GridSettings = (props: Props) => {
         setGridSize(grid.size);
     }, [grid.cellSize, grid.size]);
 
-    const setCellSizeHandler: InputNumberProps["onChange"] = (cellSize) => {
-        cellSize = getPositiveNumber(cellSize);
-        if (!cellSize) {
-            return;
-        }
-
+    const setCellSizeHandler = (cellSize: number) => {
         queueEntityUpdate(() => {
             grid.cellSize = cellSize;
 
@@ -110,12 +79,7 @@ export const GridSettings = (props: Props) => {
         setCellSize(cellSize);
     };
 
-    const setGridSizeHandler: GridSizeHandler = (size, side) => {
-        size = getPositiveNumber(size);
-        if (!size) {
-            return;
-        }
-
+    const setGridSizeHandler = (size: number, side: GridSide) => {
         const currentSize = grid.size;
 
         if (side === GridSide.Width) {
@@ -143,16 +107,16 @@ export const GridSettings = (props: Props) => {
             <MySlider
                 label="Width"
                 inputValue={gridSize.width}
-                setInputValue={(event) => {
-                    setGridSizeHandler(event, GridSide.Width);
+                setInputValue={(value) => {
+                    setGridSizeHandler(value, GridSide.Width);
                 }}
                 max={10000}
             />
             <MySlider
                 label="Height"
                 inputValue={gridSize.height}
-                setInputValue={(event) => {
-                    setGridSizeHandler(event, GridSide.Height);
+                setInputValue={(value) => {
+                    setGridSizeHandler(value, GridSide.Height);
                 }}
                 max={10000}
             />

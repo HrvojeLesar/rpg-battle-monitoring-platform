@@ -2,14 +2,14 @@ import { Application, ApplicationOptions } from "pixi.js";
 import { RefObject, useEffect, useRef } from "react";
 import { type PixiApplicationProps } from "../types/pixi_application_props";
 import { destroy } from "../board_core/board";
-import { Button } from "antd";
-import { ButtonColorType } from "antd/es/button";
 import { useAtomValue, useSetAtom } from "jotai";
 import { sceneAtoms } from "../board_react_wrapper/stores/board_store";
 import { gameStore } from "../board_react_wrapper/stores/game_store";
 import { GridSettings } from "../board_react_wrapper/components/GridSettings";
 import { TokenFactory } from "../board_core/factories/token_factory";
 import { Scene } from "../board_core/scene";
+import { Resizable } from "re-resizable";
+import { Button } from "@mantine/core";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -139,14 +139,6 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         };
     }, [applicationInitCallback, applicationOptions, resizeTo, gameId]);
 
-    const buttonColour = (scene: Scene): Maybe<ButtonColorType> => {
-        if (scene === currentScene) {
-            return "primary";
-        }
-
-        return undefined;
-    };
-
     const gridSettings = () => {
         if (!currentScene) {
             return <></>;
@@ -177,6 +169,12 @@ export const PixiApplication = (props: PixiApplicationProps) => {
 
     return (
         <>
+            <Resizable>
+                <Button>Abc</Button>
+                <Button>Abc</Button>
+                <Button>Abc</Button>
+                <Button>Abc</Button>
+            </Resizable>
             <div style={{ overflow: "hidden", position: "relative" }}>
                 <canvas ref={canvasRef} className={canvasClass} />
                 <Button
@@ -193,8 +191,6 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                     return (
                         <Button
                             key={idx}
-                            color={buttonColour(scene)}
-                            variant="solid"
                             onClick={() => {
                                 changeScene(scene);
                             }}
