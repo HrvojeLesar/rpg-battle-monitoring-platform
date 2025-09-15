@@ -7,6 +7,7 @@ import { gameStore } from "../board_react_wrapper/stores/game_store";
 import { Flex } from "@mantine/core";
 import classes from "../css/board.module.css";
 import { Hud } from "../board_react_wrapper/components/interface/Hud";
+import { WindowOverlay } from "@/board_react_wrapper/components/floating_windows/Window";
 
 declare global {
     var __PIXI_APP__: Application;
@@ -129,6 +130,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
 
     return (
         <Flex>
+            <WindowOverlay />
             <Hud />
             <canvas
                 id={classes.game}

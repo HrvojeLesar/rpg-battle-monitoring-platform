@@ -2,43 +2,40 @@ import { atom } from "jotai";
 import newUId from "@/board_core/utils/uuid_generator";
 import { Coordinates, UniqueIdentifier } from "@dnd-kit/core/dist/types";
 
-export const testWindow = (id: UniqueIdentifier) => {
-    return (
-        <div>
-            <p>Test Window {id}</p>
-        </div>
-    );
-};
+const ZINDEX_OFFSET = 10;
 
-const genTestWindow = (idx: number): WindowEntry => {
-    const id = newUId();
-    return {
-        id,
-        window: testWindow(id),
-        position: { x: 0, y: 0 },
-        zIndex: idx,
-    };
-};
+export type WindowName = string;
 
 export type WindowEntry = {
-    id: UniqueIdentifier;
-    window: JSX.Element;
-    position: Coordinates;
-    zIndex: number;
+    title?: string;
+    name?: WindowName;
+    position?: Coordinates;
+    zIndex?: number;
+    content?: JSX.Element;
 };
 
+type WindowEntryInner = {
+    id: UniqueIdentifier;
+    position: Coordinates;
+    zIndex: number;
+} & WindowEntry;
+
 export type WindowStoreState = {
-    windows: WindowEntry[];
+    windows: WindowEntryInner[];
 };
 
 const initialState: WindowStoreState = {
-    windows: [genTestWindow(1), genTestWindow(2), genTestWindow(3)],
+    windows: [],
 };
 
 const windowAtom = atom(initialState);
 
 const windows = atom((get) => {
     return get(windowAtom).windows;
+});
+
+const zIndexOffset = atom((get) => {
+    return get(windowAtom).windows.length + ZINDEX_OFFSET;
 });
 
 const updateWindowPosition = atom(
@@ -61,7 +58,7 @@ const updateWindowPosition = atom(
     },
 );
 
-const updateWindowZIndex = atom(null, (_, set, id: UniqueIdentifier) => {
+const updateWindowZIndex = atom(null, (get, set, id: UniqueIdentifier) => {
     set(windowAtom, (state) => {
         const window = state.windows.find((w) => w.id === id);
         if (!window) {
@@ -72,11 +69,13 @@ const updateWindowZIndex = atom(null, (_, set, id: UniqueIdentifier) => {
             return state;
         }
 
-        if (window.zIndex === state.windows.length) {
+        const zIndex = get(zIndexOffset);
+
+        if (window.zIndex === zIndex) {
             return state;
         }
 
-        window.zIndex = state.windows.length + 1;
+        window.zIndex = zIndex + 1;
         state.windows.forEach((w) => {
             if (w.zIndex > 1) {
                 w.zIndex -= 1;
@@ -89,9 +88,54 @@ const updateWindowZIndex = atom(null, (_, set, id: UniqueIdentifier) => {
     });
 });
 
+const removeWindow = atom(null, (_, set, id: UniqueIdentifier) => {
+    set(windowAtom, (state) => {
+        state.windows = [...state.windows.filter((w) => w.id !== id)];
+        console.log(state.windows);
+
+        return { ...state };
+    });
+});
+
+const addWindow = atom(null, (get, set, window: WindowEntry) => {
+    set(windowAtom, (state) => {
+        const entry: WindowEntryInner = {
+            id: newUId(),
+            position: window.position ?? { x: 0, y: 0 },
+            zIndex: window.zIndex ?? get(zIndexOffset) + 1,
+            ...window,
+        };
+
+        state.windows = [...state.windows, entry];
+
+        return { ...state };
+    });
+});
+
+const openWindow = atom(
+    null,
+    (get, set, window: WindowEntry | UniqueIdentifier | WindowName) => {
+        const windows = get(windowAtom).windows;
+        let foundWindow: WindowEntryInner | undefined = undefined;
+        if (typeof window === "string" || typeof window === "number") {
+            foundWindow = windows.find(
+                (w) => w.id === window || w.name === window,
+            );
+        }
+
+        if (foundWindow) {
+            set(updateWindowZIndex, foundWindow.id);
+        } else if (typeof window === "object") {
+            set(addWindow, window);
+        }
+    },
+);
+
 export const windowAtoms = {
     windowAtom,
     windows,
     updateWindowPosition,
     updateWindowZIndex,
+    removeWindow,
+    openWindow,
 };

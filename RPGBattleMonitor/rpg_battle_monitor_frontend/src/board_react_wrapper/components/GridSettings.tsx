@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { Grid } from "../../board_core/grid/grid";
 import { queueEntityUpdate } from "../../websocket/websocket";
-import { NumberInput, Slider, Text, Grid as MantineGrid } from "@mantine/core";
+import {
+    NumberInput,
+    Slider,
+    Text,
+    Grid as MantineGrid,
+    Flex,
+} from "@mantine/core";
 
 enum GridSide {
     Width = "width",
@@ -16,7 +22,7 @@ type SliderProps = {
     label?: string;
 };
 
-export const MySlider = (props: SliderProps) => {
+export const GridSettingSlider = (props: SliderProps) => {
     const { inputValue, setInputValue, min, max, label } = {
         min: 1,
         max: 100,
@@ -28,7 +34,7 @@ export const MySlider = (props: SliderProps) => {
             <MantineGrid.Col span={2}>
                 <Text>{label}</Text>
             </MantineGrid.Col>
-            <MantineGrid.Col span={2}>
+            <MantineGrid.Col span={4}>
                 <Slider
                     min={min}
                     max={max}
@@ -36,7 +42,7 @@ export const MySlider = (props: SliderProps) => {
                     value={typeof inputValue === "number" ? inputValue : 0}
                 />
             </MantineGrid.Col>
-            <MantineGrid.Col span={2}>
+            <MantineGrid.Col span={4}>
                 <NumberInput
                     allowDecimal={false}
                     allowNegative={false}
@@ -97,14 +103,14 @@ export const GridSettings = (props: Props) => {
     };
 
     return (
-        <>
-            <MySlider
+        <Flex direction="column">
+            <GridSettingSlider
                 label="Cell size in pixels:"
                 inputValue={cellSize}
                 setInputValue={setCellSizeHandler}
                 max={500}
             />
-            <MySlider
+            <GridSettingSlider
                 label="Width"
                 inputValue={gridSize.width}
                 setInputValue={(value) => {
@@ -112,7 +118,7 @@ export const GridSettings = (props: Props) => {
                 }}
                 max={10000}
             />
-            <MySlider
+            <GridSettingSlider
                 label="Height"
                 inputValue={gridSize.height}
                 setInputValue={(value) => {
@@ -120,6 +126,6 @@ export const GridSettings = (props: Props) => {
                 }}
                 max={10000}
             />
-        </>
+        </Flex>
     );
 };

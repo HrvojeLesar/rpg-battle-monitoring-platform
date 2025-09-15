@@ -12,7 +12,7 @@ import {
 } from "@dnd-kit/core";
 import { ReactNode, useEffect } from "react";
 import { Resizable } from "re-resizable";
-import { Flex, Paper } from "@mantine/core";
+import { Box, CloseButton, Divider, Flex, Paper, Title } from "@mantine/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import { IconWindowMinimize } from "@tabler/icons-react";
 import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
@@ -23,6 +23,7 @@ export type WindowProps = {
     id: UniqueIdentifier;
     children?: ReactNode;
     styles?: React.CSSProperties;
+    title?: string;
     left: number;
     top: number;
     zIndex: number;
@@ -33,10 +34,12 @@ export type WindowHeaderProps = {
     isDragging?: boolean;
     listeners?: SyntheticListenerMap;
     attributes?: DraggableAttributes;
+    title?: string;
+    onClose?: () => void;
 };
 
 const WindowHeader = (props: WindowHeaderProps) => {
-    const { styles, isDragging, listeners, attributes } = props;
+    const { styles, isDragging, listeners, attributes, title, onClose } = props;
     return (
         <Flex
             style={{
@@ -45,12 +48,18 @@ const WindowHeader = (props: WindowHeaderProps) => {
             }}
             {...listeners}
             {...attributes}
-        ></Flex>
+            gap="xs"
+            align="center"
+            justify="space-between"
+        >
+            <Title order={4}>{title}</Title>
+            <CloseButton onClick={onClose} />
+        </Flex>
     );
 };
 
 export function Window(props: WindowProps) {
-    const { id, children, styles, left, top, zIndex } = props;
+    const { id, children, styles, left, top, zIndex, title } = props;
     const { attributes, listeners, setNodeRef, transform, isDragging } =
         useDraggable({
             id,
@@ -61,6 +70,7 @@ export function Window(props: WindowProps) {
     };
 
     const updateWindowZIndex = useSetAtom(windowAtoms.updateWindowZIndex);
+    const removeWindow = useSetAtom(windowAtoms.removeWindow);
 
     useEffect(() => {
         updateWindowZIndex(id);
@@ -100,6 +110,8 @@ export function Window(props: WindowProps) {
                         <IconWindowMinimize transform="scale (-1, 1)" />
                     ),
                 }}
+                minHeight={120}
+                minWidth={120}
                 bounds="window"
                 enable={{
                     top: false,
@@ -112,19 +124,19 @@ export function Window(props: WindowProps) {
                     topLeft: false,
                 }}
             >
-                <Flex direction="column">
-                    <WindowHeader styles={styles} isDragging={isDragging} />
-                    <Flex
-                        style={{
-                            ...styles,
-                            cursor: isDragging ? "grabbing" : "grab",
+                <Flex direction="column" p="xs" gap="xs">
+                    <WindowHeader
+                        styles={styles}
+                        isDragging={isDragging}
+                        listeners={listeners}
+                        attributes={attributes}
+                        title={title}
+                        onClose={() => {
+                            removeWindow(id);
                         }}
-                        {...listeners}
-                        {...attributes}
-                    >
-                        Header
-                    </Flex>
-                    <div>{children}</div>
+                    />
+                    <Divider />
+                    <Box>{children}</Box>
                 </Flex>
             </Resizable>
         </Paper>
@@ -135,8 +147,12 @@ export const WindowOverlay = () => {
     const windows = useAtomValue(windowAtoms.windows);
     const updateWindowPosition = useSetAtom(windowAtoms.updateWindowPosition);
 
-    const mouseSensor = useSensor(MouseSensor);
-    const touchSensor = useSensor(TouchSensor);
+    const mouseSensor = useSensor(MouseSensor, {
+        activationConstraint: { distance: 1 },
+    });
+    const touchSensor = useSensor(TouchSensor, {
+        activationConstraint: { distance: 1 },
+    });
 
     const sensors = useSensors(mouseSensor, touchSensor);
 
@@ -146,33 +162,25 @@ export const WindowOverlay = () => {
     };
 
     return (
-        <div
-            style={{
-                position: "fixed",
-                inset: 0,
-                width: "100dvw",
-                height: "100dvh",
-            }}
+        <DndContext
+            sensors={sensors}
+            onDragEnd={dragEnd}
+            modifiers={[restrictToWindowEdges]}
         >
-            <DndContext
-                sensors={sensors}
-                onDragEnd={dragEnd}
-                modifiers={[restrictToWindowEdges]}
-            >
-                {windows.map((w) => {
-                    return (
-                        <Window
-                            key={w.id}
-                            id={w.id}
-                            left={w.position.x}
-                            top={w.position.y}
-                            zIndex={w.zIndex}
-                        >
-                            {w.window}
-                        </Window>
-                    );
-                })}
-            </DndContext>
-        </div>
+            {windows.map((w) => {
+                return (
+                    <Window
+                        key={w.id}
+                        id={w.id}
+                        left={w.position.x}
+                        top={w.position.y}
+                        zIndex={w.zIndex}
+                        title={w.title}
+                    >
+                        {w.content}
+                    </Window>
+                );
+            })}
+        </DndContext>
     );
 };

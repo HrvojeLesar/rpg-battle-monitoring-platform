@@ -92,7 +92,11 @@ class EntityContainer {
         this.entitiesMap.set(entity.getUId(), entity);
     }
 
-    public get(uid: UId): Option<IMessagable> {
+    public get(uid: UId | IMessagable): Option<IMessagable> {
+        if (typeof uid === "object") {
+            return this.entitiesMap.get(uid.getUId());
+        }
+
         return this.entitiesMap.get(uid);
     }
 

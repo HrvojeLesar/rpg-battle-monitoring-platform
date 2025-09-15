@@ -11,8 +11,19 @@ import {
 import { sceneAtomsUtils } from "../../stores/utils";
 import { GBoard } from "../../../board_core/board";
 import { Scene } from "../../../board_core/scene";
-import { GridSettings } from "../GridSettings";
 import { IconSettings } from "@tabler/icons-react";
+import {
+    windowAtoms,
+    WindowEntry,
+} from "@/board_react_wrapper/stores/window_store";
+import { SceneSettings } from "./SceneSettings";
+
+const openSceneSettings = (): WindowEntry => {
+    return {
+        title: "Scene Settings",
+        content: <SceneSettings />,
+    };
+};
 
 export const SceneSelection = () => {
     const scenes = useAtomValue(sceneAtoms.getScenes);
@@ -21,17 +32,7 @@ export const SceneSelection = () => {
     const createScene = useSetAtom(sceneAtoms.createScene);
     const removeScene = useSetAtom(sceneAtoms.removeScene);
 
-    const gridSettings = () => {
-        if (!currentScene) {
-            return <></>;
-        }
-
-        return (
-            <>
-                <GridSettings grid={currentScene.grid} />
-            </>
-        );
-    };
+    const openWindow = useSetAtom(windowAtoms.openWindow);
 
     const sceneData = (): ComboboxData => {
         return scenes.map((scene) => {
@@ -76,7 +77,11 @@ export const SceneSelection = () => {
                 Remove current scene
             </Button>
             <Tooltip label="Scene settings">
-                <ActionIcon>
+                <ActionIcon
+                    onClick={() => {
+                        openWindow(openSceneSettings());
+                    }}
+                >
                     <IconSettings />
                 </ActionIcon>
             </Tooltip>
