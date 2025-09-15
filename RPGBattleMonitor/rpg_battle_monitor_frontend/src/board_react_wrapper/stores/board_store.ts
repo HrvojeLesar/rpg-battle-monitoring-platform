@@ -3,12 +3,12 @@ import { SceneFactory } from "../../board_core/factories/scene_factory";
 import { Scene, SceneOptions } from "../../board_core/scene";
 import { atom } from "jotai";
 
-export type sceneReducerState = {
+export type SceneReducerState = {
     scenes: Scene[];
     currentScene: Maybe<Scene>;
 };
 
-const initialState: sceneReducerState = {
+const initialState: SceneReducerState = {
     scenes: [],
     currentScene: undefined,
 };

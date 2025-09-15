@@ -1,0 +1,1 @@
+Windows act as containers for any arbitrary content.

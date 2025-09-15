@@ -1,8 +1,8 @@
 import { CSS } from "@dnd-kit/utilities";
-import { Coordinates } from "@dnd-kit/utilities";
 import {
     DndContext,
     DragEndEvent,
+    DraggableAttributes,
     MouseSensor,
     TouchSensor,
     UniqueIdentifier,
@@ -10,12 +10,14 @@ import {
     useSensor,
     useSensors,
 } from "@dnd-kit/core";
-import { forwardRef, ReactNode, useState } from "react";
+import { ReactNode, useEffect } from "react";
 import { Resizable } from "re-resizable";
-import { Box, Flex } from "@mantine/core";
+import { Flex, Paper } from "@mantine/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
-import { useElementSize } from "@mantine/hooks";
 import { IconWindowMinimize } from "@tabler/icons-react";
+import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
+import { useAtomValue, useSetAtom } from "jotai";
+import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
 
 export type WindowProps = {
     id: UniqueIdentifier;
@@ -23,92 +25,115 @@ export type WindowProps = {
     styles?: React.CSSProperties;
     left: number;
     top: number;
+    zIndex: number;
 };
 
-export const Draggable = forwardRef<HTMLDivElement, WindowProps>(
-    function Draggable(props, ref) {
-        const { id, children, styles, left, top } = props;
-        const { attributes, listeners, setNodeRef, transform, isDragging } =
-            useDraggable({
-                id,
-            });
+export type WindowHeaderProps = {
+    styles?: React.CSSProperties;
+    isDragging?: boolean;
+    listeners?: SyntheticListenerMap;
+    attributes?: DraggableAttributes;
+};
 
-        const style = {
-            // Outputs `translate3d(x, y, 0)`
-            transform: CSS.Translate.toString(transform),
-        };
+const WindowHeader = (props: WindowHeaderProps) => {
+    const { styles, isDragging, listeners, attributes } = props;
+    return (
+        <Flex
+            style={{
+                cursor: isDragging ? "grabbing" : "grab",
+                ...styles,
+            }}
+            {...listeners}
+            {...attributes}
+        ></Flex>
+    );
+};
 
-        return (
-            <Box
-                style={{
-                    ...style,
-                    position: "absolute",
-                    left,
-                    top,
-                    border: "1px solid red",
-                    overflow: "hidden",
+export function Window(props: WindowProps) {
+    const { id, children, styles, left, top, zIndex } = props;
+    const { attributes, listeners, setNodeRef, transform, isDragging } =
+        useDraggable({
+            id,
+        });
+
+    const style = {
+        transform: CSS.Translate.toString(transform),
+    };
+
+    const updateWindowZIndex = useSetAtom(windowAtoms.updateWindowZIndex);
+
+    useEffect(() => {
+        updateWindowZIndex(id);
+    }, [isDragging, id, updateWindowZIndex]);
+
+    return (
+        <Paper
+            withBorder
+            shadow="xs"
+            style={{
+                ...style,
+                left,
+                top,
+                position: "absolute",
+                overflow: "hidden",
+                zIndex,
+            }}
+            ref={setNodeRef}
+            onClick={() => {
+                updateWindowZIndex(id);
+            }}
+        >
+            <Resizable
+                onResizeStart={() => {
+                    updateWindowZIndex(id);
                 }}
-                ref={(r) => {
-                    switch (typeof ref) {
-                        case "function":
-                            ref(r);
-                            break;
-                        case "object":
-                            if (ref !== null) {
-                                ref.current = r;
-                            }
-                            break;
-                    }
-
-                    setNodeRef(r);
+                handleStyles={{
+                    bottomRight: {
+                        width: 12,
+                        height: 12,
+                        right: 12,
+                        bottom: 12,
+                    },
+                }}
+                handleComponent={{
+                    bottomRight: (
+                        <IconWindowMinimize transform="scale (-1, 1)" />
+                    ),
+                }}
+                bounds="window"
+                enable={{
+                    top: false,
+                    right: false,
+                    bottom: false,
+                    left: false,
+                    topRight: false,
+                    bottomRight: true,
+                    bottomLeft: false,
+                    topLeft: false,
                 }}
             >
-                <Resizable
-                    handleComponent={{
-                        bottomRight: (
-                            <IconWindowMinimize
-                                size={16}
-                                transform="scale (-1, 1)"
-                            />
-                        ),
-                    }}
-                    bounds="window"
-                    enable={{
-                        top: false,
-                        right: false,
-                        bottom: false,
-                        left: false,
-                        topRight: false,
-                        bottomRight: true,
-                        bottomLeft: false,
-                        topLeft: false,
-                    }}
-                >
-                    <Flex direction="column">
-                        <div
-                            style={{
-                                ...styles,
-                                cursor: isDragging ? "grabbing" : "grab",
-                            }}
-                            {...listeners}
-                            {...attributes}
-                        >
-                            Header
-                        </div>
-                        <div>{children}</div>
+                <Flex direction="column">
+                    <WindowHeader styles={styles} isDragging={isDragging} />
+                    <Flex
+                        style={{
+                            ...styles,
+                            cursor: isDragging ? "grabbing" : "grab",
+                        }}
+                        {...listeners}
+                        {...attributes}
+                    >
+                        Header
                     </Flex>
-                </Resizable>
-            </Box>
-        );
-    },
-);
+                    <div>{children}</div>
+                </Flex>
+            </Resizable>
+        </Paper>
+    );
+}
 
-export function Window() {
-    const [{ x, y }, setCoordinates] = useState<Coordinates>({ x: 0, y: 0 });
-
-    const { ref, width, height } = useElementSize();
-
-    console.log(width, height);
+export const WindowOverlay = () => {
+    const windows = useAtomValue(windowAtoms.windows);
+    const updateWindowPosition = useSetAtom(windowAtoms.updateWindowPosition);
 
     const mouseSensor = useSensor(MouseSensor);
     const touchSensor = useSensor(TouchSensor);
@@ -116,37 +141,38 @@ export function Window() {
     const sensors = useSensors(mouseSensor, touchSensor);
 
     const dragEnd = (e: DragEndEvent) => {
-        setCoordinates(({ x, y }) => {
-            return {
-                x: x + e.delta.x,
-                y: y + e.delta.y,
-            };
-        });
+        const id = e.active.id;
+        updateWindowPosition(id, e.delta);
     };
 
     return (
-        <WindowOverlay>
+        <div
+            style={{
+                position: "fixed",
+                inset: 0,
+                width: "100dvw",
+                height: "100dvh",
+            }}
+        >
             <DndContext
                 sensors={sensors}
                 onDragEnd={dragEnd}
                 modifiers={[restrictToWindowEdges]}
             >
-                <Draggable id={1} left={x} top={y} ref={ref}>
-                    <div>Hello world</div>
-                </Draggable>
+                {windows.map((w) => {
+                    return (
+                        <Window
+                            key={w.id}
+                            id={w.id}
+                            left={w.position.x}
+                            top={w.position.y}
+                            zIndex={w.zIndex}
+                        >
+                            {w.window}
+                        </Window>
+                    );
+                })}
             </DndContext>
-        </WindowOverlay>
-    );
-}
-
-export type WindowOverlayProps = {
-    children: ReactNode;
-};
-
-const WindowOverlay = ({ children }: WindowOverlayProps) => {
-    return (
-        <div style={{ position: "fixed", width: "100dvw", height: "100dvh" }}>
-            {children}
         </div>
     );
 };

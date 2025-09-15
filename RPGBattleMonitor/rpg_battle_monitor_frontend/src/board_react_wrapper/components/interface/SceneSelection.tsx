@@ -1,10 +1,18 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { sceneAtoms } from "../../stores/board_store";
-import { Button, ComboboxData, Flex, Select } from "@mantine/core";
+import {
+    ActionIcon,
+    Button,
+    ComboboxData,
+    Flex,
+    Select,
+    Tooltip,
+} from "@mantine/core";
 import { sceneAtomsUtils } from "../../stores/utils";
 import { GBoard } from "../../../board_core/board";
 import { Scene } from "../../../board_core/scene";
 import { GridSettings } from "../GridSettings";
+import { IconSettings } from "@tabler/icons-react";
 
 export const SceneSelection = () => {
     const scenes = useAtomValue(sceneAtoms.getScenes);
@@ -24,6 +32,7 @@ export const SceneSelection = () => {
             </>
         );
     };
+
     const sceneData = (): ComboboxData => {
         return scenes.map((scene) => {
             return {
@@ -34,7 +43,7 @@ export const SceneSelection = () => {
     };
 
     return (
-        <Flex direction="row" gap="xs">
+        <Flex direction="row" gap="xs" align="center">
             <Select
                 data={sceneData()}
                 value={currentScene?.getUId()}
@@ -66,7 +75,11 @@ export const SceneSelection = () => {
             >
                 Remove current scene
             </Button>
-            {gridSettings()}
+            <Tooltip label="Scene settings">
+                <ActionIcon>
+                    <IconSettings />
+                </ActionIcon>
+            </Tooltip>
         </Flex>
     );
 };
