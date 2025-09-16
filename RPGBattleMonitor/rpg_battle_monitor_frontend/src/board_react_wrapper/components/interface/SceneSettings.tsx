@@ -30,6 +30,10 @@ export const SceneOptions = (props: SceneOptionsProps) => {
     const [name, setName] = useState(scene?.name);
     const refreshScenes = useSetAtom(sceneAtoms.refreshScenes);
 
+    useEffect(() => {
+        setName(scene.name);
+    }, [scene]);
+
     const queueSceneUpdate = useDebouncedCallback(
         (scene: Scene, name: string) => {
             if (name.trim().length === 0) return;
