@@ -14,6 +14,7 @@ const openSceneSettings = (): WindowEntry => {
     return {
         title: "Scene Settings",
         content: <SceneSettings />,
+        name: "scene-settings",
     };
 };
 

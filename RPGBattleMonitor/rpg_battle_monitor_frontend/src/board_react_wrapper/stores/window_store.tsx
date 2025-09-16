@@ -7,6 +7,7 @@ const ZINDEX_OFFSET = 10;
 export type WindowName = string;
 
 export type WindowEntry = {
+    id?: UniqueIdentifier;
     title?: string;
     name?: WindowName;
     position?: Coordinates;
@@ -114,18 +115,17 @@ const addWindow = atom(null, (get, set, window: WindowEntry) => {
 
 const openWindow = atom(
     null,
-    (get, set, window: WindowEntry | UniqueIdentifier | WindowName) => {
+    (get, set, window: WindowEntry, force: boolean = false) => {
         const windows = get(windowAtom).windows;
-        let foundWindow: WindowEntryInner | undefined = undefined;
-        if (typeof window === "string" || typeof window === "number") {
-            foundWindow = windows.find(
-                (w) => w.id === window || w.name === window,
-            );
-        }
+        const searchValue: Maybe<UniqueIdentifier> = window.name ?? window.id;
 
-        if (foundWindow) {
+        const foundWindow = windows.find(
+            (w) => w.id === searchValue || w.name === searchValue,
+        );
+
+        if (!force && foundWindow) {
             set(updateWindowZIndex, foundWindow.id);
-        } else if (typeof window === "object") {
+        } else {
             set(addWindow, window);
         }
     },
