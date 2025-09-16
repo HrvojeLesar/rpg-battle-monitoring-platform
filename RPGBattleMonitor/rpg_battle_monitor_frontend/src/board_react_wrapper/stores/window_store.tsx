@@ -12,6 +12,7 @@ export type WindowEntry = {
     position?: Coordinates;
     zIndex?: number;
     content?: JSX.Element;
+    resizable?: boolean;
 };
 
 type WindowEntryInner = {
@@ -91,7 +92,6 @@ const updateWindowZIndex = atom(null, (get, set, id: UniqueIdentifier) => {
 const removeWindow = atom(null, (_, set, id: UniqueIdentifier) => {
     set(windowAtom, (state) => {
         state.windows = [...state.windows.filter((w) => w.id !== id)];
-        console.log(state.windows);
 
         return { ...state };
     });

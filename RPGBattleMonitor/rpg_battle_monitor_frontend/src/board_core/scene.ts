@@ -17,6 +17,8 @@ import {
 } from "./interfaces/messagable";
 import newUId from "./utils/uuid_generator";
 import { isDev } from "../utils/dev_mode";
+import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
+import { sceneAtoms } from "@/board_react_wrapper/stores/board_store";
 
 export type SceneAttributes = {
     gridUid: string;
@@ -252,6 +254,7 @@ export class Scene implements IMessagable<SceneAttributes> {
         this._uid = changes.uid;
         this._sortPosition = changes.sortPosition;
         this.name = changes.name;
+        GAtomStore.set(sceneAtoms.refreshScenes);
     }
 
     public deleteAction(action: DeleteAction): void {

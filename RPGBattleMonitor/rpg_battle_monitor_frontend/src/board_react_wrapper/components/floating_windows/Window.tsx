@@ -12,9 +12,9 @@ import {
 } from "@dnd-kit/core";
 import { ReactNode, useEffect } from "react";
 import { Resizable } from "re-resizable";
-import { Box, CloseButton, Divider, Flex, Paper, Title } from "@mantine/core";
+import { CloseButton, Divider, Flex, Paper, Title } from "@mantine/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
-import { IconWindowMinimize } from "@tabler/icons-react";
+import { IconArrowsDiagonal } from "@tabler/icons-react";
 import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import { useAtomValue, useSetAtom } from "jotai";
 import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
@@ -27,6 +27,7 @@ export type WindowProps = {
     left: number;
     top: number;
     zIndex: number;
+    resizable?: boolean;
 };
 
 export type WindowHeaderProps = {
@@ -107,7 +108,7 @@ export function Window(props: WindowProps) {
                 }}
                 handleComponent={{
                     bottomRight: (
-                        <IconWindowMinimize transform="scale (-1, 1)" />
+                        <IconArrowsDiagonal transform="scale (-1, 1)" />
                     ),
                 }}
                 minHeight={120}
@@ -136,7 +137,7 @@ export function Window(props: WindowProps) {
                         }}
                     />
                     <Divider />
-                    <Box>{children}</Box>
+                    {children}
                 </Flex>
             </Resizable>
         </Paper>
@@ -176,6 +177,7 @@ export const WindowOverlay = () => {
                         top={w.position.y}
                         zIndex={w.zIndex}
                         title={w.title}
+                        resizable={w.resizable}
                     >
                         {w.content}
                     </Window>

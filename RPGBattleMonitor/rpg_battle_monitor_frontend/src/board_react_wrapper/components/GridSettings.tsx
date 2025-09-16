@@ -8,6 +8,7 @@ import {
     Grid as MantineGrid,
     Flex,
 } from "@mantine/core";
+import { useDebouncedCallback } from "@mantine/hooks";
 
 enum GridSide {
     Width = "width",
@@ -76,13 +77,17 @@ export const GridSettings = (props: Props) => {
         setGridSize(grid.size);
     }, [grid.cellSize, grid.size]);
 
-    const setCellSizeHandler = (cellSize: number) => {
+    const queueGridUpdate = useDebouncedCallback((grid: Grid) => {
         queueEntityUpdate(() => {
-            grid.cellSize = cellSize;
-
             return grid;
         });
+    }, 200);
+
+    const setCellSizeHandler = (cellSize: number) => {
         setCellSize(cellSize);
+        grid.cellSize = cellSize;
+
+        queueGridUpdate(grid);
     };
 
     const setGridSizeHandler = (size: number, side: GridSide) => {
@@ -94,12 +99,9 @@ export const GridSettings = (props: Props) => {
             currentSize.height = size;
         }
 
-        queueEntityUpdate(() => {
-            grid.size = { ...currentSize };
-
-            return grid;
-        });
         setGridSize({ ...currentSize });
+        grid.size = { ...currentSize };
+        queueGridUpdate(grid);
     };
 
     return (

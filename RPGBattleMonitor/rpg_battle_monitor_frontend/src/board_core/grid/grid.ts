@@ -6,7 +6,6 @@ import {
     TypedJson,
     UId,
 } from "../interfaces/messagable";
-import { UniqueCollection } from "../utils/unique_collection";
 import newUId from "../utils/uuid_generator";
 import { GAtomStore } from "../../board_react_wrapper/stores/state_store";
 import { sceneAtoms } from "../../board_react_wrapper/stores/board_store";

@@ -1,14 +1,6 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { sceneAtoms } from "../../stores/board_store";
-import {
-    ActionIcon,
-    Button,
-    ComboboxData,
-    Flex,
-    Select,
-    Tooltip,
-} from "@mantine/core";
-import { sceneAtomsUtils } from "../../stores/utils";
+import { ActionIcon, ComboboxData, Flex, Select, Tooltip } from "@mantine/core";
 import { GBoard } from "../../../board_core/board";
 import { Scene } from "../../../board_core/scene";
 import { IconSettings } from "@tabler/icons-react";
@@ -29,8 +21,6 @@ export const SceneSelection = () => {
     const scenes = useAtomValue(sceneAtoms.getScenes);
     const changeScene = useSetAtom(sceneAtoms.changeScene);
     const currentScene = useAtomValue(sceneAtoms.getCurrentScene);
-    const createScene = useSetAtom(sceneAtoms.createScene);
-    const removeScene = useSetAtom(sceneAtoms.removeScene);
 
     const openWindow = useSetAtom(windowAtoms.openWindow);
 
@@ -46,6 +36,7 @@ export const SceneSelection = () => {
     return (
         <Flex direction="row" gap="xs" align="center">
             <Select
+                searchable
                 data={sceneData()}
                 value={currentScene?.getUId()}
                 onChange={(value) => {
@@ -57,25 +48,6 @@ export const SceneSelection = () => {
                     }
                 }}
             />
-            <Button
-                onClick={() => {
-                    createScene({
-                        name: `test-scene${scenes.length + 1}`,
-                        sortPositionFunc: sceneAtomsUtils.getNextSortPosition,
-                    });
-                }}
-            >
-                Add scene
-            </Button>
-            <Button
-                onClick={() => {
-                    if (currentScene) {
-                        removeScene(currentScene);
-                    }
-                }}
-            >
-                Remove current scene
-            </Button>
             <Tooltip label="Scene settings">
                 <ActionIcon
                     onClick={() => {
