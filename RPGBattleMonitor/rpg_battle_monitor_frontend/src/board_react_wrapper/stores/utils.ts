@@ -15,7 +15,7 @@ const getNextSortPosition = () => {
         return acc;
     }, undefined);
 
-    if (maxSortPosition) {
+    if (maxSortPosition !== undefined) {
         return maxSortPosition + 1;
     }
 

@@ -109,6 +109,8 @@ export const PixiApplication = (props: PixiApplicationProps) => {
 
             applicationRef.current = application;
 
+            document.getElementsByTagName("html")[0].style.overflow = "hidden";
+
             return application;
         }
 
@@ -123,6 +125,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         return () => {
             canvasRemoved.current = true;
             initPromiseRef.current?.then(() => {
+                document.getElementsByTagName("html")[0].style.overflow = "";
                 destroy();
             });
         };
