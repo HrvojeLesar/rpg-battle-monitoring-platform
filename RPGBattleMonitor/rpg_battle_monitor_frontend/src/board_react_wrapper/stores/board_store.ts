@@ -17,8 +17,8 @@ const sortedScenes = (scenes: Scene[]): Scene[] => {
     scenes.sort((a, b) => {
         const aPosition = a.sortPosition;
         const bPosition = b.sortPosition;
-        if (aPosition && bPosition) {
-            return aPosition - bPosition;
+        if (aPosition !== undefined && bPosition !== undefined) {
+            return aPosition > bPosition ? 1 : -1;
         }
 
         return 0;
