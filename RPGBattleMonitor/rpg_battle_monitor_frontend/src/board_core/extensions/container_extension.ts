@@ -57,6 +57,7 @@ export type ContainerExtensionAttributes = {
     isResizable?: boolean;
     eventMode?: EventMode;
     cursor?: string;
+    rotation?: number;
 };
 
 export const DEFAULTS = {
@@ -444,6 +445,7 @@ export abstract class ContainerExtension<
             isResizable: this.isResizable,
             eventMode: this.eventMode,
             cursor: this.cursor,
+            rotation: this.rotation,
         } as Attributes;
     }
 
@@ -464,6 +466,9 @@ export abstract class ContainerExtension<
         this.isResizable = changes.isResizable ?? DEFAULTS.isResizable;
         this.eventMode = changes.eventMode;
         this.cursor = changes.cursor;
+        if (changes.rotation !== undefined) {
+            this.rotation = changes.rotation;
+        }
     }
 
     public getUId(): UId {
