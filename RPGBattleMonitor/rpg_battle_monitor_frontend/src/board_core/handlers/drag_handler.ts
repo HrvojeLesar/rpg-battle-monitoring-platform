@@ -63,8 +63,6 @@ export class DragHandler {
                 return;
             }
 
-            this.scene.viewport.pause = true;
-
             const localPos = event.getLocalPosition(this.scene.viewport);
 
             if (this.selectHandler.isMultiSelection()) {
@@ -109,7 +107,6 @@ export class DragHandler {
                 "globalpointermove",
                 this.onGlobalPointerMove,
             );
-            this.scene.viewport.pause = false;
 
             const selectedItems = this.selectHandler.selections;
             for (const container of selectedItems) {

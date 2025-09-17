@@ -21,6 +21,10 @@ export class SelectionBox extends Graphics {
         let startPoint = new Point();
 
         const onGlobalPointerMove = (event: FederatedPointerEvent) => {
+            if (this._viewport.input.touches.length > 1) {
+                return;
+            }
+
             const endPoint = event.getLocalPosition(this._viewport);
             let width = endPoint.x - startPoint.x;
             let height = endPoint.y - startPoint.y;
@@ -69,6 +73,14 @@ export class SelectionBox extends Graphics {
                 return;
             }
 
+            if (this._viewport.input.touches.length > 1) {
+                return;
+            }
+
+            if (this._viewport.input.touches.length === 1) {
+                this._viewport.plugins.pause("drag");
+            }
+
             startPoint = event.getLocalPosition(this._viewport);
 
             this.selectHandler.clearSelections();
@@ -80,6 +92,7 @@ export class SelectionBox extends Graphics {
         };
 
         const onPointerUp = (_event: FederatedPointerEvent) => {
+            this._viewport.plugins.resume("drag");
             this._viewport.off("globalpointermove", onGlobalPointerMove);
             this._viewport.off("pointerup", onPointerUp);
             this._viewport.off("pointerupoutside", onPointerUp);
