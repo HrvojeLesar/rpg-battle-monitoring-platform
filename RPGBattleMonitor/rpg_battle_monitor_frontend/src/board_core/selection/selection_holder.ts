@@ -50,7 +50,7 @@ export class SelectionHolderContainer
 
         this._holder = new SelectionHolderInner(selectHandler, options);
         this.outline = new SelectionHolderOutline(
-            this._holder as any as ContainerExtension,
+            this._holder as unknown as ContainerExtension,
             selectHandler,
         );
         this.addChild(this._holder);

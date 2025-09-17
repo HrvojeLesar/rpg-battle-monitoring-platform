@@ -1,2 +1,3 @@
 - Add proper scrolling in undersized windows or when content overflows
 - Scale resize handles based on distance zoom viewport zoom distance
+- Properly handle rotated containers

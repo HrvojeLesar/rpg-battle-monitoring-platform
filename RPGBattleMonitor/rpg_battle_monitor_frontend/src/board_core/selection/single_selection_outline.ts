@@ -8,6 +8,8 @@ export class SingleSelectionOutline extends SelectionOutline {
         selectHandler: SelectHandler,
     ) {
         super(around, selectHandler);
+
+        this.rotation = around.rotation;
     }
 
     protected drawOutline(): void {

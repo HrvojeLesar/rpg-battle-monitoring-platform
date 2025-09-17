@@ -5,6 +5,11 @@ import { Token } from "../token/token";
 import { GBoard } from "../board";
 import { TokenDataBase } from "../token/token_data";
 
+const randomHexColorCode = () => {
+    const n = (Math.random() * 0xfffff * 1000000).toString(16);
+    return "#" + n.slice(0, 6);
+};
+
 export class TokenFactory {
     public static createToken(scene: Scene, tokenData?: TokenDataBase): Token {
         const token = new Token(
@@ -12,7 +17,7 @@ export class TokenFactory {
             tokenData ?? new EmptyTokenData(),
             {
                 texture: Texture.WHITE,
-                tint: "blue",
+                tint: randomHexColorCode(),
                 width: scene.grid.cellSize * 2,
                 height: scene.grid.cellSize * 2,
             },

@@ -354,6 +354,7 @@ export abstract class ContainerExtension<
     ): ContainerExtensionOptions {
         return {
             position: new Point(container.position.x, container.position.y),
+            angle: container.angle,
             eventMode: "none",
         };
     }

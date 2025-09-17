@@ -1,4 +1,4 @@
-import { FederatedPointerEvent, Point, Sprite } from "pixi.js";
+import { Container, FederatedPointerEvent, Point, Sprite } from "pixi.js";
 import { UniqueCollection } from "../utils/unique_collection";
 import { ContainerExtension } from "../extensions/container_extension";
 import { EventStore } from "./registered_event_store";
@@ -155,6 +155,7 @@ export class SelectHandler {
                 y: localPositionToContainer.y,
                 width: s.width,
                 height: s.height,
+                rotation: s.rotation,
             });
             selectionHolder.addChild(dummySprite);
         });
@@ -181,9 +182,50 @@ export class SelectHandler {
     }
 
     public findSelectionStartPoint(): Point {
-        let point = new Point();
+        function getTopAndLeftMostPoint(container: Container): Point {
+            const x = container.x;
+            const y = container.y;
+
+            if (container.angle % 360 === 0) {
+                return new Point(x, y);
+            }
+
+            const rotation = container.rotation;
+            const width = container.width;
+            const height = container.height;
+
+            const cosine = Math.cos(rotation);
+            const sine = Math.sin(rotation);
+
+            const corners = [
+                new Point(x, y), // Top left, does not change with rotation
+                new Point(x + width * cosine, y + width * sine), // Top right
+                new Point(
+                    x + width * cosine - height * sine,
+                    y + width * sine + height * cosine,
+                ), // Bottom right
+                new Point(x - height * sine, y + height * cosine), // Bottom left
+            ];
+
+            return corners.reduce(
+                (acc, point) => {
+                    if (acc.x > point.x) {
+                        acc.x = point.x;
+                    }
+
+                    if (acc.y > point.y) {
+                        acc.y = point.y;
+                    }
+
+                    return acc;
+                },
+                new Point(x, y),
+            );
+        }
+
+        const point = new Point();
         this.selections.forEach((s, idx) => {
-            const other = s.position;
+            const other = getTopAndLeftMostPoint(s);
             if (idx === 0 || point.x > other.x) {
                 point.x = other.x;
             }
