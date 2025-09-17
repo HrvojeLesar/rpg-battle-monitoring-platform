@@ -17,7 +17,6 @@ function defaultOptions(
     overrides: Partial<ApplicationOptions>,
 ): Partial<ApplicationOptions> {
     return {
-        resolution: window.devicePixelRatio,
         autoDensity: true,
         antialias: true,
         roundPixels: true,
