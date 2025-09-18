@@ -1,4 +1,5 @@
-import { Assets, Sprite, Texture } from "pixi.js";
+import { Sprite, Texture } from "pixi.js";
+import { GAssetManager } from "../assets/asset_manager";
 
 const LOAD_TEXTURE = "load-texture:";
 
@@ -18,19 +19,15 @@ export class TextureConverter {
 
         if (data.startsWith(LOAD_TEXTURE)) {
             const url = data.slice(LOAD_TEXTURE.length);
-            console.error("loading texture", url);
-            Assets.load(url)
-                .then((texture) => {
-                    sprite.texture = texture;
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
+            GAssetManager.load({
+                sprite,
+                url,
+            });
 
-            return Texture.EMPTY;
+            return Texture.WHITE;
         }
 
-        return Texture.EMPTY;
+        return Texture.WHITE;
     }
 
     public static fromTexture(data: Texture): string {

@@ -100,6 +100,10 @@ class EntityContainer {
         return this.entitiesMap.get(uid);
     }
 
+    /**
+     * Returns an object with all deleted entities and cleanup callbacks
+     * Callbacks should be called after flushing data to websocket
+     * */
     public remove(entity: IMessagable): DeleteAction {
         const deleteAction: DeleteAction = {
             acc: [],

@@ -6,8 +6,9 @@ import {
     Ghost,
 } from "./container_extension";
 import { Grid } from "../grid/grid";
-import { TypedJson } from "../interfaces/messagable";
+import { DeleteAction, TypedJson } from "../interfaces/messagable";
 import { TextureConverter } from "../converters/texture_converter";
+import { GAssetManager } from "../assets/asset_manager";
 
 export type SpriteExtensionAttributes = {
     alpha: number;
@@ -88,5 +89,13 @@ export class SpriteExtension extends ContainerExtension<
             this.displayedEntity.tint = changes.tint;
             this.displayedEntity.texture = texture;
         }
+    }
+
+    public deleteAction(action: DeleteAction): void {
+        if (this.displayedEntity) {
+            GAssetManager.unload(this.displayedEntity);
+        }
+
+        super.deleteAction(action);
     }
 }
