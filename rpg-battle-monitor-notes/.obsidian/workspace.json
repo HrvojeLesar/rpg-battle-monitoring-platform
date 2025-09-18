@@ -8,17 +8,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "3bc5e99697699851",
+            "id": "8edcd82341b61f97",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Todo.md",
+                "file": "Plan.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Todo"
+              "title": "Plan"
             }
           }
         ]
@@ -185,9 +185,10 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "3bc5e99697699851",
+  "active": "8edcd82341b61f97",
   "lastOpenFiles": [
     "Todo.md",
+    "Plan.md",
     "Ui/Windows.md",
     "Client <-> Server/Websockets/Messages/Action.md",
     "Ui",

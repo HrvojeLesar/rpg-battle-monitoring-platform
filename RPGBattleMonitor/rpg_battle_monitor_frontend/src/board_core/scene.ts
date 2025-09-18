@@ -87,6 +87,10 @@ export class Scene implements IMessagable<SceneAttributes> {
                 bottom: true,
                 direction: "all",
                 underflow: "center",
+            })
+            .clampZoom({
+                maxScale: 2,
+                minScale: 0.1,
             });
 
         this._viewport.moveCenter(worldSize / 2, worldSize / 2);

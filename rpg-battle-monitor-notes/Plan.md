@@ -1,0 +1,15 @@
+- [ ] Right sidebar
+	- [ ] Token management
+		- [ ] Display list of tokens
+			- [ ] Possible organisation with folders
+				- [ ] Default display
+				- [ ] Per user
+			- [ ] Drag tokens onto board
+				- [ ] Detect where the token is getting dropped
+				- [ ] Create token entity on the board
+		- [ ] Adding new token data
+		- [ ] Token health bar ??
+		- [ ] Draw floating ui around selected token ??
+	- [ ] Log
+		- [ ] Log message type - based on type choose how to display the message
+		- [ ] Paginated message handling on the server - only last x messages need to be shown to the user and scrolling/pagination can request for more

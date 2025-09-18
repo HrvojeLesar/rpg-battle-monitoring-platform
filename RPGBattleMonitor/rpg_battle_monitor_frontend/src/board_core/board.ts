@@ -145,6 +145,10 @@ function resize() {
     boardApplication.resize();
 }
 
+function triggerRendererResize() {
+    boardApplication.app.resize();
+}
+
 export async function init(
     boardInitOptions: BoardInitOptions,
     options?: Partial<ApplicationOptions>,
@@ -166,9 +170,8 @@ export async function init(
         initWebsocketListeners();
     }
 
-    // TODO: does not always work, manual window resize is still sometimes required
-    window.addEventListener("resize", resize);
-    window.addEventListener("orientationchange", resize);
+    boardApplication.app.renderer.on("resize", resize);
+    window.removeEventListener("orientationchange", triggerRendererResize);
 
     // TODO: setup websocket initialization
     if (socket) {
@@ -186,16 +189,21 @@ export function destroy(
     rendererDestroyOptions?: RendererDestroyOptions,
     options?: DestroyOptions,
 ) {
+    const app = boardApplication.getApplicationOptional();
+    if (app !== undefined) {
+        app.renderer.off("resize", resize);
+        window.removeEventListener("orientationchange", triggerRendererResize);
+    }
+
     boardApplication
         .getApplicationOptional()
         ?.destroy(rendererDestroyOptions, options);
 
     try {
         boardApplication.websocket.socket.disconnect();
-    } catch (error) {}
-
-    window.removeEventListener("resize", resize);
-    window.removeEventListener("orientationchange", resize);
+    } catch (error) {
+        console.warn(error);
+    }
 
     GEventEmitter.emit("board-destoryed");
     boardApplication = new Board(GEventEmitter);
