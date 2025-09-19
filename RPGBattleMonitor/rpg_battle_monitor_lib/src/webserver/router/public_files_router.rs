@@ -1,4 +1,5 @@
-use tower_http::services::ServeDir;
+use tower::ServiceBuilder;
+use tower_http::{cors::CorsLayer, services::ServeDir};
 
 use crate::webserver::router::app_state::AppStateTrait;
 
@@ -40,5 +41,9 @@ struct ApiDocInner;
 pub fn get_router<T: AppStateTrait>(_state: T) -> axum::Router {
     let serve_dir_service = ServeDir::new("public");
 
-    axum::Router::new().nest_service("/public", serve_dir_service.clone())
+    let service = ServiceBuilder::new()
+        .layer(CorsLayer::permissive())
+        .service(serve_dir_service);
+
+    axum::Router::new().nest_service("/public", service)
 }
