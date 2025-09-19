@@ -62,4 +62,62 @@ export class TokenFactory {
 
         return token;
     }
+
+    public static createRandomToken(
+        scene: Scene,
+        tokenData?: TokenDataBase,
+    ): Token {
+        const isImage = Math.random() < 0.5;
+
+        const token = new Token(
+            scene,
+            tokenData ?? new EmptyTokenData(),
+            {
+                texture: Texture.WHITE,
+                tint: isImage ? undefined : randomHexColorCode(),
+                width: scene.grid.cellSize * 2,
+                height: scene.grid.cellSize * 2,
+            },
+            {
+                isSnapping: true,
+                isDraggable: true,
+                isSelectable: true,
+                isResizable: true,
+                eventMode: "static",
+                cursor: "pointer",
+                position: { x: scene.grid.x, y: scene.grid.y },
+            },
+        );
+
+        let textureLoading: Maybe<Promise<unknown>> = undefined;
+        if (isImage) {
+            if (token.displayedEntity) {
+                textureLoading = GAssetManager.load({
+                    sprite: token.displayedEntity,
+                    url: "http://localhost:3000/api/assets/9e7208f56a5c47379df0cfcbe4801b55.jpg",
+                });
+            }
+        }
+
+        GBoard.entityRegistry.entities.add(token);
+
+        if (!GBoard.entityRegistry.entities.get(token.tokenData.getUId())) {
+            GBoard.websocket.queue(token.tokenData, "createQueue");
+        }
+
+        const flush = () => {
+            GBoard.websocket.queue(token, "createQueue");
+            GBoard.websocket.flush();
+        };
+
+        if (textureLoading !== undefined) {
+            textureLoading.then(flush);
+        } else {
+            flush();
+        }
+
+        scene.addToken(token);
+
+        return token;
+    }
 }

@@ -171,7 +171,7 @@ export async function init(
     }
 
     boardApplication.app.renderer.on("resize", resize);
-    window.removeEventListener("orientationchange", triggerRendererResize);
+    window.addEventListener("orientationchange", triggerRendererResize);
 
     // TODO: setup websocket initialization
     if (socket) {

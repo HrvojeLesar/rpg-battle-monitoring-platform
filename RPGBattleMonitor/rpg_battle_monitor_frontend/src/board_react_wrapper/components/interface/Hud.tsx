@@ -8,7 +8,12 @@ import { ReactNode } from "react";
 
 const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
     return (
-        <Flex direction="column" m="md" gap="xs">
+        <Flex
+            direction="column"
+            m="md"
+            gap="xs"
+            style={{ pointerEvents: "all" }}
+        >
             {children}
         </Flex>
     );
@@ -25,7 +30,7 @@ const HudLeft = () => {
         return (
             <Button
                 onClick={() => {
-                    TokenFactory.createToken(currentScene);
+                    TokenFactory.createRandomToken(currentScene);
                 }}
             >
                 Add token to scene
