@@ -19,7 +19,7 @@ import newUId from "./utils/uuid_generator";
 import { isDev } from "../utils/dev_mode";
 import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
 import { sceneAtoms } from "@/board_react_wrapper/stores/board_store";
-import { Layers } from "./layers/layers";
+import { Layer, Layers } from "./layers/layers";
 
 export type SceneAttributes = {
     gridUid: string;
@@ -53,14 +53,17 @@ export class Scene implements IMessagable<SceneAttributes> {
 
     protected _sortPosition: Maybe<number>;
 
-    protected _layers: Layers = Layers.getDefaultLayers();
+    protected _layers: Layers;
+
+    protected _selectedLayer: Layer;
 
     public constructor(options: SceneOptions) {
         this._uid = newUId();
         this.name = options.name;
         this._grid = options.grid ?? new Grid(options.gridOptions);
 
-        this._sortPosition = options.sortPosition;
+        this._layers = options.layers ?? Layers.getDefaultLayers();
+        this._selectedLayer = this._layers.getLayer("token");
 
         this._viewport = new Viewport({
             events: GBoard.app.renderer.events,
@@ -301,5 +304,32 @@ export class Scene implements IMessagable<SceneAttributes> {
         this._selectHandler.unregisterSelect(token);
         this._dragHandler.unregisterDrag(token);
         this._layers.tokenLayer.removeChild(token);
+    }
+
+    public selectLayer(layer: Layer | string): void {
+        if (
+            (typeof layer === "string" && layer === this._selectedLayer.name) ||
+            (typeof layer === "object" && layer === this._selectedLayer)
+        ) {
+            return;
+        }
+
+        this._selectedLayer = this._layers.getLayer(layer);
+
+        this._layers.layers.forEach(({ container }) => {
+            container.eventMode = "none";
+        });
+
+        this._selectedLayer.container.eventMode = "passive";
+
+        this._selectHandler.clearSelections();
+    }
+
+    public get selectedLayer(): Layer {
+        return this._selectedLayer;
+    }
+
+    public set selectedLayer(layer: Layer | string) {
+        this.selectLayer(layer);
     }
 }

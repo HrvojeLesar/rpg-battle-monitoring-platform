@@ -46,7 +46,7 @@ export class SelectHandler {
         this._scene = scene;
         this.eventStore = eventStore;
         this._resizeHandler = new ResizeHandler(this, this._scene);
-        this.selectionBox = new SelectionBox(this._scene.viewport, this);
+        this.selectionBox = new SelectionBox(this._scene, this);
 
         this.selectionHolderContainer = new SelectionHolderContainer(
             this.scene.grid,

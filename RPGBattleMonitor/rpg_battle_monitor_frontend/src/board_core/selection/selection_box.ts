@@ -1,16 +1,19 @@
 import { Viewport } from "pixi-viewport";
 import { FederatedPointerEvent, Graphics, Point } from "pixi.js";
-import { GBoard } from "../board";
 import { SelectHandler } from "../handlers/select_handler";
+import { Scene } from "../scene";
+import { ContainerExtension } from "../extensions/container_extension";
 
 export class SelectionBox extends Graphics {
+    protected _scene: Scene;
     protected _viewport: Viewport;
     protected selectHandler: SelectHandler;
 
-    public constructor(viewport: Viewport, selectHandler: SelectHandler) {
+    public constructor(scene: Scene, selectHandler: SelectHandler) {
         super({ label: "selectionBox" });
 
-        this._viewport = viewport;
+        this._scene = scene;
+        this._viewport = scene.viewport;
         this.selectHandler = selectHandler;
         this.alpha = 0.5;
 
@@ -48,20 +51,22 @@ export class SelectionBox extends Graphics {
 
             const bounds = this.getBounds().rectangle;
 
-            // TODO: This only works for tokens, shoudl be generic for any container
-            // that is currently selectable on the scene
-            GBoard.scene?.tokens.forEach((token) => {
-                const tokenBounds = token.getBounds().rectangle;
+            this._scene.selectedLayer.container.children.forEach((child) => {
+                if (!(child instanceof ContainerExtension)) {
+                    return;
+                }
+
+                const tokenBounds = child.getBounds().rectangle;
                 if (bounds.intersects(tokenBounds)) {
                     if (
-                        token.isSelectable &&
-                        !this.selectHandler.isSelected(token)
+                        child.isSelectable &&
+                        !this.selectHandler.isSelected(child)
                     ) {
-                        this.selectHandler.select(token);
+                        this.selectHandler.select(child);
                     }
                 } else {
-                    if (this.selectHandler.isSelected(token)) {
-                        this.selectHandler.deselect(token);
+                    if (this.selectHandler.isSelected(child)) {
+                        this.selectHandler.deselect(child);
                     }
                 }
             });

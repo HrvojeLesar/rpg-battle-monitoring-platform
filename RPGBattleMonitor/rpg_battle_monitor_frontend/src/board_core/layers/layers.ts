@@ -57,7 +57,10 @@ export class Layers {
         });
     }
 
-    public getLayer(name: string): Layer {
+    public getLayer(name: Layer | string): Layer {
+        if (typeof name === "object") {
+            name = name.name;
+        }
         let layer = this._layers.find((layer) => layer.name === name);
 
         if (layer === undefined) {
