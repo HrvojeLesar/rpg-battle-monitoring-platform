@@ -149,6 +149,12 @@ function triggerRendererResize() {
     boardApplication.app.resize();
 }
 
+function keyupHandler(event: KeyboardEvent) {
+    if (event.target === document.body) {
+        boardApplication.eventEmitter.emit("keyup", event);
+    }
+}
+
 export async function init(
     boardInitOptions: BoardInitOptions,
     options?: Partial<ApplicationOptions>,
@@ -172,6 +178,7 @@ export async function init(
 
     boardApplication.app.renderer.on("resize", resize);
     window.addEventListener("orientationchange", triggerRendererResize);
+    document.addEventListener("keyup", keyupHandler);
 
     // TODO: setup websocket initialization
     if (socket) {
@@ -192,8 +199,10 @@ export function destroy(
     const app = boardApplication.getApplicationOptional();
     if (app !== undefined) {
         app.renderer.off("resize", resize);
-        window.removeEventListener("orientationchange", triggerRendererResize);
     }
+
+    window.removeEventListener("orientationchange", triggerRendererResize);
+    document.removeEventListener("keyup", keyupHandler);
 
     boardApplication
         .getApplicationOptional()

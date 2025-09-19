@@ -124,6 +124,17 @@ export class Scene implements IMessagable<SceneAttributes> {
             this._eventStore,
         );
 
+        GBoard.eventEmitter.on("keyup", (event) => {
+            if (GBoard.scene !== this) {
+                return;
+            }
+
+            console.log(event);
+            if (event.key === "Delete") {
+                this._selectHandler.deleteSelected();
+            }
+        });
+
         // Assets.load("https://pixijs.com/assets/bunny.png").then((texture) => {
         //     this.addToken({
         //         x: 512,
@@ -268,8 +279,6 @@ export class Scene implements IMessagable<SceneAttributes> {
 
         this.tokens.forEach((token) => {
             token.deleteAction(action);
-            this._selectHandler.unregisterSelect(token);
-            this._dragHandler.unregisterDrag(token);
         });
 
         this.grid.deleteAction(action);
@@ -305,5 +314,12 @@ export class Scene implements IMessagable<SceneAttributes> {
 
         this._tokens.add(token);
         this._viewport.addChild(token);
+    }
+
+    public removeToken(token: Token): void {
+        this._tokens.remove(token);
+        this._selectHandler.unregisterSelect(token);
+        this._dragHandler.unregisterDrag(token);
+        this._viewport.removeChild(token);
     }
 }

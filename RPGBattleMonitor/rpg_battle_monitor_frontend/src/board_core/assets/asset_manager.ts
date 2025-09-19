@@ -44,6 +44,7 @@ class AssetManager {
         return textures;
     }
 
+    // TODO: stop trying to unload Texture.EMPTY, Texture.WHITE...
     public async unload(object: Sprite | Texture): Promise<void> {
         let texture = object;
         if (object instanceof Sprite) {

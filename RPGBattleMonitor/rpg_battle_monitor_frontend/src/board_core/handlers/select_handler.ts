@@ -9,6 +9,7 @@ import { ResizeHandler } from "./resize_handler";
 import { SelectionBox } from "../selection/selection_box";
 import { SelectedMap } from "../utils/selected_map";
 import { SelectionHolderContainer } from "../selection/selection_holder";
+import { GBoard } from "../board";
 
 export enum SelectionState {
     None = "None",
@@ -267,5 +268,35 @@ export class SelectHandler {
 
     public setClampHeightBottom(value: boolean): void {
         this.clampHeightBottom = value;
+    }
+
+    public isActive(): boolean {
+        return this._scene.viewport.pause === false;
+    }
+
+    public deleteSelected(): void {
+        if (!this.isActive()) {
+            return;
+        }
+
+        const selections = this.selections;
+        this.clearSelections();
+
+        const deleteActions = selections.map((selection) => {
+            const deleteAction =
+                GBoard.entityRegistry.entities.remove(selection);
+
+            for (const entity of deleteAction.acc) {
+                GBoard.websocket.queue(entity, "deleteQueue");
+            }
+
+            return deleteAction;
+        });
+
+        GBoard.websocket.flush();
+
+        deleteActions.forEach((action) =>
+            action.cleanupCallbacks.forEach((cb) => cb()),
+        );
     }
 }

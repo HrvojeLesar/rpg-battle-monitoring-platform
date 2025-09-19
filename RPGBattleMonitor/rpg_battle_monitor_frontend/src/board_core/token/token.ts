@@ -4,7 +4,7 @@ import {
     SpriteExtension,
     SpriteExtensionAttributes,
 } from "../extensions/sprite_extension";
-import { UId, type TypedJson } from "../interfaces/messagable";
+import { DeleteAction, UId, type TypedJson } from "../interfaces/messagable";
 import { Scene } from "../scene";
 import { TokenDataBase } from "./token_data";
 import { GBoard } from "../board";
@@ -61,5 +61,13 @@ export class Token extends SpriteExtension {
 
     public get tokenData(): TokenDataBase {
         return this._tokenData;
+    }
+
+    public deleteAction(action: DeleteAction): void {
+        action.cleanupCallbacks.push(() => {
+            this.scene.removeToken(this);
+        });
+
+        super.deleteAction(action);
     }
 }

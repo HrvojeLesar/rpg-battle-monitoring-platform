@@ -92,9 +92,11 @@ export class SpriteExtension extends ContainerExtension<
     }
 
     public deleteAction(action: DeleteAction): void {
-        if (this.displayedEntity) {
-            GAssetManager.unload(this.displayedEntity);
-        }
+        action.cleanupCallbacks.push(() => {
+            if (this.displayedEntity) {
+                GAssetManager.unload(this.displayedEntity);
+            }
+        });
 
         super.deleteAction(action);
     }
