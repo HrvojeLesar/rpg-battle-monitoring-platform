@@ -110,7 +110,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Client <-> Server/Basic websocket communication.md",
+                "file": "Plan.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -120,7 +120,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Basic websocket communication"
+              "title": "Backlinks for Plan"
             }
           },
           {
@@ -187,8 +187,9 @@
   },
   "active": "8edcd82341b61f97",
   "lastOpenFiles": [
-    "Todo.md",
+    "Technologies.md",
     "Plan.md",
+    "Todo.md",
     "Ui/Windows.md",
     "Client <-> Server/Websockets/Messages/Action.md",
     "Ui",

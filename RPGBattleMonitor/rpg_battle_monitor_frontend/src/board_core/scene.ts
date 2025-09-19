@@ -19,6 +19,7 @@ import newUId from "./utils/uuid_generator";
 import { isDev } from "../utils/dev_mode";
 import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
 import { sceneAtoms } from "@/board_react_wrapper/stores/board_store";
+import { Layers } from "./layers/layers";
 
 export type SceneAttributes = {
     gridUid: string;
@@ -31,7 +32,10 @@ export type SceneOptions = {
     grid?: Grid;
     gridOptions?: GridOptions;
     sortPosition?: number;
+    layers?: Layers;
 };
+
+const WORLD_SIZE = 6000 * 8;
 
 export class Scene implements IMessagable<SceneAttributes> {
     public name: string;
@@ -49,6 +53,8 @@ export class Scene implements IMessagable<SceneAttributes> {
 
     protected _sortPosition: Maybe<number>;
 
+    protected _layers: Layers = Layers.getDefaultLayers();
+
     public constructor(options: SceneOptions) {
         this._uid = newUId();
         this.name = options.name;
@@ -56,24 +62,17 @@ export class Scene implements IMessagable<SceneAttributes> {
 
         this._sortPosition = options.sortPosition;
 
-        const gridSize = this._grid.size;
-
-        function getWorldSize() {
-            return Math.round(Math.max(gridSize.width, gridSize.height) * 8);
-        }
-
-        const worldSize = getWorldSize();
-
         this._viewport = new Viewport({
             events: GBoard.app.renderer.events,
             screenWidth: GBoard.app.canvas.width,
             screenHeight: GBoard.app.canvas.height,
-            worldWidth: worldSize,
-            worldHeight: worldSize,
+            worldWidth: WORLD_SIZE,
+            worldHeight: WORLD_SIZE,
             allowPreserveDragOutside: true,
             disableOnContextMenu: true,
         });
 
+        this._viewport.label = "viewport";
         this._viewport
             .drag({
                 mouseButtons: "middle-right",
@@ -89,19 +88,14 @@ export class Scene implements IMessagable<SceneAttributes> {
                 underflow: "center",
             })
             .clampZoom({
-                maxScale: 2,
+                maxScale: 20,
                 minScale: 0.1,
             });
 
-        this._viewport.moveCenter(worldSize / 2, worldSize / 2);
-
-        this._grid.position.set(
-            worldSize / 2 - this._grid.width / 2,
-            worldSize / 2 - this._grid.height / 2,
-        );
+        this._viewport.moveCenter(WORLD_SIZE / 2, WORLD_SIZE / 2);
 
         if (isDev()) {
-            const viewportOutline = new Graphics();
+            const viewportOutline = new Graphics({ label: "viewportOutline" });
             viewportOutline
                 .rect(
                     0,
@@ -113,7 +107,6 @@ export class Scene implements IMessagable<SceneAttributes> {
             this._viewport.addChild(viewportOutline);
         }
 
-        this._viewport.addChild(this._grid);
         this._viewport.pause = true;
 
         this._eventStore = new EventStore(this);
@@ -124,51 +117,38 @@ export class Scene implements IMessagable<SceneAttributes> {
             this._eventStore,
         );
 
+        if (options.grid === undefined) {
+            this._grid.position.set(
+                WORLD_SIZE / 2 - this._grid.width / 2,
+                WORLD_SIZE / 2 - this._grid.height / 2,
+            );
+        }
+
         GBoard.eventEmitter.on("keyup", (event) => {
             if (GBoard.scene !== this) {
                 return;
             }
 
-            console.log(event);
             if (event.key === "Delete") {
                 this._selectHandler.deleteSelected();
             }
+
+            if (event.key === "ArrowDown") {
+                const token = this._selectHandler.selections[0];
+                token.zIndex -= 1;
+            }
+
+            if (event.key === "ArrowUp") {
+                const token = this._selectHandler.selections[0];
+                token.zIndex += 1;
+            }
         });
 
-        // Assets.load("https://pixijs.com/assets/bunny.png").then((texture) => {
-        //     this.addToken({
-        //         x: 512,
-        //         y: 512,
-        //         texture,
-        //         tint: "white",
-        //         height: 300,
-        //     });
-        //     // const control = this.tokens[this.tokens.length - 2];
-        //     // const resizecontainer = this.tokens[this.tokens.length - 1];
-        //     // control.container.unregisterDraggable();
-        //     // control.container.unregisterSelectable();
-        //     // GResizeHandler.registerResize(
-        //     //     control.container,
-        //     //     resizecontainer.container,
-        //     // );
-        // });
+        this._layers.gridLayer.addChild(this._grid);
 
-        // this.addToken({});
-        // this.addToken({ x: 256, y: 256, tint: "red" });
-        // this.addToken({ x: 256, y: 512, tint: "blue" });
-        //
-        // this.addToken({
-        //     x: 512,
-        //     y: 512,
-        //     tint: "white",
-        //     height: 300,
-        // });
-
-        // const timeout = setTimeout(() => {
-        // this.tokens[0].container.moveToGridCell(new Point(7, 1));
-        // this.addToken({ x: 256, y: 512, tint: "green" });
-        // clearTimeout(timeout);
-        // }, 5000);
+        for (const layer of this._layers.layers) {
+            this._viewport.addChild(layer.container);
+        }
     }
 
     public setActive(): void {
@@ -313,13 +293,13 @@ export class Scene implements IMessagable<SceneAttributes> {
         this._dragHandler.registerDrag(token);
 
         this._tokens.add(token);
-        this._viewport.addChild(token);
+        this._layers.tokenLayer.addChild(token);
     }
 
     public removeToken(token: Token): void {
         this._tokens.remove(token);
         this._selectHandler.unregisterSelect(token);
         this._dragHandler.unregisterDrag(token);
-        this._viewport.removeChild(token);
+        this._layers.tokenLayer.removeChild(token);
     }
 }

@@ -9,6 +9,7 @@ import {
 import newUId from "../utils/uuid_generator";
 import { GAtomStore } from "../../board_react_wrapper/stores/state_store";
 import { sceneAtoms } from "../../board_react_wrapper/stores/board_store";
+import { Position } from "@/types/position";
 
 export type GridOptions = {
     hover?: boolean;
@@ -25,6 +26,7 @@ export type GridAttributes = {
     _cellSize: number;
     _size: GridSize;
     hover: boolean;
+    position: Position;
 };
 
 export class Grid extends Container implements IMessagable<GridAttributes> {
@@ -170,6 +172,10 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
             _cellSize: this.cellSize,
             _size: this.size,
             hover: this.hover,
+            position: {
+                x: this.position.x,
+                y: this.position.y,
+            },
         };
     }
 
@@ -178,6 +184,8 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
         this.cellSize = changes._cellSize;
         this.size = changes._size;
         this.hover = changes.hover;
+        this.position.x = changes.position.x;
+        this.position.y = changes.position.y;
 
         GAtomStore.set(sceneAtoms.refreshScenes);
     }

@@ -27,6 +27,7 @@ import {
 } from "../interfaces/messagable";
 import newUId from "../utils/uuid_generator";
 import { ContainerEventTypes } from "../events/container_extensions_events";
+import { Position } from "@/types/position";
 
 export type ContainerExtensionOptions = {
     isSnapping?: boolean;
@@ -47,10 +48,7 @@ export type ContainerExtensionAttributes = {
     gridUid: UId;
     width: number;
     height: number;
-    position: {
-        x: number;
-        y: number;
-    };
+    position: Position;
     isSnapping?: boolean;
     isDraggable?: boolean;
     isSelectable?: boolean;
@@ -364,7 +362,12 @@ export abstract class ContainerExtension<
             return;
         }
 
-        GBoard.viewport.addChildAt(ghost, GBoard.viewport.getChildIndex(this));
+        const scene = GBoard.scene;
+        if (scene === undefined) {
+            return;
+        }
+
+        this.parent.addChildAt(ghost, this.parent.getChildIndex(this));
     }
 
     public removeGhostFromStage(ghost: Container): void {

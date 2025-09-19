@@ -8,7 +8,7 @@ export class SelectionBox extends Graphics {
     protected selectHandler: SelectHandler;
 
     public constructor(viewport: Viewport, selectHandler: SelectHandler) {
-        super();
+        super({ label: "selectionBox" });
 
         this._viewport = viewport;
         this.selectHandler = selectHandler;
