@@ -56,6 +56,7 @@ export type ContainerExtensionAttributes = {
     eventMode?: EventMode;
     cursor?: string;
     rotation?: number;
+    zIndex?: number;
 };
 
 export const DEFAULTS = {
@@ -450,6 +451,7 @@ export abstract class ContainerExtension<
             eventMode: this.eventMode,
             cursor: this.cursor,
             rotation: this.rotation,
+            zIndex: this.zIndex,
         } as Attributes;
     }
 
@@ -473,6 +475,7 @@ export abstract class ContainerExtension<
         if (changes.rotation !== undefined) {
             this.rotation = changes.rotation;
         }
+        this.zIndex = changes.zIndex ?? 0;
     }
 
     public getUId(): UId {

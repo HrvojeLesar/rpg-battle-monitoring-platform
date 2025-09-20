@@ -1,7 +1,13 @@
 import { Viewport } from "pixi-viewport";
 import { GBoard } from "./board";
 import { UniqueCollection } from "./utils/unique_collection";
-import { Graphics, Texture } from "pixi.js";
+import {
+    Container,
+    ContainerChild,
+    Graphics,
+    IRenderLayer,
+    Texture,
+} from "pixi.js";
 import { DragHandler } from "./handlers/drag_handler";
 import { EventStore } from "./handlers/registered_event_store";
 import { SelectHandler } from "./handlers/select_handler";
@@ -20,6 +26,8 @@ import { isDev } from "../utils/dev_mode";
 import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
 import { sceneAtoms } from "@/board_react_wrapper/stores/board_store";
 import { Layer, Layers } from "./layers/layers";
+import { queueEntityUpdate } from "@/websocket/websocket";
+import { ContainerExtension } from "./extensions/container_extension";
 
 export type SceneAttributes = {
     gridUid: string;
@@ -136,14 +144,47 @@ export class Scene implements IMessagable<SceneAttributes> {
                 this._selectHandler.deleteSelected();
             }
 
-            if (event.key === "ArrowDown") {
-                const token = this._selectHandler.selections[0];
-                token.zIndex -= 1;
-            }
+            if (
+                (event.key === "ArrowDown" || event.key === "ArrowUp") &&
+                this._selectHandler.selections.length === 1
+            ) {
+                const incrementIndexBy = event.key === "ArrowUp" ? 1 : -1;
+                const selection = this._selectHandler.selections[0];
+                let selectionIndex: Maybe<number>;
+                try {
+                    selectionIndex =
+                        this.selectedLayer.container.getChildIndex(selection) +
+                        incrementIndexBy;
+                } catch (error) {
+                    console.warn(error);
+                    return;
+                }
 
-            if (event.key === "ArrowUp") {
-                const token = this._selectHandler.selections[0];
-                token.zIndex += 1;
+                let other: Maybe<ContainerChild | IRenderLayer>;
+                try {
+                    other =
+                        this.selectedLayer.container.getChildAt(selectionIndex);
+                } catch (error) {
+                    console.warn(error);
+                    return;
+                }
+
+                if (
+                    !(selection instanceof ContainerExtension) ||
+                    !(other instanceof ContainerExtension)
+                ) {
+                    return;
+                }
+
+                const zIndex = selection.zIndex;
+                selection.zIndex = other.zIndex;
+                other.zIndex = zIndex;
+
+                this.selectedLayer.container.swapChildren(selection, other);
+
+                queueEntityUpdate(() => {
+                    return [selection, other];
+                });
             }
         });
 
@@ -296,6 +337,23 @@ export class Scene implements IMessagable<SceneAttributes> {
         this._dragHandler.registerDrag(token);
 
         this._tokens.add(token);
+
+        if (token.zIndex === 0) {
+            queueEntityUpdate(() => {
+                const nextZIndex =
+                    this._tokens.items.reduce((acc, t) => {
+                        if (t.zIndex !== undefined && t.zIndex > acc) {
+                            acc = t.zIndex;
+                        }
+
+                        return acc;
+                    }, this._tokens.items[0]?.zIndex ?? 0) + 1;
+                token.zIndex = nextZIndex;
+
+                return token;
+            });
+        }
+
         this._layers.tokenLayer.addChild(token);
     }
 
