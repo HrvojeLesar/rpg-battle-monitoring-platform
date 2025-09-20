@@ -12,6 +12,10 @@ import { SelectHandler } from "../handlers/select_handler";
 import { NEGATIVE_POINT } from "../utils/consts";
 import { ResizeHandler, ResizeKind } from "../handlers/resize_handler";
 
+const RESIZE_CONTROL_SIZE = 25;
+const MAX_RESIZE_CONTROL_SIZE = 120;
+const RESIZE_CONTROL_OFFSET = 8;
+
 type PositionFuncs = {
     fn: (position: Point, width: number, height: number) => Point;
     kind: ResizeKind;
@@ -153,6 +157,7 @@ class ResizeControls extends Container {
         super.destroy(options);
     }
 
+    // TODO: This function ticks constantly even when the outline is not visible
     protected tickerStroke(): void {
         if (this.selectHandler.isMultiSelection()) {
             this.visible = false;
@@ -162,6 +167,14 @@ class ResizeControls extends Container {
         if (!GBoard.scene) {
             return;
         }
+
+        const scale = GBoard.scene.viewport.scale.x;
+        const widthHeight = Math.max(
+            Math.min(RESIZE_CONTROL_SIZE / scale - 15, MAX_RESIZE_CONTROL_SIZE),
+            RESIZE_CONTROL_SIZE,
+        );
+
+        const positionModifier = RESIZE_CONTROL_OFFSET / scale;
 
         const outlineContainerLocalPos = this._outlineContainer
             .toLocal(GBoard.viewport)
@@ -176,7 +189,12 @@ class ResizeControls extends Container {
             );
             controlPoint
                 .clear()
-                .rect(position.x - 8, position.y - 8, 25, 25)
+                .rect(
+                    position.x - positionModifier,
+                    position.y - positionModifier,
+                    widthHeight,
+                    widthHeight,
+                )
                 .fill({ color: "white" })
                 .stroke();
         });
