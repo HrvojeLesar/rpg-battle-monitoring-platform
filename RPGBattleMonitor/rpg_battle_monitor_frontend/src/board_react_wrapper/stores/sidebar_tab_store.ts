@@ -3,8 +3,8 @@ import { ReactNode } from "react";
 
 export type SidebarTab = {
     value: string;
-    icon: ReactNode;
-    content: Maybe<ReactNode>;
+    icon: () => ReactNode;
+    content: Maybe<() => ReactNode>;
     title?: string;
 };
 

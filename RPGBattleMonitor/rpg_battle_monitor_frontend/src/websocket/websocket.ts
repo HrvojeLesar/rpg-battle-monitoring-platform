@@ -110,26 +110,26 @@ export class Websocket {
             GAtomStore.set(sidebarTabAtoms.addTab, {
                 value: "Tokens",
                 title: "Tokens",
-                icon: TokenIcon(),
-                content: Tokens(),
+                icon: TokenIcon,
+                content: Tokens,
             });
             GAtomStore.set(sidebarTabAtoms.addTab, {
                 value: "Tokens 2",
                 title: "Tokens 2",
-                icon: TokenIcon(),
-                content: Tokens(),
+                icon: TokenIcon,
+                content: Tokens,
             });
             GAtomStore.set(sidebarTabAtoms.addTab, {
                 value: "Tokens 3",
                 title: "Tokens 3",
-                icon: TokenIcon(),
-                content: Tokens(),
+                icon: TokenIcon,
+                content: Tokens,
             });
             GAtomStore.set(sidebarTabAtoms.addTab, {
                 value: "Tokens 4",
                 title: "Tokens 4",
-                icon: TokenIcon(),
-                content: Tokens(),
+                icon: TokenIcon,
+                content: Tokens,
             });
         };
 

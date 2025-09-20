@@ -24,11 +24,13 @@ export const SidebarTabs = () => {
                 mb="xs"
             >
                 {tabs.map((tab, idx) => {
+                    const Icon = tab.icon;
+
                     return (
                         <Tabs.Tab
                             key={idx}
                             value={tab.value}
-                            leftSection={tab.icon}
+                            leftSection={<Icon />}
                         >
                             {tab.title ?? tab.value}
                         </Tabs.Tab>
@@ -37,9 +39,10 @@ export const SidebarTabs = () => {
             </Tabs.List>
 
             {tabs.map((tab, idx) => {
+                const Content = tab.content;
                 return (
                     <Tabs.Panel key={idx} value={tab.value}>
-                        {tab.content}
+                        {Content && <Content />}
                     </Tabs.Panel>
                 );
             })}
