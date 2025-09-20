@@ -1,7 +1,20 @@
-import { Sprite, Texture } from "pixi.js";
+import { BufferImageSource, Sprite, Texture } from "pixi.js";
 import { GAssetManager } from "../assets/asset_manager";
 
 const LOAD_TEXTURE = "load-texture:";
+
+function createEmptyWhiteTexture(label?: string): Texture {
+    return new Texture({
+        source: new BufferImageSource({
+            resource: new Uint8Array([255, 255, 255, 255]),
+            width: 1,
+            height: 1,
+            alphaMode: "premultiply-alpha-on-upload",
+            label: label ?? "WHITE",
+        }),
+        label: label ?? "WHITE",
+    });
+}
 
 export class TextureConverter {
     public static toTexture(data: string, sprite: Sprite): Texture {
@@ -24,7 +37,8 @@ export class TextureConverter {
                 url,
             });
 
-            return Texture.WHITE;
+            // TODO: add loading texture
+            return createEmptyWhiteTexture(url);
         }
 
         return Texture.WHITE;
