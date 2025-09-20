@@ -1,5 +1,5 @@
 import { GEventEmitter } from "../../board_core/board";
-import { sceneAtoms } from "../stores/board_store";
+import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 import { GAtomStore } from "../stores/state_store";
 
 export const initEventListeners = () => {

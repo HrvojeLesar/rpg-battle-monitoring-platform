@@ -14,7 +14,7 @@ import { Grid } from "./grid/grid";
 import { Websocket } from "../websocket/websocket";
 import { EntityRegistry } from "./registry/entity_registry";
 import { GAtomStore } from "../board_react_wrapper/stores/state_store";
-import { sceneAtoms } from "../board_react_wrapper/stores/board_store";
+import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 
 export type GameBoard = Board;
 

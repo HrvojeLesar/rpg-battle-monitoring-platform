@@ -1,5 +1,4 @@
 import { useAtomValue, useSetAtom } from "jotai";
-import { sceneAtoms } from "../../stores/board_store";
 import { ActionIcon, ComboboxData, Flex, Select, Tooltip } from "@mantine/core";
 import { GBoard } from "../../../board_core/board";
 import { Scene } from "../../../board_core/scene";
@@ -9,6 +8,7 @@ import {
     WindowEntry,
 } from "@/board_react_wrapper/stores/window_store";
 import { SceneSettings } from "./SceneSettings";
+import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 
 const openSceneSettings = (): WindowEntry => {
     return {

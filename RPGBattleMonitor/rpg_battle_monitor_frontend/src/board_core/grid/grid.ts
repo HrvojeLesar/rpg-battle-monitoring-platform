@@ -8,8 +8,8 @@ import {
 } from "../interfaces/messagable";
 import newUId from "../utils/uuid_generator";
 import { GAtomStore } from "../../board_react_wrapper/stores/state_store";
-import { sceneAtoms } from "../../board_react_wrapper/stores/board_store";
 import { Position } from "@/types/position";
+import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 
 export type GridOptions = {
     hover?: boolean;

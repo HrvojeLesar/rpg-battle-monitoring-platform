@@ -1,4 +1,4 @@
-import { sceneAtoms } from "./board_store";
+import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 import { GAtomStore } from "./state_store";
 
 const getNextSortPosition = () => {

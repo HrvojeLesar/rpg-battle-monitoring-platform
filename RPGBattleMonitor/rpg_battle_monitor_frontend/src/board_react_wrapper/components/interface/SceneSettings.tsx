@@ -1,5 +1,5 @@
 import { Scene } from "@/board_core/scene";
-import { sceneAtoms } from "@/board_react_wrapper/stores/board_store";
+import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 import {
     ActionIcon,
     Button,

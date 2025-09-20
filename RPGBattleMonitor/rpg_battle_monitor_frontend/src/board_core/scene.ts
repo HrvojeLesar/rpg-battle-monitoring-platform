@@ -1,13 +1,7 @@
 import { Viewport } from "pixi-viewport";
 import { GBoard } from "./board";
 import { UniqueCollection } from "./utils/unique_collection";
-import {
-    Container,
-    ContainerChild,
-    Graphics,
-    IRenderLayer,
-    Texture,
-} from "pixi.js";
+import { ContainerChild, Graphics, IRenderLayer, Texture } from "pixi.js";
 import { DragHandler } from "./handlers/drag_handler";
 import { EventStore } from "./handlers/registered_event_store";
 import { SelectHandler } from "./handlers/select_handler";
@@ -24,7 +18,7 @@ import {
 import newUId from "./utils/uuid_generator";
 import { isDev } from "../utils/dev_mode";
 import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
-import { sceneAtoms } from "@/board_react_wrapper/stores/board_store";
+import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 import { Layer, Layers } from "./layers/layers";
 import { queueEntityUpdate } from "@/websocket/websocket";
 import { ContainerExtension } from "./extensions/container_extension";

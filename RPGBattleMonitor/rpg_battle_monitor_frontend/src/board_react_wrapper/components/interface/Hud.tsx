@@ -1,6 +1,5 @@
 import { Box, Button, Flex, Paper } from "@mantine/core";
 import { useAtomValue } from "jotai";
-import { sceneAtoms } from "../../stores/board_store";
 import { SceneSelection } from "./SceneSelection";
 import classes from "../../../css/hud.module.css";
 import { ReactNode } from "react";
@@ -8,6 +7,7 @@ import { GBoard } from "@/board_core/board";
 import { TokenFactory } from "@/board_core/factories/token_factory";
 import { Resizable } from "re-resizable";
 import { SidebarTabs } from "./SidebarTabs";
+import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 
 const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
     return (
