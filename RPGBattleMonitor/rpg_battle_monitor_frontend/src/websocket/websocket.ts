@@ -1,6 +1,12 @@
 import { io, ManagerOptions, Socket, SocketOptions } from "socket.io-client";
 import { GBoard, GEventEmitter } from "../board_core/board";
 import { IMessagable, TypedJson } from "../board_core/interfaces/messagable";
+import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
+import { sidebarTabAtoms } from "@/board_react_wrapper/stores/sidebar_tab_store";
+import {
+    TokenIcon,
+    Tokens,
+} from "@/board_react_wrapper/components/interface/Tokens";
 
 export type JoinData = {
     data: TypedJson[];
@@ -99,6 +105,32 @@ export class Websocket {
             this.socket.off("join", join);
             GBoard.entityRegistry.convertQueuedEntities();
             GEventEmitter.emit("socket-join-finished");
+
+            GAtomStore.set(sidebarTabAtoms.resetTabs);
+            GAtomStore.set(sidebarTabAtoms.addTab, {
+                value: "Tokens",
+                title: "Tokens",
+                icon: TokenIcon(),
+                content: Tokens(),
+            });
+            GAtomStore.set(sidebarTabAtoms.addTab, {
+                value: "Tokens 2",
+                title: "Tokens 2",
+                icon: TokenIcon(),
+                content: Tokens(),
+            });
+            GAtomStore.set(sidebarTabAtoms.addTab, {
+                value: "Tokens 3",
+                title: "Tokens 3",
+                icon: TokenIcon(),
+                content: Tokens(),
+            });
+            GAtomStore.set(sidebarTabAtoms.addTab, {
+                value: "Tokens 4",
+                title: "Tokens 4",
+                icon: TokenIcon(),
+                content: Tokens(),
+            });
         };
 
         this.socket.once("join-finished", joinFinished);

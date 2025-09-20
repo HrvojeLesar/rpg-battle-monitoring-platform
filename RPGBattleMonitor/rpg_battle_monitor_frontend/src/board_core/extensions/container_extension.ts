@@ -355,6 +355,7 @@ export abstract class ContainerExtension<
             position: new Point(container.position.x, container.position.y),
             angle: container.angle,
             eventMode: "none",
+            zIndex: 99999,
         };
     }
 

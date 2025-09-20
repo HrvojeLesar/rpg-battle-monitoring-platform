@@ -5,5 +5,7 @@
     overflow: visible;
     position: relative;
     z-index: 1;
-    flex-directon: row;
+    pointer-events: none;
+    /* height: calc(100vh); */
+    /* width: calc(100vw); */
 }

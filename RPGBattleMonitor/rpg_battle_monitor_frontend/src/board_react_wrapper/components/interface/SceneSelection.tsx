@@ -35,7 +35,14 @@ export const SceneSelection = () => {
     };
 
     return (
-        <Flex direction="row" gap="xs" align="center">
+        <Flex
+            direction="row"
+            gap="xs"
+            align="center"
+            style={{
+                pointerEvents: "all",
+            }}
+        >
             <Select
                 searchable
                 data={sceneData()}

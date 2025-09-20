@@ -54,6 +54,7 @@ export class TextureConverter {
             return label;
         }
 
+        // TODO: strip out http{s}://some-url and only keep path so uri can be interchangable
         if (label.startsWith("http")) {
             return `${LOAD_TEXTURE}${label}`;
         }

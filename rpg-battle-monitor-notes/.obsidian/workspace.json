@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "6bdaed3d920d7459",
+        "id": "1a58b003fab573db",
         "type": "tabs",
         "children": [
           {
-            "id": "8edcd82341b61f97",
+            "id": "db59c08a81e6e893",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -185,11 +185,11 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "8edcd82341b61f97",
+  "active": "db59c08a81e6e893",
   "lastOpenFiles": [
     "Technologies.md",
-    "Plan.md",
     "Todo.md",
+    "Plan.md",
     "Ui/Windows.md",
     "Client <-> Server/Websockets/Messages/Action.md",
     "Ui",

@@ -1,4 +1,4 @@
-import { Box, Button, Flex } from "@mantine/core";
+import { Box, Button, Flex, Paper } from "@mantine/core";
 import { useAtomValue } from "jotai";
 import { sceneAtoms } from "../../stores/board_store";
 import { SceneSelection } from "./SceneSelection";
@@ -6,6 +6,8 @@ import classes from "../../../css/hud.module.css";
 import { ReactNode } from "react";
 import { GBoard } from "@/board_core/board";
 import { TokenFactory } from "@/board_core/factories/token_factory";
+import { Resizable } from "re-resizable";
+import { SidebarTabs } from "./SidebarTabs";
 
 const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
     return (
@@ -13,7 +15,10 @@ const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
             direction="column"
             m="md"
             gap="xs"
-            style={{ pointerEvents: "all" }}
+            style={{
+                height: "calc(100vh - (var(--mantine-spacing-md) * 2))",
+                overflow: "hidden",
+            }}
         >
             {children}
         </Flex>
@@ -30,6 +35,9 @@ const HudLeft = () => {
 
         return (
             <Button
+                style={{
+                    pointerEvents: "all",
+                }}
                 onClick={() => {
                     TokenFactory.createRandomToken(currentScene);
                 }}
@@ -46,6 +54,9 @@ const HudLeft = () => {
 
         return (
             <Button
+                style={{
+                    pointerEvents: "all",
+                }}
                 onClick={() => {
                     const selectedLayer = GBoard.scene?.selectedLayer;
                     if (selectedLayer?.name === "grid") {
@@ -62,9 +73,11 @@ const HudLeft = () => {
 
     return (
         <SidesFlexBox>
-            <SceneSelection />
-            {addTokenButton()}
-            {addLayerSwitchButton()}
+            <Flex direction="column" gap="xs" style={{ overflow: "auto" }}>
+                <SceneSelection />
+                {addTokenButton()}
+                {addLayerSwitchButton()}
+            </Flex>
         </SidesFlexBox>
     );
 };
@@ -74,7 +87,38 @@ const HudFiller = () => {
 };
 
 const HudRight = () => {
-    return <SidesFlexBox></SidesFlexBox>;
+    return (
+        <SidesFlexBox>
+            <Resizable
+                style={{
+                    pointerEvents: "all",
+                }}
+                defaultSize={{
+                    width: 300,
+                }}
+                enable={{
+                    top: false,
+                    right: true,
+                    bottom: false,
+                    left: true,
+                    topRight: false,
+                    bottomRight: false,
+                    bottomLeft: false,
+                    topLeft: false,
+                }}
+            >
+                <Paper
+                    p="xs"
+                    style={{
+                        height: "calc(100vh - (var(--mantine-spacing-md) * 2))",
+                        overflow: "auto",
+                    }}
+                >
+                    <SidebarTabs />
+                </Paper>
+            </Resizable>
+        </SidesFlexBox>
+    );
 };
 
 export const Hud = () => {

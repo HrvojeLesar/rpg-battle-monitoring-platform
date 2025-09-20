@@ -7,9 +7,9 @@ import {
     Divider,
     Flex,
     Popover,
-    Title,
     Text,
     Input,
+    Fieldset,
 } from "@mantine/core";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
@@ -85,67 +85,75 @@ export const SceneSettings = () => {
     return (
         <Container my="xs">
             <Flex direction="row" gap="xs" wrap="wrap">
-                <Flex direction="column" gap="xs">
-                    <Title order={4}>Scenes</Title>
-                    <Divider />
-                    <Button
-                        onClick={() => {
-                            createScene({
-                                name: `test-scene${scenes.length + 1}`,
-                                sortPositionFunc:
-                                    sceneAtomsUtils.getNextSortPosition,
-                            });
-                        }}
-                    >
-                        New scene
-                    </Button>
-                    {scenes.map((scene) => {
-                        return (
-                            <Flex key={scene.getUId()} gap="xs" align="center">
-                                <Button
-                                    title={scene.name}
-                                    onClick={() => {
-                                        changeScene(scene);
-                                        setSelectedScene(scene);
-                                    }}
-                                    variant={
-                                        selectedScene?.getUId() ===
-                                        scene.getUId()
-                                            ? "filled"
-                                            : "outline"
-                                    }
+                <Fieldset legend="Scene">
+                    <Flex direction="column" gap="xs">
+                        <Button
+                            onClick={() => {
+                                createScene({
+                                    name: `test-scene${scenes.length + 1}`,
+                                    sortPositionFunc:
+                                        sceneAtomsUtils.getNextSortPosition,
+                                });
+                            }}
+                        >
+                            New scene
+                        </Button>
+                        {scenes.map((scene) => {
+                            return (
+                                <Flex
+                                    key={scene.getUId()}
+                                    gap="xs"
+                                    align="center"
+                                    justify="space-between"
                                 >
-                                    {scene.name}
-                                </Button>
-                                <Popover withArrow shadow="xs">
-                                    <Popover.Target>
-                                        <ActionIcon
-                                            variant="outline"
-                                            color="red"
-                                            title="Delete scene"
-                                        >
-                                            <IconTrash />
-                                        </ActionIcon>
-                                    </Popover.Target>
-                                    <Popover.Dropdown>
-                                        <Flex gap="xs" align="center">
-                                            <Text c="red">Are you sure?</Text>
-                                            <Button
-                                                size="xs"
+                                    <Button
+                                        flex="2"
+                                        title={scene.name}
+                                        onClick={() => {
+                                            changeScene(scene);
+                                            setSelectedScene(scene);
+                                        }}
+                                        variant={
+                                            selectedScene?.getUId() ===
+                                            scene.getUId()
+                                                ? "filled"
+                                                : "outline"
+                                        }
+                                    >
+                                        {scene.name}
+                                    </Button>
+                                    <Popover withArrow shadow="xs">
+                                        <Popover.Target>
+                                            <ActionIcon
+                                                variant="outline"
                                                 color="red"
-                                                onClick={() => {
-                                                    removeScene(scene);
-                                                }}
+                                                title="Delete scene"
                                             >
-                                                Yes
-                                            </Button>
-                                        </Flex>
-                                    </Popover.Dropdown>
-                                </Popover>
-                            </Flex>
-                        );
-                    })}
-                </Flex>
+                                                <IconTrash />
+                                            </ActionIcon>
+                                        </Popover.Target>
+                                        <Popover.Dropdown>
+                                            <Flex gap="xs" align="center">
+                                                <Text c="red">
+                                                    Are you sure?
+                                                </Text>
+                                                <Button
+                                                    size="xs"
+                                                    color="red"
+                                                    onClick={() => {
+                                                        removeScene(scene);
+                                                    }}
+                                                >
+                                                    Yes
+                                                </Button>
+                                            </Flex>
+                                        </Popover.Dropdown>
+                                    </Popover>
+                                </Flex>
+                            );
+                        })}
+                    </Flex>
+                </Fieldset>
                 <Divider orientation="vertical" />
                 {selectedScene && <SceneOptions scene={selectedScene} />}
                 {selectedScene && <GridSettings grid={selectedScene?.grid} />}
