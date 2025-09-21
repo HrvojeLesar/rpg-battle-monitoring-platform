@@ -1,13 +1,12 @@
 import { Viewport } from "pixi-viewport";
 import { GBoard } from "./board";
 import { UniqueCollection } from "./utils/unique_collection";
-import { ContainerChild, Graphics, IRenderLayer, Texture } from "pixi.js";
+import { ContainerChild, Graphics, IRenderLayer } from "pixi.js";
 import { DragHandler } from "./handlers/drag_handler";
 import { EventStore } from "./handlers/registered_event_store";
 import { SelectHandler } from "./handlers/select_handler";
 import { Grid, GridOptions } from "./grid/grid";
 import { Token } from "./token/token";
-import { EmptyTokenData } from "./token/empty_token_data";
 import {
     DeleteAction,
     IMessagable,
@@ -97,6 +96,8 @@ export class Scene implements IMessagable<SceneAttributes> {
                 minScale: 0.1,
             });
 
+        this.viewport.scale.x = 0.2;
+        this.viewport.scale.y = 0.2;
         this._viewport.moveCenter(WORLD_SIZE / 2, WORLD_SIZE / 2);
 
         if (isDev()) {
@@ -215,45 +216,6 @@ export class Scene implements IMessagable<SceneAttributes> {
         return this._eventStore;
     }
 
-    protected addTokenOld({
-        x = 64,
-        y = 64,
-        tint = "green",
-        texture = undefined,
-        width = undefined,
-        height = undefined,
-    }): void {
-        const token = new Token(
-            this,
-            new EmptyTokenData(),
-            {
-                texture: texture ?? Texture.WHITE,
-                tint: tint,
-                width: width ?? this._grid.cellSize * 3,
-                height: height ?? this._grid.cellSize * 3,
-                alpha: 0.5,
-            },
-            {
-                isSnapping: tint === "red" ? false : true,
-                isDraggable: true,
-                isSelectable: tint === "blue" ? false : true,
-                isResizable: true,
-                eventMode: "static",
-                cursor: "pointer",
-                position: { x: x, y: y },
-            },
-        );
-
-        GBoard.entityRegistry.entities.add(token);
-
-        // WARN: Order matters, try changing so any order is valid
-        this._selectHandler.registerSelect(token);
-        this._dragHandler.registerDrag(token);
-
-        this._tokens.add(token);
-        this._viewport.addChild(token);
-    }
-
     public getKind(): string {
         return this.constructor.name;
     }
@@ -326,13 +288,14 @@ export class Scene implements IMessagable<SceneAttributes> {
         return shouldApplyChanges(this, changes);
     }
 
-    public addToken(token: Token): void {
+    public addToken(token: Token, layer?: Layer | string): void {
         this._selectHandler.registerSelect(token);
         this._dragHandler.registerDrag(token);
 
         this._tokens.add(token);
 
         if (token.zIndex === 0) {
+            // WARN: This queues an update for a token that is possibly not yet created: see token_factory.ts
             queueEntityUpdate(() => {
                 const nextZIndex =
                     this._tokens.items.reduce((acc, t) => {
@@ -348,7 +311,11 @@ export class Scene implements IMessagable<SceneAttributes> {
             });
         }
 
-        this._layers.tokenLayer.addChild(token);
+        if (layer !== undefined) {
+            this._layers.getLayer(layer);
+        } else {
+            this.selectedLayer.container.addChild(token);
+        }
     }
 
     public removeToken(token: Token): void {

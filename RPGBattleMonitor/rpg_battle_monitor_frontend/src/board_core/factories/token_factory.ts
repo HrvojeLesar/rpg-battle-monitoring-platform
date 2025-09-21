@@ -113,6 +113,8 @@ export class TokenFactory {
         };
 
         if (textureLoading !== undefined) {
+            // WARN: when this code is ran token in first updated then created because scene.addToken() runs
+            // before the promise
             textureLoading.then(flush);
         } else {
             flush();
