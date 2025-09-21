@@ -1,4 +1,6 @@
+import { ASSETS_URL_BASE } from "@/board_react_wrapper/utils/utils";
 import { Assets, ProgressCallback, Sprite, Texture } from "pixi.js";
+import { LOAD_TEXTURE } from "../converters/texture_converter";
 
 export type AssetSpritePair = {
     sprite: Sprite;
@@ -35,6 +37,8 @@ class AssetManager {
             }
 
             const texture = textures[pair.url];
+            const path = pair.url.replace(ASSETS_URL_BASE, "");
+            texture.label = `${LOAD_TEXTURE}${path}`;
             if (texture !== undefined) {
                 this.incrementTextureUseCount(texture);
                 sprite.texture = texture;
@@ -58,7 +62,10 @@ class AssetManager {
             return;
         }
 
-        const identifier = texture.label;
+        const identifier = texture.label?.replace(
+            LOAD_TEXTURE,
+            ASSETS_URL_BASE,
+        );
 
         if (identifier === undefined) {
             return;

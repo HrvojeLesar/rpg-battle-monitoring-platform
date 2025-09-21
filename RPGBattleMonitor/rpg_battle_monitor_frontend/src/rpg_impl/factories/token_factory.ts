@@ -4,13 +4,14 @@ import { RpgTokenData } from "../tokens/CharacterTokenData";
 import { RpgToken } from "../tokens/CharacterToken";
 import { GAssetManager } from "@/board_core/assets/asset_manager";
 import { GBoard } from "@/board_core/board";
+import { getUrl } from "@/board_react_wrapper/utils/utils";
 
 const randomHexColorCode = () => {
     const n = (Math.random() * 0xfffff * 1000000).toString(16);
     return "#" + n.slice(0, 6);
 };
 
-export class CharacterTokenFactory {
+export class RpgTokenFactory {
     public static createRandomToken(
         scene: Scene,
         tokenData?: RpgTokenData,
@@ -20,9 +21,7 @@ export class CharacterTokenFactory {
         const data =
             tokenData ??
             new RpgTokenData({
-                image: isImage
-                    ? "http://localhost:3000/public/W_m.jpeg"
-                    : undefined,
+                image: isImage ? "/public/W_m.jpeg" : undefined,
             });
 
         const token = new RpgToken(
@@ -52,7 +51,7 @@ export class CharacterTokenFactory {
             if (token.displayedEntity && token.tokenData.image) {
                 textureLoading = GAssetManager.load({
                     sprite: token.displayedEntity,
-                    url: token.tokenData.image,
+                    url: getUrl(token.tokenData.image),
                 });
             }
         }

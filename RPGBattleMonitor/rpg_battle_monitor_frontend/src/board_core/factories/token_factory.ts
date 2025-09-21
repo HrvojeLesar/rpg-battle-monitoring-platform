@@ -5,6 +5,7 @@ import { Token } from "../token/token";
 import { GBoard } from "../board";
 import { TokenDataBase } from "../token/token_data";
 import { GAssetManager } from "../assets/asset_manager";
+import { getUrl } from "@/board_react_wrapper/utils/utils";
 
 const randomHexColorCode = () => {
     const n = (Math.random() * 0xfffff * 1000000).toString(16);
@@ -37,7 +38,7 @@ export class TokenFactory {
         if (token.displayedEntity) {
             textureLoading = GAssetManager.load({
                 sprite: token.displayedEntity,
-                url: "http://localhost:3000/public/W_m.jpeg",
+                url: getUrl("/public/W_m.jpeg"),
             });
         }
 
@@ -95,7 +96,7 @@ export class TokenFactory {
             if (token.displayedEntity) {
                 textureLoading = GAssetManager.load({
                     sprite: token.displayedEntity,
-                    url: "http://localhost:3000/public/W_m.jpeg",
+                    url: getUrl("/public/W_m.jpeg"),
                 });
             }
         }

@@ -8,6 +8,11 @@ import { DeleteAction, UId, type TypedJson } from "../interfaces/messagable";
 import { Scene } from "../scene";
 import { TokenDataBase } from "./token_data";
 import { GBoard } from "../board";
+import {
+    LOAD_TEXTURE,
+    TextureConverter,
+} from "../converters/texture_converter";
+import { GAssetManager } from "../assets/asset_manager";
 
 export type TokenAttributes = {
     gridUid: UId;
@@ -53,6 +58,7 @@ export class Token extends SpriteExtension {
 
     public applyUpdateAction(changes: TypedJson<TokenAttributes>): void {
         super.applyUpdateAction(changes);
+        this.setTexture();
     }
 
     protected update(): void {
@@ -69,5 +75,20 @@ export class Token extends SpriteExtension {
         });
 
         super.deleteAction(action);
+    }
+
+    public setTexture(): void {
+        if (this.displayedEntity) {
+            const loadTexture = `${LOAD_TEXTURE}${this.tokenData.image}`;
+            if (this.displayedEntity.texture.label !== loadTexture) {
+                GAssetManager.unload(this.displayedEntity);
+                const texture = TextureConverter.toTexture(
+                    loadTexture,
+                    this.displayedEntity,
+                );
+
+                this.displayedEntity.texture = texture;
+            }
+        }
     }
 }

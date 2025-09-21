@@ -8,7 +8,7 @@ import { TokenFactory } from "@/board_core/factories/token_factory";
 import { Resizable } from "re-resizable";
 import { SidebarTabs } from "./SidebarTabs";
 import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
-import { CharacterTokenFactory } from "@/rpg_impl/factories/token_factory";
+import { RpgTokenFactory } from "@/rpg_impl/factories/token_factory";
 
 const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
     return (
@@ -41,7 +41,7 @@ const HudLeft = () => {
                 }}
                 onClick={() => {
                     // TokenFactory.createRandomToken(currentScene);
-                    CharacterTokenFactory.createRandomToken(currentScene);
+                    RpgTokenFactory.createRandomToken(currentScene);
                 }}
             >
                 Add token to scene

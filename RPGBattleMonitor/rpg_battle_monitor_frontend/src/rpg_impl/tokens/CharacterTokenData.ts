@@ -1,37 +1,34 @@
 import { TypedJson } from "@/board_core/interfaces/messagable";
-import { TokenDataBase } from "@/board_core/token/token_data";
+import {
+    TokenDataBase,
+    TokenDataBaseAttributes,
+} from "@/board_core/token/token_data";
 
 export type RpgTokenAttributes = {
-    image: Maybe<string>;
     tint: Maybe<number>;
     name: string;
-};
+} & TokenDataBaseAttributes;
 
 export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
-    public tint: Maybe<number> = undefined;
-    public image: Maybe<string> = undefined;
     public name: string = "Test token name";
+    public tint: Maybe<number> = undefined;
 
     public constructor(options?: Partial<RpgTokenAttributes>) {
-        super();
+        super(options);
 
         this.image = options?.image;
-        this.tint = options?.tint;
     }
 
     public getAttributes(): RpgTokenAttributes {
         return {
-            image: this.image,
+            ...super.getAttributes(),
             tint: this.tint,
             name: this.name,
         };
     }
 
-    public applyUpdateAction(
-        changes: TypedJson<RpgTokenAttributes>,
-    ): void {
+    public applyUpdateAction(changes: TypedJson<RpgTokenAttributes>): void {
         this.tint = changes.tint;
-        this.image = changes.image;
 
         super.applyUpdateAction(changes);
     }

@@ -1,7 +1,8 @@
 import { BufferImageSource, Sprite, Texture } from "pixi.js";
 import { GAssetManager } from "../assets/asset_manager";
+import { getUrl } from "@/board_react_wrapper/utils/utils";
 
-const LOAD_TEXTURE = "load-texture:";
+export const LOAD_TEXTURE = "load-texture:";
 
 function createEmptyWhiteTexture(label?: string): Texture {
     return new Texture({
@@ -10,9 +11,9 @@ function createEmptyWhiteTexture(label?: string): Texture {
             width: 1,
             height: 1,
             alphaMode: "premultiply-alpha-on-upload",
-            label: label ?? "WHITE",
+            label: label === undefined ? `${LOAD_TEXTURE}${label}` : "WHITE",
         }),
-        label: label ?? "WHITE",
+        label: label === undefined ? `${LOAD_TEXTURE}${label}` : "WHITE",
     });
 }
 
@@ -31,14 +32,15 @@ export class TextureConverter {
         }
 
         if (data.startsWith(LOAD_TEXTURE)) {
-            const url = data.slice(LOAD_TEXTURE.length);
+            const path = data.slice(LOAD_TEXTURE.length);
+            const url = getUrl(path);
             GAssetManager.load({
                 sprite,
                 url,
             });
 
             // TODO: add loading texture
-            return createEmptyWhiteTexture(url);
+            return createEmptyWhiteTexture(path);
         }
 
         return Texture.WHITE;
@@ -54,9 +56,8 @@ export class TextureConverter {
             return label;
         }
 
-        // TODO: strip out http{s}://some-url and only keep path so uri can be interchangable
-        if (label.startsWith("http")) {
-            return `${LOAD_TEXTURE}${label}`;
+        if (label.startsWith(LOAD_TEXTURE)) {
+            return label;
         }
 
         return "";

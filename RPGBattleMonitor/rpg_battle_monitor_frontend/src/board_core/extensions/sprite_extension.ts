@@ -7,13 +7,11 @@ import {
 } from "./container_extension";
 import { Grid } from "../grid/grid";
 import { DeleteAction, TypedJson } from "../interfaces/messagable";
-import { TextureConverter } from "../converters/texture_converter";
 import { GAssetManager } from "../assets/asset_manager";
 
 export type SpriteExtensionAttributes = {
     alpha: number;
     tint: ColorSource;
-    spriteTexture: string;
 } & ContainerExtensionAttributes;
 
 export class SpriteExtension extends ContainerExtension<
@@ -70,9 +68,6 @@ export class SpriteExtension extends ContainerExtension<
             ...super.getAttributes(),
             alpha: this.displayedEntity.alpha,
             tint: this.displayedEntity.tint,
-            spriteTexture: TextureConverter.fromTexture(
-                this.displayedEntity.texture,
-            ),
         };
     }
 
@@ -81,13 +76,8 @@ export class SpriteExtension extends ContainerExtension<
     ): void {
         super.applyUpdateAction(changes);
         if (this.displayedEntity) {
-            const texture = TextureConverter.toTexture(
-                changes.spriteTexture,
-                this.displayedEntity,
-            );
             this.displayedEntity.alpha = changes.alpha;
             this.displayedEntity.tint = changes.tint;
-            this.displayedEntity.texture = texture;
         }
     }
 

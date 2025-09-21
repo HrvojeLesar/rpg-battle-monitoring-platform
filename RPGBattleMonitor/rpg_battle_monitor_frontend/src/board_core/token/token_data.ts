@@ -1,6 +1,5 @@
 import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
 import {
-    DefaultAttributes,
     DeleteAction,
     IMessagable,
     shouldApplyChanges,
@@ -12,14 +11,22 @@ import { tokenAtoms } from "@/board_react_wrapper/stores/token_store";
 import { GBoard } from "../board";
 import { Token } from "./token";
 
-export abstract class TokenDataBase<T = DefaultAttributes>
-    implements IMessagable<T>
+export type TokenDataBaseAttributes = {
+    image: Maybe<string>;
+};
+
+export abstract class TokenDataBase<
+    T extends TokenDataBaseAttributes = TokenDataBaseAttributes,
+> implements IMessagable<T>
 {
     protected _uid: UId;
     protected _lastChangesTimestamp: Maybe<number> = undefined;
+    protected _image: Maybe<string> = undefined;
 
-    public constructor() {
+    public constructor(options?: Partial<T>) {
         this._uid = newUId();
+
+        this._image = options?.image;
     }
 
     public set uid(uid: UId) {
@@ -34,9 +41,15 @@ export abstract class TokenDataBase<T = DefaultAttributes>
         return this.constructor.name;
     }
 
-    public abstract getAttributes(): T;
+    public getAttributes(): T {
+        return {
+            image: this._image,
+        } as T;
+    }
+
     public applyUpdateAction(changes: TypedJson<T>): void {
         this._uid = changes.uid;
+        this.image = changes.image;
 
         GAtomStore.set(tokenAtoms.refreshTokens);
     }
@@ -65,9 +78,7 @@ export abstract class TokenDataBase<T = DefaultAttributes>
     public deleteAction(action: DeleteAction): void {
         action.acc.push(this as IMessagable);
 
-        const tokens = GBoard.entityRegistry.entities.list(
-            (entity) => entity instanceof Token && entity.tokenData === this,
-        ) as Token[];
+        const tokens = this.getAssoicatedTokens();
 
         for (const token of tokens) {
             token.deleteAction(action);
@@ -80,5 +91,24 @@ export abstract class TokenDataBase<T = DefaultAttributes>
 
     public shouldApplyChanges(changes: TypedJson<T>): boolean {
         return shouldApplyChanges(this, changes);
+    }
+
+    public get image(): Maybe<string> {
+        return this._image;
+    }
+
+    public set image(image: Maybe<string>) {
+        this._image = image;
+
+        const tokens = this.getAssoicatedTokens();
+        tokens.forEach((token) => {
+            token.setTexture();
+        });
+    }
+
+    public getAssoicatedTokens(): Token[] {
+        return GBoard.entityRegistry.entities.list(
+            (entity) => entity instanceof Token && entity.tokenData === this,
+        ) as Token[];
     }
 }
