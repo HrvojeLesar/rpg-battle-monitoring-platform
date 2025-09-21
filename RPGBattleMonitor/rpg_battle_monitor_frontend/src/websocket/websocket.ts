@@ -48,8 +48,8 @@ export type ActionMessageListen = {
 export class Websocket {
     protected _socket: Socket<ListenEvents, EmitEvents>;
     public joined: boolean = false;
-    protected queues: QueueMap;
-    protected queueOrder: (keyof QueueMap)[] = [];
+
+    protected actionQueue: ActionMessageEmit[] = [];
 
     public constructor(
         uri?: string,
@@ -58,11 +58,6 @@ export class Websocket {
         const socket = io(uri, opts);
 
         this._socket = socket;
-
-        this.queues = {} as QueueMap;
-        for (const key of Object.keys(WebsocketQueues)) {
-            this.queues[key as keyof QueueMap] = [];
-        }
     }
 
     public static createDefaultSocket(gameId: number): Websocket {
@@ -80,21 +75,27 @@ export class Websocket {
     }
 
     public queue(data: IMessagable, queue: keyof QueueMap) {
-        this.queues[queue].push(data);
-        this.queueOrder.push(queue);
+        const action = WebsocketQueues[queue];
+
+        const queueLenght = this.actionQueue.length;
+
+        if (
+            queueLenght === 0 ||
+            this.actionQueue[queueLenght - 1].action !== action
+        ) {
+            this.actionQueue.push({ action, data: [data] });
+        } else {
+            this.actionQueue[queueLenght - 1].data.push(data);
+        }
     }
 
     public flush() {
         // TODO: add queueing if websocket has not finished joining yet
-        for (const queueKey of this.queueOrder) {
-            const queue = this.queues[queueKey];
-            if (queue.length > 0) {
-                const action = WebsocketQueues[queueKey];
-                this.socket.emit("action", { action, data: queue });
-                this.queues[queueKey] = [];
-            }
+        for (const action of this.actionQueue) {
+            this.socket.emit("action", action);
         }
-        this.queueOrder = [];
+
+        this.actionQueue = [];
     }
 
     public initJoin() {
@@ -145,7 +146,9 @@ export class Websocket {
     }
 
     public clear(queue: keyof QueueMap) {
-        this.queues[queue] = [];
+        this.actionQueue = this.actionQueue.filter(
+            (action) => action.action !== WebsocketQueues[queue],
+        );
     }
 }
 
