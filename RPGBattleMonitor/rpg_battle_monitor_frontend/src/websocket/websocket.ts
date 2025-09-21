@@ -49,6 +49,7 @@ export class Websocket {
     protected _socket: Socket<ListenEvents, EmitEvents>;
     public joined: boolean = false;
     protected queues: QueueMap;
+    protected queueOrder: (keyof QueueMap)[] = [];
 
     public constructor(
         uri?: string,
@@ -80,17 +81,20 @@ export class Websocket {
 
     public queue(data: IMessagable, queue: keyof QueueMap) {
         this.queues[queue].push(data);
+        this.queueOrder.push(queue);
     }
 
     public flush() {
         // TODO: add queueing if websocket has not finished joining yet
-        for (const [key, value] of Object.entries(WebsocketQueues)) {
-            const queue = this.queues[key as keyof QueueMap];
+        for (const queueKey of this.queueOrder) {
+            const queue = this.queues[queueKey];
             if (queue.length > 0) {
-                this.socket.emit("action", { action: value, data: queue });
-                this.queues[key as keyof QueueMap] = [];
+                const action = WebsocketQueues[queueKey];
+                this.socket.emit("action", { action, data: queue });
+                this.queues[queueKey] = [];
             }
         }
+        this.queueOrder = [];
     }
 
     public initJoin() {
