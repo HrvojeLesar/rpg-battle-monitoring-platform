@@ -1,7 +1,7 @@
 import { Scene } from "@/board_core/scene";
 import { Texture } from "pixi.js";
-import { CharacterTokenData } from "../tokens/CharacterTokenData";
-import { CharacterToken } from "../tokens/CharacterToken";
+import { RpgTokenData } from "../tokens/CharacterTokenData";
+import { RpgToken } from "../tokens/CharacterToken";
 import { GAssetManager } from "@/board_core/assets/asset_manager";
 import { GBoard } from "@/board_core/board";
 
@@ -13,19 +13,19 @@ const randomHexColorCode = () => {
 export class CharacterTokenFactory {
     public static createRandomToken(
         scene: Scene,
-        tokenData?: CharacterTokenData,
-    ): CharacterToken {
+        tokenData?: RpgTokenData,
+    ): RpgToken {
         const isImage = Math.random() < 0.5;
 
         const data =
             tokenData ??
-            new CharacterTokenData({
+            new RpgTokenData({
                 image: isImage
                     ? "http://localhost:3000/public/W_m.jpeg"
                     : undefined,
             });
 
-        const token = new CharacterToken(
+        const token = new RpgToken(
             scene,
             data,
             {

@@ -3,7 +3,7 @@ import { Flex, Image, Paper } from "@mantine/core";
 import { IconToiletPaper } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { DeleteConfirmation } from "../utils/DeleteConfirmation";
-import { CharacterTokenData } from "@/rpg_impl/tokens/CharacterTokenData";
+import { RpgTokenData } from "@/rpg_impl/tokens/CharacterTokenData";
 import { Fragment } from "react/jsx-runtime";
 
 const defaultImageUrl = "http://localhost:3000/public/rpg/default.jpeg";
@@ -16,7 +16,7 @@ export const Tokens = () => {
     return (
         <>
             {tokens.map((token, idx) => {
-                if (!(token instanceof CharacterTokenData)) {
+                if (!(token instanceof RpgTokenData)) {
                     return <Fragment key={idx}></Fragment>;
                 }
 

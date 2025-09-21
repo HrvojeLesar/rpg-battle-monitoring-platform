@@ -2,19 +2,19 @@ import { ContainerExtensionOptions } from "@/board_core/extensions/container_ext
 import { Scene } from "@/board_core/scene";
 import { Token } from "@/board_core/token/token";
 import { SpriteOptions } from "pixi.js";
-import { CharacterTokenData } from "./CharacterTokenData";
+import { RpgTokenData } from "./CharacterTokenData";
 
-export class CharacterToken extends Token {
+export class RpgToken extends Token {
     public constructor(
         scene: Scene,
-        tokenData: CharacterTokenData,
+        tokenData: RpgTokenData,
         spriteOptions?: SpriteOptions,
         containerOptions?: ContainerExtensionOptions,
     ) {
         super(scene, tokenData, spriteOptions, containerOptions);
     }
 
-    public get tokenData(): CharacterTokenData {
-        return this._tokenData as CharacterTokenData;
+    public get tokenData(): RpgTokenData {
+        return this._tokenData as RpgTokenData;
     }
 }

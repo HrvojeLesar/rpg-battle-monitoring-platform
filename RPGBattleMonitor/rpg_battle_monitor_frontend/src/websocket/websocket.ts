@@ -112,27 +112,11 @@ export class Websocket {
             GEventEmitter.emit("socket-join-finished");
 
             GAtomStore.set(sidebarTabAtoms.resetTabs);
+
+            // TODO: Move into external module
             GAtomStore.set(sidebarTabAtoms.addTab, {
                 value: "Tokens",
                 title: "Tokens",
-                icon: TokenIcon,
-                content: Tokens,
-            });
-            GAtomStore.set(sidebarTabAtoms.addTab, {
-                value: "Tokens 2",
-                title: "Tokens 2",
-                icon: TokenIcon,
-                content: Tokens,
-            });
-            GAtomStore.set(sidebarTabAtoms.addTab, {
-                value: "Tokens 3",
-                title: "Tokens 3",
-                icon: TokenIcon,
-                content: Tokens,
-            });
-            GAtomStore.set(sidebarTabAtoms.addTab, {
-                value: "Tokens 4",
-                title: "Tokens 4",
                 icon: TokenIcon,
                 content: Tokens,
             });
