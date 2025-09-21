@@ -73,7 +73,6 @@ export class SelectionBox extends Graphics {
         };
 
         const onPointerDown = (event: FederatedPointerEvent) => {
-            // TODO: Handle touch properly
             if (event.pointerType === "mouse" && event.button !== 0) {
                 return;
             }

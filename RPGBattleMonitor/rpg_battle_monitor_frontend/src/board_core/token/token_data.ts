@@ -9,6 +9,8 @@ import {
 } from "../interfaces/messagable";
 import newUId from "../utils/uuid_generator";
 import { tokenAtoms } from "@/board_react_wrapper/stores/token_store";
+import { GBoard } from "../board";
+import { Token } from "./token";
 
 export abstract class TokenDataBase<T = DefaultAttributes>
     implements IMessagable<T>
@@ -60,7 +62,17 @@ export abstract class TokenDataBase<T = DefaultAttributes>
         return this.name;
     }
 
-    public abstract deleteAction(action: DeleteAction): void;
+    public deleteAction(action: DeleteAction): void {
+        action.acc.push(this as IMessagable);
+
+        const tokens = GBoard.entityRegistry.entities.list(
+            (entity) => entity instanceof Token && entity.tokenData === this,
+        ) as Token[];
+
+        for (const token of tokens) {
+            token.deleteAction(action);
+        }
+    }
 
     public getLastChangesTimestamp(): Maybe<number> {
         return this._lastChangesTimestamp;

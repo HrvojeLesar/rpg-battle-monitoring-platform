@@ -1,6 +1,7 @@
 import { atom } from "jotai";
 import { TokenDataBase } from "@/board_core/token/token_data";
 import { GBoard } from "@/board_core/board";
+import { removeAndFlushEntities } from "@/board_core/utils/remove_and_flush_entities";
 
 export type TokenStoreState = {
     tokens: TokenDataBase[];
@@ -28,8 +29,19 @@ const refreshTokens = atom(null, (_, set) => {
     });
 });
 
+const deleteToken = atom(null, (get, set, token: TokenDataBase) => {
+    set(tokenAtom, () => {
+        removeAndFlushEntities(token);
+
+        set(refreshTokens);
+
+        return get(tokenAtom);
+    });
+});
+
 export const tokenAtoms = {
     tokenAtom,
     tokens,
     refreshTokens,
+    deleteToken,
 };

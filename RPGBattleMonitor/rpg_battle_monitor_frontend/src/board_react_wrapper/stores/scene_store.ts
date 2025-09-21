@@ -1,3 +1,4 @@
+import { removeAndFlushEntities } from "@/board_core/utils/remove_and_flush_entities";
 import { GBoard } from "../../board_core/board";
 import { SceneFactory } from "../../board_core/factories/scene_factory";
 import { Scene, SceneOptions } from "../../board_core/scene";
@@ -93,15 +94,7 @@ const refreshScenes = atom(null, (_, set) => {
 });
 
 const removeScene = atom(null, (_, set, scene: Scene) => {
-    const deleteAction = GBoard.entityRegistry.entities.remove(scene);
-
-    for (const entity of deleteAction.acc) {
-        GBoard.websocket.queue(entity, "deleteQueue");
-    }
-
-    GBoard.websocket.flush();
-
-    deleteAction.cleanupCallbacks.forEach((cb) => cb());
+    removeAndFlushEntities(scene);
 
     set(sceneAtom, (state) => {
         state.scenes = state.scenes.filter(

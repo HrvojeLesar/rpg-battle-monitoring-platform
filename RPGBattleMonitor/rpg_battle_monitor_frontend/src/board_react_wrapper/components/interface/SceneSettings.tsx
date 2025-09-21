@@ -1,23 +1,20 @@
 import { Scene } from "@/board_core/scene";
 import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 import {
-    ActionIcon,
     Button,
     Container,
     Divider,
     Flex,
-    Popover,
-    Text,
     Input,
     Fieldset,
 } from "@mantine/core";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { GridSettings } from "../GridSettings";
-import { IconTrash } from "@tabler/icons-react";
 import { sceneAtomsUtils } from "@/board_react_wrapper/stores/utils";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { queueEntityUpdate } from "@/websocket/websocket";
+import { DeleteConfirmation } from "../utils/DeleteConfirmation";
 
 const SCENE_NAME = "Scene name";
 
@@ -122,33 +119,12 @@ export const SceneSettings = () => {
                                     >
                                         {scene.name}
                                     </Button>
-                                    <Popover withArrow shadow="xs">
-                                        <Popover.Target>
-                                            <ActionIcon
-                                                variant="outline"
-                                                color="red"
-                                                title="Delete scene"
-                                            >
-                                                <IconTrash />
-                                            </ActionIcon>
-                                        </Popover.Target>
-                                        <Popover.Dropdown>
-                                            <Flex gap="xs" align="center">
-                                                <Text c="red">
-                                                    Are you sure?
-                                                </Text>
-                                                <Button
-                                                    size="xs"
-                                                    color="red"
-                                                    onClick={() => {
-                                                        removeScene(scene);
-                                                    }}
-                                                >
-                                                    Yes
-                                                </Button>
-                                            </Flex>
-                                        </Popover.Dropdown>
-                                    </Popover>
+                                    <DeleteConfirmation
+                                        title="Delete scene"
+                                        onDelete={() => {
+                                            removeScene(scene);
+                                        }}
+                                    />
                                 </Flex>
                             );
                         })}

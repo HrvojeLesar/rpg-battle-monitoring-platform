@@ -32,6 +32,7 @@ export const initEventListeners = () => {
     GEventEmitter.on("board-init-finished", refreshScenes);
     GEventEmitter.on("socket-join-finished", joinFinished);
     GEventEmitter.on("entity-added", refreshTokens);
+    GEventEmitter.on("entity-removed", refreshTokens);
 };
 
 export const destroyEventListeners = () => {
@@ -40,4 +41,5 @@ export const destroyEventListeners = () => {
     GEventEmitter.off("board-init-finished", refreshScenes);
     GEventEmitter.off("socket-join-finished", joinFinished);
     GEventEmitter.off("entity-added", refreshTokens);
+    GEventEmitter.off("entity-removed", refreshTokens);
 };
