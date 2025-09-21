@@ -44,6 +44,7 @@ export class TokenFactory {
         GBoard.entityRegistry.entities.add(token);
 
         if (!GBoard.entityRegistry.entities.get(token.tokenData.getUId())) {
+            GBoard.entityRegistry.entities.add(token.tokenData);
             GBoard.websocket.queue(token.tokenData, "createQueue");
         }
 
@@ -102,6 +103,7 @@ export class TokenFactory {
         GBoard.entityRegistry.entities.add(token);
 
         if (!GBoard.entityRegistry.entities.get(token.tokenData.getUId())) {
+            GBoard.entityRegistry.entities.add(token.tokenData);
             GBoard.websocket.queue(token.tokenData, "createQueue");
         }
 

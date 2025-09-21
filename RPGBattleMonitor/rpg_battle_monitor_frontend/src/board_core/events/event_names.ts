@@ -1,4 +1,5 @@
 import { JoinData } from "../../websocket/websocket";
+import { IMessagable } from "../interfaces/messagable";
 
 export type EventNames = {
     "board-init-started": () => void;
@@ -9,7 +10,10 @@ export type EventNames = {
     "socket-join-finished": () => void;
     "socket-join": (joinData: JoinData) => void;
 
-    "keyup": (event: KeyboardEvent) => void;
+    keyup: (event: KeyboardEvent) => void;
+
+    "entity-added": (entity: IMessagable) => void;
+    "entity-removed": (entity: IMessagable) => void;
 };
 
 export type EventEmitterTypes = {

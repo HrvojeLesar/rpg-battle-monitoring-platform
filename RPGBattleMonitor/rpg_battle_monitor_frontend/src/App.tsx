@@ -6,11 +6,8 @@ import { RouterProvider } from "@tanstack/react-router";
 import { router } from "./board_react_wrapper/routes/root";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "jotai";
-import { initEventListeners } from "./board_react_wrapper/event_listeners/board_init_event_listener";
 
 export const queryClient = new QueryClient();
-
-initEventListeners();
 
 import "@mantine/core/styles.css";
 

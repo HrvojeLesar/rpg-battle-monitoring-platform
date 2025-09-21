@@ -1,24 +1,43 @@
 import { GEventEmitter } from "../../board_core/board";
 import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 import { GAtomStore } from "../stores/state_store";
+import { tokenAtoms } from "../stores/token_store";
+import { IMessagable } from "@/board_core/interfaces/messagable";
+import { TokenDataBase } from "@/board_core/token/token_data";
+
+function clearScenes() {
+    GAtomStore.set(sceneAtoms.clearScenes);
+}
+
+function refreshScenes() {
+    GAtomStore.set(sceneAtoms.refreshScenes);
+}
+
+function joinFinished() {
+    refreshScenes();
+    const scenes = GAtomStore.get(sceneAtoms.getScenes);
+    const firstScene = scenes.at(0);
+    GAtomStore.set(sceneAtoms.changeScene, firstScene);
+}
+
+function refreshTokens(entity: IMessagable) {
+    if (entity instanceof TokenDataBase) {
+        GAtomStore.set(tokenAtoms.refreshTokens);
+    }
+}
 
 export const initEventListeners = () => {
-    GEventEmitter.on("board-init-started", () => {
-        GAtomStore.set(sceneAtoms.clearScenes);
-    });
+    GEventEmitter.on("board-init-started", clearScenes);
+    GEventEmitter.on("board-destoryed", clearScenes);
+    GEventEmitter.on("board-init-finished", refreshScenes);
+    GEventEmitter.on("socket-join-finished", joinFinished);
+    GEventEmitter.on("entity-added", refreshTokens);
+};
 
-    GEventEmitter.on("board-init-finished", () => {
-        GAtomStore.set(sceneAtoms.refreshScenes);
-    });
-
-    GEventEmitter.on("board-destoryed", () => {
-        GAtomStore.set(sceneAtoms.clearScenes);
-    });
-
-    GEventEmitter.on("socket-join-finished", () => {
-        GAtomStore.set(sceneAtoms.refreshScenes);
-        const scenes = GAtomStore.get(sceneAtoms.getScenes);
-        const firstScene = scenes.at(0);
-        GAtomStore.set(sceneAtoms.changeScene, firstScene);
-    });
+export const destroyEventListeners = () => {
+    GEventEmitter.off("board-init-started", clearScenes);
+    GEventEmitter.off("board-destoryed", clearScenes);
+    GEventEmitter.off("board-init-finished", refreshScenes);
+    GEventEmitter.off("socket-join-finished", joinFinished);
+    GEventEmitter.off("entity-added", refreshTokens);
 };

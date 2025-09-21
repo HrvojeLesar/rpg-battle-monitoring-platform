@@ -15,6 +15,10 @@ import { Websocket } from "../websocket/websocket";
 import { EntityRegistry } from "./registry/entity_registry";
 import { GAtomStore } from "../board_react_wrapper/stores/state_store";
 import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
+import {
+    destroyEventListeners,
+    initEventListeners,
+} from "@/board_react_wrapper/event_listeners/board_init_event_listener";
 
 export type GameBoard = Board;
 
@@ -160,6 +164,8 @@ export async function init(
     options?: Partial<ApplicationOptions>,
     socket?: Websocket,
 ): Promise<Application> {
+    initEventListeners();
+
     GEventEmitter.emit("board-init-started");
     const application = new Application();
 
@@ -189,6 +195,7 @@ export async function init(
     console.log("Finished board init");
 
     GEventEmitter.emit("board-init-finished");
+
     return boardApplication.getApplication();
 }
 
@@ -215,6 +222,8 @@ export function destroy(
     }
 
     GEventEmitter.emit("board-destoryed");
+
+    destroyEventListeners();
     boardApplication = new Board(GEventEmitter);
 }
 

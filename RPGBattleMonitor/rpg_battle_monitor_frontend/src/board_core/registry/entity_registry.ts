@@ -1,4 +1,4 @@
-import { GBoard } from "../board";
+import { GBoard, GEventEmitter } from "../board";
 import { EmptyTokenDataConverter } from "../converters/empty_token_data_converter";
 import { GridConverter } from "../converters/grid_converter";
 import { SceneConverter } from "../converters/scene_converter";
@@ -90,6 +90,7 @@ class EntityContainer {
 
     public add(entity: IMessagable): void {
         this.entitiesMap.set(entity.getUId(), entity);
+        GEventEmitter.emit("entity-added", entity);
     }
 
     public get(uid: UId | IMessagable): Option<IMessagable> {
@@ -112,15 +113,29 @@ class EntityContainer {
         const existingEntity = this.entitiesMap.get(entity.getUId());
 
         if (existingEntity) {
-            this.entitiesMap.delete(entity.getUId());
+            if (this.entitiesMap.delete(entity.getUId())) {
+                GEventEmitter.emit("entity-removed", existingEntity);
+            }
             existingEntity.deleteAction(deleteAction);
         }
 
         for (const removedEntity of deleteAction.acc) {
-            this.entitiesMap.delete(removedEntity.getUId());
+            if (this.entitiesMap.delete(removedEntity.getUId())) {
+                GEventEmitter.emit("entity-removed", removedEntity);
+            }
         }
 
         return deleteAction;
+    }
+
+    public list(filter?: (entity: IMessagable) => boolean): IMessagable[] {
+        const entities = Array.from(this.entitiesMap.values());
+
+        if (filter) {
+            return entities.filter(filter);
+        }
+
+        return entities;
     }
 }
 

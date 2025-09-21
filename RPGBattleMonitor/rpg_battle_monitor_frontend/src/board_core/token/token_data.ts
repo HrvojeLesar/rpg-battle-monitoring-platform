@@ -1,3 +1,4 @@
+import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
 import {
     DefaultAttributes,
     DeleteAction,
@@ -7,6 +8,7 @@ import {
     UId,
 } from "../interfaces/messagable";
 import newUId from "../utils/uuid_generator";
+import { tokenAtoms } from "@/board_react_wrapper/stores/token_store";
 
 export abstract class TokenDataBase<T = DefaultAttributes>
     implements IMessagable<T>
@@ -33,6 +35,8 @@ export abstract class TokenDataBase<T = DefaultAttributes>
     public abstract getAttributes(): T;
     public applyUpdateAction(changes: TypedJson<T>): void {
         this._uid = changes.uid;
+
+        GAtomStore.set(tokenAtoms.refreshTokens);
     }
 
     public getUId(): UId {
