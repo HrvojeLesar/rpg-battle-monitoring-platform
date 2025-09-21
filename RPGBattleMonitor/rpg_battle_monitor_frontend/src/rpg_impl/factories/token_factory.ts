@@ -1,5 +1,5 @@
 import { Scene } from "@/board_core/scene";
-import { Texture } from "pixi.js";
+import { Point, Texture } from "pixi.js";
 import { RpgTokenData } from "../tokens/CharacterTokenData";
 import { RpgToken } from "../tokens/CharacterToken";
 import { GAssetManager } from "@/board_core/assets/asset_manager";
@@ -15,8 +15,9 @@ export class RpgTokenFactory {
     public static createRandomToken(
         scene: Scene,
         tokenData?: RpgTokenData,
+        position?: Point,
     ): RpgToken {
-        const isImage = Math.random() < 0.5;
+        const isImage = tokenData === undefined ? Math.random() < 0.5 : true;
 
         const data =
             tokenData ??
@@ -40,7 +41,7 @@ export class RpgTokenFactory {
                 isResizable: true,
                 eventMode: "static",
                 cursor: "pointer",
-                position: { x: scene.grid.x, y: scene.grid.y },
+                position: position ?? { x: scene.grid.x, y: scene.grid.y },
             },
         );
 

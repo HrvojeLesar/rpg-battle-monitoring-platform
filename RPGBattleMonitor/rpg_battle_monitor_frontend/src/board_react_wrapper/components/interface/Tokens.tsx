@@ -25,7 +25,6 @@ export const Tokens = () => {
                             return [];
                         }
 
-                        console.log(token.image);
                         token.image =
                             token.image === "/public/realamerican.jpg"
                                 ? "/public/rpg/default.jpeg"
@@ -49,8 +48,21 @@ export const Tokens = () => {
                         : defaultImageUrl;
 
                 return (
-                    <Flex key={idx} gap="xs" align="center">
-                        <Image maw="128px" mah="128px" src={imageUrl} />
+                    <Flex
+                        key={idx}
+                        gap="xs"
+                        align="center"
+                        draggable
+                        onDragStart={(e) => {
+                            e.dataTransfer.setData("token", token.getUId());
+                        }}
+                    >
+                        <Image
+                            draggable="false"
+                            maw="128px"
+                            mah="128px"
+                            src={imageUrl}
+                        />
                         <Paper>{`${token.name} - ${token.getUId()}`}</Paper>
                         <DeleteConfirmation
                             title="Delete token"

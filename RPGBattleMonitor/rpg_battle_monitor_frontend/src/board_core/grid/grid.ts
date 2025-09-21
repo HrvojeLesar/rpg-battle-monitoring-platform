@@ -121,7 +121,7 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
     }
 
     private createHoveredCell(): Graphics {
-        const hoveredCell = new Graphics();
+        const hoveredCell = new Graphics({ label: "Hovered cell" });
         hoveredCell
             .rect(0, 0, this._cellSize, this._cellSize)
             .fill({ color: "red" });

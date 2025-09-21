@@ -3,6 +3,7 @@ import {
     ApplicationOptions,
     Container,
     DestroyOptions,
+    Point,
     RendererDestroyOptions,
 } from "pixi.js";
 import { isDev } from "../utils/dev_mode";
@@ -19,6 +20,8 @@ import {
     destroyEventListeners,
     initEventListeners,
 } from "@/board_react_wrapper/event_listeners/board_init_event_listener";
+import { RpgTokenFactory } from "@/rpg_impl/factories/token_factory";
+import { RpgTokenData } from "@/rpg_impl/tokens/CharacterTokenData";
 
 export type GameBoard = Board;
 
@@ -159,6 +162,25 @@ function keyupHandler(event: KeyboardEvent) {
     }
 }
 
+function dragoverHandler(event: DragEvent) {
+    event.preventDefault();
+}
+
+function dropHandler(event: DragEvent) {
+    const data = event.dataTransfer?.getData("token");
+    if (data === undefined) {
+        return;
+    }
+
+    const screenPoint = new Point(event.x, event.y);
+    const localPoint = boardApplication.viewport.toLocal(screenPoint);
+    const tokendata = boardApplication.entityRegistry.entities.get(data);
+    const scene = boardApplication.scene;
+    if (scene && tokendata && tokendata instanceof RpgTokenData) {
+        RpgTokenFactory.createRandomToken(scene, tokendata, localPoint);
+    }
+}
+
 export async function init(
     boardInitOptions: BoardInitOptions,
     options?: Partial<ApplicationOptions>,
@@ -186,6 +208,9 @@ export async function init(
     window.addEventListener("orientationchange", triggerRendererResize);
     document.addEventListener("keyup", keyupHandler);
 
+    boardApplication.app.canvas.addEventListener("dragover", dragoverHandler);
+    boardApplication.app.canvas.addEventListener("drop", dropHandler);
+
     // TODO: setup websocket initialization
     if (socket) {
         boardApplication.websocket = socket;
@@ -206,6 +231,7 @@ export function destroy(
     const app = boardApplication.getApplicationOptional();
     if (app !== undefined) {
         app.renderer.off("resize", resize);
+        app.canvas.removeEventListener("dragover", dragoverHandler);
     }
 
     window.removeEventListener("orientationchange", triggerRendererResize);
