@@ -5,6 +5,7 @@ import { RpgToken } from "../tokens/CharacterToken";
 import { GAssetManager } from "@/board_core/assets/asset_manager";
 import { GBoard } from "@/board_core/board";
 import { getUrl } from "@/board_react_wrapper/utils/utils";
+import { GridCell } from "@/board_core/grid/cell";
 
 const randomHexColorCode = () => {
     const n = (Math.random() * 0xfffff * 1000000).toString(16);
@@ -17,7 +18,7 @@ export class RpgTokenFactory {
         tokenData?: RpgTokenData,
         position?: Point,
     ): RpgToken {
-        const isImage = tokenData === undefined ? Math.random() < 0.5 : true;
+        const isImage = true;
 
         const data =
             tokenData ??
@@ -41,16 +42,21 @@ export class RpgTokenFactory {
                 isResizable: true,
                 eventMode: "static",
                 cursor: "pointer",
-                position: position ?? { x: scene.grid.x, y: scene.grid.y },
+                position: { x: scene.grid.x, y: scene.grid.y },
             },
         );
 
+        if (position !== undefined) {
+            const cell = GridCell.getGridCellFromPoint(position, scene.grid);
+
+            token.moveToGridCell(cell);
+        }
+
         data.tint = token.displayedEntity?.tint;
 
-        let textureLoading: Maybe<Promise<unknown>> = undefined;
         if (isImage) {
             if (token.displayedEntity && token.tokenData.image) {
-                textureLoading = GAssetManager.load({
+                GAssetManager.load({
                     sprite: token.displayedEntity,
                     url: getUrl(token.tokenData.image),
                 });
@@ -69,11 +75,7 @@ export class RpgTokenFactory {
             GBoard.websocket.flush();
         };
 
-        if (textureLoading !== undefined) {
-            textureLoading.then(flush);
-        } else {
-            flush();
-        }
+        flush();
 
         scene.addToken(token);
 

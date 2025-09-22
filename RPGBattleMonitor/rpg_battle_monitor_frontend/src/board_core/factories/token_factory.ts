@@ -91,10 +91,9 @@ export class TokenFactory {
             },
         );
 
-        let textureLoading: Maybe<Promise<unknown>> = undefined;
         if (isImage) {
             if (token.displayedEntity) {
-                textureLoading = GAssetManager.load({
+                GAssetManager.load({
                     sprite: token.displayedEntity,
                     url: getUrl("/public/W_m.jpeg"),
                 });
@@ -113,13 +112,7 @@ export class TokenFactory {
             GBoard.websocket.flush();
         };
 
-        if (textureLoading !== undefined) {
-            // WARN: when this code is ran token in first updated then created because scene.addToken() runs
-            // before the promise
-            textureLoading.then(flush);
-        } else {
-            flush();
-        }
+        flush();
 
         scene.addToken(token);
 

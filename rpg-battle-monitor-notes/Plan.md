@@ -1,12 +1,13 @@
 - [ ] Right sidebar
 	- [ ] Token management
-		- [ ] Display list of tokens
+		- [x] Display list of tokens
 			- [ ] Possible organisation with folders
 				- [ ] Default display
 				- [ ] Per user
-			- [ ] Drag tokens onto board
-				- [ ] Detect where the token is getting dropped
-				- [ ] Create token entity on the board
+			- [x] Drag tokens onto board
+				- [x] Detect where the token is getting dropped
+				- [x] Create token entity on the board
+				- [x] Position token better - currently it usually isn't dropped where expected
 		- [ ] Adding new token data
 		- [ ] Token health bar ??
 		- [ ] Draw floating ui around selected token ??

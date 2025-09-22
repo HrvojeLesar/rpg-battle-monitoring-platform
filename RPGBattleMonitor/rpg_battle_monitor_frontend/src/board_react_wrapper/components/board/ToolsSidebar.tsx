@@ -5,5 +5,7 @@ export type ToolsSidebarProps = {
 };
 
 export const ToolsSidebar = (props: ToolsSidebarProps) => {
-    return <></>;
+    const { children } = props;
+
+    return <>{children}</>;
 };
