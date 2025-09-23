@@ -60,7 +60,7 @@ export class TokenFactory {
             flush();
         }
 
-        scene.addToken(token);
+        scene.addToken(token, token.layer);
 
         return token;
     }
@@ -114,7 +114,7 @@ export class TokenFactory {
 
         flush();
 
-        scene.addToken(token);
+        scene.addToken(token, token.layer);
 
         return token;
     }

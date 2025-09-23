@@ -294,9 +294,9 @@ export class Scene implements IMessagable<SceneAttributes> {
 
         this._tokens.add(token);
 
-        if (token.zIndex === 0) {
-            // WARN: This queues an update for a token that is possibly not yet created: see token_factory.ts
-            queueEntityUpdate(() => {
+        queueEntityUpdate(() => {
+            const updatedTokens: Token[] = [];
+            if (token.zIndex === 0) {
                 const nextZIndex =
                     this._tokens.items.reduce((acc, t) => {
                         if (t.zIndex !== undefined && t.zIndex > acc) {
@@ -307,12 +307,21 @@ export class Scene implements IMessagable<SceneAttributes> {
                     }, this._tokens.items[0]?.zIndex ?? 0) + 1;
                 token.zIndex = nextZIndex;
 
-                return token;
-            });
-        }
+                updatedTokens[0] = token;
+            }
+
+            const layerName = typeof layer === "object" ? layer.name : layer;
+
+            if (layerName !== token.layer || token.layer === undefined) {
+                token.layer = layerName ?? this._selectedLayer.name;
+                updatedTokens[0] = token;
+            }
+
+            return updatedTokens;
+        });
 
         if (layer !== undefined) {
-            this._layers.getLayer(layer);
+            this._layers.getLayer(layer).container.addChild(token);
         } else {
             this.selectedLayer.container.addChild(token);
         }

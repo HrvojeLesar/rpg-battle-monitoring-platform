@@ -29,7 +29,7 @@ export class RpgTokenConverter {
             const token = new RpgToken(scene, tokenData);
             token.applyUpdateAction(attributes);
 
-            scene.addToken(token);
+            scene.addToken(token, token.layer);
 
             return token;
         }

@@ -57,6 +57,7 @@ export type ContainerExtensionAttributes = {
     cursor?: string;
     rotation?: number;
     zIndex?: number;
+    layer?: string;
 };
 
 export const DEFAULTS = {
@@ -92,6 +93,7 @@ export abstract class ContainerExtension<
         new UniqueCollection();
     private _eventEmitter = new EventEmitter<ContainerEventTypes>();
     protected _lastChangesTimestamp: Maybe<number> = undefined;
+    public layer: Maybe<string>;
 
     public constructor(grid: Grid, options?: ContainerExtensionOptions) {
         super(options);
@@ -451,6 +453,7 @@ export abstract class ContainerExtension<
             cursor: this.cursor,
             rotation: this.rotation,
             zIndex: this.zIndex,
+            layer: this.layer,
         } as Attributes;
     }
 
@@ -475,6 +478,7 @@ export abstract class ContainerExtension<
             this.rotation = changes.rotation;
         }
         this.zIndex = changes.zIndex ?? 0;
+        this.layer = changes.layer;
     }
 
     public getUId(): UId {

@@ -28,7 +28,7 @@ export class TokenConverter {
             const token = new Token(scene, tokenData);
             token.applyUpdateAction(attributes);
 
-            scene.addToken(token);
+            scene.addToken(token, token.layer);
 
             return token;
         }

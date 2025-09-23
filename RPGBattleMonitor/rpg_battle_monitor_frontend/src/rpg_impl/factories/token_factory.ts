@@ -77,7 +77,7 @@ export class RpgTokenFactory {
 
         flush();
 
-        scene.addToken(token);
+        scene.addToken(token, token.layer);
 
         return token;
     }
