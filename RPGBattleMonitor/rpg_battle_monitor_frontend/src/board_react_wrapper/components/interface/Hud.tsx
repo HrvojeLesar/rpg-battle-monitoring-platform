@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Paper } from "@mantine/core";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { SceneSelection } from "./SceneSelection";
 import classes from "../../../css/hud.module.css";
 import { ReactNode } from "react";
@@ -8,6 +8,9 @@ import { Resizable } from "re-resizable";
 import { SidebarTabs } from "./SidebarTabs";
 import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 import { RpgTokenFactory } from "@/rpg_impl/factories/token_factory";
+import { TurnOrderFactory } from "@/rpg_impl/factories/turn_order_factory";
+import { RpgScene } from "@/rpg_impl/scene/scene";
+import { turnOrderAtoms } from "@/rpg_impl/stores/turn_order_store";
 
 const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
     return (
@@ -27,6 +30,9 @@ const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
 
 const HudLeft = () => {
     const currentScene = useAtomValue(sceneAtoms.getCurrentScene);
+    const currentSceneLayer = useAtomValue(sceneAtoms.getCurrentSceneLayer);
+    const refreshScenes = useSetAtom(sceneAtoms.refreshScenes);
+    const currentTurnOrder = useAtomValue(turnOrderAtoms.currentTurnOrder);
 
     const addTokenButton = () => {
         if (!currentScene) {
@@ -60,14 +66,40 @@ const HudLeft = () => {
                 }}
                 onClick={() => {
                     const selectedLayer = GBoard.scene?.selectedLayer;
-                    if (selectedLayer?.name === "grid") {
+                    if (selectedLayer?.name === "gridBackground") {
                         GBoard.scene?.selectLayer("token");
-                    } else {
+                    } else if (selectedLayer?.name === "token") {
                         GBoard.scene?.selectLayer("grid");
+                    } else if (selectedLayer?.name === "grid") {
+                        GBoard.scene?.selectLayer("gridBackground");
+                    } else {
+                        GBoard.scene?.selectLayer("token");
                     }
+
+                    refreshScenes();
                 }}
             >
-                Switch layer events
+                Switch layer events (Current layer:
+                {currentSceneLayer?.name})
+            </Button>
+        );
+    };
+
+    const addTurnOrderButton = () => {
+        if (!currentScene || !(currentScene instanceof RpgScene)) {
+            return <></>;
+        }
+
+        return (
+            <Button
+                style={{
+                    pointerEvents: "all",
+                }}
+                onClick={() => {
+                    TurnOrderFactory.create(currentScene);
+                }}
+            >
+                Add turn order to current scene {currentTurnOrder?.getUId()}
             </Button>
         );
     };
@@ -78,6 +110,7 @@ const HudLeft = () => {
                 <SceneSelection />
                 {addTokenButton()}
                 {addLayerSwitchButton()}
+                {addTurnOrderButton()}
             </Flex>
         </SidesFlexBox>
     );

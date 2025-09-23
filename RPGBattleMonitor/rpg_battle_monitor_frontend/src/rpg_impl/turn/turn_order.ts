@@ -33,7 +33,7 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
     protected _tokens: RpgTokenData[] = [];
     public readonly scene: RpgScene;
 
-    public constructor(scene: RpgScene, options: TurnOrderAttributes) {
+    public constructor(scene: RpgScene, options?: TurnOrderAttributes) {
         this._uid = newUId();
         this.scene = scene;
 
@@ -69,6 +69,7 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
     }
 
     public applyUpdateAction(changes: TypedJson<TurnOrderAttributes>): void {
+        this._uid = changes.uid;
         this._tokens = convertUIdsToTokens(changes.tokenUIds);
     }
 

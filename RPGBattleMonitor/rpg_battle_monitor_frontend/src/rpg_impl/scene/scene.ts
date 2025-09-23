@@ -1,6 +1,8 @@
 import { Scene, SceneOptions } from "@/board_core/scene";
 import { TurnOrder } from "../turn/turn_order";
-import { GBoard } from "@/board_core/board";
+import { removeAndFlushEntities } from "@/board_core/utils/remove_and_flush_entities";
+import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
+import { turnOrderAtoms } from "../stores/turn_order_store";
 
 export type RpgSceneOptions = { turnOrder?: TurnOrder } & SceneOptions;
 
@@ -22,9 +24,11 @@ export class RpgScene extends Scene {
             this._turnOrder &&
             this._turnOrder.getUId() !== turnOrder?.getUId()
         ) {
-            GBoard.entityRegistry.entities.remove(this._turnOrder);
+            removeAndFlushEntities(this._turnOrder);
         }
 
         this._turnOrder = turnOrder;
+
+        GAtomStore.set(turnOrderAtoms.currentTurnOrder);
     }
 }

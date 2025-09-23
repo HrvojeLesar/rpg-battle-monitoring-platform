@@ -121,6 +121,10 @@ const addScene = atom(null, (_, set, scene: Scene) => {
     });
 });
 
+const getCurrentSceneLayer = atom((get) => {
+    return get(sceneAtom).currentScene?.selectedLayer;
+});
+
 export const sceneAtoms = {
     sceneAtom,
     getScenes,
@@ -131,4 +135,5 @@ export const sceneAtoms = {
     refreshScenes,
     removeScene,
     addScene,
+    getCurrentSceneLayer,
 };

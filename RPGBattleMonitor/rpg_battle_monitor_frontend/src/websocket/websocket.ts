@@ -7,6 +7,7 @@ import {
     TokenIcon,
     Tokens,
 } from "@/board_react_wrapper/components/interface/Tokens";
+import { TurnOrder } from "@/rpg_impl/components/TurnOrder";
 
 export type JoinData = {
     data: TypedJson[];
@@ -119,6 +120,13 @@ export class Websocket {
                 title: "Token Data",
                 icon: TokenIcon,
                 content: Tokens,
+            });
+
+            GAtomStore.set(sidebarTabAtoms.addTab, {
+                value: "Turn order",
+                title: "Turn order",
+                icon: TokenIcon,
+                content: TurnOrder,
             });
         };
 
