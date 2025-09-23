@@ -105,8 +105,6 @@ export abstract class ContainerExtension<
 
         this._gridCell = new GridCell(this as ContainerExtension);
         this._uid = newUId();
-
-        this.emit("added", this);
     }
 
     public get isSnapping(): boolean {

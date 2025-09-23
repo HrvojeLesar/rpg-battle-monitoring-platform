@@ -18,5 +18,19 @@
 - [ ] Character customisation
 	- [ ] Changing token image
 	- [ ] Changing character stats
-		- [ ] 
+		- [ ] Character builder
+		- [ ] Built in monsters
 - [ ] Turn order
+	- [ ] Add tokens on scene to turn display
+	- [ ] Calculate their turn order as they are placed
+	- [ ] Start turn
+		- [ ] Start with display who's turn it is
+		- [ ] Hide monster turn order from players
+			- [ ] Hide for monsters in combat, but out of sight
+- [ ] Walls
+	- [ ] Wall layer
+		- [ ] Placing walls
+		- [ ] Connecting walls
+		- [ ] Doors
+		- [ ] Windows
+	- [ ] Line of sight calculation/display
