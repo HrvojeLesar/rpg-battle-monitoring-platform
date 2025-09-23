@@ -115,8 +115,8 @@ export class Websocket {
 
             // TODO: Move into external module
             GAtomStore.set(sidebarTabAtoms.addTab, {
-                value: "Tokens",
-                title: "Tokens",
+                value: "Token Data",
+                title: "Token Data",
                 icon: TokenIcon,
                 content: Tokens,
             });

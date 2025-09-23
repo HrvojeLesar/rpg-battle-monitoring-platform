@@ -14,3 +14,9 @@
 	- [ ] Log
 		- [ ] Log message type - based on type choose how to display the message
 		- [ ] Paginated message handling on the server - only last x messages need to be shown to the user and scrolling/pagination can request for more
+
+- [ ] Character customisation
+	- [ ] Changing token image
+	- [ ] Changing character stats
+		- [ ] 
+- [ ] Turn order

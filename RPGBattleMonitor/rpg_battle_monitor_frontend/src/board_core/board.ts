@@ -21,7 +21,7 @@ import {
     initEventListeners,
 } from "@/board_react_wrapper/event_listeners/board_init_event_listener";
 import { RpgTokenFactory } from "@/rpg_impl/factories/token_factory";
-import { RpgTokenData } from "@/rpg_impl/tokens/CharacterTokenData";
+import { RpgTokenData } from "@/rpg_impl/tokens/rpg_token_data";
 
 export type GameBoard = Board;
 

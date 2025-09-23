@@ -13,7 +13,7 @@ export type EventNames = {
     keyup: (event: KeyboardEvent) => void;
 
     "entity-added": (entity: IMessagable) => void;
-    "entity-removed": (entity: IMessagable) => void;
+    "entity-removed": (entity: IMessagable | IMessagable[]) => void;
 };
 
 export type EventEmitterTypes = {

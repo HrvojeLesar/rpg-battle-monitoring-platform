@@ -1,9 +1,9 @@
 import { TypedJson } from "@/board_core/interfaces/messagable";
 import { TokenAttributes } from "@/board_core/token/token";
-import { RpgToken } from "../tokens/CharacterToken";
+import { RpgToken } from "../tokens/rpg_token";
 import { GBoard } from "@/board_core/board";
 import { Scene } from "@/board_core/scene";
-import { RpgTokenData } from "../tokens/CharacterTokenData";
+import { RpgTokenData } from "../tokens/rpg_token_data";
 
 export class RpgTokenConverter {
     public static convert(attributes: TypedJson<TokenAttributes>): RpgToken {

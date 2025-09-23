@@ -1,7 +1,7 @@
 import { Scene } from "@/board_core/scene";
 import { Point, Texture } from "pixi.js";
-import { RpgTokenData } from "../tokens/CharacterTokenData";
-import { RpgToken } from "../tokens/CharacterToken";
+import { RpgTokenData } from "../tokens/rpg_token_data";
+import { RpgToken } from "../tokens/rpg_token";
 import { GAssetManager } from "@/board_core/assets/asset_manager";
 import { GBoard } from "@/board_core/board";
 import { getUrl } from "@/board_react_wrapper/utils/utils";

@@ -1,5 +1,5 @@
 import { TypedJson } from "@/board_core/interfaces/messagable";
-import { RpgTokenAttributes, RpgTokenData } from "../tokens/CharacterTokenData";
+import { RpgTokenAttributes, RpgTokenData } from "../tokens/rpg_token_data";
 import { GBoard } from "@/board_core/board";
 
 export class RpgTokenDataConverter {

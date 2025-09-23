@@ -3,7 +3,7 @@ import { Button, Flex, Image, Paper } from "@mantine/core";
 import { IconToiletPaper } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { DeleteConfirmation } from "../utils/DeleteConfirmation";
-import { RpgTokenData } from "@/rpg_impl/tokens/CharacterTokenData";
+import { RpgTokenData } from "@/rpg_impl/tokens/rpg_token_data";
 import { Fragment } from "react/jsx-runtime";
 import { getUrl } from "@/board_react_wrapper/utils/utils";
 import { queueEntityUpdate } from "@/websocket/websocket";

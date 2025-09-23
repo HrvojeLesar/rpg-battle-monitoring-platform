@@ -20,7 +20,7 @@ function joinFinished() {
     GAtomStore.set(sceneAtoms.changeScene, firstScene);
 }
 
-function refreshTokens(entity: IMessagable) {
+function refreshTokens(entity: IMessagable | IMessagable[]) {
     if (entity instanceof TokenDataBase) {
         GAtomStore.set(tokenAtoms.refreshTokens);
     }

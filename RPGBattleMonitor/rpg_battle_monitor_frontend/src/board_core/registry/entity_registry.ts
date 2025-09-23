@@ -1,4 +1,4 @@
-import { RpgTokenData } from "@/rpg_impl/tokens/CharacterTokenData";
+import { RpgTokenData } from "@/rpg_impl/tokens/rpg_token_data";
 import { GBoard, GEventEmitter } from "../board";
 import { EmptyTokenDataConverter } from "../converters/empty_token_data_converter";
 import { GridConverter } from "../converters/grid_converter";
@@ -17,7 +17,7 @@ import { Scene } from "../scene";
 import { EmptyTokenData } from "../token/empty_token_data";
 import { Token } from "../token/token";
 import { RpgTokenDataConverter } from "@/rpg_impl/converters/rpg_token_data_converter";
-import { RpgToken } from "@/rpg_impl/tokens/CharacterToken";
+import { RpgToken } from "@/rpg_impl/tokens/rpg_token";
 import { RpgTokenConverter } from "@/rpg_impl/converters/rpg_token_coverter";
 
 export type EntityKind = string;
@@ -114,20 +114,25 @@ class EntityContainer {
             acc: [],
             cleanupCallbacks: [],
         };
+
+        const removed = [];
+
         const existingEntity = this.entitiesMap.get(entity.getUId());
 
         if (existingEntity) {
             if (this.entitiesMap.delete(entity.getUId())) {
-                GEventEmitter.emit("entity-removed", existingEntity);
+                removed.push(entity);
             }
             existingEntity.deleteAction(deleteAction);
         }
 
         for (const removedEntity of deleteAction.acc) {
             if (this.entitiesMap.delete(removedEntity.getUId())) {
-                GEventEmitter.emit("entity-removed", removedEntity);
+                removed.push(removedEntity);
             }
         }
+
+        GEventEmitter.emit("entity-removed", removed);
 
         return deleteAction;
     }
