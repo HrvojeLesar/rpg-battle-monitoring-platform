@@ -112,30 +112,117 @@ const HudLeft = () => {
         }
 
         return (
+            <Flex gap="xs">
+                <Button
+                    flex={1}
+                    style={{
+                        pointerEvents: "all",
+                    }}
+                    onClick={() => {
+                        const selections =
+                            currentScene.selectHandler.selections.reduce<
+                                RpgToken[]
+                            >((acc, selection) => {
+                                if (selection instanceof RpgToken) {
+                                    acc.push(selection);
+                                }
+
+                                return acc;
+                            }, []);
+
+                        turnOrder.addToken(selections);
+
+                        queueEntityUpdate(() => {
+                            return turnOrder;
+                        });
+                    }}
+                >
+                    Add selection to turn order
+                </Button>
+                <Button
+                    flex={1}
+                    style={{
+                        pointerEvents: "all",
+                    }}
+                    onClick={() => {
+                        turnOrder.startCombat();
+
+                        queueEntityUpdate(() => {
+                            return turnOrder;
+                        });
+                    }}
+                >
+                    Start combat
+                </Button>
+                <Button
+                    flex={1}
+                    style={{
+                        pointerEvents: "all",
+                    }}
+                    onClick={() => {
+                        turnOrder.stopCombat();
+
+                        queueEntityUpdate(() => {
+                            return turnOrder;
+                        });
+                    }}
+                >
+                    Stop combat
+                </Button>
+                <Button
+                    flex={1}
+                    style={{
+                        pointerEvents: "all",
+                    }}
+                    onClick={() => {
+                        turnOrder.nextTurn();
+
+                        queueEntityUpdate(() => {
+                            return turnOrder;
+                        });
+                    }}
+                >
+                    Next turn
+                </Button>
+            </Flex>
+        );
+    };
+
+    const focusOnSelection = () => {
+        if (!currentScene) {
+            return <></>;
+        }
+
+        return (
             <Button
                 style={{
                     pointerEvents: "all",
                 }}
                 onClick={() => {
-                    const selections =
-                        currentScene.selectHandler.selections.reduce<
-                            RpgToken[]
-                        >((acc, selection) => {
-                            if (selection instanceof RpgToken) {
-                                acc.push(selection);
-                            }
+                    const selection =
+                        currentScene.selectHandler.selections.at(0);
 
-                            return acc;
-                        }, []);
+                    if (selection === undefined) {
+                        return;
+                    }
 
-                    turnOrder.addToken(selections);
+                    const pos = selection.position.clone();
+                    const width = selection.width;
+                    const height = selection.height;
+                    if (
+                        pos === undefined ||
+                        width === undefined ||
+                        height === undefined
+                    ) {
+                        return;
+                    }
 
-                    queueEntityUpdate(() => {
-                        return turnOrder;
-                    });
+                    pos.set(pos.x + width / 2, pos.y + height / 2);
+
+                    currentScene.viewport.moveCenter(pos);
                 }}
             >
-                Add selection to turn order
+                Focus on selection
             </Button>
         );
     };
@@ -148,6 +235,7 @@ const HudLeft = () => {
                 {addLayerSwitchButton()}
                 {addTurnOrderButton()}
                 {addSelectionToTurnOrder()}
+                {focusOnSelection()}
             </Flex>
         </SidesFlexBox>
     );
