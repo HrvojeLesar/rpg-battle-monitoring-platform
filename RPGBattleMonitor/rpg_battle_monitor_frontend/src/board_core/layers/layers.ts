@@ -13,19 +13,25 @@ function defaultLayers() {
     return [
         {
             name: "gridBackground",
-            container: new Container({ label: "gridBackgroundLayer" }),
+            container: new Container({
+                label: "gridBackgroundLayer",
+                eventMode: "none",
+            }),
             zIndex: zIndex++,
             label: "Grid background",
         },
         {
             name: "grid",
-            container: new Container({ label: "gridLayer" }),
+            container: new Container({ label: "gridLayer", eventMode: "none" }),
             zIndex: zIndex++,
             label: "Grid",
         },
         {
             name: "token",
-            container: new Container({ label: "tokenLayer" }),
+            container: new Container({
+                label: "tokenLayer",
+                eventMode: "none",
+            }),
             zIndex: zIndex++,
             label: "Token",
         },

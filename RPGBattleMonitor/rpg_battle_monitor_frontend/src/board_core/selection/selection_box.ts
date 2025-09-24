@@ -51,6 +51,10 @@ export class SelectionBox extends Graphics {
 
             const bounds = this.getBounds().rectangle;
 
+            if (this._scene.selectedLayer.container.eventMode === "none") {
+                return;
+            }
+
             this._scene.selectedLayer.container.children.forEach((child) => {
                 if (!(child instanceof ContainerExtension)) {
                     return;

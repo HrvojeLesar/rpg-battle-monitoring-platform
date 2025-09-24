@@ -65,6 +65,7 @@ export class Scene implements IMessagable<SceneAttributes> {
 
         this._layers = options.layers ?? Layers.getDefaultLayers();
         this._selectedLayer = this._layers.getLayer("token");
+        this._selectedLayer.container.eventMode = "passive";
 
         this._viewport = new Viewport({
             events: GBoard.app.renderer.events,
