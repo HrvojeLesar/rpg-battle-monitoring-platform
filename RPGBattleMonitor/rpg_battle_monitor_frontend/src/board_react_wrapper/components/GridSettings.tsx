@@ -107,10 +107,26 @@ export const GridSettings = (props: Props) => {
     return (
         <Flex direction="column">
             <GridSettingSlider
-                label="Cell size in pixels:"
+                label="Cell size in pixels"
                 inputValue={cellSize}
                 setInputValue={setCellSizeHandler}
                 max={500}
+            />
+            <GridSettingSlider
+                label="Horizontal cell number"
+                inputValue={Math.round(gridSize.width / cellSize)}
+                setInputValue={(value) => {
+                    setGridSizeHandler(value * cellSize, GridSide.Width);
+                }}
+                max={250}
+            />
+            <GridSettingSlider
+                label="Vertical cell number"
+                inputValue={Math.round(gridSize.height / cellSize)}
+                setInputValue={(value) => {
+                    setGridSizeHandler(value * cellSize, GridSide.Height);
+                }}
+                max={250}
             />
             <GridSettingSlider
                 label="Width"
