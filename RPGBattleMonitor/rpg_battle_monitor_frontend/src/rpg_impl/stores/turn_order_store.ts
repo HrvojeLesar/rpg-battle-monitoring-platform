@@ -54,6 +54,7 @@ const refreshTurnOrder = atom(null, (get, set) => {
     });
 });
 
+// TODO: register handler to it cannot clash with init order
 GAtomStore.sub(sceneAtoms.getCurrentScene, () => {
     GAtomStore.set(currentTurnOrder);
 });

@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Paper } from "@mantine/core";
-import { useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtomValue, useSetAtom } from "jotai";
 import { SceneSelection } from "./SceneSelection";
 import classes from "../../../css/hud.module.css";
 import { ReactNode } from "react";
@@ -13,6 +13,15 @@ import { RpgScene } from "@/rpg_impl/scene/scene";
 import { turnOrderAtoms } from "@/rpg_impl/stores/turn_order_store";
 import { RpgToken } from "@/rpg_impl/tokens/rpg_token";
 import { queueEntityUpdate } from "@/websocket/websocket";
+
+export const posAtom = atom({ x: 0, y: 0, other: undefined });
+
+export const setPosAtom = atom(
+    null,
+    (_, set, pos: { x: number; y: number }) => {
+        set(posAtom, pos);
+    },
+);
 
 const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
     return (
@@ -35,6 +44,7 @@ const HudLeft = () => {
     const currentSceneLayer = useAtomValue(sceneAtoms.getCurrentSceneLayer);
     const refreshScenes = useSetAtom(sceneAtoms.refreshScenes);
     const { turnOrder } = useAtomValue(turnOrderAtoms.currentTurnOrder);
+    const pos = useAtomValue(posAtom);
 
     const addTokenButton = () => {
         if (!currentScene) {
@@ -227,6 +237,18 @@ const HudLeft = () => {
         );
     };
 
+    const dropPosition = () => {
+        return (
+            <Button
+                style={{
+                    pointerEvents: "all",
+                }}
+            >
+                Drop position x: {pos.x}, y: {pos.y}, other: {pos.other}
+            </Button>
+        );
+    };
+
     return (
         <SidesFlexBox>
             <Flex direction="column" gap="xs" style={{ overflow: "auto" }}>
@@ -236,6 +258,7 @@ const HudLeft = () => {
                 {addTurnOrderButton()}
                 {addSelectionToTurnOrder()}
                 {focusOnSelection()}
+                {dropPosition()}
             </Flex>
         </SidesFlexBox>
     );

@@ -3,7 +3,6 @@ import { GBoard } from "../../board_core/board";
 import { SceneFactory } from "../../board_core/factories/scene_factory";
 import { Scene, SceneOptions } from "../../board_core/scene";
 import { atom } from "jotai";
-import { RpgSceneFactory } from "@/rpg_impl/factories/rpg_scene_factory";
 
 export type SceneReducerState = {
     scenes: Scene[];
@@ -15,7 +14,7 @@ const initialState: SceneReducerState = {
     currentScene: undefined,
 };
 
-const sortedScenes = (scenes: Scene[]): Scene[] => {
+export const sortedScenes = (scenes: Scene[]): Scene[] => {
     scenes.sort((a, b) => {
         const aPosition = a.sortPosition;
         const bPosition = b.sortPosition;
@@ -47,8 +46,7 @@ const createScene = atom(null, (_, set, options: SceneOptionsExt) => {
     const sceneSortPosition =
         options.sortPosition ??
         (options.sortPositionFunc && options.sortPositionFunc());
-    // const scene = SceneFactory.createScene({
-    const scene = RpgSceneFactory.createScene({
+    const scene = SceneFactory.createScene({
         ...options,
         sortPosition: sceneSortPosition,
     });

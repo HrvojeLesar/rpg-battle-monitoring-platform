@@ -62,13 +62,16 @@ export class Websocket {
     }
 
     public static createDefaultSocket(gameId: number): Websocket {
-        return new Websocket("ws://localhost:3000", {
-            path: "/api/socket.io",
-            auth: {
-                userToken: "some-session-token",
-                game: gameId,
+        return new Websocket(
+            `ws://${import.meta.env.BASE_URL ?? "192.168.1.7:3000"}`,
+            {
+                path: "/api/socket.io",
+                auth: {
+                    userToken: "some-session-token",
+                    game: gameId,
+                },
             },
-        });
+        );
     }
 
     public get socket(): Socket<ListenEvents, EmitEvents> {

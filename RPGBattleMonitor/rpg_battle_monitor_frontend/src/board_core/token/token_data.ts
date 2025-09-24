@@ -83,6 +83,8 @@ export abstract class TokenDataBase<
         for (const token of tokens) {
             token.deleteAction(action);
         }
+
+        GAtomStore.set(tokenAtoms.refreshTokens);
     }
 
     public getLastChangesTimestamp(): Maybe<number> {

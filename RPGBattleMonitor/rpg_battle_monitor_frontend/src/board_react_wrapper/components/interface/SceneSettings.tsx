@@ -15,6 +15,7 @@ import { sceneAtomsUtils } from "@/board_react_wrapper/stores/utils";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { queueEntityUpdate } from "@/websocket/websocket";
 import { DeleteConfirmation } from "../utils/DeleteConfirmation";
+import { sceneAtomsExt } from "@/rpg_impl/stores/scene_store_ext";
 
 const SCENE_NAME = "Scene name";
 
@@ -68,7 +69,7 @@ export const SceneSettings = () => {
     const scenes = useAtomValue(sceneAtoms.getScenes);
     const changeScene = useSetAtom(sceneAtoms.changeScene);
     const removeScene = useSetAtom(sceneAtoms.removeScene);
-    const createScene = useSetAtom(sceneAtoms.createScene);
+    const createScene = useSetAtom(sceneAtomsExt.createScene);
 
     const [selectedScene, setSelectedScene] = useState<Scene>();
 
