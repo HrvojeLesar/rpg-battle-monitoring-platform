@@ -7,6 +7,8 @@ import { RpgTokenData } from "@/rpg_impl/tokens/rpg_token_data";
 import { Fragment } from "react/jsx-runtime";
 import { getUrl } from "@/board_react_wrapper/utils/utils";
 import { queueEntityUpdate } from "@/websocket/websocket";
+import { GDragAndDropRegistry } from "@/board_core/registry/drag_and_drop_registry";
+import { RPG_TOKEN_DROP } from "@/rpg_impl/utils/rpg_token_drop";
 
 const defaultImageUrl = getUrl("/public/rpg/default.jpeg");
 
@@ -54,9 +56,9 @@ export const Tokens = () => {
                         align="center"
                         draggable
                         onDragStart={(e) => {
-                            // WARN: format must be "text/plain" because mobile implementations do not broadly support other formats
-                            e.dataTransfer.setData(
-                                "text/plain",
+                            GDragAndDropRegistry.emit(
+                                e as unknown as DragEvent,
+                                RPG_TOKEN_DROP,
                                 token.getUId(),
                             );
                         }}

@@ -63,7 +63,7 @@ export class Websocket {
 
     public static createDefaultSocket(gameId: number): Websocket {
         return new Websocket(
-            `ws://${import.meta.env.BASE_URL ?? "192.168.1.7:3000"}`,
+            `ws://${import.meta.env.VITE_BASE_URL ?? "localhost:3000"}`,
             {
                 path: "/api/socket.io",
                 auth: {

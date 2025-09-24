@@ -1,4 +1,3 @@
-import { RpgTokenData } from "@/rpg_impl/tokens/rpg_token_data";
 import { GBoard, GEventEmitter } from "../board";
 import { EmptyTokenDataConverter } from "../converters/empty_token_data_converter";
 import { GridConverter } from "../converters/grid_converter";
@@ -16,13 +15,6 @@ import {
 import { Scene } from "../scene";
 import { EmptyTokenData } from "../token/empty_token_data";
 import { Token } from "../token/token";
-import { RpgTokenDataConverter } from "@/rpg_impl/converters/rpg_token_data_converter";
-import { RpgToken } from "@/rpg_impl/tokens/rpg_token";
-import { RpgTokenConverter } from "@/rpg_impl/converters/rpg_token_coverter";
-import { RpgScene } from "@/rpg_impl/scene/scene";
-import { RpgSceneConverter } from "@/rpg_impl/converters/rpg_scene_converter";
-import { TurnOrder } from "@/rpg_impl/turn/turn_order";
-import { TurnOrderConverter } from "@/rpg_impl/converters/turn_order_converter";
 
 export type EntityKind = string;
 export type OrderPriority = number;
@@ -233,27 +225,6 @@ export class EntityRegistry {
             Token.getKindStatic(),
             TokenConverter.convert,
         );
-
-        // TODO: Move to init function of external module
-
-        registry.registeredEntityKinds.register(
-            RpgScene.getKindStatic(),
-            RpgSceneConverter.convert,
-        );
-        registry.registeredEntityKinds.register(
-            RpgTokenData.getKindStatic(),
-            RpgTokenDataConverter.convert,
-        );
-        registry.registeredEntityKinds.register(
-            RpgToken.getKindStatic(),
-            RpgTokenConverter.convert,
-        );
-        registry.registeredEntityKinds.register(
-            TurnOrder.getKindStatic(),
-            TurnOrderConverter.convert,
-        );
-
-        // TODO: Move to init function of external module
 
         return registry;
     }

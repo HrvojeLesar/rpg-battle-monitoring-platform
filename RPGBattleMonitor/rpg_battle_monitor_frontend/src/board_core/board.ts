@@ -3,7 +3,6 @@ import {
     ApplicationOptions,
     Container,
     DestroyOptions,
-    Point,
     RendererDestroyOptions,
 } from "pixi.js";
 import { isDev } from "../utils/dev_mode";
@@ -20,8 +19,8 @@ import {
     destroyEventListeners,
     initEventListeners,
 } from "@/board_react_wrapper/event_listeners/board_init_event_listener";
-import { RpgTokenFactory } from "@/rpg_impl/factories/token_factory";
-import { RpgTokenData } from "@/rpg_impl/tokens/rpg_token_data";
+import { GDragAndDropRegistry } from "./registry/drag_and_drop_registry";
+import { initializeRPG } from "@/rpg_impl/init/init";
 
 export type GameBoard = Board;
 
@@ -169,17 +168,7 @@ function dragoverHandler(event: DragEvent) {
 function dropHandler(event: DragEvent) {
     // WARN: format must be "text/plain" because mobile implementations do not broadly support other formats
     const data = event.dataTransfer?.getData("text/plain");
-    if (data === undefined || data.length === 0) {
-        return;
-    }
-
-    const screenPoint = new Point(event.x, event.y);
-    const localPoint = boardApplication.viewport.toLocal(screenPoint);
-    const tokendata = boardApplication.entityRegistry.entities.get(data);
-    const scene = boardApplication.scene;
-    if (scene && tokendata && tokendata instanceof RpgTokenData) {
-        RpgTokenFactory.createRandomToken(scene, tokendata, localPoint);
-    }
+    GDragAndDropRegistry.handle(data, event);
 }
 
 export async function init(
@@ -211,6 +200,8 @@ export async function init(
 
     boardApplication.app.canvas.addEventListener("dragover", dragoverHandler);
     boardApplication.app.canvas.addEventListener("drop", dropHandler);
+
+    initializeRPG(boardApplication.entityRegistry);
 
     // TODO: setup websocket initialization
     if (socket) {
