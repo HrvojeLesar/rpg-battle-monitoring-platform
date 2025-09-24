@@ -241,16 +241,16 @@ export class EntityRegistry {
             RpgSceneConverter.convert,
         );
         registry.registeredEntityKinds.register(
-            TurnOrder.getKindStatic(),
-            TurnOrderConverter.convert,
-        );
-        registry.registeredEntityKinds.register(
             RpgTokenData.getKindStatic(),
             RpgTokenDataConverter.convert,
         );
         registry.registeredEntityKinds.register(
             RpgToken.getKindStatic(),
             RpgTokenConverter.convert,
+        );
+        registry.registeredEntityKinds.register(
+            TurnOrder.getKindStatic(),
+            TurnOrderConverter.convert,
         );
 
         // TODO: Move to init function of external module

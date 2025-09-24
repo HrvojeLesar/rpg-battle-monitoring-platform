@@ -1,4 +1,4 @@
-import { DeleteAction, TypedJson } from "@/board_core/interfaces/messagable";
+import { TypedJson } from "@/board_core/interfaces/messagable";
 import {
     TokenDataBase,
     TokenDataBaseAttributes,
@@ -30,9 +30,6 @@ import { Race } from "../characters_stats/race";
 import { Background } from "../characters_stats/backgrounds";
 import { Alignment } from "@floating-ui/react";
 import { Equipment, getEmptyEquipment } from "../characters_stats/equipment";
-import { TurnOrder } from "../turn/turn_order";
-import { GBoard } from "@/board_core/board";
-import { queueEntityUpdate } from "@/websocket/websocket";
 
 export type RpgTokenAttributes = {
     tint: Maybe<number>;
@@ -166,28 +163,5 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
         this.size = changes.size;
 
         super.applyUpdateAction(changes);
-    }
-
-    public getAssoicatedTurnOrders(): TurnOrder[] {
-        return GBoard.entityRegistry.entities.list(
-            (entity) =>
-                entity instanceof TurnOrder && entity.tokens.includes(this),
-        ) as TurnOrder[];
-    }
-
-    public deleteAction(action: DeleteAction): void {
-        super.deleteAction(action);
-
-        const turnOrders = this.getAssoicatedTurnOrders();
-
-        action.cleanupCallbacks.push(() => {
-            queueEntityUpdate(() => {
-                for (const turnOrder of turnOrders) {
-                    turnOrder.removeToken(this);
-                }
-
-                return turnOrders;
-            });
-        });
     }
 }

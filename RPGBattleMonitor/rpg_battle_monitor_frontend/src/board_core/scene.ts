@@ -360,4 +360,8 @@ export class Scene implements IMessagable<SceneAttributes> {
     public set selectedLayer(layer: Layer | string) {
         this.selectLayer(layer);
     }
+
+    public get selectHandler(): SelectHandler {
+        return this._selectHandler;
+    }
 }

@@ -3,6 +3,7 @@ import { TurnOrder } from "../turn/turn_order";
 import { removeAndFlushEntities } from "@/board_core/utils/remove_and_flush_entities";
 import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
 import { turnOrderAtoms } from "../stores/turn_order_store";
+import { DeleteAction } from "@/board_core/interfaces/messagable";
 
 export type RpgSceneOptions = { turnOrder?: TurnOrder } & SceneOptions;
 
@@ -30,5 +31,13 @@ export class RpgScene extends Scene {
         this._turnOrder = turnOrder;
 
         GAtomStore.set(turnOrderAtoms.currentTurnOrder);
+    }
+
+    public deleteAction(action: DeleteAction): void {
+        super.deleteAction(action);
+
+        if (this._turnOrder) {
+            this._turnOrder.deleteAction(action);
+        }
     }
 }

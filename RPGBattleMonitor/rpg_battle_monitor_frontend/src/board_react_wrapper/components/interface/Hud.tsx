@@ -11,6 +11,8 @@ import { RpgTokenFactory } from "@/rpg_impl/factories/token_factory";
 import { TurnOrderFactory } from "@/rpg_impl/factories/turn_order_factory";
 import { RpgScene } from "@/rpg_impl/scene/scene";
 import { turnOrderAtoms } from "@/rpg_impl/stores/turn_order_store";
+import { RpgToken } from "@/rpg_impl/tokens/rpg_token";
+import { queueEntityUpdate } from "@/websocket/websocket";
 
 const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
     return (
@@ -32,7 +34,7 @@ const HudLeft = () => {
     const currentScene = useAtomValue(sceneAtoms.getCurrentScene);
     const currentSceneLayer = useAtomValue(sceneAtoms.getCurrentSceneLayer);
     const refreshScenes = useSetAtom(sceneAtoms.refreshScenes);
-    const currentTurnOrder = useAtomValue(turnOrderAtoms.currentTurnOrder);
+    const { turnOrder } = useAtomValue(turnOrderAtoms.currentTurnOrder);
 
     const addTokenButton = () => {
         if (!currentScene) {
@@ -99,7 +101,41 @@ const HudLeft = () => {
                     TurnOrderFactory.create(currentScene);
                 }}
             >
-                Add turn order to current scene {currentTurnOrder?.getUId()}
+                Add turn order to current scene {turnOrder?.getUId()}
+            </Button>
+        );
+    };
+
+    const addSelectionToTurnOrder = () => {
+        if (!turnOrder || !currentScene) {
+            return <></>;
+        }
+
+        return (
+            <Button
+                style={{
+                    pointerEvents: "all",
+                }}
+                onClick={() => {
+                    const selections =
+                        currentScene.selectHandler.selections.reduce<
+                            RpgToken[]
+                        >((acc, selection) => {
+                            if (selection instanceof RpgToken) {
+                                acc.push(selection);
+                            }
+
+                            return acc;
+                        }, []);
+
+                    turnOrder.addToken(selections);
+
+                    queueEntityUpdate(() => {
+                        return turnOrder;
+                    });
+                }}
+            >
+                Add selection to turn order
             </Button>
         );
     };
@@ -111,6 +147,7 @@ const HudLeft = () => {
                 {addTokenButton()}
                 {addLayerSwitchButton()}
                 {addTurnOrderButton()}
+                {addSelectionToTurnOrder()}
             </Flex>
         </SidesFlexBox>
     );

@@ -6,20 +6,27 @@ import {
     UId,
 } from "@/board_core/interfaces/messagable";
 import newUId from "@/board_core/utils/uuid_generator";
-import { RpgTokenData } from "../tokens/rpg_token_data";
 import { GBoard } from "@/board_core/board";
 import { RpgScene } from "../scene/scene";
+import { RpgToken } from "../tokens/rpg_token";
+import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
+import { turnOrderAtoms } from "../stores/turn_order_store";
 
 export type TurnOrderAttributes = {
     tokenUIds: UId[];
     sceneUid: UId;
 };
 
-function convertUIdsToTokens(tokens: UId[]): RpgTokenData[] {
+export type TurnOrderEntry = {
+    token: RpgToken;
+    initiative: number;
+};
+
+function convertUIdsToTokens(tokens: UId[]): RpgToken[] {
     return (
-        tokens.reduce<RpgTokenData[]>((acc, tokenUId) => {
+        tokens.reduce<RpgToken[]>((acc, tokenUId) => {
             const token = GBoard.entityRegistry.entities.get(tokenUId);
-            if (token instanceof RpgTokenData) {
+            if (token instanceof RpgToken) {
                 acc.push(token);
             }
             return acc;
@@ -30,14 +37,21 @@ function convertUIdsToTokens(tokens: UId[]): RpgTokenData[] {
 export class TurnOrder implements IMessagable<TurnOrderAttributes> {
     protected _uid: UId;
     protected _lastChangesTimestamp: Maybe<number> = undefined;
-    protected _tokens: RpgTokenData[] = [];
+    protected _tokens: TurnOrderEntry[] = [];
     public readonly scene: RpgScene;
 
     public constructor(scene: RpgScene, options?: TurnOrderAttributes) {
         this._uid = newUId();
         this.scene = scene;
 
-        this._tokens = convertUIdsToTokens(options?.tokenUIds ?? []);
+        const rpgTokens = convertUIdsToTokens(options?.tokenUIds ?? []).map(
+            (token) => ({
+                token,
+                initiative: 0,
+            }),
+        );
+
+        this._tokens = rpgTokens;
     }
 
     public getKind(): string {
@@ -63,14 +77,14 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
 
     public getAttributes(): TurnOrderAttributes {
         return {
-            tokenUIds: this._tokens.map((token) => token.getUId()),
+            tokenUIds: this._tokens.map((entry) => entry.token.getUId()),
             sceneUid: this.scene.getUId(),
         };
     }
 
     public applyUpdateAction(changes: TypedJson<TurnOrderAttributes>): void {
         this._uid = changes.uid;
-        this._tokens = convertUIdsToTokens(changes.tokenUIds);
+        this.addToken(convertUIdsToTokens(changes.tokenUIds));
     }
 
     public deleteAction(action: DeleteAction): void {
@@ -87,19 +101,50 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
         return shouldApplyChanges(this, changes);
     }
 
-    public get tokens(): RpgTokenData[] {
+    public get tokens(): Readonly<TurnOrderEntry[]> {
         return this._tokens;
     }
 
-    public addToken(token: RpgTokenData): void {
-        this._tokens.push(token);
+    public addToken(token: RpgToken | RpgToken[]): void {
+        const tokens = Array.isArray(token) ? token : [token];
+
+        tokens
+            .filter((token) => !this.isTokenInTurnOrder(token))
+            .forEach((token) => {
+                this._tokens.push({
+                    token,
+                    initiative: 0,
+                });
+            });
+
+        GAtomStore.set(turnOrderAtoms.currentTurnOrder);
     }
 
-    public removeToken(token: RpgTokenData): void {
-        this._tokens = this._tokens.filter((t) => t !== token);
+    public removeToken(token: RpgToken | RpgToken[]): void {
+        const tokens = Array.isArray(token) ? token : [token];
+
+        this._tokens = this._tokens.filter(
+            (entry) => !tokens.includes(entry.token),
+        );
+
+        GAtomStore.set(turnOrderAtoms.currentTurnOrder);
+    }
+
+    public isTokenInTurnOrder(token: RpgToken): boolean {
+        return this._tokens.some((entry) => entry.token === token);
     }
 
     public static getKindStatic(): string {
         return this.name;
     }
+
+    public startCombat(): void {
+        // 1. Determine surprise -- DM will mark manually
+        // 2. Establish positions -- skip because tokens are already positioned
+        // 3. Roll initiative
+        // 4. Take turn
+        // 5. Begin next round
+    }
+
+    protected rollInitiative(): void {}
 }
