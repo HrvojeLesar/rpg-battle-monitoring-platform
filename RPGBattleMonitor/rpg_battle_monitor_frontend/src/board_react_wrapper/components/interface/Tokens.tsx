@@ -54,7 +54,11 @@ export const Tokens = () => {
                         align="center"
                         draggable
                         onDragStart={(e) => {
-                            e.dataTransfer.setData("token", token.getUId());
+                            // WARN: format must be "text/plain" because mobile implementations do not broadly support other formats
+                            e.dataTransfer.setData(
+                                "text/plain",
+                                token.getUId(),
+                            );
                         }}
                     >
                         <Image

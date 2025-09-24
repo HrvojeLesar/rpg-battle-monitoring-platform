@@ -167,8 +167,9 @@ function dragoverHandler(event: DragEvent) {
 }
 
 function dropHandler(event: DragEvent) {
-    const data = event.dataTransfer?.getData("token");
-    if (data === undefined) {
+    // WARN: format must be "text/plain" because mobile implementations do not broadly support other formats
+    const data = event.dataTransfer?.getData("text/plain");
+    if (data === undefined || data.length === 0) {
         return;
     }
 
