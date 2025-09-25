@@ -1,62 +1,24 @@
 import { ContainerExtension } from "@/board_core/extensions/container_extension";
-import { GridCell, GridCellPosition } from "@/board_core/grid/cell";
+import { GridCell } from "@/board_core/grid/cell";
 import { DragHandler } from "@/board_core/handlers/drag_handler";
 import { EventStore } from "@/board_core/handlers/registered_event_store";
 import { SelectHandler } from "@/board_core/handlers/select_handler";
 import { Layer } from "@/board_core/layers/layers";
-import { Scene } from "@/board_core/scene";
-import { Container, FederatedPointerEvent, Graphics, Point } from "pixi.js";
+import { Container, FederatedPointerEvent, Point } from "pixi.js";
 import { Arrow } from "../graphics/arrow";
-import { Grid } from "@/board_core/grid/grid";
 import { RpgToken } from "../tokens/rpg_token";
-import { sizeToGridCellMultiplier } from "../characters_stats/combat";
+import { DistanceDisplay } from "../graphics/distance_display";
+import { HighlightedCell } from "../graphics/highlighted_cell";
+import { RpgScene } from "../scene/scene";
 
-class HighlightedCell extends Graphics {
-    protected _gridCellPosition: GridCellPosition;
-    protected _token: RpgToken;
-
-    constructor(
-        gridCellPosition: GridCellPosition,
-        grid: Grid,
-        token: RpgToken,
-    ) {
-        super();
-
-        this._gridCellPosition = gridCellPosition;
-
-        this._token = token;
-
-        this.position.set(
-            gridCellPosition.x * grid.cellSize,
-            gridCellPosition.y * grid.cellSize,
-        );
-
-        const multiplier = sizeToGridCellMultiplier(token.tokenData.size);
-        this.rect(
-            0,
-            0,
-            grid.cellSize * multiplier,
-            grid.cellSize * multiplier,
-        ).fill({
-            color: "green",
-            alpha: 0.5,
-        });
-    }
-
-    public get gridCellPosition(): GridCellPosition {
-        return this._gridCellPosition;
-    }
-
-    public get token(): RpgToken {
-        return this._token;
-    }
-}
+export const CELL_FT = 5;
 
 export class RpgDragHandler extends DragHandler {
     protected dragLayer: Layer;
+    protected distanceDisplays: DistanceDisplay[] = [];
 
     public constructor(
-        scene: Scene,
+        scene: RpgScene,
         selectHandler: SelectHandler,
         eventStore: EventStore,
     ) {
@@ -110,6 +72,18 @@ export class RpgDragHandler extends DragHandler {
         cells.forEach((cell) => {
             cell.visible = true;
         });
+
+        const distanceDisplay = this.distanceDisplays.find(
+            (d) => d.token === container,
+        );
+
+        if (distanceDisplay !== undefined)
+            if (cells.length > 0) {
+                distanceDisplay.visible = true;
+                distanceDisplay.setText(`${this.getDistanceInFt(cells)} ft`);
+            } else {
+                distanceDisplay.visible = false;
+            }
     }
 
     protected override onPointerDown(event: FederatedPointerEvent) {
@@ -125,6 +99,17 @@ export class RpgDragHandler extends DragHandler {
         this.selectHandler.selections.forEach((selection) => {
             if (!(selection instanceof RpgToken)) {
                 return;
+            }
+
+            if (
+                this.distanceDisplays.find((d) => d.token === selection) ===
+                undefined
+            ) {
+                this.distanceDisplays.push(
+                    new DistanceDisplay({
+                        token: selection,
+                    }),
+                );
             }
 
             this.dragLayer.container.addChild(
@@ -144,6 +129,11 @@ export class RpgDragHandler extends DragHandler {
         children.forEach((child) => {
             child.destroy(true);
         });
+
+        this.distanceDisplays.forEach((d) => {
+            d.destroy(true);
+        });
+        this.distanceDisplays = [];
     }
 
     // TODO: credit https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
@@ -304,5 +294,15 @@ export class RpgDragHandler extends DragHandler {
         outputCells.reverse();
 
         return outputCells;
+    }
+
+    protected getDistanceInFt(cells: HighlightedCell[]): number {
+        if (cells.length < 2) {
+            return 0;
+        }
+
+        const cellCount = cells.length - 1;
+
+        return cellCount * CELL_FT;
     }
 }
