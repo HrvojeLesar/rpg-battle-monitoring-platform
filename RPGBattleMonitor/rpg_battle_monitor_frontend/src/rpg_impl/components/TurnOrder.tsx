@@ -65,7 +65,6 @@ export const TokenTurnEntry = ({ children }: TokenTurnEntryProps) => {
 };
 
 const Surprised = ({ entry, turnOrder }: TokenTurnEntrySurprisedProps) => {
-    console.log("Surprised rerender", entry.token.getUId());
     const [surprised, setSurprised] = useState(entry.surprised);
 
     const updateTurnOrder = useDebouncedCallback(() => {

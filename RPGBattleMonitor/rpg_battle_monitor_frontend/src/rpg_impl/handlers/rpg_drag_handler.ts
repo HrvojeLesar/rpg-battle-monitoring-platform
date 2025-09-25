@@ -8,20 +8,36 @@ import { Scene } from "@/board_core/scene";
 import { Container, FederatedPointerEvent, Graphics, Point } from "pixi.js";
 import { Arrow } from "../graphics/arrow";
 import { Grid } from "@/board_core/grid/grid";
+import { RpgToken } from "../tokens/rpg_token";
+import { sizeToGridCellMultiplier } from "../characters_stats/combat";
 
 class HighlightedCell extends Graphics {
     protected _gridCellPosition: GridCellPosition;
+    protected _token: RpgToken;
 
-    constructor(gridCellPosition: GridCellPosition, grid: Grid) {
+    constructor(
+        gridCellPosition: GridCellPosition,
+        grid: Grid,
+        token: RpgToken,
+    ) {
         super();
 
         this._gridCellPosition = gridCellPosition;
+
+        this._token = token;
 
         this.position.set(
             gridCellPosition.x * grid.cellSize,
             gridCellPosition.y * grid.cellSize,
         );
-        this.rect(0, 0, grid.cellSize, grid.cellSize).fill({
+
+        const multiplier = sizeToGridCellMultiplier(token.tokenData.size);
+        this.rect(
+            0,
+            0,
+            grid.cellSize * multiplier,
+            grid.cellSize * multiplier,
+        ).fill({
             color: "green",
             alpha: 0.5,
         });
@@ -30,10 +46,13 @@ class HighlightedCell extends Graphics {
     public get gridCellPosition(): GridCellPosition {
         return this._gridCellPosition;
     }
+
+    public get token(): RpgToken {
+        return this._token;
+    }
 }
 
 export class RpgDragHandler extends DragHandler {
-    protected startPositions: GridCell[] = [];
     protected dragLayer: Layer;
 
     public constructor(
@@ -61,31 +80,35 @@ export class RpgDragHandler extends DragHandler {
     ) {
         super.onGlobalPointerMove(offset, container, event);
 
-        this.selectHandler.selections.forEach((selection) => {
-            const cell = selection.getGridCellPosition();
-            const arrows = this.dragLayer.container.children.filter(
-                (child) =>
-                    child instanceof Arrow && child.forContainer === selection,
-            ) as Arrow[];
+        if (!(container instanceof RpgToken)) {
+            return;
+        }
 
-            arrows.forEach((arrow) => {
-                const cellSize = this.scene.grid.cellSize;
-                const endPoint = new Point(
-                    cell.x * cellSize + cellSize / 2,
-                    cell.y * cellSize + cellSize / 2,
-                );
-                arrow.setTo(endPoint);
-                arrow.visible = true;
+        const cell = container.getGridCellPosition();
+        const arrow = this.dragLayer.container.children.find(
+            (child) => child instanceof Arrow && child.token === container,
+        ) as Maybe<Arrow>;
 
-                const startPoint = arrow.getFrom();
-                const cells = this.shortestPath(
-                    this.raycast(startPoint, endPoint),
-                );
+        if (arrow === undefined) {
+            return;
+        }
 
-                cells.forEach((cell) => {
-                    cell.visible = true;
-                });
-            });
+        const cellSize = this.scene.grid.cellSize;
+        const endPoint = new Point(
+            cell.x * cellSize + cellSize / 2,
+            cell.y * cellSize + cellSize / 2,
+        );
+
+        arrow.setTo(endPoint);
+        arrow.visible = true;
+
+        const startPoint = arrow.startPoint;
+        const cells = this.shortestPath(
+            this.raycast(startPoint, endPoint, container),
+        );
+
+        cells.forEach((cell) => {
+            cell.visible = true;
         });
     }
 
@@ -100,18 +123,14 @@ export class RpgDragHandler extends DragHandler {
         });
 
         this.selectHandler.selections.forEach((selection) => {
-            const cell = selection.getGridCellPosition();
-            this.startPositions.push(cell);
-            const cellSize = this.scene.grid.cellSize;
-            const startPoint = new Point(
-                cell.x * cellSize + cellSize / 2,
-                cell.y * cellSize + cellSize / 2,
-            );
+            if (!(selection instanceof RpgToken)) {
+                return;
+            }
+
             this.dragLayer.container.addChild(
                 new Arrow({
-                    from: startPoint,
-                    to: startPoint,
-                    forContainer: selection,
+                    token: selection,
+                    scene: this.scene,
                     visible: false,
                 }),
             );
@@ -129,8 +148,12 @@ export class RpgDragHandler extends DragHandler {
 
     // TODO: credit https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
     // TODO: credit https://playtechs.blogspot.com/2007/03/raytracing-on-grid.html
-    protected raycast(startPoint: Point, endPoint: Point): HighlightedCell[] {
-        this.destroyHighlights();
+    protected raycast(
+        startPoint: Point,
+        endPoint: Point,
+        token: RpgToken,
+    ): HighlightedCell[] {
+        this.destroyHighlights(token);
 
         const derivedPoint = new Point(
             Math.abs(endPoint.x - startPoint.x),
@@ -152,7 +175,7 @@ export class RpgDragHandler extends DragHandler {
 
         const cellPoints: HighlightedCell[] = [];
         for (; numberOfPointsOnScreen > 0; --numberOfPointsOnScreen) {
-            const cellPoint = this.highlightCell(point);
+            const cellPoint = this.highlightCell(point, token);
             if (cellPoint !== undefined) {
                 cellPoints.push(cellPoint);
             }
@@ -168,17 +191,26 @@ export class RpgDragHandler extends DragHandler {
         return cellPoints;
     }
 
-    protected highlightCell(point: Point): Maybe<HighlightedCell> {
+    protected highlightCell(
+        point: Point,
+        token: RpgToken,
+    ): Maybe<HighlightedCell> {
         const cell = GridCell.getGridCellFromPoint(point, this.scene.grid);
 
         const existingHighlight = this.dragLayer.container.children.find(
             (child) =>
                 child instanceof HighlightedCell &&
                 child.gridCellPosition.x === cell.x &&
-                child.gridCellPosition.y === cell.y,
+                child.gridCellPosition.y === cell.y &&
+                child.token === token,
         );
+
         if (existingHighlight === undefined) {
-            const highlightCell = new HighlightedCell(cell, this.scene.grid);
+            const highlightCell = new HighlightedCell(
+                cell,
+                this.scene.grid,
+                token,
+            );
             this.dragLayer.container.addChild(highlightCell);
             highlightCell.visible = false;
 
@@ -188,16 +220,18 @@ export class RpgDragHandler extends DragHandler {
         return undefined;
     }
 
-    protected destroyHighlights() {
+    protected destroyHighlights(rpgToken: RpgToken) {
         const children = [...this.dragLayer.container.children];
 
         children.forEach((child) => {
-            if (child instanceof HighlightedCell) {
+            if (child instanceof HighlightedCell && child.token === rpgToken) {
                 child.destroy(true);
             }
         });
     }
 
+    // TODO: credit https://en.wikipedia.org/wiki/Breadth-first_search
+    // TODO: account for larger token size e.g. 2x2
     protected shortestPath(cells: HighlightedCell[]): HighlightedCell[] {
         if (cells.length < 2) {
             return [];

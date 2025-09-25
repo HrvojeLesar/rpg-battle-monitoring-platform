@@ -1,34 +1,42 @@
-import {
-    Container,
-    Graphics,
-    GraphicsContext,
-    GraphicsOptions,
-    Point,
-} from "pixi.js";
+import { Graphics, GraphicsContext, GraphicsOptions, Point } from "pixi.js";
+import { RpgToken } from "../tokens/rpg_token";
+import { Scene } from "@/board_core/scene";
 
 export type ArrowOptions = {
-    from: Point;
-    to: Point;
-    forContainer: Maybe<Container>;
+    token: RpgToken;
+    scene: Scene;
 } & (GraphicsOptions | GraphicsContext);
 
 export class Arrow extends Graphics {
+    protected _startPoint: Point;
     protected _from: Point;
     protected _to: Point;
-    public forContainer: Maybe<Container> = undefined;
+    public token: RpgToken;
+    public scene: Scene;
 
     constructor(options: ArrowOptions) {
         super(options);
 
-        this._from = options.from;
-        this._to = options.to;
-        this.drawArrow();
+        this.scene = options.scene;
+        this.token = options.token;
 
-        this.forContainer = options.forContainer;
+        const cell = this.token.getGridCellPosition();
+        const cellSize = this.scene.grid.cellSize;
+        // // TODO: Handle case when size is larger than a single cell
+        // const multiplier = sizeToGridCellMultiplier(this.token.tokenData.size);
+        const startPoint = new Point(
+            cell.x * cellSize + cellSize / 2,
+            cell.y * cellSize + cellSize / 2,
+        );
+
+        this._startPoint = startPoint.clone();
+        this._from = startPoint.clone();
+        this._to = startPoint;
+        this.drawArrow();
     }
 
     public getFrom(): Point {
-        return this._from;
+        return this._from.clone();
     }
 
     public setFrom(value: Point) {
@@ -42,9 +50,13 @@ export class Arrow extends Graphics {
     }
 
     public setTo(value: Point) {
-        this._to = value;
+        this._to = value.clone();
 
         this.drawArrow();
+    }
+
+    public get startPoint(): Point {
+        return this._startPoint;
     }
 
     protected drawArrow(): void {
