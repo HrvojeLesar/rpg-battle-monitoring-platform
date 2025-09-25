@@ -27,6 +27,17 @@
 		- [x] Start with display who's turn it is
 		- [ ] Hide monster turn order from players
 			- [ ] Hide for monsters in combat, but out of sight
+	- [ ] Moving during combat
+		- [ ] Draw a line from start to end point 
+			- [ ] Raytrace from mouse start position to current position. From cells that collide with the ray find the shortest path to the mouse position, highlight those cells
+		![[Pasted image 20250924184914.png]]
+		- [ ] Display ft moved based on character speed
+			- [ ] For other players display a line where the character attempts to move to
+		- [ ] Display speed left to use in turn
+		- [ ] Disallow moving beyond character speed
+		- [ ] Disallow moving to same space as enemy 
+		- [ ] Add harsh terrain
+			- [ ] Double speed used when passing
 - [ ] Walls
 	- [ ] Wall layer
 		- [ ] Placing walls

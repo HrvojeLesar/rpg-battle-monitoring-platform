@@ -21,6 +21,7 @@ import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 import { Layer, Layers } from "./layers/layers";
 import { queueEntityUpdate } from "@/websocket/websocket";
 import { ContainerExtension } from "./extensions/container_extension";
+import { GHandlerRegistry } from "./registry/handler_registry";
 
 export type SceneAttributes = {
     gridUid: string;
@@ -117,8 +118,12 @@ export class Scene implements IMessagable<SceneAttributes> {
         this._viewport.pause = true;
 
         this._eventStore = new EventStore(this);
-        this._selectHandler = new SelectHandler(this, this._eventStore);
-        this._dragHandler = new DragHandler(
+        this._selectHandler = new GHandlerRegistry.handler.select(
+            this,
+            this._eventStore,
+        );
+
+        this._dragHandler = new GHandlerRegistry.handler.drag(
             this,
             this._selectHandler,
             this._eventStore,

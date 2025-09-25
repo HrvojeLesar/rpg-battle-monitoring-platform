@@ -39,6 +39,8 @@ export class SelectHandler {
     protected clampHeightTop: boolean = false;
     protected clampHeightBottom: boolean = false;
 
+    protected _pause: boolean = false;
+
     protected managedContainers: UniqueCollection<ContainerExtension> =
         new UniqueCollection();
 
@@ -298,5 +300,13 @@ export class SelectHandler {
         deleteActions.forEach((action) =>
             action.cleanupCallbacks.forEach((cb) => cb()),
         );
+    }
+
+    public get pause(): boolean {
+        return this._pause;
+    }
+
+    public set pause(value: boolean) {
+        this._pause = value;
     }
 }

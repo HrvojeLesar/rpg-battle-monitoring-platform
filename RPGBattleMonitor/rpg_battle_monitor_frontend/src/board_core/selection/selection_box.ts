@@ -25,7 +25,15 @@ export class SelectionBox extends Graphics {
 
         const onGlobalPointerMove = (event: FederatedPointerEvent) => {
             if (this._viewport.input.touches.length > 1) {
-                return;
+                return onPointerUp();
+            }
+
+            if (this.selectHandler.pause) {
+                return onPointerUp();
+            }
+
+            if (this._scene.selectedLayer.container.eventMode === "none") {
+                return onPointerUp();
             }
 
             const endPoint = event.getLocalPosition(this._viewport);
@@ -50,10 +58,6 @@ export class SelectionBox extends Graphics {
                 .stroke({ color: "white", width: 1 });
 
             const bounds = this.getBounds().rectangle;
-
-            if (this._scene.selectedLayer.container.eventMode === "none") {
-                return;
-            }
 
             this._scene.selectedLayer.container.children.forEach((child) => {
                 if (!(child instanceof ContainerExtension)) {
@@ -85,6 +89,11 @@ export class SelectionBox extends Graphics {
                 return;
             }
 
+            if (this.selectHandler.pause) {
+                this.selectHandler.clearSelections();
+                return;
+            }
+
             if (this._viewport.input.touches.length === 1) {
                 this._viewport.plugins.pause("drag");
             }
@@ -99,7 +108,7 @@ export class SelectionBox extends Graphics {
             this._viewport.on("pointerupoutside", onPointerUp);
         };
 
-        const onPointerUp = (_event: FederatedPointerEvent) => {
+        const onPointerUp = () => {
             this._viewport.plugins.resume("drag");
             this._viewport.off("globalpointermove", onGlobalPointerMove);
             this._viewport.off("pointerup", onPointerUp);

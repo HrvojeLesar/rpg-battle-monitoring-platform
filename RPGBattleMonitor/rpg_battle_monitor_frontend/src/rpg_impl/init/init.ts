@@ -12,10 +12,13 @@ import { GBoard } from "@/board_core/board";
 import { RpgTokenFactory } from "../factories/token_factory";
 import { Point } from "pixi.js";
 import { RPG_TOKEN_DROP } from "../utils/rpg_token_drop";
+import { GHandlerRegistry } from "@/board_core/registry/handler_registry";
+import { RpgDragHandler } from "../handlers/rpg_drag_handler";
 
 export const initializeRPG = (entityRegistry: EntityRegistry) => {
     registerEntities(entityRegistry);
     GDragAndDropRegistry.registerHandler(RPG_TOKEN_DROP, dragAndDropHandler);
+    GHandlerRegistry.overrideHandler("drag", RpgDragHandler);
 };
 
 const registerEntities = (registry: EntityRegistry) => {
