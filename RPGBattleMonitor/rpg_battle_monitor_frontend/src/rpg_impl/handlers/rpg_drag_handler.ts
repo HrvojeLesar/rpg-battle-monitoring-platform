@@ -16,6 +16,8 @@ import { IMessagable } from "@/board_core/interfaces/messagable";
 import { TurnOrder } from "../turn/turn_order";
 import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
 import { turnOrderAtoms } from "../stores/turn_order_store";
+import { raycast } from "../utils/raycast";
+import { shortestPath } from "../utils/highlighted_cells_shortest_path";
 
 export const CELL_FT = 5;
 
@@ -178,40 +180,19 @@ export class RpgDragHandler extends DragHandler {
         endPoint: Point,
         token: RpgToken,
     ): HighlightedCell[] {
-        this.destroyHighlights(token);
-
-        const derivedPoint = new Point(
-            Math.abs(endPoint.x - startPoint.x),
-            Math.abs(endPoint.y - startPoint.y),
-        );
-        const point = new Point(startPoint.x, startPoint.y);
-
-        // WARN: this checks every pixel and can be quite inefficient because most of the time the same cell is tested
-        let numberOfPointsOnScreen = 1 + derivedPoint.x + derivedPoint.y;
-
-        const increment = new Point(
-            endPoint.x > startPoint.x ? 1 : -1,
-            endPoint.y > startPoint.y ? 1 : -1,
-        );
-        let error = derivedPoint.y - derivedPoint.y;
-
-        derivedPoint.x *= 2;
-        derivedPoint.y *= 2;
-
         const cellPoints: HighlightedCell[] = [];
-        for (; numberOfPointsOnScreen > 0; --numberOfPointsOnScreen) {
-            const cellPoint = this.highlightCell(point, token);
-            if (cellPoint !== undefined) {
-                cellPoints.push(cellPoint);
-            }
-            if (error > 0) {
-                point.x += increment.x;
-                error -= derivedPoint.y;
-            } else {
-                point.y += increment.y;
-                error += derivedPoint.x;
-            }
-        }
+
+        raycast(startPoint, endPoint, {
+            start: () => {
+                this.destroyHighlights(token);
+            },
+            onPoint: (point) => {
+                const cellPoint = this.highlightCell(point, token);
+                if (cellPoint !== undefined) {
+                    cellPoints.push(cellPoint);
+                }
+            },
+        });
 
         return cellPoints;
     }
@@ -258,77 +239,7 @@ export class RpgDragHandler extends DragHandler {
     // TODO: credit https://en.wikipedia.org/wiki/Breadth-first_search
     // TODO: account for larger token size e.g. 2x2
     protected shortestPath(cells: HighlightedCell[]): HighlightedCell[] {
-        if (cells.length < 2) {
-            return [];
-        }
-
-        const startingPoint = cells[0];
-        const endPoint = cells[cells.length - 1];
-
-        const generateKeyRaw = (x: number, y: number) => `${x},${y}`;
-        const generateKey = (p: Point) => `${p.x},${p.y}`;
-        const pointsMap = new Map(
-            cells.map((cell) => [generateKey(cell.gridCellPosition), cell]),
-        );
-
-        const directions = [
-            [1, 0],
-            [-1, 0],
-            [0, 1],
-            [0, -1],
-            [1, 1],
-            [1, -1],
-            [-1, 1],
-            [-1, -1],
-        ];
-        const queue: HighlightedCell[] = [startingPoint];
-        const visited = new Set([generateKey(startingPoint.gridCellPosition)]);
-        const cellsGraphMap = new Map<string, HighlightedCell | undefined>([
-            [generateKey(startingPoint.gridCellPosition), undefined],
-        ]);
-
-        while (queue.length > 0) {
-            const cell = queue.shift()!;
-            const current = cell.gridCellPosition;
-
-            if (current.x === endPoint.x && current.y === endPoint.y) {
-                break;
-            }
-
-            for (const [dx, dy] of directions) {
-                const x = current.x + dx;
-                const y = current.y + dy;
-                const adjacentPointKey = generateKeyRaw(x, y);
-                if (
-                    pointsMap.has(adjacentPointKey) &&
-                    !visited.has(adjacentPointKey)
-                ) {
-                    const adjacentPoint = pointsMap.get(adjacentPointKey)!;
-                    visited.add(adjacentPointKey);
-                    queue.push(adjacentPoint);
-
-                    cellsGraphMap.set(adjacentPointKey, cell);
-                }
-            }
-        }
-
-        const outputCells: HighlightedCell[] = [endPoint];
-        let nextCellKey: Maybe<string> = generateKey(endPoint.gridCellPosition);
-        if (!cellsGraphMap.has(nextCellKey)) {
-            return [];
-        }
-
-        while (nextCellKey !== undefined) {
-            const cell = cellsGraphMap.get(nextCellKey);
-            if (cell !== undefined) {
-                outputCells.push(cell);
-            }
-            nextCellKey = cell ? generateKey(cell.gridCellPosition) : undefined;
-        }
-
-        outputCells.reverse();
-
-        return outputCells;
+        return shortestPath(cells);
     }
 
     protected getDistanceInFt(cells: HighlightedCell[]): number {

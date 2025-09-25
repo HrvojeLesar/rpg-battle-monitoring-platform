@@ -1,13 +1,14 @@
 import { ContainerExtensionOptions } from "@/board_core/extensions/container_extension";
 import { Scene } from "@/board_core/scene";
-import { Token } from "@/board_core/token/token";
-import { SpriteOptions } from "pixi.js";
+import { Token, TokenAttributes } from "@/board_core/token/token";
+import { Point, SpriteOptions } from "pixi.js";
 import { RpgTokenData } from "./rpg_token_data";
 import { sizeToGridCellMultiplier } from "../characters_stats/combat";
-import { DeleteAction } from "@/board_core/interfaces/messagable";
+import { DeleteAction, TypedJson } from "@/board_core/interfaces/messagable";
 import { TurnOrder } from "../turn/turn_order";
 import { GBoard } from "@/board_core/board";
 import { queueEntityUpdate } from "@/websocket/websocket";
+import { GRpgTokenAnimator } from "../handlers/animate";
 
 export class RpgToken extends Token {
     public constructor(
@@ -55,5 +56,17 @@ export class RpgToken extends Token {
                 return turnOrders;
             });
         });
+    }
+
+    public applyUpdateAction(changes: TypedJson<TokenAttributes>): void {
+        // const oldPosition = this.position.clone();
+        super.applyUpdateAction(changes);
+
+        // this.position.set(oldPosition.x, oldPosition.y);
+        //
+        // GRpgTokenAnimator.animateMove(
+        //     this,
+        //     new Point(changes.position.x, changes.position.y),
+        // );
     }
 }

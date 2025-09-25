@@ -4,7 +4,7 @@ import { Grid } from "./grid";
 import { IGridMove } from "../interfaces/grid_move";
 import { GBoard } from "../board";
 
-export type GridCellPosition = Point;
+export class GridCellPosition extends Point {}
 
 export class GridCell extends Point implements IGridMove {
     private container: ContainerExtension;

@@ -1,6 +1,7 @@
 import { Graphics, GraphicsContext, GraphicsOptions, Point } from "pixi.js";
 import { RpgToken } from "../tokens/rpg_token";
 import { Scene } from "@/board_core/scene";
+import { GridCell, GridCellPosition } from "@/board_core/grid/cell";
 
 export type ArrowOptions = {
     token: RpgToken;
@@ -20,13 +21,8 @@ export class Arrow extends Graphics {
         this.scene = options.scene;
         this.token = options.token;
 
-        const cell = this.token.getGridCellPosition();
-        const cellSize = this.scene.grid.cellSize;
-        // // TODO: Handle case when size is larger than a single cell
-        // const multiplier = sizeToGridCellMultiplier(this.token.tokenData.size);
-        const startPoint = new Point(
-            cell.x * cellSize + cellSize / 2,
-            cell.y * cellSize + cellSize / 2,
+        const startPoint = this.getAdjustedPoint(
+            this.token.getGridCellPosition(),
         );
 
         this._startPoint = startPoint.clone();
@@ -57,6 +53,14 @@ export class Arrow extends Graphics {
 
     public get startPoint(): Point {
         return this._startPoint;
+    }
+
+    public getAdjustedPoint(cell: GridCellPosition | GridCell): Point {
+        const cellSize = this.scene.grid.cellSize;
+        return new Point(
+            cell.x * cellSize + cellSize / 2,
+            cell.y * cellSize + cellSize / 2,
+        );
     }
 
     protected drawArrow(): void {
