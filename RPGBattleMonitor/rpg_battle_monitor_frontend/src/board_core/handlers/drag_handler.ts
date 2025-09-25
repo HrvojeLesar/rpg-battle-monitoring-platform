@@ -6,12 +6,6 @@ import { EventStore } from "./registered_event_store";
 import { UniqueCollection } from "../utils/unique_collection";
 import { GBoard } from "../board";
 
-type OnGlobalPointerMove = {
-    handler: DragHandler;
-    offset: Point;
-    container: ContainerExtension;
-};
-
 export class DragHandler {
     public static UNREGISTER_DRAG: string = "UNREGISTER_DRAG";
     protected isDirty: boolean = false;
@@ -19,6 +13,8 @@ export class DragHandler {
     protected scene: Scene;
     protected selectHandler: SelectHandler;
     protected eventStore: EventStore;
+
+    protected globalPointerMoveUnregisterHandle: (() => void)[] = [];
 
     protected managedContainers: UniqueCollection<ContainerExtension> =
         new UniqueCollection();
@@ -34,110 +30,110 @@ export class DragHandler {
     }
 
     protected onGlobalPointerMove(
-        this: OnGlobalPointerMove,
         event: FederatedPointerEvent,
+        offset: Point,
+        container: ContainerExtension,
     ) {
-        const localPos = event.getLocalPosition(this.handler.scene.viewport);
+        const localPos = event.getLocalPosition(this.scene.viewport);
         const newEntityPosition = new Point(
-            localPos.x - this.offset.x,
-            localPos.y - this.offset.y,
+            localPos.x - offset.x,
+            localPos.y - offset.y,
         );
 
-        this.container.clampPositionToViewport(
+        container.clampPositionToViewport(
             newEntityPosition,
-            this.handler.selectHandler,
+            this.selectHandler,
         );
 
-        this.handler.isDirty = true;
-        this.container.position.set(newEntityPosition.x, newEntityPosition.y);
+        this.isDirty = true;
+        container.position.set(newEntityPosition.x, newEntityPosition.y);
+    }
+
+    protected onPointerDown(event: FederatedPointerEvent) {
+        if (event.pointerType === "mouse" && event.button !== 0) {
+            return;
+        }
+        event.stopPropagation();
+
+        if (!this.selectHandler.isSelectionDraggable()) {
+            return;
+        }
+
+        const localPos = event.getLocalPosition(this.scene.viewport);
+
+        if (this.selectHandler.isMultiSelection()) {
+            const holder = this.selectHandler.selectionHolderContainer;
+            const offset = new Point();
+            offset.x = localPos.x - holder.x;
+            offset.y = localPos.y - holder.y;
+
+            const handle = this.onGlobalPointerMove.bind(
+                this,
+                event,
+                offset,
+                holder,
+            );
+            this.globalPointerMoveUnregisterHandle.push(handle);
+
+            this.scene.viewport.on("globalpointermove", handle);
+        }
+
+        const selections = this.selectHandler.selections;
+        for (const selection of selections) {
+            const offset = new Point();
+            offset.x = localPos.x - selection.x;
+            offset.y = localPos.y - selection.y;
+
+            selection.addGhostToStage(selection.createGhost());
+
+            const selectionHandle = this.onGlobalPointerMove.bind(
+                this,
+                event,
+                offset,
+                selection,
+            );
+            this.globalPointerMoveUnregisterHandle.push(selectionHandle);
+            this.scene.viewport.on("globalpointermove", selectionHandle);
+        }
+    }
+
+    protected onPointerUp() {
+        this.globalPointerMoveUnregisterHandle.forEach((handle) => {
+            this.scene.viewport.off("globalpointermove", handle);
+        });
+        this.globalPointerMoveUnregisterHandle = [];
+
+        const selectedItems = this.selectHandler.selections;
+        for (const container of selectedItems) {
+            if (this.isDirty) {
+                container.snapToGrid();
+                container.eventEmitter.emit("drag-end");
+            }
+            container.clearGhosts();
+        }
+
+        this.selectHandler.drawSelectionOutline();
+
+        this.isDirty = false;
+
+        GBoard.websocket.flush();
+    }
+
+    protected unregisterDragEvents(container: ContainerExtension) {
+        container.off("pointerdown", this.onPointerDown.bind(this));
+        container.off("pointerup", this.onPointerUp.bind(this));
+        container.off("pointerupoutside", this.onPointerUp.bind(this));
     }
 
     public registerDrag(container: ContainerExtension) {
-        const onPointerDown = (event: FederatedPointerEvent) => {
-            if (event.pointerType === "mouse" && event.button !== 0) {
-                return;
-            }
-            event.stopPropagation();
-
-            if (!this.selectHandler.isSelectionDraggable()) {
-                return;
-            }
-
-            const localPos = event.getLocalPosition(this.scene.viewport);
-
-            if (this.selectHandler.isMultiSelection()) {
-                const holder = this.selectHandler.selectionHolderContainer;
-                const offset = new Point();
-                offset.x = localPos.x - holder.x;
-                offset.y = localPos.y - holder.y;
-
-                this.scene.viewport.on(
-                    "globalpointermove",
-                    this.onGlobalPointerMove,
-                    {
-                        handler: this,
-                        offset: offset,
-                        container: holder,
-                    },
-                );
-            }
-
-            const selections = this.selectHandler.selections;
-            for (const selection of selections) {
-                const offset = new Point();
-                offset.x = localPos.x - selection.x;
-                offset.y = localPos.y - selection.y;
-
-                selection.addGhostToStage(selection.createGhost());
-
-                this.scene.viewport.on(
-                    "globalpointermove",
-                    this.onGlobalPointerMove,
-                    {
-                        handler: this,
-                        offset: offset,
-                        container: selection,
-                    },
-                );
-            }
-        };
-
-        const onPointerUp = (_event: FederatedPointerEvent) => {
-            this.scene.viewport.off(
-                "globalpointermove",
-                this.onGlobalPointerMove,
-            );
-
-            const selectedItems = this.selectHandler.selections;
-            for (const container of selectedItems) {
-                if (this.isDirty) {
-                    container.snapToGrid();
-                    container.eventEmitter.emit("drag-end");
-                }
-                container.clearGhosts();
-            }
-
-            this.selectHandler.drawSelectionOutline();
-
-            this.isDirty = false;
-
-            GBoard.websocket.flush();
-        };
-
-        container.on("pointerdown", onPointerDown);
-        container.on("pointerup", onPointerUp);
-        container.on("pointerupoutside", onPointerUp);
-
-        const unregisterDrag = () => {
-            container.off("pointerdown", onPointerDown);
-            container.off("pointerup", onPointerUp);
-            container.off("pointerupoutside", onPointerUp);
-        };
+        container.on("pointerdown", this.onPointerDown.bind(this));
+        container.on("pointerup", this.onPointerUp.bind(this));
+        container.on("pointerupoutside", this.onPointerUp.bind(this));
 
         this.eventStore.register(
             container,
             DragHandler.UNREGISTER_DRAG,
-            unregisterDrag,
+            this.unregisterDragEvents.bind(this, container),
         );
 
         this.managedContainers.add(container);
