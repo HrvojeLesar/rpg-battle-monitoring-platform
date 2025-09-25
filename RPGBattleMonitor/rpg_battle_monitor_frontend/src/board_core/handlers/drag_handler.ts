@@ -14,7 +14,9 @@ export class DragHandler {
     protected selectHandler: SelectHandler;
     protected eventStore: EventStore;
 
-    protected globalPointerMoveUnregisterHandle: (() => void)[] = [];
+    protected globalPointerMoveUnregisterHandle: ((
+        event: FederatedPointerEvent,
+    ) => void)[] = [];
 
     protected managedContainers: UniqueCollection<ContainerExtension> =
         new UniqueCollection();
@@ -30,9 +32,9 @@ export class DragHandler {
     }
 
     protected onGlobalPointerMove(
-        event: FederatedPointerEvent,
         offset: Point,
         container: ContainerExtension,
+        event: FederatedPointerEvent,
     ) {
         const localPos = event.getLocalPosition(this.scene.viewport);
         const newEntityPosition = new Point(
@@ -67,12 +69,8 @@ export class DragHandler {
             offset.x = localPos.x - holder.x;
             offset.y = localPos.y - holder.y;
 
-            const handle = this.onGlobalPointerMove.bind(
-                this,
-                event,
-                offset,
-                holder,
-            );
+            const handle = this.onGlobalPointerMove.bind(this, offset, holder);
+
             this.globalPointerMoveUnregisterHandle.push(handle);
 
             this.scene.viewport.on("globalpointermove", handle);
@@ -88,11 +86,11 @@ export class DragHandler {
 
             const selectionHandle = this.onGlobalPointerMove.bind(
                 this,
-                event,
                 offset,
                 selection,
             );
             this.globalPointerMoveUnregisterHandle.push(selectionHandle);
+
             this.scene.viewport.on("globalpointermove", selectionHandle);
         }
     }

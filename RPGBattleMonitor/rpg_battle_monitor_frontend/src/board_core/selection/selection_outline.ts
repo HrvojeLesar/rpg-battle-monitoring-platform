@@ -227,7 +227,10 @@ export class SelectionOutline extends Container {
             this.selectHandler.resizeHandler,
             this.selectHandler,
         );
-        this.addChild(this._resizeControls);
+
+        if (this._outlineAround.isResizable) {
+            this.addChild(this._resizeControls);
+        }
     }
 
     public destroy(options?: DestroyOptions): void {

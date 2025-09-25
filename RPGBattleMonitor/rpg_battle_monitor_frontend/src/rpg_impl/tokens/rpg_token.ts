@@ -26,6 +26,8 @@ export class RpgToken extends Token {
                 scene.grid.cellSize *
                 sizeToGridCellMultiplier(this.tokenData.size);
         }
+
+        this.isResizable = false;
     }
 
     public get tokenData(): RpgTokenData {
