@@ -4,7 +4,9 @@ import { Scene } from "../scene";
 import { SelectHandler } from "./select_handler";
 import { EventStore } from "./registered_event_store";
 import { UniqueCollection } from "../utils/unique_collection";
-import { GBoard } from "../board";
+import { queueEntityUpdate } from "@/websocket/websocket";
+import { Token } from "../token/token";
+import { IMessagable } from "../interfaces/messagable";
 
 export class DragHandler {
     public static UNREGISTER_DRAG: string = "UNREGISTER_DRAG";
@@ -102,19 +104,20 @@ export class DragHandler {
         this.globalPointerMoveUnregisterHandle = [];
 
         const selectedItems = this.selectHandler.selections;
+        const updatedItems: ContainerExtension[] = [];
         for (const container of selectedItems) {
-            if (this.isDirty) {
-                container.snapToGrid();
-                container.eventEmitter.emit("drag-end");
-            }
-            container.clearGhosts();
+            this.moveContainer(container, updatedItems);
         }
 
         this.selectHandler.drawSelectionOutline();
 
         this.isDirty = false;
 
-        GBoard.websocket.flush();
+        queueEntityUpdate(() => {
+            return updatedItems.filter(
+                (container) => container instanceof Token,
+            );
+        });
     }
 
     protected unregisterDragEvents(container: ContainerExtension) {
@@ -140,5 +143,16 @@ export class DragHandler {
     public unregisterDrag(container: ContainerExtension) {
         this.managedContainers.remove(container);
         this.eventStore.unregister(container, DragHandler.UNREGISTER_DRAG);
+    }
+
+    protected moveContainer(
+        container: ContainerExtension,
+        updatedItems: IMessagable[],
+    ): void {
+        if (this.isDirty) {
+            container.snapToGrid();
+            updatedItems.push(container);
+        }
+        container.clearGhosts();
     }
 }

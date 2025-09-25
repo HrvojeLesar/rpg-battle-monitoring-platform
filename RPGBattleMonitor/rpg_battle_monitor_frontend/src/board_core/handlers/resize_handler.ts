@@ -10,6 +10,8 @@ import { DragHandler } from "./drag_handler";
 import { SelectHandler } from "./select_handler";
 import { Scene } from "../scene";
 import { IResizable } from "../interfaces/resizable";
+import { queueEntityUpdate } from "@/websocket/websocket";
+import { Token } from "../token/token";
 
 export enum ResizeKind {
     TopLeft = "top-left",
@@ -78,9 +80,13 @@ export class ResizeHandler {
                 this.onGlobalPointerMove,
             );
 
-            container.eventEmitter.emit("resize-end");
+            queueEntityUpdate(() => {
+                if (container instanceof Token) {
+                    return container;
+                }
 
-            GBoard.websocket.flush();
+                return [];
+            });
         };
 
         resizeDragPoint.on("pointerdown", onPointerDown);

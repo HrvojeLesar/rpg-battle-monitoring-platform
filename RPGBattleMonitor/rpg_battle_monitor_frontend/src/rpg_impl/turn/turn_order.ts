@@ -33,12 +33,16 @@ export type TurnOrderEntrySerialized = {
     token: UId;
     initiative: number;
     surprised: boolean;
+    baseSpeed: number;
+    speed: number;
 };
 
 export type TurnOrderEntry = {
     token: RpgToken;
     initiative: number;
     surprised: boolean;
+    baseSpeed: number;
+    speed: number;
 };
 
 function convertUIdsToTokens(
@@ -52,6 +56,8 @@ function convertUIdsToTokens(
                     token,
                     initiative: entry.initiative,
                     surprised: entry.surprised,
+                    baseSpeed: entry.baseSpeed,
+                    speed: entry.speed,
                 });
             }
             return acc;
@@ -105,6 +111,8 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
                 token: entry.token.getUId(),
                 initiative: entry.initiative,
                 surprised: entry.surprised,
+                baseSpeed: entry.baseSpeed,
+                speed: entry.speed,
             })),
             sceneUid: this.scene.getUId(),
             turnOrderState: this._state,
@@ -152,6 +160,8 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
                     token,
                     initiative: 0,
                     surprised: false,
+                    baseSpeed: token.tokenData.speed.walk,
+                    speed: token.tokenData.speed.walk, // TODO: get speed from the current token state and apply modifiers
                 });
             });
 
@@ -243,12 +253,35 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
         this.turnCount++;
 
         const nextToken = this.tokens.at(this.tokenIdxOnTurn);
-        if (nextToken?.surprised) {
-            nextToken.surprised = false;
-            this.nextTurn();
+        if (nextToken !== undefined) {
+            this.processEntryNextTurn(nextToken);
         }
 
         GAtomStore.set(turnOrderAtoms.currentTurnOrder);
+    }
+
+    public isInCombat(): boolean {
+        return this._state === TurnOrderState.InCombat;
+    }
+
+    public isOnTurn(token: RpgToken): boolean {
+        return (
+            this._state === TurnOrderState.InCombat &&
+            this.tokens.at(this.tokenIdxOnTurn)?.token === token
+        );
+    }
+
+    public getToken(token: RpgToken): Maybe<TurnOrderEntry> {
+        return this._tokens.find((entry) => entry.token === token);
+    }
+
+    protected processEntryNextTurn(nextToken: TurnOrderEntry): void {
+        nextToken.speed = nextToken.baseSpeed;
+
+        if (nextToken.surprised) {
+            nextToken.surprised = false;
+            this.nextTurn();
+        }
     }
 }
 

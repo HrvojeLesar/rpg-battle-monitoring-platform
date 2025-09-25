@@ -30,7 +30,7 @@ export const TurnOrder = () => {
                     return (
                         <TokenTurnEntry key={uid}>
                             <Box bg={isOnTurn ? "green" : undefined}>
-                                Token {uid} {entry.initiative}
+                                Token {uid} {entry.initiative} {entry.speed}
                             </Box>
                             <TokenTurnEntry.Surprised
                                 turnOrder={turnOrder}

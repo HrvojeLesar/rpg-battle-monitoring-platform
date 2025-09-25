@@ -9,6 +9,8 @@ export class DistanceDisplay extends Container {
     public token: RpgToken;
     public textLabel: Text;
     public background: Graphics;
+    public units = "ft";
+    protected _distance = 0;
 
     constructor(options: DistanceDisplayOptions) {
         super(options);
@@ -17,7 +19,7 @@ export class DistanceDisplay extends Container {
         this.token.addChild(this);
 
         this.textLabel = new Text({
-            text: "0 ft",
+            text: this.distanceText,
             resolution: 2,
             style: {
                 fontSize: 24 / this.token.scene.viewport.scale.x,
@@ -36,7 +38,7 @@ export class DistanceDisplay extends Container {
         this.visible = false;
     }
 
-    public setText(text: string): void {
+    protected setText(text: string): void {
         this.textLabel.text = text;
         this.drawBackground();
     }
@@ -57,5 +59,18 @@ export class DistanceDisplay extends Container {
                 color: 0xffff00,
                 alpha: 1,
             });
+    }
+
+    protected get distanceText(): string {
+        return `${this._distance} ${this.units}`;
+    }
+
+    public get distance(): number {
+        return this._distance;
+    }
+
+    public set distance(value: number) {
+        this._distance = value;
+        this.setText(this.distanceText);
     }
 }

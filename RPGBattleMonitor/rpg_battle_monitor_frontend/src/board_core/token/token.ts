@@ -7,7 +7,6 @@ import {
 import { DeleteAction, UId, type TypedJson } from "../interfaces/messagable";
 import { Scene } from "../scene";
 import { TokenDataBase } from "./token_data";
-import { GBoard } from "../board";
 import {
     LOAD_TEXTURE,
     TextureConverter,
@@ -34,9 +33,6 @@ export class Token extends SpriteExtension {
 
         this._scene = scene;
         this._tokenData = tokenData;
-
-        this.eventEmitter.on("drag-end", this.update.bind(this));
-        this.eventEmitter.on("resize-end", this.update.bind(this));
     }
 
     public get scene(): Scene {
@@ -59,10 +55,6 @@ export class Token extends SpriteExtension {
     public applyUpdateAction(changes: TypedJson<TokenAttributes>): void {
         super.applyUpdateAction(changes);
         this.setTexture();
-    }
-
-    protected update(): void {
-        GBoard.websocket.queue(this, "updateQueue");
     }
 
     public get tokenData(): TokenDataBase {
