@@ -370,4 +370,8 @@ export class Scene implements IMessagable<SceneAttributes> {
     public get selectHandler(): SelectHandler {
         return this._selectHandler;
     }
+
+    public get layers(): Layers {
+        return this._layers;
+    }
 }

@@ -34,10 +34,11 @@ export class GridCell extends Point implements IGridMove {
         );
     }
 
+    // WARN: check if this actually works for any cell size and is not off by one
     private calculateCellPosition() {
         this.set(
-            Math.floor(this.container.x / this.grid.cellSize),
-            Math.floor(this.container.y / this.grid.cellSize),
+            Math.round(this.container.x / this.grid.cellSize),
+            Math.round(this.container.y / this.grid.cellSize),
         );
     }
 

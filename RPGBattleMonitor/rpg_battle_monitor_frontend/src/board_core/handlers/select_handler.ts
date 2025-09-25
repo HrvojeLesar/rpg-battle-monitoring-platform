@@ -54,7 +54,17 @@ export class SelectHandler {
             this.scene.grid,
             this,
         );
-        this._scene.viewport.addChild(this.selectionHolderContainer);
+
+        const selectionLayer = this._scene.layers.getLayer({
+            name: "selection",
+            container: new Container({
+                label: "selectionLayer",
+                eventMode: "none",
+            }),
+            zIndex: this._scene.layers.layers.length,
+            label: "Selection layer",
+        });
+        selectionLayer.container.addChild(this.selectionHolderContainer);
 
         this._selected = new SelectedMap();
     }

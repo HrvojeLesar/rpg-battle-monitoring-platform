@@ -63,10 +63,7 @@ export class Layers {
         });
     }
 
-    public getLayer(name: Layer | string): Layer {
-        if (typeof name === "object") {
-            name = name.name;
-        }
+    protected getLayerFromString(name: string): Layer {
         let layer = this._layers.find((layer) => layer.name === name);
 
         if (layer === undefined) {
@@ -76,6 +73,24 @@ export class Layers {
         }
 
         return layer;
+    }
+
+    protected getLayerFromObject(inputLayer: Layer): Layer {
+        const layer = this.getLayerFromString(inputLayer.name);
+
+        layer.container = inputLayer.container;
+        layer.zIndex = inputLayer.zIndex;
+        layer.label = inputLayer.label;
+
+        return layer;
+    }
+
+    public getLayer(layer: Layer | string): Layer {
+        if (typeof layer === "object") {
+            return this.getLayerFromObject(layer);
+        }
+
+        return this.getLayerFromString(layer);
     }
 
     public get gridLayer(): Container {
