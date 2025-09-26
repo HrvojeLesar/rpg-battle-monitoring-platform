@@ -24,6 +24,8 @@ const currentTurnOrder = atom<TurnOrderBoxed, [], void>(
             return { turnOrder: undefined };
         }
 
+        currentScene.updateTurnMarker();
+
         if (currentTurnOrder === undefined) {
             return { turnOrder: currentScene.turnOrder };
         }

@@ -34,7 +34,10 @@ export class DistanceDisplay extends Container {
         this.addChild(this.background, this.textLabel);
 
         // TODO: Position so text length is offset and text does not go to the right of token
-        this.position.set(this.token.width / 2, this.token.height + 50);
+        this.position.set(
+            this.token.displayedEntity!.width / 2,
+            this.token.displayedEntity!.height + 150,
+        );
         this.visible = false;
     }
 

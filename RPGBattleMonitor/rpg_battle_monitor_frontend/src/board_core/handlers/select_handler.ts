@@ -166,8 +166,8 @@ export class SelectHandler {
             const dummySprite = new Sprite({
                 x: localPositionToContainer.x,
                 y: localPositionToContainer.y,
-                width: s.width,
-                height: s.height,
+                width: s.displayedEntity?.width ?? s.width,
+                height: s.displayedEntity?.height ?? s.height,
                 rotation: s.rotation,
             });
             selectionHolder.addChild(dummySprite);

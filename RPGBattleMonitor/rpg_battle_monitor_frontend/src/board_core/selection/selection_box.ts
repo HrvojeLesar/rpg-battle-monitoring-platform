@@ -64,7 +64,9 @@ export class SelectionBox extends Graphics {
                     return;
                 }
 
-                const tokenBounds = child.getBounds().rectangle;
+                const tokenBounds =
+                    child.displayedEntity?.getBounds().rectangle ??
+                    child.getBounds().rectangle;
                 if (bounds.intersects(tokenBounds)) {
                     if (
                         child.isSelectable &&

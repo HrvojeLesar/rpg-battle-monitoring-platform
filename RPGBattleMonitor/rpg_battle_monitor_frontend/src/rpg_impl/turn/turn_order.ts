@@ -220,6 +220,7 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
                 AbilityScoreType.Dexterity,
             );
             entry.initiative = rolled + dexModifier;
+            entry.speed = entry.baseSpeed;
         });
 
         this._tokens.sort((a, b) => {
@@ -273,6 +274,10 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
 
     public getToken(token: RpgToken): Maybe<TurnOrderEntry> {
         return this._tokens.find((entry) => entry.token === token);
+    }
+
+    public getTokenOnTurn(): Maybe<TurnOrderEntry> {
+        return this._tokens.at(this.tokenIdxOnTurn);
     }
 
     protected processEntryNextTurn(nextToken: TurnOrderEntry): void {

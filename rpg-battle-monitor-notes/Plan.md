@@ -28,13 +28,13 @@
 		- [ ] Hide monster turn order from players
 			- [ ] Hide for monsters in combat, but out of sight
 	- [ ] Moving during combat
-		- [ ] Draw a line from start to end point 
-			- [ ] Raytrace from mouse start position to current position. From cells that collide with the ray find the shortest path to the mouse position, highlight those cells
+		- [x] Draw a line from start to end point 
+			- [x] Raytrace from mouse start position to current position. From cells that collide with the ray find the shortest path to the mouse position, highlight those cells
 		![[Pasted image 20250924184914.png]]
-		- [ ] Display ft moved based on character speed
+		- [x] Display ft moved based on character speed
 			- [ ] For other players display a line where the character attempts to move to
-		- [ ] Display speed left to use in turn
-		- [ ] Disallow moving beyond character speed
+		- [x] Display speed left to use in turn
+		- [x] Disallow moving beyond character speed
 		- [ ] Disallow moving to same space as enemy 
 		- [ ] Add harsh terrain
 			- [ ] Double speed used when passing
@@ -45,3 +45,13 @@
 		- [ ] Doors
 		- [ ] Windows
 	- [ ] Line of sight calculation/display
+- [ ] Combat
+	- [ ] Add melee attack
+		- [ ] Highlight attackable tokens in range
+		- [ ] Roll for hit
+			- [ ] If hit roll for damage
+			- [ ] Display rolls to users
+			- [ ] If hit and damaged update health of target
+	- [ ] Add ranged attack
+		- [ ] Add at least one spell
+		- [ ] Raytrace between start and target, if in range and target is seen roll for hit/damage

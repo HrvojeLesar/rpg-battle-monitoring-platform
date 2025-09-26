@@ -2,26 +2,26 @@
 
 ## Plan
 
-- [ ] Joining a game
-- [ ] Map
-    - [ ] Uploading background map
-    - [ ] Adjusting grid
-    - [ ] Character setup
-    - [ ] Turn order
+- [x] Joining a game
+- [x] Map
+    - [x] Uploading background map
+    - [x] Adjusting grid
+    - [x] Character setup
+    - [x] Turn order
 
 ## Core feature - MUST HAVE
 
 - [ ] At least one integrated ruleset (e.g. DnD)
 - [ ] Map
-    - [ ] Loading custom map
-    - [ ] Setting map scale
-    - [ ] Setting map field size (resize squares in case of DnD)
+    - [x] Loading custom map
+    - [x] Setting map scale
+    - [x] Setting map field size (resize squares in case of DnD)
 - [ ] Players
-    - [ ] Load charactes to map
-    - [ ] Load their stats
+    - [x] Load charactes to map
+    - [x] Load their stats
 - [ ] Turn automation
-    - [ ] Turn order (hide unseen enemies from turn order)
-    - [ ] Visualize movement range
+    - [x] Turn order (hide unseen enemies from turn order)
+    - [x] Visualize movement range
     - [ ] Visualize ability use (mark area for AoE abilities, highlight targets
             when using spells)
 
