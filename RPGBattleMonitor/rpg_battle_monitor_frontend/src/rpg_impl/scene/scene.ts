@@ -6,6 +6,9 @@ import { turnOrderAtoms } from "../stores/turn_order_store";
 import { DeleteAction } from "@/board_core/interfaces/messagable";
 import { defaultLayers, Layer, Layers } from "@/board_core/layers/layers";
 import { Container } from "pixi.js";
+import { RpgDragHandler } from "../handlers/rpg_drag_handler";
+import { Token } from "@/board_core/token/token";
+import { RpgToken } from "../tokens/rpg_token";
 
 export type RpgSceneOptions = { turnOrder?: TurnOrder } & SceneOptions;
 
@@ -30,6 +33,7 @@ function defaultLayersExt() {
 
 export class RpgScene extends Scene {
     protected _turnOrder: Maybe<TurnOrder>;
+    protected _rpgDragHandler: RpgDragHandler;
 
     public constructor(options: RpgSceneOptions) {
         super({
@@ -38,6 +42,12 @@ export class RpgScene extends Scene {
         });
 
         this._turnOrder = options.turnOrder;
+
+        this._rpgDragHandler = new RpgDragHandler(
+            this,
+            this._selectHandler,
+            this._eventStore,
+        );
     }
 
     public get turnOrder(): Maybe<TurnOrder> {
@@ -73,5 +83,23 @@ export class RpgScene extends Scene {
 
     public get dragLayer(): Layer {
         return this.layers.getLayer("drag");
+    }
+
+    protected override registerHandlersToToken(token: Token): void {
+        if (token instanceof RpgToken) {
+            this._selectHandler.registerSelect(token);
+            this._rpgDragHandler.registerDrag(token);
+        } else {
+            super.unregisterHandlersFromToken(token);
+        }
+    }
+
+    protected override unregisterHandlersFromToken(token: Token): void {
+        if (token instanceof RpgToken) {
+            this._selectHandler.unregisterSelect(token);
+            this._rpgDragHandler.unregisterDrag(token);
+        } else {
+            super.unregisterHandlersFromToken(token);
+        }
     }
 }

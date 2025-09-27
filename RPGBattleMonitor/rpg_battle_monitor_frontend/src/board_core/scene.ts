@@ -300,8 +300,7 @@ export class Scene implements IMessagable<SceneAttributes> {
     }
 
     public addToken(token: Token, layer?: Layer | string): void {
-        this._selectHandler.registerSelect(token);
-        this._dragHandler.registerDrag(token);
+        this.registerHandlersToToken(token);
 
         this._tokens.add(token);
 
@@ -340,8 +339,7 @@ export class Scene implements IMessagable<SceneAttributes> {
 
     public removeToken(token: Token): void {
         this._tokens.remove(token);
-        this._selectHandler.unregisterSelect(token);
-        this._dragHandler.unregisterDrag(token);
+        this.unregisterHandlersFromToken(token);
         this._layers.tokenLayer.removeChild(token);
     }
 
@@ -384,5 +382,15 @@ export class Scene implements IMessagable<SceneAttributes> {
         for (const layer of this._layers.layers) {
             this._viewport.addChild(layer.container);
         }
+    }
+
+    protected registerHandlersToToken(token: Token): void {
+        this._selectHandler.registerSelect(token);
+        this._dragHandler.registerDrag(token);
+    }
+
+    protected unregisterHandlersFromToken(token: Token): void {
+        this._selectHandler.unregisterSelect(token);
+        this._dragHandler.unregisterDrag(token);
     }
 }
