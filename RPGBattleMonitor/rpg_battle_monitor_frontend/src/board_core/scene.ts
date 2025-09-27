@@ -191,9 +191,7 @@ export class Scene implements IMessagable<SceneAttributes> {
 
         this._layers.gridLayer.addChild(this._grid);
 
-        for (const layer of this._layers.layers) {
-            this._viewport.addChild(layer.container);
-        }
+        this.addLayersToStage();
     }
 
     public setActive(): void {
@@ -373,5 +371,11 @@ export class Scene implements IMessagable<SceneAttributes> {
 
     public get layers(): Layers {
         return this._layers;
+    }
+
+    protected addLayersToStage(): void {
+        for (const layer of this._layers.layers) {
+            this._viewport.addChild(layer.container);
+        }
     }
 }

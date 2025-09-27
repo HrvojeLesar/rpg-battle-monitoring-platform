@@ -4,7 +4,7 @@ import { DragHandler } from "@/board_core/handlers/drag_handler";
 import { EventStore } from "@/board_core/handlers/registered_event_store";
 import { SelectHandler } from "@/board_core/handlers/select_handler";
 import { Layer } from "@/board_core/layers/layers";
-import { Container, FederatedPointerEvent, Point } from "pixi.js";
+import { FederatedPointerEvent, Point } from "pixi.js";
 import { Arrow } from "../graphics/arrow";
 import { RpgToken } from "../tokens/rpg_token";
 import { DistanceDisplay } from "../graphics/distance_display";
@@ -25,6 +25,7 @@ export class RpgDragHandler extends DragHandler {
     protected dragLayer: Layer;
     protected distanceDisplays: DistanceDisplay[] = [];
     protected rpgTokenInitialPositions: Map<RpgToken, Point> = new Map();
+    declare protected scene: RpgScene;
 
     public constructor(
         scene: RpgScene,
@@ -33,15 +34,7 @@ export class RpgDragHandler extends DragHandler {
     ) {
         super(scene, selectHandler, eventStore);
 
-        this.dragLayer = this.scene.layers.getLayer({
-            name: "drag",
-            container: new Container({
-                label: "dragLayer",
-                eventMode: "none",
-            }),
-            zIndex: this.scene.layers.layers.length,
-            label: "Drag layer",
-        });
+        this.dragLayer = scene.dragLayer;
     }
 
     protected onGlobalPointerMove(

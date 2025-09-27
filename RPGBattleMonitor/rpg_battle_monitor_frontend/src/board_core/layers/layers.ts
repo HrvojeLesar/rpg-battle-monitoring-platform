@@ -7,7 +7,7 @@ export type Layer = {
     label?: string;
 };
 
-function defaultLayers() {
+export function defaultLayers() {
     let zIndex = 0;
 
     return [
@@ -35,7 +35,7 @@ function defaultLayers() {
             zIndex: zIndex++,
             label: "Token",
         },
-    ] as const;
+    ];
 }
 
 type LayerCollection = Layer[];
@@ -58,9 +58,7 @@ export class Layers {
             }
         }
 
-        this._layers.sort((a, b) => {
-            return a.zIndex - b.zIndex;
-        });
+        this.sortLayers();
     }
 
     protected getLayerFromString(name: string): Layer {
@@ -111,5 +109,11 @@ export class Layers {
 
     public get layers(): Readonly<Layer[]> {
         return [...this._layers];
+    }
+
+    public sortLayers(): void {
+        this._layers.sort((a, b) => {
+            return a.zIndex - b.zIndex;
+        });
     }
 }

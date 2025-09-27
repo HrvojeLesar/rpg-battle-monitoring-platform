@@ -6,14 +6,38 @@ import { turnOrderAtoms } from "../stores/turn_order_store";
 import { DeleteAction } from "@/board_core/interfaces/messagable";
 import { RpgToken } from "../tokens/rpg_token";
 import { OnTurnMarker } from "../graphics/on_turn_marker";
+import { defaultLayers, Layer, Layers } from "@/board_core/layers/layers";
+import { Container } from "pixi.js";
 
 export type RpgSceneOptions = { turnOrder?: TurnOrder } & SceneOptions;
+
+function defaultLayersExt() {
+    const layers = defaultLayers();
+
+    const dragLayer = {
+        name: "drag",
+        container: new Container({
+            label: "dragLayer",
+            eventMode: "none",
+        }),
+        zIndex: 3,
+        label: "Drag layer",
+    };
+
+    const defaultLayersExt = [...layers, dragLayer];
+    defaultLayersExt[2].zIndex = dragLayer.zIndex + 1;
+
+    return defaultLayersExt;
+}
 
 export class RpgScene extends Scene {
     protected _turnOrder: Maybe<TurnOrder>;
 
     public constructor(options: RpgSceneOptions) {
-        super(options);
+        super({
+            layers: new Layers(defaultLayersExt()),
+            ...options,
+        });
 
         this._turnOrder = options.turnOrder;
     }
@@ -70,5 +94,15 @@ export class RpgScene extends Scene {
                 .filter((child) => child instanceof OnTurnMarker)
                 .forEach((child) => child.destroy(true)),
         );
+    }
+
+    protected addLayersToStage(): void {
+        for (const layer of this._layers.layers) {
+            this._viewport.addChild(layer.container);
+        }
+    }
+
+    public get dragLayer(): Layer {
+        return this.layers.getLayer("drag");
     }
 }
