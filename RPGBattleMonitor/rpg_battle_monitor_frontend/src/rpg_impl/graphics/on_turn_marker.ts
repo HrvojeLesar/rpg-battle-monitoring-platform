@@ -67,4 +67,13 @@ export class OnTurnMarker extends Container {
         this.position.y =
             this.amplitude * Math.sin(this.elapsed * this.speed) + this.offset;
     }
+
+    public set visible(value: boolean) {
+        GBoard.app.ticker.remove(this.bobUpAndDown, this);
+        super.visible = value;
+
+        if (value) {
+            GBoard.app.ticker.add(this.bobUpAndDown, this);
+        }
+    }
 }

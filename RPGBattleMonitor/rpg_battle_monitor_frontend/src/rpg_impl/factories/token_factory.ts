@@ -49,7 +49,9 @@ export class RpgTokenFactory {
         if (position !== undefined) {
             const cell = GridCell.getGridCellFromPoint(position, scene.grid);
 
+            // TODO: Fix off by one error
             token.moveToGridCell(cell);
+            token.snapToGrid();
         }
 
         data.tint = token.displayedEntity?.tint;

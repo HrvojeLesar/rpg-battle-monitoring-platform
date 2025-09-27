@@ -282,6 +282,8 @@ export class RpgDragHandler extends DragHandler {
         token: RpgToken,
         updatedItems: IMessagable[],
     ): void {
+        token.clearGhosts();
+
         if (!this.isDirty) {
             return;
         }
@@ -305,7 +307,6 @@ export class RpgDragHandler extends DragHandler {
 
             token.position.set(initialPos.x, initialPos.y);
             token.snapToGrid();
-            token.clearGhosts();
         }
     }
 
