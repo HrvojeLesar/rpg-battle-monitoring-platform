@@ -12,3 +12,7 @@ export enum GameGetRequests {
 export enum GamePostRequests {
     GameCreate = "/game/create",
 }
+
+export enum AssetPostRequests {
+    AssetUpload = "/assets/upload",
+}
