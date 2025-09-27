@@ -6,3 +6,4 @@
 - [ ]  Urls to external assets should contain only path, not the uri
 	- [ ] Uri should be chosen at runtime
 - [ ] Objects are still selectable even when the current layer is not focused
+- [ ] Fix off by one error on grid cell calculations

@@ -51,7 +51,6 @@ export class RpgTokenFactory {
 
             // TODO: Fix off by one error
             token.moveToGridCell(cell);
-            token.snapToGrid();
         }
 
         data.tint = token.displayedEntity?.tint;

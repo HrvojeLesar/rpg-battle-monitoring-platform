@@ -1,7 +1,7 @@
 import { Viewport } from "pixi-viewport";
 import { GBoard } from "./board";
 import { UniqueCollection } from "./utils/unique_collection";
-import { ContainerChild, Graphics, IRenderLayer } from "pixi.js";
+import { ContainerChild, Graphics, IRenderLayer, Point } from "pixi.js";
 import { DragHandler } from "./handlers/drag_handler";
 import { EventStore } from "./handlers/registered_event_store";
 import { SelectHandler } from "./handlers/select_handler";
@@ -22,6 +22,7 @@ import { Layer, Layers } from "./layers/layers";
 import { queueEntityUpdate } from "@/websocket/websocket";
 import { ContainerExtension } from "./extensions/container_extension";
 import { GHandlerRegistry } from "./registry/handler_registry";
+import { GridCell } from "./grid/cell";
 
 export type SceneAttributes = {
     gridUid: string;
@@ -130,9 +131,15 @@ export class Scene implements IMessagable<SceneAttributes> {
         );
 
         if (options.grid === undefined) {
+            const x = WORLD_SIZE / 2 - this._grid.width / 2;
+            const y = WORLD_SIZE / 2 - this._grid.height / 2;
+            const startCell = GridCell.getGridCellFromPoint(
+                new Point(x, y),
+                this._grid,
+            );
             this._grid.position.set(
-                WORLD_SIZE / 2 - this._grid.width / 2,
-                WORLD_SIZE / 2 - this._grid.height / 2,
+                startCell.x * this._grid.cellSize,
+                startCell.y * this._grid.cellSize,
             );
         }
 
