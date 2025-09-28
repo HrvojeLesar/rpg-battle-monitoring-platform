@@ -4,7 +4,7 @@ import { IMessagable } from "../interfaces/messagable";
 export type EventNames = {
     "board-init-started": () => void;
     "board-init-finished": () => void;
-    "board-destoryed": () => void;
+    "board-destroyed": () => void;
 
     "socket-join-started": () => void;
     "socket-join-finished": () => void;

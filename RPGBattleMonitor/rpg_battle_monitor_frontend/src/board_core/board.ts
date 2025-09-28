@@ -239,7 +239,7 @@ export function destroy(
         console.warn(error);
     }
 
-    GEventEmitter.emit("board-destoryed");
+    GEventEmitter.emit("board-destroyed");
 
     destroyEventListeners();
     boardApplication = new Board(GEventEmitter);

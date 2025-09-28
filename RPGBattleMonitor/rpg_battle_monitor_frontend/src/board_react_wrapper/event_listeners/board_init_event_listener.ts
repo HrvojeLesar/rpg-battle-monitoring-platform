@@ -28,7 +28,7 @@ function refreshTokens(entity: IMessagable | IMessagable[]) {
 
 export const initEventListeners = () => {
     GEventEmitter.on("board-init-started", clearScenes);
-    GEventEmitter.on("board-destoryed", clearScenes);
+    GEventEmitter.on("board-destroyed", clearScenes);
     GEventEmitter.on("board-init-finished", refreshScenes);
     GEventEmitter.on("socket-join-finished", joinFinished);
     GEventEmitter.on("entity-added", refreshTokens);
@@ -37,7 +37,7 @@ export const initEventListeners = () => {
 
 export const destroyEventListeners = () => {
     GEventEmitter.off("board-init-started", clearScenes);
-    GEventEmitter.off("board-destoryed", clearScenes);
+    GEventEmitter.off("board-destroyed", clearScenes);
     GEventEmitter.off("board-init-finished", refreshScenes);
     GEventEmitter.off("socket-join-finished", joinFinished);
     GEventEmitter.off("entity-added", refreshTokens);

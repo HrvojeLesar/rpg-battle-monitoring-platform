@@ -113,24 +113,8 @@ export class Websocket {
             this.joined = true;
             this.socket.off("join", join);
             GBoard.entityRegistry.convertQueuedEntities();
+
             GEventEmitter.emit("socket-join-finished");
-
-            GAtomStore.set(sidebarTabAtoms.resetTabs);
-
-            // TODO: Move into external module
-            GAtomStore.set(sidebarTabAtoms.addTab, {
-                value: "Token Data",
-                title: "Token Data",
-                icon: TokenIcon,
-                content: Tokens,
-            });
-
-            GAtomStore.set(sidebarTabAtoms.addTab, {
-                value: "Turn order",
-                title: "Turn order",
-                icon: TokenIcon,
-                content: TurnOrder,
-            });
         };
 
         this.socket.once("join-finished", joinFinished);
