@@ -1,4 +1,7 @@
-import { uploadAsset } from "@/board_react_wrapper/requests/assets";
+import {
+    AssetUploadResponse,
+    uploadAsset,
+} from "@/board_react_wrapper/requests/assets";
 import {
     Button,
     Flex,
@@ -7,8 +10,6 @@ import {
     Loader,
     Progress,
     Text,
-    Transition,
-    Paper,
 } from "@mantine/core";
 import { useFileDialog } from "@mantine/hooks";
 import { useMutation } from "@tanstack/react-query";
@@ -16,8 +17,8 @@ import { AxiosProgressEvent } from "axios";
 import { useCallback, useState } from "react";
 
 export type AssetUploadProps = {
-    onSuccess: () => void;
-    onError: () => void;
+    onSuccess: (response: AssetUploadResponse) => void;
+    onError: (error: Error, variables: File, context: unknown) => void;
 };
 
 export const AssetUpload = (props: AssetUploadProps) => {
@@ -42,11 +43,7 @@ export const AssetUpload = (props: AssetUploadProps) => {
     const file = fileDialog.files?.item(0) ?? undefined;
 
     const uploadAssetMutation = useMutation({
-        mutationFn: () => {
-            if (file === undefined) {
-                return Promise.resolve();
-            }
-
+        mutationFn: (file: File) => {
             return uploadAsset(file, onProgress);
         },
         onSuccess: onSuccess,
@@ -70,7 +67,7 @@ export const AssetUpload = (props: AssetUploadProps) => {
         return (
             <Button
                 onClick={() => {
-                    uploadAssetMutation.mutate();
+                    uploadAssetMutation.mutate(file);
                 }}
                 disabled={
                     uploadAssetMutation.isPending ||
