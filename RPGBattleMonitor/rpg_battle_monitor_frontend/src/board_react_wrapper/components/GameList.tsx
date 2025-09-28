@@ -4,8 +4,6 @@ import { createGame, fetchGames } from "../requests/games";
 import { queryClient } from "../../App";
 import { useNavigate } from "@tanstack/react-router";
 import { BOARD_ROUTE_PATH } from "../routes/board";
-import { useSetAtom } from "jotai";
-import { gameStore } from "../stores/game_store";
 import { Button, Flex } from "@mantine/core";
 
 export const GameList = () => {
@@ -22,8 +20,6 @@ export const GameList = () => {
     });
 
     const navigate = useNavigate({});
-
-    const setGameId = useSetAtom(gameStore.setGameId);
 
     if (gameList.isPending) {
         return <div>Loading...</div>;
@@ -47,8 +43,10 @@ export const GameList = () => {
                             <Button
                                 key={idx}
                                 onClick={() => {
-                                    setGameId(game.id);
-                                    navigate({ to: BOARD_ROUTE_PATH });
+                                    navigate({
+                                        to: BOARD_ROUTE_PATH,
+                                        params: { gameId: String(game.id) },
+                                    });
                                 }}
                             >
                                 {game.name} - {game.id}

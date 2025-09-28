@@ -1,5 +1,7 @@
+import { GameAssets } from "../assets/game_assets";
 import { GBoard, GEventEmitter } from "../board";
 import { EmptyTokenDataConverter } from "../converters/empty_token_data_converter";
+import { GameAssetsConverter } from "../converters/game_assets_converter";
 import { GridConverter } from "../converters/grid_converter";
 import { SceneConverter } from "../converters/scene_converter";
 import { SpriteExtensionConverter } from "../converters/sprite_extension_converter";
@@ -208,6 +210,10 @@ export class EntityRegistry {
         registry.registeredEntityKinds.register(
             Grid.getKindStatic(),
             GridConverter.convert,
+        );
+        registry.registeredEntityKinds.register(
+            GameAssets.getKindStatic(),
+            GameAssetsConverter.convert,
         );
         registry.registeredEntityKinds.register(
             Scene.getKindStatic(),

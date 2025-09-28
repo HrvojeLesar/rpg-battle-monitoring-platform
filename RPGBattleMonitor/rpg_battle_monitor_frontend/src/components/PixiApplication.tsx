@@ -2,8 +2,6 @@ import { Application, ApplicationOptions } from "pixi.js";
 import { RefObject, useEffect, useRef } from "react";
 import { type PixiApplicationProps } from "../types/pixi_application_props";
 import { destroy } from "../board_core/board";
-import { useAtomValue } from "jotai";
-import { gameStore } from "../board_react_wrapper/stores/game_store";
 import { Flex } from "@mantine/core";
 import classes from "../css/board.module.css";
 import { Hud } from "../board_react_wrapper/components/interface/Hud";
@@ -25,8 +23,13 @@ function defaultOptions(
 }
 
 export const PixiApplication = (props: PixiApplicationProps) => {
-    const { canvas, resizeTo, applicationOptions, applicationInitCallback } =
-        props;
+    const {
+        canvas,
+        resizeTo,
+        applicationOptions,
+        applicationInitCallback,
+        gameId,
+    } = props;
 
     console.log("pixi app rendered");
 
@@ -34,8 +37,6 @@ export const PixiApplication = (props: PixiApplicationProps) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(canvas ?? null);
     const initPromiseRef = useRef<Promise<Application | null> | null>(null);
     const canvasRemoved = useRef(false);
-
-    const gameId = useAtomValue(gameStore.getGameId);
 
     useEffect(() => {
         const application = applicationRef.current;

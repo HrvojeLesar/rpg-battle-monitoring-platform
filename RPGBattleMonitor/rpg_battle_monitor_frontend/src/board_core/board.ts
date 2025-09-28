@@ -21,6 +21,7 @@ import {
 } from "@/board_react_wrapper/event_listeners/board_init_event_listener";
 import { GDragAndDropRegistry } from "./registry/drag_and_drop_registry";
 import { initializeRPG } from "@/rpg_impl/init/init";
+import { GameAssets } from "./assets/game_assets";
 
 export type GameBoard = Board;
 
@@ -37,6 +38,8 @@ class Board {
     protected _websocket?: Websocket;
 
     protected _entityRegistry: EntityRegistry;
+
+    protected _gameAssets?: GameAssets;
 
     public constructor(eventEmitter: BoardEventEmitter) {
         this._eventEmitter = eventEmitter;
@@ -140,6 +143,15 @@ class Board {
                 this.app.canvas.height,
             );
         });
+    }
+
+    public get gameAssets(): Maybe<GameAssets> {
+        return this._gameAssets;
+    }
+
+    public set gameAssets(gameAssets: Maybe<GameAssets>) {
+        this._gameAssets = gameAssets;
+        // TODO: refresh asset store
     }
 }
 

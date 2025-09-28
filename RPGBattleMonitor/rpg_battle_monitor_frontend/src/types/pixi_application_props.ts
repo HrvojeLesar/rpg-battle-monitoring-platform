@@ -18,4 +18,5 @@ export type PixiApplicationProps = {
         options?: Partial<ApplicationOptions>,
         socket?: Websocket,
     ) => Promise<Application>;
+    gameId: number;
 };
