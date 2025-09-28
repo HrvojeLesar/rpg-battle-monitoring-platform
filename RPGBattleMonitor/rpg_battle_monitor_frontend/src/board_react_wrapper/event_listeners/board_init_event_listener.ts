@@ -38,7 +38,6 @@ function entityAdded(entity: IMessagable | IMessagable[]) {
 }
 
 export const initEventListeners = () => {
-    console.log("init event listeners");
     GEventEmitter.on("board-init-started", clearScenes);
     GEventEmitter.on("board-destroyed", clearScenes);
     GEventEmitter.on("board-init-finished", refreshScenes);
@@ -48,7 +47,6 @@ export const initEventListeners = () => {
 };
 
 export const destroyEventListeners = () => {
-    console.log("destroy event listeners");
     GEventEmitter.off("board-init-started", clearScenes);
     GEventEmitter.off("board-destroyed", clearScenes);
     GEventEmitter.off("board-init-finished", refreshScenes);

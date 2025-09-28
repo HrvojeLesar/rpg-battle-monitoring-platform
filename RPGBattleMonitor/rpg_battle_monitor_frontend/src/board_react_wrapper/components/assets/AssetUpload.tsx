@@ -21,7 +21,7 @@ export type AssetUploadProps = {
     onError: (error: Error, variables: File, context: unknown) => void;
 };
 
-export const AssetUpload = (props: AssetUploadProps) => {
+export const AssetUpload = (props: Partial<AssetUploadProps>) => {
     const { onSuccess, onError } = props;
 
     const [progress, setProgress] = useState(0);

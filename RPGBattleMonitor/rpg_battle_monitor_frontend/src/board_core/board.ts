@@ -150,8 +150,20 @@ class Board {
     }
 
     public set gameAssets(gameAssets: Maybe<GameAssets>) {
-        this._gameAssets = gameAssets;
-        // TODO: refresh asset store
+        if (this._gameAssets === undefined) {
+            this._gameAssets = gameAssets;
+        }
+    }
+
+    public get assetsRegistry(): GameAssets {
+        const assets = this._gameAssets;
+        if (assets === undefined) {
+            throw new Error(
+                "Failed to get game assets, object is not created or assigned to board",
+            );
+        }
+
+        return assets;
     }
 }
 

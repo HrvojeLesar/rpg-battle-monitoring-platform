@@ -19,6 +19,7 @@ import {
     Tokens,
 } from "@/board_react_wrapper/components/interface/Tokens";
 import { TurnOrder as TurnOrderComponent } from "../components/TurnOrder";
+import { RPGAssetUpload } from "../components/Assets/Upload";
 
 export const initializeRPG = (entityRegistry: EntityRegistry) => {
     registerEntities(entityRegistry);
@@ -67,6 +68,13 @@ const socketJoinFinishedListener = () => {
     // TODO: Next line disallows sidebar tabs from outside this module
     // better solution would be to try to replace tab when adding it if it already exists
     GAtomStore.set(sidebarTabAtoms.resetTabs);
+
+    GAtomStore.set(sidebarTabAtoms.addTab, {
+        value: "Assets",
+        title: "Assets",
+        icon: TokenIcon,
+        content: RPGAssetUpload,
+    });
     GAtomStore.set(sidebarTabAtoms.addTab, {
         value: "Token Data",
         title: "Token Data",

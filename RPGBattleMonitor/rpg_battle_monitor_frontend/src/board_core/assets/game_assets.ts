@@ -1,3 +1,4 @@
+import { AssetUploadResponse } from "@/board_react_wrapper/requests/assets";
 import {
     DeleteAction,
     IMessagable,
@@ -6,15 +7,29 @@ import {
     UId,
 } from "../interfaces/messagable";
 import newUId from "../utils/uuid_generator";
+import { assetsAtoms } from "@/board_react_wrapper/stores/asset_store";
+import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
+import { queueEntityUpdate } from "@/websocket/websocket";
 
-export type GameAssetsAttributes = {};
+export type Asset = AssetUploadResponse;
+
+export type GameAssetsAttributes = {
+    assets: Asset[];
+};
 
 export class GameAssets implements IMessagable<GameAssetsAttributes> {
     private _uid: UId;
     protected _lastChangesTimestamp: Maybe<number> = undefined;
+    protected unsub: () => void;
 
-    public constructor(attributes?: GameAssetsAttributes) {
+    public constructor(_attributes?: GameAssetsAttributes) {
         this._uid = newUId();
+
+        this.unsub = GAtomStore.sub(assetsAtoms.saveChangesFlag, () => {
+            queueEntityUpdate(() => {
+                return this;
+            });
+        });
     }
 
     public static getKindStatic(): string {
@@ -43,15 +58,23 @@ export class GameAssets implements IMessagable<GameAssetsAttributes> {
     }
 
     public getAttributes(): GameAssetsAttributes {
-        return {};
+        return {
+            assets: this.assets,
+        };
     }
 
     public applyUpdateAction(changes: TypedJson<GameAssetsAttributes>): void {
         this._uid = changes.uid;
+
+        GAtomStore.set(assetsAtoms.setAssets, changes.assets);
     }
 
     public deleteAction(action: DeleteAction): void {
         action.acc.push(this);
+
+        action.cleanupCallbacks.push(() => {
+            this.unsub();
+        });
     }
 
     public getLastChangesTimestamp(): Maybe<number> {
@@ -62,5 +85,16 @@ export class GameAssets implements IMessagable<GameAssetsAttributes> {
         changes: TypedJson<GameAssetsAttributes>,
     ): boolean {
         return shouldApplyChanges(this, changes);
+    }
+
+    public add(asset: Asset): void {
+        const existingAsset = this.assets.find((a) => a.url === asset.url);
+        if (!existingAsset) {
+            GAtomStore.set(assetsAtoms.addAsset, asset);
+        }
+    }
+
+    public get assets(): Asset[] {
+        return GAtomStore.get(assetsAtoms.assets);
     }
 }
