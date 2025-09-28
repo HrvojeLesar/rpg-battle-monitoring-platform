@@ -68,7 +68,7 @@ export const RPGAssetUpload = () => {
                                         });
                                     }}
                                 />
-                                <Text>{asset.filename}</Text>
+                                <Text>{asset.originalFilename}</Text>
                                 <DeleteConfirmation
                                     title="Delete asset"
                                     onDelete={() => {

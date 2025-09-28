@@ -16,6 +16,7 @@ pub struct Model {
     pub mime: String,
     pub asset_type: String,
     pub created_at: NaiveDateTime,
+    pub original_filename: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -147,7 +148,14 @@ mod assets_inner {
             };
 
             let asset = self
-                .create_asset(conn, name.clone(), hash, mime, asset_type.into())
+                .create_asset(
+                    conn,
+                    name.clone(),
+                    hash,
+                    mime,
+                    asset_type.into(),
+                    user_given_filename,
+                )
                 .await?;
 
             self.write_file(&name, data).await?;
@@ -163,12 +171,14 @@ mod assets_inner {
             hash: String,
             mime: String,
             asset_type: AssetType,
+            user_given_filename: String,
         ) -> Result<Asset> {
             let asset = ActiveModel {
                 name: Set(name),
                 hash: Set(hash),
                 mime: Set(mime),
                 asset_type: Set(asset_type.to_string()),
+                original_filename: Set(user_given_filename),
                 ..Default::default()
             };
 

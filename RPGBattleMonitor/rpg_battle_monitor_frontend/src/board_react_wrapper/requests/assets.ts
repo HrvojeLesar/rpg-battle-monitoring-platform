@@ -5,6 +5,7 @@ export type AssetUploadResponse = {
     url: string;
     filename: string;
     thumbnails: string[];
+    originalFilename: string;
 };
 
 export const uploadAsset = async (

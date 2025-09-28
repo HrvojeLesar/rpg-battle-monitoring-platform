@@ -28,6 +28,7 @@ pub(crate) use doc::ApiDoc;
 #[derive(Debug, Clone, Serialize, Default)]
 #[cfg_attr(test, derive(serde::Deserialize))]
 #[cfg_attr(feature = "api_doc", derive(ToSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct UploadResponse {
     #[cfg_attr(feature = "api_doc", schema(example = 1))]
     id: i32,
@@ -37,6 +38,8 @@ pub struct UploadResponse {
     filename: String,
     #[cfg_attr(feature = "api_doc", schema(example = json!(["/api/assets/thumbnail-1.png", "/api/assets/thumbnail-2.png"])))]
     thumbnails: Vec<String>,
+    #[cfg_attr(feature = "api_doc", schema(example = "filename.png"))]
+    original_filename: String,
 }
 
 #[derive(Debug, Default)]
@@ -132,6 +135,7 @@ pub async fn upload<F: Adapter>(
             .collect(),
         url: gen_partial_asset_url(&asset.name),
         filename: asset.name,
+        original_filename: asset.original_filename,
     }))
 }
 
