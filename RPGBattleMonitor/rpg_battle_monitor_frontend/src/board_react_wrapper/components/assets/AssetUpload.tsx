@@ -13,7 +13,7 @@ import {
 } from "@mantine/core";
 import { useFileDialog } from "@mantine/hooks";
 import { useMutation } from "@tanstack/react-query";
-import { AxiosProgressEvent } from "axios";
+import { AxiosError, AxiosProgressEvent } from "axios";
 import { useCallback, useState } from "react";
 
 export type AssetUploadProps = {
@@ -69,10 +69,7 @@ export const AssetUpload = (props: Partial<AssetUploadProps>) => {
                 onClick={() => {
                     uploadAssetMutation.mutate(file);
                 }}
-                disabled={
-                    uploadAssetMutation.isPending ||
-                    uploadAssetMutation.isSuccess
-                }
+                disabled={uploadAssetMutation.isPending}
             >
                 Upload
             </Button>
@@ -104,7 +101,25 @@ export const AssetUpload = (props: Partial<AssetUploadProps>) => {
     };
 
     const dialogButton = () => {
-        return <Button onClick={fileDialog.open}>Pick files to upload</Button>;
+        return (
+            <Button onClick={fileDialog.open}>Choose image to upload</Button>
+        );
+    };
+
+    const errorText = () => {
+        if (
+            uploadAssetMutation.isError &&
+            uploadAssetMutation.error instanceof AxiosError
+        ) {
+            return (
+                <Text c="red" fw="bold" style={{ alignSelf: "center" }}>
+                    {uploadAssetMutation.error.response?.statusText ??
+                        uploadAssetMutation.error.message}
+                </Text>
+            );
+        }
+
+        return <></>;
     };
 
     return (
@@ -125,6 +140,7 @@ export const AssetUpload = (props: Partial<AssetUploadProps>) => {
                     {uploadButton()}
                     {progressBar()}
                     {successText()}
+                    {errorText()}
                 </Flex>
             </Flex>
         </>

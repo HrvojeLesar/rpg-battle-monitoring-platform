@@ -32,6 +32,15 @@ const addAsset = atom(null, (_, set, asset: Asset) => {
     });
 });
 
+const removeAsset = atom(null, (_, set, asset: Asset) => {
+    set(assetsAtom, (state) => {
+        state.assets = state.assets.filter((a) => a.url !== asset.url);
+        state.saveChangesFlag = !state.saveChangesFlag;
+
+        return { ...state };
+    });
+});
+
 const setAssets = atom(null, (_, set, assets: Asset[]) => {
     set(assetsAtom, (state) => {
         state.assets = [...assets];
@@ -46,4 +55,5 @@ export const assetsAtoms = {
     addAsset,
     setAssets,
     saveChangesFlag,
+    removeAsset,
 };

@@ -88,7 +88,7 @@ export class GameAssets implements IMessagable<GameAssetsAttributes> {
     }
 
     public add(asset: Asset): void {
-        const existingAsset = this.assets.find((a) => a.url === asset.url);
+        const existingAsset = this.findAsset(asset);
         if (!existingAsset) {
             GAtomStore.set(assetsAtoms.addAsset, asset);
         }
@@ -96,5 +96,20 @@ export class GameAssets implements IMessagable<GameAssetsAttributes> {
 
     public get assets(): Asset[] {
         return GAtomStore.get(assetsAtoms.assets);
+    }
+
+    public remove(asset: Asset): Maybe<Asset> {
+        const existingAsset = this.findAsset(asset);
+        if (existingAsset) {
+            GAtomStore.set(assetsAtoms.removeAsset, asset);
+
+            return existingAsset;
+        }
+
+        return undefined;
+    }
+
+    protected findAsset(asset: Asset): Maybe<Asset> {
+        return this.assets.find((a) => a.url === asset.url);
     }
 }

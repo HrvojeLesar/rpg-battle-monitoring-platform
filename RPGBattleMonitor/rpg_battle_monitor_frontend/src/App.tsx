@@ -6,6 +6,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import { router } from "./board_react_wrapper/routes/root";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "jotai";
+import { ModalsProvider } from "@mantine/modals";
 
 export const queryClient = new QueryClient();
 
@@ -19,7 +20,9 @@ function App() {
             <QueryClientProvider client={queryClient}>
                 <Provider store={GAtomStore}>
                     <MantineProvider defaultColorScheme="auto">
-                        <RouterProvider router={router} />
+                        <ModalsProvider>
+                            <RouterProvider router={router} />
+                        </ModalsProvider>
                     </MantineProvider>
                 </Provider>
             </QueryClientProvider>
