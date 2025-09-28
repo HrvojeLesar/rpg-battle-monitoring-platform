@@ -10,6 +10,8 @@ import newUId from "../utils/uuid_generator";
 import { GAtomStore } from "../../board_react_wrapper/stores/state_store";
 import { Position } from "@/types/position";
 import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
+import { GridCell } from "./cell";
+import { WORLD_SIZE } from "../scene";
 
 export type GridOptions = {
     hover?: boolean;
@@ -67,6 +69,7 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
 
     public set cellSize(cellSize: number) {
         this._cellSize = cellSize;
+        this.fixPosition();
         this.replaceGrid();
     }
 
@@ -77,6 +80,17 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
     public set size(size: GridSize) {
         this._size = size;
         this.replaceGrid();
+    }
+
+    public fixPosition(): void {
+        const x = WORLD_SIZE / 2 - this.width / 2;
+        const y = WORLD_SIZE / 2 - this.height / 2;
+        const startCell = GridCell.getGridCellFromPoint(new Point(x, y), this);
+
+        this.position.set(
+            startCell.x * this._cellSize,
+            startCell.y * this._cellSize,
+        );
     }
 
     private replaceGrid(): void {
