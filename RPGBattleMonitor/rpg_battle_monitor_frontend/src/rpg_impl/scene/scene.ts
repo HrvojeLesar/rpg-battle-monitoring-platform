@@ -90,7 +90,7 @@ export class RpgScene extends Scene {
             this._selectHandler.registerSelect(token);
             this._rpgDragHandler.registerDrag(token);
         } else {
-            super.unregisterHandlersFromToken(token);
+            super.registerHandlersToToken(token);
         }
     }
 

@@ -11,7 +11,7 @@ import { GDragAndDropRegistry } from "@/board_core/registry/drag_and_drop_regist
 import { GBoard, GEventEmitter } from "@/board_core/board";
 import { RpgTokenFactory } from "../factories/token_factory";
 import { Point } from "pixi.js";
-import { RPG_TOKEN_DROP } from "../utils/rpg_token_drop";
+import { RPG_ASSET_DROP, RPG_TOKEN_DROP } from "../utils/rpg_token_drop";
 import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
 import { sidebarTabAtoms } from "@/board_react_wrapper/stores/sidebar_tab_store";
 import {
@@ -20,10 +20,17 @@ import {
 } from "@/board_react_wrapper/components/interface/Tokens";
 import { TurnOrder as TurnOrderComponent } from "../components/TurnOrder";
 import { RPGAssetUpload } from "../components/Assets/Upload";
+import { DecorationToken } from "../tokens/decoration_token";
+import { DecorationTokenConverter } from "../converters/decoration_token_coverter";
+import { DecorationTokenFactory } from "../factories/decoration_token_factory";
+import { DecorationTokenData } from "../tokens/decoration_token_data";
+import { DecorationTokenDataConverter } from "../converters/decoration_token_data_converter";
+import { Asset } from "@/board_core/assets/game_assets";
 
 export const initializeRPG = (entityRegistry: EntityRegistry) => {
     registerEntities(entityRegistry);
     GDragAndDropRegistry.registerHandler(RPG_TOKEN_DROP, dragAndDropHandler);
+    GDragAndDropRegistry.registerHandler(RPG_ASSET_DROP, assetDropHandler);
     // GHandlerRegistry.overrideHandler("drag", RpgDragHandler);
     GEventEmitter.on("socket-join-finished", socketJoinFinishedListener);
     GEventEmitter.once("board-destroyed", () => {
@@ -48,6 +55,14 @@ const registerEntities = (registry: EntityRegistry) => {
         TurnOrder.getKindStatic(),
         TurnOrderConverter.convert,
     );
+    registry.registeredEntityKinds.register(
+        DecorationTokenData.getKindStatic(),
+        DecorationTokenDataConverter.convert,
+    );
+    registry.registeredEntityKinds.register(
+        DecorationToken.getKindStatic(),
+        DecorationTokenConverter.convert,
+    );
 };
 
 const dragAndDropHandler = (event: DragEvent, data: string) => {
@@ -61,6 +76,23 @@ const dragAndDropHandler = (event: DragEvent, data: string) => {
     const scene = GBoard.scene;
     if (scene && tokendata && tokendata instanceof RpgTokenData) {
         RpgTokenFactory.createRandomToken(scene, tokendata, localPoint);
+    }
+};
+
+const assetDropHandler = (event: DragEvent, assetDataJson: string) => {
+    let assetData;
+    try {
+        assetData = JSON.parse(assetDataJson) as Asset;
+    } catch (e) {
+        console.error(e);
+        return;
+    }
+
+    const screenPoint = new Point(event.x, event.y);
+    const localPoint = GBoard.viewport.toLocal(screenPoint);
+    const scene = GBoard.scene;
+    if (scene) {
+        DecorationTokenFactory.create(scene, assetData, localPoint);
     }
 };
 

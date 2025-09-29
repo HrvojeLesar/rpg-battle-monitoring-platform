@@ -60,7 +60,7 @@ export const AssetHoverPreviewDefault = (
             target={target}
             dropdown={dropdown}
             popoverDropdownProps={{
-                style: { pointerEvents: "all" },
+                style: { pointerEvents: "none" },
             }}
         />
     );
