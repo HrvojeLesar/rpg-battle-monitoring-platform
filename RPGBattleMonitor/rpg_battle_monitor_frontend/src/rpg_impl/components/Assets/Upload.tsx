@@ -70,8 +70,10 @@ export const RPGAssetUpload = () => {
                                     target={
                                         <Image
                                             src={getUrl(asset.url)}
-                                            maw="64px"
-                                            mah="64px"
+                                            maw="32px"
+                                            mah="32px"
+                                            miw="32px"
+                                            mih="32px"
                                             style={{ cursor: "pointer" }}
                                             onClick={() => {
                                                 modals.open({

@@ -10,6 +10,8 @@ import { SelectionBox } from "../selection/selection_box";
 import { SelectedMap } from "../utils/selected_map";
 import { SelectionHolderContainer } from "../selection/selection_holder";
 import { GBoard } from "../board";
+import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
+import { selectAtoms } from "@/board_react_wrapper/stores/select_store";
 
 export enum SelectionState {
     None = "None",
@@ -89,6 +91,8 @@ export class SelectHandler {
         if (this.isMultiSelection()) {
             this.drawSelectionOutline();
         }
+
+        GAtomStore.set(selectAtoms.selections);
     }
 
     public deselect(container: ContainerExtension): void {
@@ -97,6 +101,8 @@ export class SelectHandler {
         if (this.isMultiSelection()) {
             this.drawSelectionOutline();
         }
+
+        GAtomStore.set(selectAtoms.selections);
     }
 
     public isSelected(container: ContainerExtension): boolean {
@@ -147,6 +153,7 @@ export class SelectHandler {
         this.setClampHeightTop(false);
         this.setClampHeightBottom(false);
         this._selected.clear();
+        GAtomStore.set(selectAtoms.selections);
     }
 
     public isMultiSelection(): boolean {

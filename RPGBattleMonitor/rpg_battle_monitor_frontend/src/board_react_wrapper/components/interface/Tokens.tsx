@@ -56,6 +56,8 @@ export const Tokens = () => {
                                 draggable="false"
                                 maw="128px"
                                 mah="128px"
+                                miw="32px"
+                                mih="32px"
                                 src={imageUrl}
                             />
                         }

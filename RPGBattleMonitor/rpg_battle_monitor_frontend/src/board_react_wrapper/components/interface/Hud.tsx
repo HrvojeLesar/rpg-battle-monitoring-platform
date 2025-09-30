@@ -13,6 +13,7 @@ import { RpgScene } from "@/rpg_impl/scene/scene";
 import { turnOrderAtoms } from "@/rpg_impl/stores/turn_order_store";
 import { RpgToken } from "@/rpg_impl/tokens/rpg_token";
 import { queueEntityUpdate } from "@/websocket/websocket";
+import { SelectionControls } from "../selection_controls/SelectionControls";
 
 const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
     return (
@@ -236,6 +237,10 @@ const HudLeft = () => {
                 {addTurnOrderButton()}
                 {addSelectionToTurnOrder()}
                 {focusOnSelection()}
+                <SelectionControls>
+                    <SelectionControls.DeleteSelection />
+                    <SelectionControls.ContainerProperties />
+                </SelectionControls>
             </Flex>
         </SidesFlexBox>
     );
