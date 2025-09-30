@@ -62,5 +62,5 @@ GAtomStore.sub(sceneAtoms.getCurrentScene, () => {
 export const turnOrderAtoms = {
     turnOrderAtom,
     currentTurnOrder,
-    // refreshTurnOrder,
+    refreshTurnOrder,
 };
