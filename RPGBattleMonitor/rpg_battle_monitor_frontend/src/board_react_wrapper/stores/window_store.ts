@@ -1,6 +1,11 @@
 import { atom } from "jotai";
 import newUId from "@/board_core/utils/uuid_generator";
 import { Coordinates, UniqueIdentifier } from "@dnd-kit/core/dist/types";
+import { atomWithRefresh } from "jotai/utils";
+import {
+    WINDOW_MIN_HEIGHT,
+    WINDOW_MIN_WIDTH,
+} from "../components/floating_windows/Window";
 
 const ZINDEX_OFFSET = 10;
 
@@ -25,6 +30,13 @@ type WindowEntryInner = {
 export type WindowStoreState = {
     windows: WindowEntryInner[];
 };
+
+const defaultWindowPosition = atomWithRefresh(() => {
+    return {
+        x: window.innerWidth / 2 - WINDOW_MIN_WIDTH,
+        y: window.innerHeight / 2 - WINDOW_MIN_HEIGHT,
+    };
+});
 
 const initialState: WindowStoreState = {
     windows: [],
@@ -100,9 +112,11 @@ const removeWindow = atom(null, (_, set, id: UniqueIdentifier) => {
 
 const addWindow = atom(null, (get, set, window: WindowEntry) => {
     set(windowAtom, (state) => {
+        set(defaultWindowPosition);
+        const defaultPosition = get(defaultWindowPosition);
         const entry: WindowEntryInner = {
             id: newUId(),
-            position: window.position ?? { x: 0, y: 0 },
+            position: window.position ?? defaultPosition,
             zIndex: window.zIndex ?? get(zIndexOffset) + 1,
             ...window,
         };

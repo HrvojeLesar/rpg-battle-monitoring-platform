@@ -39,6 +39,9 @@ export type WindowHeaderProps = {
     onClose?: () => void;
 };
 
+export const WINDOW_MIN_HEIGHT = 120;
+export const WINDOW_MIN_WIDTH = 120;
+
 const WindowHeader = (props: WindowHeaderProps) => {
     const { styles, isDragging, listeners, attributes, title, onClose } = props;
     return (
@@ -111,8 +114,8 @@ export function Window(props: WindowProps) {
                         <IconArrowsDiagonal transform="scale (-1, 1)" />
                     ),
                 }}
-                minHeight={120}
-                minWidth={120}
+                minHeight={WINDOW_MIN_HEIGHT}
+                minWidth={WINDOW_MIN_WIDTH}
                 bounds="window"
                 enable={{
                     top: false,
