@@ -1,13 +1,6 @@
 import { Scene } from "@/board_core/scene";
 import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
-import {
-    Button,
-    Container,
-    Divider,
-    Flex,
-    Input,
-    Fieldset,
-} from "@mantine/core";
+import { Button, Divider, Flex, Input, Fieldset } from "@mantine/core";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { GridSettings } from "../GridSettings";
@@ -51,17 +44,19 @@ export const SceneOptions = (props: SceneOptionsProps) => {
     };
 
     return (
-        <Input.Wrapper label={SCENE_NAME} title={SCENE_NAME}>
-            <Input
-                placeholder={name}
-                value={name}
-                onChange={(e) => {
-                    const name = e.currentTarget.value;
-                    setNameHandler(name);
-                    queueSceneUpdate(scene, name);
-                }}
-            ></Input>
-        </Input.Wrapper>
+        <Fieldset legend="Scene options" style={{ overflow: "auto" }}>
+            <Input.Wrapper label={SCENE_NAME} title={SCENE_NAME}>
+                <Input
+                    placeholder={name}
+                    value={name}
+                    onChange={(e) => {
+                        const name = e.currentTarget.value;
+                        setNameHandler(name);
+                        queueSceneUpdate(scene, name);
+                    }}
+                ></Input>
+            </Input.Wrapper>
+        </Fieldset>
     );
 };
 
@@ -81,60 +76,58 @@ export const SceneSettings = () => {
     }, [selectedScene, scenes]);
 
     return (
-        <Container my="xs">
-            <Flex direction="row" gap="xs" wrap="wrap">
-                <Fieldset legend="Scene">
-                    <Flex direction="column" gap="xs">
-                        <Button
-                            onClick={() => {
-                                createScene({
-                                    name: `test-scene${scenes.length + 1}`,
-                                    sortPositionFunc:
-                                        sceneAtomsUtils.getNextSortPosition,
-                                });
-                            }}
-                        >
-                            New scene
-                        </Button>
-                        {scenes.map((scene) => {
-                            return (
-                                <Flex
-                                    key={scene.getUId()}
-                                    gap="xs"
-                                    align="center"
-                                    justify="space-between"
+        <Flex direction="row" gap="xs" wrap="wrap">
+            <Fieldset legend="Scene">
+                <Flex direction="column" gap="xs">
+                    <Button
+                        onClick={() => {
+                            createScene({
+                                name: `test-scene${scenes.length + 1}`,
+                                sortPositionFunc:
+                                    sceneAtomsUtils.getNextSortPosition,
+                            });
+                        }}
+                    >
+                        New scene
+                    </Button>
+                    {scenes.map((scene) => {
+                        return (
+                            <Flex
+                                key={scene.getUId()}
+                                gap="xs"
+                                align="center"
+                                justify="space-between"
+                            >
+                                <Button
+                                    flex="2"
+                                    title={scene.name}
+                                    onClick={() => {
+                                        changeScene(scene);
+                                        setSelectedScene(scene);
+                                    }}
+                                    variant={
+                                        selectedScene?.getUId() ===
+                                        scene.getUId()
+                                            ? "filled"
+                                            : "outline"
+                                    }
                                 >
-                                    <Button
-                                        flex="2"
-                                        title={scene.name}
-                                        onClick={() => {
-                                            changeScene(scene);
-                                            setSelectedScene(scene);
-                                        }}
-                                        variant={
-                                            selectedScene?.getUId() ===
-                                            scene.getUId()
-                                                ? "filled"
-                                                : "outline"
-                                        }
-                                    >
-                                        {scene.name}
-                                    </Button>
-                                    <DeleteConfirmation
-                                        title="Delete scene"
-                                        onDelete={() => {
-                                            removeScene(scene);
-                                        }}
-                                    />
-                                </Flex>
-                            );
-                        })}
-                    </Flex>
-                </Fieldset>
-                <Divider orientation="vertical" />
-                {selectedScene && <SceneOptions scene={selectedScene} />}
-                {selectedScene && <GridSettings grid={selectedScene?.grid} />}
-            </Flex>
-        </Container>
+                                    {scene.name}
+                                </Button>
+                                <DeleteConfirmation
+                                    title="Delete scene"
+                                    onDelete={() => {
+                                        removeScene(scene);
+                                    }}
+                                />
+                            </Flex>
+                        );
+                    })}
+                </Flex>
+            </Fieldset>
+            <Divider orientation="vertical" />
+            {selectedScene && <SceneOptions scene={selectedScene} />}
+            {selectedScene && <GridSettings grid={selectedScene?.grid} />}
+        </Flex>
     );
 };

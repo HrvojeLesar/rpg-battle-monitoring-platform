@@ -17,6 +17,7 @@ export type GridOptions = {
     hover?: boolean;
     cellSize?: number;
     gridSize?: GridSize;
+    opacity: number;
 };
 
 export type GridSize = {
@@ -29,6 +30,7 @@ export type GridAttributes = {
     _size: GridSize;
     hover: boolean;
     position: Position;
+    opacity: number;
 };
 
 export class Grid extends Container implements IMessagable<GridAttributes> {
@@ -36,6 +38,7 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
     protected hoveredCell: Graphics;
     public hover: boolean = true;
     protected _lastChangesTimestamp: Maybe<number> = undefined;
+    protected _opacity: number;
 
     protected _cellSize: number = 200;
     protected _size: GridSize = {
@@ -52,6 +55,8 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
         this.hover = options?.hover ?? this.hover;
         this._cellSize = options?.cellSize ?? this._cellSize;
         this._size = options?.gridSize ?? this._size;
+        this._opacity = options?.opacity ?? 1;
+        this.alpha = this._opacity;
 
         this.gridSprite = new DrawnGrid(this._cellSize, this._size);
         this.interactive = true;
@@ -190,6 +195,7 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
                 x: this.position.x,
                 y: this.position.y,
             },
+            opacity: this.opacity,
         };
     }
 
@@ -200,6 +206,7 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
         this.hover = changes.hover;
         this.position.x = changes.position.x;
         this.position.y = changes.position.y;
+        this.opacity = changes.opacity;
 
         GAtomStore.set(sceneAtoms.refreshScenes);
     }
@@ -222,6 +229,15 @@ export class Grid extends Container implements IMessagable<GridAttributes> {
 
     public shouldApplyChanges(changes: TypedJson<GridAttributes>): boolean {
         return shouldApplyChanges(this, changes);
+    }
+
+    public get opacity(): number {
+        return this._opacity;
+    }
+
+    public set opacity(opacity: number) {
+        this._opacity = opacity;
+        this.alpha = opacity;
     }
 }
 

@@ -7,6 +7,7 @@ import {
     Text,
     Grid as MantineGrid,
     Flex,
+    Fieldset,
 } from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
 
@@ -21,12 +22,15 @@ type SliderProps = {
     min?: number;
     max?: number;
     label?: string;
+    step?: number;
+    allowDecimal?: boolean;
 };
 
 export const GridSettingSlider = (props: SliderProps) => {
-    const { inputValue, setInputValue, min, max, label } = {
+    const { inputValue, setInputValue, min, max, label, step, allowDecimal } = {
         min: 1,
         max: 100,
+        allowDecimal: false,
         ...props,
     };
 
@@ -41,11 +45,12 @@ export const GridSettingSlider = (props: SliderProps) => {
                     max={max}
                     onChange={setInputValue}
                     value={typeof inputValue === "number" ? inputValue : 0}
+                    step={step}
                 />
             </MantineGrid.Col>
             <MantineGrid.Col span={4}>
                 <NumberInput
-                    allowDecimal={false}
+                    allowDecimal={allowDecimal}
                     allowNegative={false}
                     min={min}
                     max={max}
@@ -71,11 +76,13 @@ export const GridSettings = (props: Props) => {
     const { grid } = props;
     const [cellSize, setCellSize] = useState(grid.cellSize);
     const [gridSize, setGridSize] = useState(grid.size);
+    const [opacity, setOpacity] = useState(grid.opacity);
 
     useEffect(() => {
         setCellSize(grid.cellSize);
         setGridSize(grid.size);
-    }, [grid.cellSize, grid.size]);
+        setOpacity(grid.opacity);
+    }, [grid.cellSize, grid.size, grid.opacity]);
 
     const queueGridUpdate = useDebouncedCallback((grid: Grid) => {
         queueEntityUpdate(() => {
@@ -104,46 +111,64 @@ export const GridSettings = (props: Props) => {
         queueGridUpdate(grid);
     };
 
+    const setGridOpacityHandler = (opacity: number) => {
+        setOpacity(opacity);
+        grid.opacity = opacity;
+
+        queueGridUpdate(grid);
+    };
+
     return (
-        <Flex direction="column">
-            <GridSettingSlider
-                label="Cell size in pixels"
-                inputValue={cellSize}
-                setInputValue={setCellSizeHandler}
-                max={500}
-            />
-            <GridSettingSlider
-                label="Horizontal cell number"
-                inputValue={Math.round(gridSize.width / cellSize)}
-                setInputValue={(value) => {
-                    setGridSizeHandler(value * cellSize, GridSide.Width);
-                }}
-                max={250}
-            />
-            <GridSettingSlider
-                label="Vertical cell number"
-                inputValue={Math.round(gridSize.height / cellSize)}
-                setInputValue={(value) => {
-                    setGridSizeHandler(value * cellSize, GridSide.Height);
-                }}
-                max={250}
-            />
-            <GridSettingSlider
-                label="Width"
-                inputValue={gridSize.width}
-                setInputValue={(value) => {
-                    setGridSizeHandler(value, GridSide.Width);
-                }}
-                max={10000}
-            />
-            <GridSettingSlider
-                label="Height"
-                inputValue={gridSize.height}
-                setInputValue={(value) => {
-                    setGridSizeHandler(value, GridSide.Height);
-                }}
-                max={10000}
-            />
-        </Flex>
+        <Fieldset legend="Grid settings">
+            <Flex direction="column">
+                <GridSettingSlider
+                    label="Cell size in pixels"
+                    inputValue={cellSize}
+                    setInputValue={setCellSizeHandler}
+                    max={500}
+                />
+                <GridSettingSlider
+                    label="Horizontal cell number"
+                    inputValue={Math.round(gridSize.width / cellSize)}
+                    setInputValue={(value) => {
+                        setGridSizeHandler(value * cellSize, GridSide.Width);
+                    }}
+                    max={250}
+                />
+                <GridSettingSlider
+                    label="Vertical cell number"
+                    inputValue={Math.round(gridSize.height / cellSize)}
+                    setInputValue={(value) => {
+                        setGridSizeHandler(value * cellSize, GridSide.Height);
+                    }}
+                    max={250}
+                />
+                <GridSettingSlider
+                    label="Width"
+                    inputValue={gridSize.width}
+                    setInputValue={(value) => {
+                        setGridSizeHandler(value, GridSide.Width);
+                    }}
+                    max={10000}
+                />
+                <GridSettingSlider
+                    label="Height"
+                    inputValue={gridSize.height}
+                    setInputValue={(value) => {
+                        setGridSizeHandler(value, GridSide.Height);
+                    }}
+                    max={10000}
+                />
+                <GridSettingSlider
+                    label="Opacity"
+                    inputValue={opacity}
+                    setInputValue={setGridOpacityHandler}
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    allowDecimal
+                />
+            </Flex>
+        </Fieldset>
     );
 };
