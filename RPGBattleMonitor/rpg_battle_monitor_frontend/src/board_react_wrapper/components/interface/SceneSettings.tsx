@@ -1,6 +1,6 @@
 import { Scene } from "@/board_core/scene";
 import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
-import { Button, Divider, Flex, Input, Fieldset } from "@mantine/core";
+import { Button, Divider, Flex, Fieldset, TextInput } from "@mantine/core";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { GridSettings } from "../GridSettings";
@@ -23,7 +23,7 @@ export const SceneOptions = (props: SceneOptionsProps) => {
 
     useEffect(() => {
         setName(scene.name);
-    }, [scene]);
+    }, [scene.name]);
 
     const queueSceneUpdate = useDebouncedCallback(
         (scene: Scene, name: string) => {
@@ -45,17 +45,17 @@ export const SceneOptions = (props: SceneOptionsProps) => {
 
     return (
         <Fieldset legend="Scene options" style={{ overflow: "auto" }}>
-            <Input.Wrapper label={SCENE_NAME} title={SCENE_NAME}>
-                <Input
-                    placeholder={name}
-                    value={name}
-                    onChange={(e) => {
-                        const name = e.currentTarget.value;
-                        setNameHandler(name);
-                        queueSceneUpdate(scene, name);
-                    }}
-                ></Input>
-            </Input.Wrapper>
+            <TextInput
+                label={SCENE_NAME}
+                title={SCENE_NAME}
+                placeholder="Input scene name..."
+                value={name}
+                onChange={(e) => {
+                    const name = e.currentTarget.value;
+                    setNameHandler(name);
+                    queueSceneUpdate(scene, name);
+                }}
+            />
         </Fieldset>
     );
 };

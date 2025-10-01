@@ -69,3 +69,20 @@ export function getEmptySpeed(): Speed {
         climb: 0,
     };
 }
+
+export const sizeMap = [
+    { value: "tiny", label: "Tiny" },
+    { value: "small", label: "Small" },
+    { value: "medium", label: "Medium" },
+    { value: "large", label: "Large" },
+    { value: "huge", label: "Huge" },
+    { value: "gargantuan", label: "Gargantuan" },
+];
+
+export function isValidSize(size: Option<string>): boolean {
+    if (size === null || size === undefined) {
+        return false;
+    }
+
+    return sizeMap.map((s) => s.value).includes(size);
+}

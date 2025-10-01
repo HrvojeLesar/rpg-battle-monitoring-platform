@@ -26,6 +26,10 @@ import { DecorationTokenFactory } from "../factories/decoration_token_factory";
 import { DecorationTokenData } from "../tokens/decoration_token_data";
 import { DecorationTokenDataConverter } from "../converters/decoration_token_data_converter";
 import { Asset } from "@/board_core/assets/game_assets";
+import { GTokenWindowRegistry } from "../registry/token_window_registry";
+import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
+import { openDecorationTokenWindow } from "../components/windows/DecorationTokenWindow";
+import { openRpgTokenWindow } from "../components/windows/RpgTokenWindow";
 
 export const initializeRPG = (entityRegistry: EntityRegistry) => {
     registerEntities(entityRegistry);
@@ -36,6 +40,21 @@ export const initializeRPG = (entityRegistry: EntityRegistry) => {
     GEventEmitter.once("board-destroyed", () => {
         GEventEmitter.off("socket-join-finished", socketJoinFinishedListener);
     });
+
+    GTokenWindowRegistry.registerHandler((token) => {
+        if (token instanceof DecorationTokenData) {
+            GAtomStore.set(
+                windowAtoms.openWindow,
+                openDecorationTokenWindow(token),
+            );
+        }
+    }, DecorationTokenData);
+
+    GTokenWindowRegistry.registerHandler((token) => {
+        if (token instanceof RpgTokenData) {
+            GAtomStore.set(windowAtoms.openWindow, openRpgTokenWindow(token));
+        }
+    }, RpgTokenData);
 };
 
 const registerEntities = (registry: EntityRegistry) => {
@@ -102,16 +121,17 @@ const socketJoinFinishedListener = () => {
     GAtomStore.set(sidebarTabAtoms.resetTabs);
 
     GAtomStore.set(sidebarTabAtoms.addTab, {
-        value: "Assets",
-        title: "Assets",
-        icon: TokenIcon,
-        content: RPGAssetUpload,
-    });
-    GAtomStore.set(sidebarTabAtoms.addTab, {
         value: "Token Data",
         title: "Token Data",
         icon: TokenIcon,
         content: Tokens,
+    });
+
+    GAtomStore.set(sidebarTabAtoms.addTab, {
+        value: "Assets",
+        title: "Assets",
+        icon: TokenIcon,
+        content: RPGAssetUpload,
     });
 
     GAtomStore.set(sidebarTabAtoms.addTab, {

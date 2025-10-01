@@ -279,6 +279,7 @@ function initWebsocketListeners() {
                     );
                     if (entity && entity.shouldApplyChanges(data)) {
                         entity.applyUpdateAction(data);
+                        GEventEmitter.emit("entity-updated", entity);
                     }
                 });
                 break;

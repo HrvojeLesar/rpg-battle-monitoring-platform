@@ -63,3 +63,80 @@ export type Skills = {
 };
 
 export type PassiveWisdom = number;
+
+export function getEmptySkills(): Skills {
+    return {
+        [SkillType.Athletics]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.Acrobatics]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.SleightOfHand]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.Stealth]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.Arcana]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.History]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.Investigation]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.Nature]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.Religion]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.AnimalHandling]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.Insight]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.Medicine]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.Perception]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.Survival]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.Deception]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.Intimidation]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.Performance]: {
+            score: 0,
+            proficient: false,
+        },
+        [SkillType.Persuasion]: {
+            score: 0,
+            proficient: false,
+        },
+    };
+}

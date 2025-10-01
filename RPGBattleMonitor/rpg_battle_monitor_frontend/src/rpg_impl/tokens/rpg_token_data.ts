@@ -1,4 +1,4 @@
-import { TypedJson } from "@/board_core/interfaces/messagable";
+import { DeleteAction, TypedJson } from "@/board_core/interfaces/messagable";
 import {
     TokenDataBase,
     TokenDataBaseAttributes,
@@ -12,7 +12,11 @@ import {
     getEmptySavingThrows,
     SavingThrows,
 } from "../characters_stats/saving_throws";
-import { PassiveWisdom } from "../characters_stats/skills";
+import {
+    getEmptySkills,
+    PassiveWisdom,
+    Skills,
+} from "../characters_stats/skills";
 import {
     ArmorClass,
     DeathSaves,
@@ -28,8 +32,12 @@ import {
 import { CharacterClass } from "../characters_stats/class";
 import { Race } from "../characters_stats/race";
 import { Background } from "../characters_stats/backgrounds";
-import { Alignment } from "@floating-ui/react";
 import { Equipment, getEmptyEquipment } from "../characters_stats/equipment";
+import { Alignment } from "../characters_stats/alignment";
+import { Experience, getEmptyExperience } from "../characters_stats/experience";
+import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
+import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
+import { getRpgTokenWindowName } from "../components/windows/RpgTokenWindow";
 
 export type RpgTokenAttributes = {
     tint: Maybe<number>;
@@ -39,7 +47,7 @@ export type RpgTokenAttributes = {
     playerName: Maybe<string>;
     race: Maybe<Race>;
     alignment: Maybe<Alignment>;
-    experience: number;
+    experience: Experience;
     equipment: Equipment;
     abilityScore: AbilityScores;
     inspirationModifier: inspirationModifier;
@@ -52,6 +60,7 @@ export type RpgTokenAttributes = {
     hitDice: HitDice;
     deathSaves: DeathSaves;
     size: Size;
+    skills: Skills;
 } & TokenDataBaseAttributes;
 
 export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
@@ -62,7 +71,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
     public playerName: Maybe<string>;
     public race: Maybe<Race>;
     public alignment: Maybe<Alignment>;
-    public experience: number;
+    public experience: Experience;
 
     public equipment: Equipment;
     public abilityScore: AbilityScores;
@@ -77,6 +86,8 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
     public deathSaves: DeathSaves;
 
     public size: Size;
+
+    public skills: Skills;
 
     public tint: Maybe<number> = undefined;
 
@@ -99,7 +110,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
         this.playerName = options?.playerName;
         this.race = options?.race;
         this.alignment = options?.alignment;
-        this.experience = options?.experience ?? 0;
+        this.experience = options?.experience ?? getEmptyExperience();
         this.equipment = options?.equipment ?? getEmptyEquipment();
         this.abilityScore = options?.abilityScore ?? getEmptyAbilityScores();
         this.inspirationModifier = options?.inspirationModifier ?? 0;
@@ -112,6 +123,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
         this.hitDice = options?.hitDice ?? 0;
         this.deathSaves = options?.deathSaves ?? getEmptyDeahtSaves();
         this.size = options?.size ?? "medium";
+        this.skills = options?.skills ?? getEmptySkills();
     }
 
     public getAttributes(): RpgTokenAttributes {
@@ -137,6 +149,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
             hitDice: this.hitDice,
             deathSaves: this.deathSaves,
             size: this.size,
+            skills: this.skills,
         };
     }
 
@@ -161,7 +174,19 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
         this.hitDice = changes.hitDice;
         this.deathSaves = changes.deathSaves;
         this.size = changes.size;
+        this.skills = changes.skills;
 
         super.applyUpdateAction(changes);
+    }
+
+    public deleteAction(action: DeleteAction): void {
+        super.deleteAction(action);
+
+        action.cleanupCallbacks.push(() => {
+            GAtomStore.set(
+                windowAtoms.closeWindow,
+                getRpgTokenWindowName(this),
+            );
+        });
     }
 }

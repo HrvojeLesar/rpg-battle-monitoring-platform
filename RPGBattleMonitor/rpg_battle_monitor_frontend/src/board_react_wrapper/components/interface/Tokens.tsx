@@ -1,5 +1,5 @@
 import { tokenAtoms } from "@/board_react_wrapper/stores/token_store";
-import { Fieldset, Flex, Image, Paper } from "@mantine/core";
+import { Fieldset, Flex, Image, Paper, Text } from "@mantine/core";
 import { IconToiletPaper } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { DeleteConfirmation } from "../utils/DeleteConfirmation";
@@ -13,6 +13,7 @@ import {
 import { DecorationTokenData } from "@/rpg_impl/tokens/decoration_token_data";
 import { AssetHoverPreviewDefault } from "../assets/AssetHoverPreview";
 import { TokenDataBase } from "@/board_core/token/token_data";
+import { GTokenWindowRegistry } from "@/rpg_impl/registry/token_window_registry";
 
 const defaultImageUrl = getUrl("/public/rpg/default.jpeg");
 
@@ -140,6 +141,10 @@ const RpgTokensFieldset = (props: RpgTokensFieldsetProps) => {
                         token.getUId(),
                     );
                 }}
+                style={{ cursor: "pointer" }}
+                onClick={() => {
+                    GTokenWindowRegistry.handle(token);
+                }}
             >
                 <AssetHoverPreviewDefault
                     target={
@@ -154,7 +159,9 @@ const RpgTokensFieldset = (props: RpgTokensFieldsetProps) => {
                     }
                     dropdown={<Image mah="256px" maw="256px" src={imageUrl} />}
                 />
-                <Paper>{`${token.name} - ${token.getUId()}`}</Paper>
+                <Paper>
+                    <Text>{`${token.name}`}</Text>
+                </Paper>
                 <DeleteConfirmation
                     title="Delete token"
                     onDelete={() => {

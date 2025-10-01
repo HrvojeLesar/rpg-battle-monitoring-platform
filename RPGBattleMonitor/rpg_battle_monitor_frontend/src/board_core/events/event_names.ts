@@ -14,6 +14,7 @@ export type EventNames = {
 
     "entity-added": (entity: IMessagable) => void;
     "entity-removed": (entity: IMessagable | IMessagable[]) => void;
+    "entity-updated": (entity: IMessagable) => void;
 };
 
 export type EventEmitterTypes = {
