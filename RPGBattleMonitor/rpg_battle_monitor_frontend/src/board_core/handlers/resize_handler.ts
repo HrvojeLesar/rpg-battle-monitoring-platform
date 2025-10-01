@@ -110,6 +110,10 @@ export class ResizeHandler {
         this: OnGlobalPointerMove,
         event: FederatedPointerEvent,
     ) {
+        // TODO: Add interrupts when changes occur while dragging
+        if (this.container.destroyed) {
+            return;
+        }
         const localPos = event.getLocalPosition(GBoard.viewport);
         this.container.resize(
             localPos,

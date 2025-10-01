@@ -145,6 +145,20 @@ const openWindow = atom(
     },
 );
 
+const closeWindow = atom(
+    null,
+    (get, set, id: UniqueIdentifier | WindowName) => {
+        const existingWindows = get(windows);
+        const window = existingWindows.find(
+            (w) => w.id === id || w.name === id,
+        );
+
+        if (window) {
+            set(removeWindow, window.id);
+        }
+    },
+);
+
 export const windowAtoms = {
     windowAtom,
     windows,
@@ -152,4 +166,5 @@ export const windowAtoms = {
     updateWindowZIndex,
     removeWindow,
     openWindow,
+    closeWindow,
 };

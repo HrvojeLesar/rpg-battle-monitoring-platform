@@ -1,6 +1,7 @@
 import {
     Container,
     ContainerOptions,
+    DestroyOptions,
     EventEmitter,
     EventMode,
     ObservablePoint,
@@ -520,5 +521,11 @@ export abstract class ContainerExtension<
 
     public shouldApplyChanges(changes: TypedJson<Attributes>): boolean {
         return shouldApplyChanges(this, changes);
+    }
+
+    public destroy(options?: DestroyOptions): void {
+        this.clearGhosts();
+
+        super.destroy(options);
     }
 }

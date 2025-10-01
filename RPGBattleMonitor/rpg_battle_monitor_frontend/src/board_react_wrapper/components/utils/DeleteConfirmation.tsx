@@ -20,7 +20,10 @@ export const DeleteConfirmation = (props: DeleteConfirmationProps) => {
             <Popover.Target>
                 {target ?? (
                     <ActionIcon
-                        onClick={() => setOpened((o) => !o)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setOpened((o) => !o);
+                        }}
                         variant="outline"
                         color="red"
                         title={title}
@@ -35,7 +38,8 @@ export const DeleteConfirmation = (props: DeleteConfirmationProps) => {
                     <Button
                         size="xs"
                         color="red"
-                        onClick={() => {
+                        onClick={(e) => {
+                            e.stopPropagation();
                             onDelete();
                             setOpened(false);
                         }}

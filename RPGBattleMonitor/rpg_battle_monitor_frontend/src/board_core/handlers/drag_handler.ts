@@ -38,6 +38,11 @@ export class DragHandler {
         container: ContainerExtension,
         event: FederatedPointerEvent,
     ) {
+        // TODO: Add interrupts when changes occur while dragging
+        if (container.destroyed) {
+            return;
+        }
+
         const localPos = event.getLocalPosition(this.scene.viewport);
         const newEntityPosition = new Point(
             localPos.x - offset.x,
