@@ -1,0 +1,19 @@
+.asset-selection {
+    border-radius: 5px;
+    transition: all 0.2s ease-in-out;
+}
+[data-mantine-color-scheme="light"] .asset-selection {
+    border: 2px solid var(--mantine-color-gray-3);
+}
+
+[data-mantine-color-scheme="dark"] .asset-selection {
+    border: 2px solid var(--mantine-color-gray-8);
+}
+
+[data-mantine-color-scheme="light"] .asset-selection:hover {
+    border: 2px solid var(--mantine-color-gray-1);
+}
+
+[data-mantine-color-scheme="dark"] .asset-selection:hover {
+    border: 2px solid var(--mantine-color-gray-2);
+}

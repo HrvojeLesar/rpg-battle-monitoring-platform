@@ -1,5 +1,6 @@
 import {
     Box,
+    FloatingPosition,
     Popover,
     PopoverDropdownProps,
     PopoverProps,
@@ -44,17 +45,18 @@ export const AssetHoverPreview = (props: AssetHoverPreviewProps) => {
 export type AssetHoverPreviewDefaultProps = {
     target: ReactNode;
     dropdown: ReactNode;
+    position?: FloatingPosition;
 };
 
 export const AssetHoverPreviewDefault = (
     props: AssetHoverPreviewDefaultProps,
 ) => {
-    const { target, dropdown } = props;
+    const { target, dropdown, position } = props;
 
     return (
         <AssetHoverPreview
             popoverProps={{
-                position: "left",
+                position: position ?? "left",
                 withArrow: true,
             }}
             target={target}

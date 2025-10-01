@@ -73,6 +73,9 @@ const DecorationTokensFieldset = (props: DecorationTokensFieldsetProps) => {
                         JSON.stringify(token.asset),
                     );
                 }}
+                onClick={() => {
+                    GTokenWindowRegistry.openWindow(token);
+                }}
             >
                 <AssetHoverPreviewDefault
                     target={
@@ -143,7 +146,7 @@ const RpgTokensFieldset = (props: RpgTokensFieldsetProps) => {
                 }}
                 style={{ cursor: "pointer" }}
                 onClick={() => {
-                    GTokenWindowRegistry.handle(token);
+                    GTokenWindowRegistry.openWindow(token);
                 }}
             >
                 <AssetHoverPreviewDefault

@@ -33,8 +33,8 @@ export type WindowStoreState = {
 
 const defaultWindowPosition = atomWithRefresh(() => {
     return {
-        x: window.innerWidth / 2 - WINDOW_MIN_WIDTH,
-        y: window.innerHeight / 2 - WINDOW_MIN_HEIGHT,
+        x: window.innerWidth / 2 - WINDOW_MIN_WIDTH * 2,
+        y: window.innerHeight / 2 - WINDOW_MIN_HEIGHT * 2,
     };
 });
 

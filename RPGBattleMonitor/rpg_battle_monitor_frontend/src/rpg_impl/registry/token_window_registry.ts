@@ -19,7 +19,7 @@ class TokenWindowRegistry {
         this.handlers.push({ handler, tokenClass });
     }
 
-    public handle(token: TokenDataBase | Token) {
+    public openWindow(token: TokenDataBase | Token) {
         this.handlers.forEach(({ handler, tokenClass }) => {
             if (token instanceof tokenClass) {
                 handler(token);
