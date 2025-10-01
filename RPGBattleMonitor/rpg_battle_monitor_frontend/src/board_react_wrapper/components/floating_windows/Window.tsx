@@ -12,7 +12,14 @@ import {
 } from "@dnd-kit/core";
 import { ReactNode, useEffect } from "react";
 import { Resizable } from "re-resizable";
-import { CloseButton, Divider, Flex, Paper, Title } from "@mantine/core";
+import {
+    CloseButton,
+    Divider,
+    Flex,
+    Paper,
+    ScrollArea,
+    Title,
+} from "@mantine/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import { IconArrowsDiagonal } from "@tabler/icons-react";
 import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
@@ -116,6 +123,8 @@ export function Window(props: WindowProps) {
                 }}
                 minHeight={WINDOW_MIN_HEIGHT}
                 minWidth={WINDOW_MIN_WIDTH}
+                maxHeight="calc(100vh - (var(--mantine-spacing-md) * 8))"
+                maxWidth="calc(100vw - (var(--mantine-spacing-md) * 8))"
                 bounds="window"
                 enable={{
                     top: false,
@@ -128,7 +137,7 @@ export function Window(props: WindowProps) {
                     topLeft: false,
                 }}
             >
-                <Flex direction="column" p="xs" gap="xs">
+                <Flex direction="column" p="xs" gap="xs" maw="100%" mah="100%">
                     <WindowHeader
                         styles={styles}
                         isDragging={isDragging}
@@ -140,7 +149,17 @@ export function Window(props: WindowProps) {
                         }}
                     />
                     <Divider />
-                    {children}
+                    <div
+                        style={{
+                            overflow: "auto",
+                            maxHeight:
+                                "calc(100vh - (var(--mantine-spacing-md) * 8))",
+                            maxWidth:
+                                "calc(100vw - (var(--mantine-spacing-md) * 8))",
+                        }}
+                    >
+                        {children}
+                    </div>
                 </Flex>
             </Resizable>
         </Paper>
