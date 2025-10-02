@@ -2,7 +2,7 @@ import { Asset } from "@/board_core/assets/game_assets";
 import { AssetHoverPreviewDefault } from "@/board_react_wrapper/components/assets/AssetHoverPreview";
 import { assetsAtoms } from "@/board_react_wrapper/stores/asset_store";
 import { getUrl } from "@/board_react_wrapper/utils/utils";
-import { Image, Flex, Text } from "@mantine/core";
+import { Image, Stack, Text, Group } from "@mantine/core";
 import { useAtomValue } from "jotai";
 import classes from "../../css/AssetPicker.module.css";
 
@@ -19,16 +19,20 @@ export const AssetPicker = (props: AssetPickerProps) => {
     );
 
     return (
-        <Flex direction="row" gap="xs" wrap="wrap">
+        <Group grow wrap="wrap" justify="center">
             {assets.map((asset, idx) => {
                 const imageUrl = getUrl(asset.url);
                 return (
-                    <Flex
+                    <Stack
                         key={idx}
-                        direction={"column"}
                         style={{ cursor: "pointer" }}
                         className={classes["asset-selection"]}
                         onClick={() => onSelect(asset)}
+                        p="xs"
+                        align="center"
+                        justify="center"
+                        miw="256px"
+                        mih="256px"
                     >
                         <AssetHoverPreviewDefault
                             position="top"
@@ -43,13 +47,13 @@ export const AssetPicker = (props: AssetPickerProps) => {
                                 />
                             }
                             dropdown={
-                                <Image mah="256px" maw="256px" src={imageUrl} />
+                                <Image mah="512px" maw="512px" src={imageUrl} />
                             }
                         />
                         <Text fw="bold">{asset.originalFilename}</Text>
-                    </Flex>
+                    </Stack>
                 );
             })}
-        </Flex>
+        </Group>
     );
 };

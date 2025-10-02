@@ -1,9 +1,12 @@
 import { Asset } from "@/board_core/assets/game_assets";
-import { TypedJson } from "@/board_core/interfaces/messagable";
+import { DeleteAction, TypedJson } from "@/board_core/interfaces/messagable";
 import {
     TokenDataBase,
     TokenDataBaseAttributes,
 } from "@/board_core/token/token_data";
+import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
+import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
+import { getDecorationTokenWindowName } from "../components/windows/DecorationTokenWindow";
 
 export type DecorationTokenDataAttributes = {
     asset?: Asset;
@@ -38,10 +41,21 @@ export class DecorationTokenData extends TokenDataBase<DecorationTokenDataAttrib
 
     public set asset(asset: Asset) {
         this._asset = asset;
-        this._image = asset.url;
+        this.image = asset.url;
     }
 
     public get asset(): Maybe<Asset> {
         return this._asset;
+    }
+
+    public deleteAction(action: DeleteAction): void {
+        super.deleteAction(action);
+
+        action.cleanupCallbacks.push(() => {
+            GAtomStore.set(
+                windowAtoms.closeWindow,
+                getDecorationTokenWindowName(this),
+            );
+        });
     }
 }

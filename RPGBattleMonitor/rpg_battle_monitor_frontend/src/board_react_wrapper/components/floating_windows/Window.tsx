@@ -124,7 +124,7 @@ export function Window(props: WindowProps) {
                 minHeight={WINDOW_MIN_HEIGHT}
                 minWidth={WINDOW_MIN_WIDTH}
                 maxHeight="calc(100vh - (var(--mantine-spacing-md) * 8))"
-                maxWidth="calc(100vw - (var(--mantine-spacing-md) * 8))"
+                maxWidth="calc(100vw - (var(--mantine-spacing-md) * 16))"
                 bounds="window"
                 enable={{
                     top: false,

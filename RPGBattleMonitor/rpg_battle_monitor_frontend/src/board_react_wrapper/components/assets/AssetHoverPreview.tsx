@@ -29,7 +29,7 @@ export const AssetHoverPreview = (props: AssetHoverPreviewProps) => {
     const [opened, { close, open }] = useDisclosure(false);
 
     return (
-        <Popover opened={opened} {...popoverProps}>
+        <Popover opened={opened} middlewares={{ size: true }} {...popoverProps}>
             <Popover.Target {...popoverTargetProps}>
                 <Box onMouseEnter={open} onMouseLeave={close}>
                     {target}

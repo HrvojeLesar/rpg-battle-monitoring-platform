@@ -106,6 +106,8 @@ export abstract class TokenDataBase<
         tokens.forEach((token) => {
             token.setTexture();
         });
+
+        GAtomStore.set(tokenAtoms.refreshTokens);
     }
 
     public getAssoicatedTokens(): Token[] {

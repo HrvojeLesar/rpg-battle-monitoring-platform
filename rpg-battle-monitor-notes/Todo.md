@@ -8,3 +8,4 @@
 - [ ] Objects are still selectable even when the current layer is not focused
 - [ ] Fix off by one error on grid cell calculations
 - [ ] Fix moving viewport on trackpad/touch devices
+- [ ] Fix gif not appearing as token image
