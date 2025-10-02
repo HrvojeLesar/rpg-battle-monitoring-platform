@@ -28,6 +28,7 @@ import {
     Speed,
     Size,
     getEmptySpeed,
+    sizeToGridCellMultiplier,
 } from "../characters_stats/combat";
 import { CharacterClass } from "../characters_stats/class";
 import { Race } from "../characters_stats/race";
@@ -38,6 +39,7 @@ import { Experience, getEmptyExperience } from "../characters_stats/experience";
 import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
 import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
 import { getRpgTokenWindowName } from "../components/windows/RpgTokenWindow";
+import { queueEntityUpdate } from "@/websocket/websocket";
 
 export type RpgTokenAttributes = {
     tint: Maybe<number>;
@@ -85,7 +87,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
     public hitDice: HitDice;
     public deathSaves: DeathSaves;
 
-    public size: Size;
+    protected _size: Size;
 
     public skills: Skills;
 
@@ -122,7 +124,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
         this.hitPoints = options?.hitPoints ?? getEmptyHitPoints();
         this.hitDice = options?.hitDice ?? 0;
         this.deathSaves = options?.deathSaves ?? getEmptyDeahtSaves();
-        this.size = options?.size ?? "medium";
+        this._size = options?.size ?? "medium";
         this.skills = options?.skills ?? getEmptySkills();
     }
 
@@ -148,7 +150,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
             hitPoints: this.hitPoints,
             hitDice: this.hitDice,
             deathSaves: this.deathSaves,
-            size: this.size,
+            size: this._size,
             skills: this.skills,
         };
     }
@@ -173,7 +175,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
         this.hitPoints = changes.hitPoints;
         this.hitDice = changes.hitDice;
         this.deathSaves = changes.deathSaves;
-        this.size = changes.size;
+        this._size = changes.size;
         this.skills = changes.skills;
 
         super.applyUpdateAction(changes);
@@ -188,5 +190,31 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
                 getRpgTokenWindowName(this),
             );
         });
+    }
+
+    public set size(size: Size) {
+        this._size = size;
+
+        queueEntityUpdate(() => {
+            const tokens = this.getAssoicatedTokens().filter((token) => {
+                if (token.displayedEntity) {
+                    token.displayedEntity.width =
+                        token.scene.grid.cellSize *
+                        sizeToGridCellMultiplier(size);
+                    token.displayedEntity.height =
+                        token.scene.grid.cellSize *
+                        sizeToGridCellMultiplier(size);
+                    return true;
+                }
+
+                return false;
+            });
+
+            return tokens;
+        });
+    }
+
+    public get size(): Size {
+        return this._size;
     }
 }
