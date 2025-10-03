@@ -21,7 +21,7 @@ export class OnTurnMarker extends Container {
     protected speed: number = 0.05;
     protected offset: number = -100;
 
-    constructor(options: DistanceDisplayOptions) {
+    public constructor(options: DistanceDisplayOptions) {
         super({
             ...options,
             eventMode: "none",

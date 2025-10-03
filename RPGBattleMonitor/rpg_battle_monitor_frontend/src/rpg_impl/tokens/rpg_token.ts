@@ -11,9 +11,12 @@ import { queueEntityUpdate } from "@/websocket/websocket";
 import { GRpgTokenAnimator } from "../handlers/animate";
 import { OnTurnMarker } from "../graphics/on_turn_marker";
 import { RpgScene } from "../scene/scene";
+import { InRangeHighlight } from "../graphics/in_range_highlight";
+import { GridCell, GridCellPosition } from "@/board_core/grid/cell";
 
 export class RpgToken extends Token {
     protected onTurnMarker: OnTurnMarker;
+    protected inRangeHighlight: InRangeHighlight;
 
     public constructor(
         scene: Scene,
@@ -39,6 +42,12 @@ export class RpgToken extends Token {
         });
         this.onTurnMarker.visible = false;
         this.addChild(this.onTurnMarker);
+
+        this.inRangeHighlight = new InRangeHighlight({
+            token: this,
+        });
+        this.inRangeHighlight.visible = false;
+        this.addChild(this.inRangeHighlight);
 
         this.addUpdateFnToTicker();
     }
@@ -125,5 +134,47 @@ export class RpgToken extends Token {
         } else {
             this.onTurnMarker.visible = false;
         }
+    }
+
+    public set isHighlighted(value: boolean) {
+        this.inRangeHighlight.visible = value;
+    }
+
+    public get isHighlighted(): boolean {
+        return this.inRangeHighlight.visible;
+    }
+
+    public get centerPoint(): Point {
+        return new Point(
+            this.position.x + this.displayedEntity!.width / 2,
+            this.position.y + this.displayedEntity!.height / 2,
+        );
+    }
+
+    public get occupiedCells(): GridCellPosition[] {
+        const cells: GridCellPosition[] = [];
+
+        const size = this.tokenData.size;
+        const multiplier = sizeToGridCellMultiplier(size);
+        const startX = this.position.x;
+        const startY = this.position.y;
+
+        const cellSize = this.scene.grid.cellSize;
+
+        for (let y = 0; y < multiplier; y++) {
+            for (let x = 0; x < multiplier; x++) {
+                cells.push(
+                    GridCell.getGridCellFromPoint(
+                        new Point(startX + x * cellSize, startY + y * cellSize),
+                    ),
+                );
+            }
+        }
+
+        if (cells.length === 0) {
+            throw new Error("Token has no cells");
+        }
+
+        return cells;
     }
 }

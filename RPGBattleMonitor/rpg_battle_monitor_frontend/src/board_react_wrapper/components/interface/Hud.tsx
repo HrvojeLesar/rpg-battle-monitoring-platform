@@ -228,6 +228,31 @@ const HudLeft = () => {
         );
     };
 
+    const inRange = () => {
+        if (!(currentScene instanceof RpgScene)) {
+            return <></>;
+        }
+
+        return (
+            <Button
+                style={{
+                    pointerEvents: "all",
+                }}
+                onClick={() => {
+                    const token = currentScene.selectHandler.selections.at(0);
+                    if (token instanceof RpgToken) {
+                        currentScene.inRangeHandler.highlightTokensInRange(
+                            token,
+                            1,
+                        );
+                    }
+                }}
+            >
+                Highlight in range
+            </Button>
+        );
+    };
+
     return (
         <SidesFlexBox>
             <Flex direction="column" gap="xs" style={{ overflow: "auto" }}>
@@ -241,6 +266,7 @@ const HudLeft = () => {
                     <SelectionControls.DeleteSelection />
                     <SelectionControls.ContainerProperties />
                 </SelectionControls>
+                {inRange()}
             </Flex>
         </SidesFlexBox>
     );

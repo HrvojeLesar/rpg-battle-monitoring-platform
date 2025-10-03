@@ -39,7 +39,7 @@ export class UniqueCollection<T> implements IUniqueCollection<T> {
     }
 
     public getItems(): Readonly<T[]> {
-        return this._items;
+        return [...this._items];
     }
 
     public get items(): Readonly<T[]> {

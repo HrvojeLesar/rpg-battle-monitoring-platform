@@ -4,7 +4,14 @@ import { Grid } from "./grid";
 import { IGridMove } from "../interfaces/grid_move";
 import { GBoard } from "../board";
 
-export class GridCellPosition extends Point {}
+export class GridCellPosition extends Point {
+    public getCenterPoint(cellSize: number): Point {
+        return new Point(
+            this.x * cellSize + cellSize / 2,
+            this.y * cellSize + cellSize / 2,
+        );
+    }
+}
 
 export class GridCell extends Point implements IGridMove {
     private container: ContainerExtension;
@@ -59,10 +66,10 @@ export class GridCell extends Point implements IGridMove {
         }
 
         if (grid === undefined) {
-            return new Point(0, 0);
+            return new GridCellPosition(0, 0);
         }
 
-        return new Point(
+        return new GridCellPosition(
             Math.floor(point.x / grid.cellSize),
             Math.floor(point.y / grid.cellSize),
         );

@@ -1,4 +1,10 @@
-import { Container, ContainerOptions, Graphics, Text } from "pixi.js";
+import {
+    Container,
+    ContainerOptions,
+    DestroyOptions,
+    Graphics,
+    Text,
+} from "pixi.js";
 import { RpgToken } from "../tokens/rpg_token";
 
 export type DistanceDisplayOptions = {
@@ -39,6 +45,8 @@ export class DistanceDisplay extends Container {
             this.token.displayedEntity!.height + 150,
         );
         this.visible = false;
+
+        this.token.scene.viewport.on("zoomed", this.onZoom, this);
     }
 
     protected setText(text: string): void {
@@ -75,5 +83,15 @@ export class DistanceDisplay extends Container {
     public set distance(value: number) {
         this._distance = value;
         this.setText(this.distanceText);
+    }
+
+    public destroy(options?: DestroyOptions): void {
+        this.token.scene.viewport.off("zoomed", this.onZoom, this);
+        super.destroy(options);
+    }
+
+    protected onZoom(): void {
+        this.textLabel.style.fontSize = 24 / this.token.scene.viewport.scale.x;
+        this.drawBackground();
     }
 }

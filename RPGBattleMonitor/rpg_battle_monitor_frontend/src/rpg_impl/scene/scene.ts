@@ -9,6 +9,7 @@ import { Container } from "pixi.js";
 import { RpgDragHandler } from "../handlers/rpg_drag_handler";
 import { Token } from "@/board_core/token/token";
 import { RpgToken } from "../tokens/rpg_token";
+import { InRangeHandler } from "../handlers/in_range_handler";
 
 export type RpgSceneOptions = { turnOrder?: TurnOrder } & SceneOptions;
 
@@ -34,6 +35,7 @@ function defaultLayersExt() {
 export class RpgScene extends Scene {
     protected _turnOrder: Maybe<TurnOrder>;
     protected _rpgDragHandler: RpgDragHandler;
+    protected _inRangeHandler: InRangeHandler;
 
     public constructor(options: RpgSceneOptions) {
         super({
@@ -48,6 +50,8 @@ export class RpgScene extends Scene {
             this._selectHandler,
             this._eventStore,
         );
+
+        this._inRangeHandler = new InRangeHandler(this);
     }
 
     public get turnOrder(): Maybe<TurnOrder> {
@@ -101,5 +105,9 @@ export class RpgScene extends Scene {
         } else {
             super.unregisterHandlersFromToken(token);
         }
+    }
+
+    public get inRangeHandler(): InRangeHandler {
+        return this._inRangeHandler;
     }
 }
