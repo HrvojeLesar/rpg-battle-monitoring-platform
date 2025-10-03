@@ -82,7 +82,7 @@ export const SceneSettings = () => {
                     <Button
                         onClick={() => {
                             createScene({
-                                name: `test-scene${scenes.length + 1}`,
+                                name: `scene-${scenes.length + 1}`,
                                 sortPositionFunc:
                                     sceneAtomsUtils.getNextSortPosition,
                             });

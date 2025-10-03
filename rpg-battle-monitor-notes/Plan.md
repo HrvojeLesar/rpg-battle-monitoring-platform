@@ -46,6 +46,14 @@
 		- [ ] Windows
 	- [ ] Line of sight calculation/display
 - [ ] Combat
+	- [ ] Logic
+		- [ ] Choose skill to use
+		- [ ] For each token that is not friendly
+			- [ ] Add friendly logic
+			- [ ] "Draw" a line from the attacking token to other tokens
+			- [ ] Check if line is in skill range, e.g. 5 ft
+			- [ ] Highlight all tokens in skill range
+			- [ ] Some spells/attacks don't require a target
 	- [ ] Add melee attack
 		- [ ] Highlight attackable tokens in range
 		- [ ] Roll for hit

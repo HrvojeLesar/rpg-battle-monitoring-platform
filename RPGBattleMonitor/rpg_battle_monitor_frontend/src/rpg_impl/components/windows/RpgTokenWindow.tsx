@@ -29,10 +29,12 @@ import {
     Checkbox,
     Stack,
     Image,
+    ActionIcon,
 } from "@mantine/core";
 import { useDebouncedCallback, useForceUpdate } from "@mantine/hooks";
+import { IconDeviceFloppy } from "@tabler/icons-react";
 import { useSetAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export const RPG_TOKEN_WINDOW_PREFIX = "rpg-token-";
 
@@ -62,8 +64,12 @@ type RpgTokenDataPublicAttributes = keyof InstanceType<typeof RpgTokenData>;
 export const CharacterSheet = (props: CharacterSheetProps) => {
     const { token, editMode } = props;
 
+    const forceUpdate = useForceUpdate();
+
     const disabled = !editMode;
     const refreshTokens = useSetAtom(tokenAtoms.refreshTokens);
+
+    const updatedFields = useRef<Partial<RpgTokenData>>({});
 
     const [name, setName] = useState(token.name);
     const [cClass, setClass] = useState(token.class);
@@ -83,22 +89,42 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
     const [hitPoints, setHitPoints] = useState(token.hitPoints);
     const [hitDice, setHitDice] = useState(token.hitDice);
     const [deathSaves, setDeathSaves] = useState(token.deathSaves);
-    const [size, setSize] = useState(token._size);
+    const [size, setSize] = useState(token.size);
 
-    const queueUpdate = useDebouncedCallback<
+    const queueUpdate = useCallback<
         <K extends RpgTokenDataPublicAttributes>(
             value: RpgTokenData[K],
             field: K,
         ) => void
-    >((value, field) => {
-        token[field] = value;
+    >(
+        (value, field) => {
+            updatedFields.current[field] = value;
 
+            refreshTokens();
+        },
+        [refreshTokens],
+    );
+
+    const saveToken = useCallback(<
+        K extends RpgTokenDataPublicAttributes,
+    >() => {
         queueEntityUpdate(() => {
+            Object.keys(updatedFields.current).forEach((field) => {
+                const f = field as K;
+                const data = updatedFields.current[f];
+                if (data !== undefined) {
+                    token[f] = data;
+                }
+            });
+
+            updatedFields.current = {};
+
             return token;
         });
 
         refreshTokens();
-    }, 200);
+        forceUpdate();
+    }, [token, forceUpdate, refreshTokens]);
 
     useEffect(() => {
         const updateComponent = (entity: IMessagable) => {
@@ -119,7 +145,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                 setHitPoints(token.hitPoints);
                 setHitDice(token.hitDice);
                 setDeathSaves(token.deathSaves);
-                setSize(token._size);
+                setSize(token.size);
             }
         };
 
@@ -129,6 +155,28 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
             GEventEmitter.off("entity-updated", updateComponent);
         };
     }, [token]);
+
+    const isUpdated = () => {
+        return (
+            name !== token.name ||
+            cClass !== token.class ||
+            race !== token.race ||
+            alignment !== token.alignment ||
+            experience !== token.experience ||
+            equipment !== token.equipment ||
+            abilityScore !== token.abilityScore ||
+            inspirationModifier !== token.inspirationModifier ||
+            savingThrows !== token.savingThrows ||
+            passiveWisdom !== token.passiveWisdom ||
+            armorClass !== token.armorClass ||
+            initiative !== token.initiative ||
+            speed !== token.speed ||
+            hitPoints !== token.hitPoints ||
+            hitDice !== token.hitDice ||
+            deathSaves !== token.deathSaves ||
+            size !== token.size
+        );
+    };
 
     return (
         <Stack gap="xs" pb="xs" justify="center" align="stretch">
@@ -215,13 +263,13 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                                     leftSection={<Text>{modifierText()}</Text>}
                                     value={score.score}
                                     onChange={(value) => {
-                                        const abilityScore = {
-                                            ...token.abilityScore,
+                                        const updatedScore = {
+                                            ...abilityScore,
                                             [key]: { score: value },
                                         };
-                                        setAbilityScore(abilityScore);
+                                        setAbilityScore(updatedScore);
                                         queueUpdate(
-                                            abilityScore,
+                                            updatedScore,
                                             "abilityScore",
                                         );
                                     }}
@@ -253,16 +301,18 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                                             onChange={(event) => {
                                                 const value =
                                                     event.currentTarget.checked;
-                                                const savingThrows = {
-                                                    ...token.savingThrows,
+                                                const updatedSavingThrows = {
+                                                    ...savingThrows,
                                                     [key]: {
                                                         ...score,
                                                         proficient: value,
                                                     },
                                                 };
-                                                setSavingThrows(savingThrows);
+                                                setSavingThrows(
+                                                    updatedSavingThrows,
+                                                );
                                                 queueUpdate(
-                                                    savingThrows,
+                                                    updatedSavingThrows,
                                                     "savingThrows",
                                                 );
                                             }}
@@ -270,13 +320,13 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                                     }
                                     value={score.score}
                                     onChange={(value) => {
-                                        const savingThrows = {
-                                            ...token.savingThrows,
+                                        const updatedSavingThrows = {
+                                            ...savingThrows,
                                             [key]: { ...score, score: value },
                                         };
-                                        setSavingThrows(savingThrows);
+                                        setSavingThrows(updatedSavingThrows);
                                         queueUpdate(
-                                            savingThrows,
+                                            updatedSavingThrows,
                                             "savingThrows",
                                         );
                                     }}
@@ -332,12 +382,15 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                                     label={key}
                                     value={value}
                                     onChange={(value) => {
-                                        const hitpoints = {
-                                            ...token.hitPoints,
+                                        const updatedHitpoints = {
+                                            ...hitPoints,
                                             [key]: value,
                                         };
-                                        setHitPoints(hitpoints);
-                                        queueUpdate(hitpoints, "hitPoints");
+                                        setHitPoints(updatedHitpoints);
+                                        queueUpdate(
+                                            updatedHitpoints,
+                                            "hitPoints",
+                                        );
                                     }}
                                 />
                             );
@@ -352,12 +405,15 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                                     label={key}
                                     value={value}
                                     onChange={(value) => {
-                                        const deathSaves = {
-                                            ...token.deathSaves,
+                                        const updatedDeathSaves = {
+                                            ...deathSaves,
                                             [key]: value,
                                         };
-                                        setDeathSaves(deathSaves);
-                                        queueUpdate(deathSaves, "deathSaves");
+                                        setDeathSaves(updatedDeathSaves);
+                                        queueUpdate(
+                                            updatedDeathSaves,
+                                            "deathSaves",
+                                        );
                                     }}
                                 />
                             );
@@ -379,6 +435,20 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                     <Text>TODO: Skill proficiency</Text>
                 </Flex>
             </Fieldset>
+            {isUpdated() && (
+                <Flex justify="right">
+                    <ActionIcon
+                        title="Save"
+                        color="green"
+                        variant="outline"
+                        onClick={() => {
+                            saveToken();
+                        }}
+                    >
+                        <IconDeviceFloppy />
+                    </ActionIcon>
+                </Flex>
+            )}
         </Stack>
     );
 };
