@@ -63,6 +63,7 @@ export type RpgTokenAttributes = {
     deathSaves: DeathSaves;
     size: Size;
     skills: Skills;
+    tags: string[];
 } & TokenDataBaseAttributes;
 
 export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
@@ -92,6 +93,8 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
     public skills: Skills;
 
     public tint: Maybe<number> = undefined;
+
+    public tags: string[];
 
     // TODO: Spellcasting, cantrips, spell slots
     //
@@ -128,6 +131,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
         this.deathSaves = options?.deathSaves ?? getEmptyDeahtSaves();
         this._size = options?.size ?? "medium";
         this.skills = options?.skills ?? getEmptySkills();
+        this.tags = options?.tags ?? [];
     }
 
     public getAttributes(): RpgTokenAttributes {
@@ -154,6 +158,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
             deathSaves: this.deathSaves,
             size: this._size,
             skills: this.skills,
+            tags: this.tags,
         };
     }
 
@@ -179,6 +184,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
         this.deathSaves = changes.deathSaves;
         this._size = changes.size;
         this.skills = changes.skills;
+        this.tags = changes.tags;
 
         super.applyUpdateAction(changes);
     }

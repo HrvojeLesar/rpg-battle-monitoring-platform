@@ -33,6 +33,7 @@ import {
     ActionIcon,
     Popover,
     Button,
+    TagsInput,
 } from "@mantine/core";
 import {
     useDebouncedCallback,
@@ -44,6 +45,7 @@ import { useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AssetPicker, DefaultAssetPicker } from "../Assets/AssetPicker";
 import { TextIncrementableNumberInput } from "../TextIncrementableNumberInput";
+import { COMBAT_TAGS } from "@/rpg_impl/characters_stats/tags";
 
 export const RPG_TOKEN_WINDOW_PREFIX = "rpg-token-";
 
@@ -99,6 +101,8 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
     const [hitDice, setHitDice] = useState(token.hitDice);
     const [deathSaves, setDeathSaves] = useState(token.deathSaves);
     const [size, setSize] = useState(token.size);
+
+    const [tags, setTags] = useState(token.tags);
 
     const [opened, { close, open }] = useDisclosure(false);
     const [searchTerm, setSearchTerm] = useState("");
@@ -171,6 +175,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                 setDeathSaves(token.deathSaves);
                 setSize(token.size);
                 setTokenImage(token.image);
+                setTags(token.tags);
             }
         };
 
@@ -200,7 +205,8 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
             hitDice !== token.hitDice ||
             deathSaves !== token.deathSaves ||
             size !== token.size ||
-            tokenImage !== token.image
+            tokenImage !== token.image ||
+            tags !== token.tags
         );
     };
 
@@ -474,6 +480,16 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                         }}
                     />
                     <Text>TODO: Skill proficiency</Text>
+                    <Fieldset legend="Tags">
+                        <TagsInput
+                            data={COMBAT_TAGS}
+                            value={tags}
+                            onChange={(tags) => {
+                                setTags(tags);
+                                queueUpdate(tags, "tags");
+                            }}
+                        />
+                    </Fieldset>
                 </Flex>
             </Fieldset>
             {isUpdated() && (

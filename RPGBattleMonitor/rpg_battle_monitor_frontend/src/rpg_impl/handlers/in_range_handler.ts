@@ -19,12 +19,11 @@ export class InRangeHandler {
         });
     }
 
-    // TODO: Does not work with larger tokens
-    public highlightTokensInRange(from: RpgToken, range: number): void {
-        this.clearHighlight();
+    public tokensInRange(from: RpgToken, range: number): RpgToken[] {
+        const tokensInRange: RpgToken[] = [];
 
         if (range < 0) {
-            return;
+            return tokensInRange;
         }
 
         const cellSize = this.scene.grid.cellSize;
@@ -34,6 +33,7 @@ export class InRangeHandler {
                 cell.y * cellSize + cellSize / 2,
             );
         });
+
         this.scene.rpgTokens
             .filter((token) => token !== from)
             .forEach((token) => {
@@ -70,11 +70,22 @@ export class InRangeHandler {
                         const pathWithStartingPointIncluded =
                             shortestPath(cells);
                         if (pathWithStartingPointIncluded.length - 1 <= range) {
-                            token.isHighlighted = true;
+                            tokensInRange.push(token);
                             return;
                         }
                     }
                 }
             });
+
+        return tokensInRange;
+    }
+
+    // TODO: Does not work with larger tokens
+    public highlightTokensInRange(from: RpgToken, range: number): void {
+        this.clearHighlight();
+
+        this.tokensInRange(from, range).forEach((token) => {
+            token.isHighlighted = true;
+        });
     }
 }

@@ -6,6 +6,7 @@
       {
         "id": "1a58b003fab573db",
         "type": "tabs",
+        "dimension": 71.61552346570397,
         "children": [
           {
             "id": "db59c08a81e6e893",
@@ -24,8 +25,9 @@
         ]
       },
       {
-        "id": "e593c55dfb9dcd1b",
+        "id": "084c91993d18459b",
         "type": "tabs",
+        "dimension": 28.384476534296027,
         "children": [
           {
             "id": "499779ec7438bc7c",
@@ -185,7 +187,7 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "db59c08a81e6e893",
+  "active": "499779ec7438bc7c",
   "lastOpenFiles": [
     "Plan.md",
     "Todo.md",

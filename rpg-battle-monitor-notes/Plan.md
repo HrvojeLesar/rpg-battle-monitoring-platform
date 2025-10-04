@@ -50,10 +50,23 @@
 		- [ ] Choose skill to use
 		- [ ] For each token that is not friendly
 			- [ ] Add friendly logic
+				- [ ] Add tag list to token data
+				- [ ] Check for existence of a tag "friendly" tag when highlighting tokens (this can be maybe team based, so group and friendly npc tokens can be assigned one group while any hostile tokens can be assigned another group)
 			- [x] "Draw" a line from the attacking token to other tokens
 			- [x] Check if line is in skill range, e.g. 5 ft
 			- [x] Highlight all tokens in skill range
 			- [ ] Some spells/attacks don't require a target
+		- [ ] Target selection logic
+			- [ ] Overlay token layer
+			- [ ] Highlight valid token targets
+			- [ ] If attack/spell is targeted only allow clicking on highlighted tokens
+			- [ ] If attack/spell can have free selection allow clicking any cell
+		- [ ] AoE spells
+			- [ ] Line
+			- [ ] Cone
+			- [ ] Cube
+			- [ ] Sphere
+			- [ ] Cylinder
 	- [ ] Add melee attack
 		- [ ] Highlight attackable tokens in range
 		- [ ] Roll for hit
