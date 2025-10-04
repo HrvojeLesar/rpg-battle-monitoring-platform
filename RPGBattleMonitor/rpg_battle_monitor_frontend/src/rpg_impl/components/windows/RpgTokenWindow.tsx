@@ -43,6 +43,7 @@ import { IconDeviceFloppy } from "@tabler/icons-react";
 import { useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AssetPicker, DefaultAssetPicker } from "../Assets/AssetPicker";
+import { TextIncrementableNumberInput } from "../TextIncrementableNumberInput";
 
 export const RPG_TOKEN_WINDOW_PREFIX = "rpg-token-";
 
@@ -416,11 +417,11 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                     <Fieldset legend="Hit Points">
                         {Object.entries(hitPoints).map(([key, value]) => {
                             return (
-                                <NumberInput
+                                <TextIncrementableNumberInput
                                     key={key}
                                     disabled={disabled}
                                     label={key}
-                                    value={value}
+                                    initialValue={value}
                                     onChange={(value) => {
                                         const updatedHitpoints = {
                                             ...hitPoints,

@@ -1,5 +1,13 @@
 import { tokenAtoms } from "@/board_react_wrapper/stores/token_store";
-import { Fieldset, Flex, Image, Paper, Text } from "@mantine/core";
+import {
+    Button,
+    Fieldset,
+    Flex,
+    Image,
+    NumberInput,
+    Paper,
+    Text,
+} from "@mantine/core";
 import { IconToiletPaper } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { DeleteConfirmation } from "../utils/DeleteConfirmation";
@@ -14,6 +22,9 @@ import { DecorationTokenData } from "@/rpg_impl/tokens/decoration_token_data";
 import { AssetHoverPreviewDefault } from "../assets/AssetHoverPreview";
 import { TokenDataBase } from "@/board_core/token/token_data";
 import { GTokenWindowRegistry } from "@/rpg_impl/registry/token_window_registry";
+import { TokenDataFactory } from "@/rpg_impl/factories/token_data_factory";
+import { useState } from "react";
+import { TextIncrementableNumberInput } from "@/rpg_impl/components/TextIncrementableNumberInput";
 
 const defaultImageUrl = getUrl("/public/rpg/default.jpeg");
 
@@ -123,9 +134,7 @@ type RpgTokensFieldsetProps = {
 const RpgTokensFieldset = (props: RpgTokensFieldsetProps) => {
     const { tokens, deleteToken } = props;
 
-    if (tokens.length === 0) {
-        return <></>;
-    }
+    const [numberValue, setNumberValue] = useState<string | number>("");
 
     const tokenElements = tokens.map((token, idx) => {
         const imageUrl =
@@ -178,6 +187,14 @@ const RpgTokensFieldset = (props: RpgTokensFieldsetProps) => {
     return (
         <Fieldset legend="Tokens" style={{ overflow: "auto" }}>
             <Flex direction="column" gap="xs">
+                <Button
+                    onClick={() => {
+                        const token = TokenDataFactory.create();
+                        GTokenWindowRegistry.openWindow(token);
+                    }}
+                >
+                    Create new token
+                </Button>
                 {tokenElements}
             </Flex>
         </Fieldset>

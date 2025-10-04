@@ -7,7 +7,6 @@ import { GBoard } from "@/board_core/board";
 import { Resizable } from "re-resizable";
 import { SidebarTabs } from "./SidebarTabs";
 import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
-import { RpgTokenFactory } from "@/rpg_impl/factories/token_factory";
 import { TurnOrderFactory } from "@/rpg_impl/factories/turn_order_factory";
 import { RpgScene } from "@/rpg_impl/scene/scene";
 import { turnOrderAtoms } from "@/rpg_impl/stores/turn_order_store";
@@ -36,26 +35,6 @@ const HudLeft = () => {
     const currentSceneLayer = useAtomValue(sceneAtoms.getCurrentSceneLayer);
     const refreshScenes = useSetAtom(sceneAtoms.refreshScenes);
     const { turnOrder } = useAtomValue(turnOrderAtoms.currentTurnOrder);
-
-    const addTokenButton = () => {
-        if (!currentScene) {
-            return <></>;
-        }
-
-        return (
-            <Button
-                style={{
-                    pointerEvents: "all",
-                }}
-                onClick={() => {
-                    // TokenFactory.createRandomToken(currentScene);
-                    RpgTokenFactory.createRandomToken(currentScene);
-                }}
-            >
-                Add token to scene
-            </Button>
-        );
-    };
 
     const addLayerSwitchButton = () => {
         if (!currentScene) {
@@ -257,7 +236,6 @@ const HudLeft = () => {
         <SidesFlexBox>
             <Flex direction="column" gap="xs" style={{ overflow: "auto" }}>
                 <SceneSelection />
-                {addTokenButton()}
                 {addLayerSwitchButton()}
                 {addTurnOrderButton()}
                 {addSelectionToTurnOrder()}

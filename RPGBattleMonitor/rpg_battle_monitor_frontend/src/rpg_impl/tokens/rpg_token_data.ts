@@ -66,7 +66,7 @@ export type RpgTokenAttributes = {
 } & TokenDataBaseAttributes;
 
 export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
-    public name: string = "Test token name";
+    public name: string;
 
     public class: CharacterClass;
     public background: Maybe<Background>;
@@ -104,6 +104,8 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
 
     public constructor(options?: Partial<RpgTokenAttributes>) {
         super(options);
+
+        this.name = options?.name ?? "New token";
 
         this.image = options?.image;
 
