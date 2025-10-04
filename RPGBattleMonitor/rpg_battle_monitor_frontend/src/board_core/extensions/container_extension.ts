@@ -370,7 +370,7 @@ export abstract class ContainerExtension<
             return;
         }
 
-        this.parent.addChildAt(ghost, this.parent.getChildIndex(this));
+        this.parent?.addChildAt(ghost, this.parent.getChildIndex(this));
     }
 
     public removeGhostFromStage(ghost: Container): void {

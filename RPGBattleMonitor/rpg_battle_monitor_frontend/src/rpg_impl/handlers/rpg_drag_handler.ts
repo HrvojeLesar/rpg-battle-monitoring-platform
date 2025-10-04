@@ -137,19 +137,21 @@ export class RpgDragHandler extends DragHandler {
         });
     }
 
-    protected override onPointerUp(): void {
+    protected override onPointerUp(event: FederatedPointerEvent): void {
         this.globalPointerMoveUnregisterHandle.forEach((handle) => {
             this.scene.viewport.off("globalpointermove", handle);
         });
         this.globalPointerMoveUnregisterHandle = [];
 
+        const localPos = event.getLocalPosition(this.scene.viewport);
+
         const selectedItems = this.selectHandler.selections;
         const updatedItems: IMessagable[] = [];
         for (const container of selectedItems) {
             if (container instanceof RpgToken) {
-                this.moveContainer(container, updatedItems);
+                this.moveContainer(container, updatedItems, localPos);
             } else {
-                super.moveContainer(container, updatedItems);
+                super.moveContainer(container, updatedItems, localPos);
             }
         }
 
@@ -285,6 +287,17 @@ export class RpgDragHandler extends DragHandler {
             return false;
         }
 
+        // TODO: add rule for size
+        if (this.isSpaceOccupied(token)) {
+            notifications.show(
+                errorNotification(
+                    "Cell is occupied",
+                    "Moving to an occupied cell is not allowed",
+                ),
+            );
+            return false;
+        }
+
         if (distanceDisplay.distance > entry.speed) {
             notifications.show(
                 errorNotification(
@@ -303,6 +316,7 @@ export class RpgDragHandler extends DragHandler {
     protected moveContainer(
         token: RpgToken,
         updatedItems: IMessagable[],
+        position?: Point,
     ): void {
         token.clearGhosts();
 
@@ -312,7 +326,7 @@ export class RpgDragHandler extends DragHandler {
 
         const canTokenBeMoved = this.canTokenBeMoved(token);
         if (canTokenBeMoved) {
-            super.moveContainer(token, updatedItems);
+            super.moveContainer(token, updatedItems, position);
             const turnOrder = this.getTurnOrder();
             if (turnOrder !== undefined) {
                 updatedItems.push(turnOrder);
@@ -323,7 +337,7 @@ export class RpgDragHandler extends DragHandler {
             const initialPos = this.rpgTokenInitialPositions.get(token);
             if (initialPos === undefined) {
                 console.error("No initial position found for token", token);
-                super.moveContainer(token, updatedItems);
+                super.moveContainer(token, updatedItems, position);
                 return;
             }
 
@@ -335,5 +349,9 @@ export class RpgDragHandler extends DragHandler {
     protected getTurnOrder(): Maybe<TurnOrder> {
         const scene = this.scene as RpgScene;
         return scene.turnOrder;
+    }
+
+    protected isSpaceOccupied(token: RpgToken): boolean {
+        return this.scene.occupiedSpaceHandler.isSpaceOccupied(token);
     }
 }

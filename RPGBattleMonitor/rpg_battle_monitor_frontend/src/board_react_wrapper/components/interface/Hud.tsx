@@ -186,6 +186,8 @@ const HudLeft = () => {
                         return;
                     }
 
+                    selection.getOccupiedCells();
+
                     const pos = selection.position.clone();
                     const width = selection.width;
                     const height = selection.height;

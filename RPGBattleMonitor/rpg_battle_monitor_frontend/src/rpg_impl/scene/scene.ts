@@ -10,6 +10,7 @@ import { RpgDragHandler } from "../handlers/rpg_drag_handler";
 import { Token } from "@/board_core/token/token";
 import { RpgToken } from "../tokens/rpg_token";
 import { InRangeHandler } from "../handlers/in_range_handler";
+import { OccupiedSpaceHandler } from "../handlers/occupied_space_handler";
 
 export type RpgSceneOptions = { turnOrder?: TurnOrder } & SceneOptions;
 
@@ -36,6 +37,7 @@ export class RpgScene extends Scene {
     protected _turnOrder: Maybe<TurnOrder>;
     protected _rpgDragHandler: RpgDragHandler;
     protected _inRangeHandler: InRangeHandler;
+    protected _occupiedSpaceHandler: OccupiedSpaceHandler;
 
     public constructor(options: RpgSceneOptions) {
         super({
@@ -52,6 +54,7 @@ export class RpgScene extends Scene {
         );
 
         this._inRangeHandler = new InRangeHandler(this);
+        this._occupiedSpaceHandler = new OccupiedSpaceHandler(this);
     }
 
     public get turnOrder(): Maybe<TurnOrder> {
@@ -109,5 +112,17 @@ export class RpgScene extends Scene {
 
     public get inRangeHandler(): InRangeHandler {
         return this._inRangeHandler;
+    }
+
+    public get rpgTokens(): RpgToken[] {
+        const sceneTokens = this.tokens;
+
+        return sceneTokens.filter(
+            (token) => token instanceof RpgToken,
+        ) as RpgToken[];
+    }
+
+    public get occupiedSpaceHandler(): OccupiedSpaceHandler {
+        return this._occupiedSpaceHandler;
     }
 }

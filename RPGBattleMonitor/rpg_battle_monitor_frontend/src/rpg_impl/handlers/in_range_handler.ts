@@ -13,16 +13,8 @@ export class InRangeHandler {
         this.scene = scene;
     }
 
-    public get tokens(): RpgToken[] {
-        const sceneTokens = this.scene.tokens;
-
-        return sceneTokens.filter(
-            (token) => token instanceof RpgToken,
-        ) as RpgToken[];
-    }
-
     public clearHighlight(): void {
-        this.tokens.forEach((token) => {
+        this.scene.rpgTokens.forEach((token) => {
             token.isHighlighted = false;
         });
     }
@@ -36,16 +28,16 @@ export class InRangeHandler {
         }
 
         const cellSize = this.scene.grid.cellSize;
-        const fromPoints = from.occupiedCells.map((cell) => {
+        const fromPoints = from.getOccupiedCells().map((cell) => {
             return new Point(
                 cell.x * cellSize + cellSize / 2,
                 cell.y * cellSize + cellSize / 2,
             );
         });
-        this.tokens
+        this.scene.rpgTokens
             .filter((token) => token !== from)
             .forEach((token) => {
-                const occupiedCells = token.occupiedCells;
+                const occupiedCells = token.getOccupiedCells();
                 for (const cell of occupiedCells) {
                     const cellCenterPoint = cell.getCenterPoint(cellSize);
                     for (const fromPoint of fromPoints) {

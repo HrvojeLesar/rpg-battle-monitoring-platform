@@ -151,13 +151,13 @@ export class RpgToken extends Token {
         );
     }
 
-    public get occupiedCells(): GridCellPosition[] {
+    public getOccupiedCells(position?: Point): GridCellPosition[] {
         const cells: GridCellPosition[] = [];
 
         const size = this.tokenData.size;
         const multiplier = sizeToGridCellMultiplier(size);
-        const startX = this.position.x;
-        const startY = this.position.y;
+        const startX = position?.x ?? this.position.x;
+        const startY = position?.y ?? this.position.y;
 
         const cellSize = this.scene.grid.cellSize;
 

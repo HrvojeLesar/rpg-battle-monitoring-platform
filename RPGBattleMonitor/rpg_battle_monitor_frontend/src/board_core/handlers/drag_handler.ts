@@ -102,7 +102,7 @@ export class DragHandler {
         }
     }
 
-    protected onPointerUp() {
+    protected onPointerUp(_event: FederatedPointerEvent) {
         this.globalPointerMoveUnregisterHandle.forEach((handle) => {
             this.scene.viewport.off("globalpointermove", handle);
         });
@@ -153,6 +153,7 @@ export class DragHandler {
     protected moveContainer(
         container: ContainerExtension,
         updatedItems: IMessagable[],
+        _position?: Point,
     ): void {
         if (this.isDirty) {
             container.snapToGrid();
