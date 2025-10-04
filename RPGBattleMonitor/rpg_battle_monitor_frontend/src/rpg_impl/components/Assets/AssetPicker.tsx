@@ -2,7 +2,15 @@ import { Asset } from "@/board_core/assets/game_assets";
 import { AssetHoverPreviewDefault } from "@/board_react_wrapper/components/assets/AssetHoverPreview";
 import { assetsAtoms } from "@/board_react_wrapper/stores/asset_store";
 import { getUrl } from "@/board_react_wrapper/utils/utils";
-import { Image, Stack, Text, Group } from "@mantine/core";
+import {
+    Image,
+    Stack,
+    Text,
+    Group,
+    Popover,
+    Button,
+    TextInput,
+} from "@mantine/core";
 import { useAtomValue } from "jotai";
 import classes from "../../css/AssetPicker.module.css";
 
@@ -55,5 +63,65 @@ export const AssetPicker = (props: AssetPickerProps) => {
                 );
             })}
         </Group>
+    );
+};
+
+export type DefaultAssetPickerProps = {
+    filter: (asset: Asset) => boolean;
+    onSelect: (asset: Asset) => void;
+    searchTerm: string;
+    onSearchChange: (searchTerm: string) => void;
+    opened: boolean;
+    open: () => void;
+    close: () => void;
+};
+
+export const DefaultAssetPicker = (props: DefaultAssetPickerProps) => {
+    const {
+        filter,
+        onSelect,
+        searchTerm,
+        onSearchChange,
+        opened,
+        open,
+        close,
+    } = props;
+
+    return (
+        <Popover
+            opened={opened}
+            withArrow
+            onDismiss={close}
+            width="target"
+            middlewares={{ size: true }}
+        >
+            <Popover.Target>
+                <Button
+                    onClick={() => {
+                        if (opened) {
+                            close();
+                        } else {
+                            open();
+                        }
+                    }}
+                >
+                    Change image
+                </Button>
+            </Popover.Target>
+            <Popover.Dropdown style={{ overflow: "auto" }}>
+                <TextInput
+                    mb="xs"
+                    value={searchTerm}
+                    label="Search"
+                    onChange={(event) => {
+                        const value = event.currentTarget.value;
+                        onSearchChange(value);
+                    }}
+                    pos="sticky"
+                    top="0px"
+                />
+                <AssetPicker onSelect={onSelect} filter={filter} />
+            </Popover.Dropdown>
+        </Popover>
     );
 };

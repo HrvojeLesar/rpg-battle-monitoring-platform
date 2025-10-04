@@ -1,16 +1,7 @@
 import { WindowEntry } from "@/board_react_wrapper/stores/window_store";
 import { DecorationTokenData } from "@/rpg_impl/tokens/decoration_token_data";
-import { AssetPicker } from "../Assets/AssetPicker";
-import {
-    Button,
-    Stack,
-    Image,
-    Popover,
-    TextInput,
-    Flex,
-    ActionIcon,
-    Fieldset,
-} from "@mantine/core";
+import { DefaultAssetPicker } from "../Assets/AssetPicker";
+import { Stack, Image, Flex, ActionIcon, Fieldset } from "@mantine/core";
 import { getUrl } from "@/board_react_wrapper/utils/utils";
 import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useState } from "react";
@@ -19,6 +10,8 @@ import { IconCancel, IconDeviceFloppy } from "@tabler/icons-react";
 import { queueEntityUpdate } from "@/websocket/websocket";
 import { GDragAndDropRegistry } from "@/board_core/registry/drag_and_drop_registry";
 import { RPG_ASSET_DROP } from "@/rpg_impl/utils/rpg_token_drop";
+import { GEventEmitter } from "@/board_core/board";
+import { IMessagable } from "@/board_core/interfaces/messagable";
 
 export const DECORATION_TOKEN_WINDOW_PREFIX = "decoration-token-";
 
@@ -67,6 +60,24 @@ export const DecorationTokenWindow = (props: DecorationTokenWindowProps) => {
         setAsset(token.asset);
     }, [token.asset]);
 
+    useEffect(() => {
+        const updateComponent = (entity: IMessagable) => {
+            if (
+                entity === token &&
+                entity instanceof DecorationTokenData &&
+                entity.asset !== asset
+            ) {
+                setAsset(entity.asset);
+            }
+        };
+
+        GEventEmitter.on("entity-updated", updateComponent);
+
+        return () => {
+            GEventEmitter.off("entity-updated", updateComponent);
+        };
+    }, [token, asset]);
+
     const isAssetChanged = asset !== token.asset;
 
     return (
@@ -93,47 +104,18 @@ export const DecorationTokenWindow = (props: DecorationTokenWindowProps) => {
             </Fieldset>
             <Fieldset legend="Edit">
                 <Stack gap="xs" pb="xs" justify="center" align="stretch">
-                    <Popover
+                    <DefaultAssetPicker
+                        filter={assetPickerFilter}
+                        onSelect={(asset) => {
+                            setAsset(asset);
+                            close();
+                        }}
+                        searchTerm={searchTerm}
+                        onSearchChange={setSearchTerm}
                         opened={opened}
-                        withArrow
-                        onDismiss={close}
-                        width="target"
-                        middlewares={{ size: true }}
-                    >
-                        <Popover.Target>
-                            <Button
-                                onClick={() => {
-                                    if (opened) {
-                                        close();
-                                    } else {
-                                        open();
-                                    }
-                                }}
-                            >
-                                Change image
-                            </Button>
-                        </Popover.Target>
-                        <Popover.Dropdown style={{ overflow: "auto" }}>
-                            <TextInput
-                                mb="xs"
-                                value={searchTerm}
-                                label="Search"
-                                onChange={(event) => {
-                                    const value = event.currentTarget.value;
-                                    setSearchTerm(value);
-                                }}
-                                pos="sticky"
-                                top="0px"
-                            />
-                            <AssetPicker
-                                onSelect={(asset) => {
-                                    setAsset(asset);
-                                    close();
-                                }}
-                                filter={assetPickerFilter}
-                            />
-                        </Popover.Dropdown>
-                    </Popover>
+                        open={open}
+                        close={close}
+                    />
                     {isAssetChanged && (
                         <Flex justify="space-between">
                             <ActionIcon

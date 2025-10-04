@@ -42,7 +42,7 @@ import {
 import { IconDeviceFloppy } from "@tabler/icons-react";
 import { useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AssetPicker } from "../Assets/AssetPicker";
+import { AssetPicker, DefaultAssetPicker } from "../Assets/AssetPicker";
 
 export const RPG_TOKEN_WINDOW_PREFIX = "rpg-token-";
 
@@ -225,48 +225,19 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                             }}
                         />
                     )}
-                    <Popover
+                    <DefaultAssetPicker
+                        filter={assetPickerFilter}
+                        onSelect={(asset) => {
+                            setTokenImage(asset.url);
+                            queueUpdate(asset.url, "image");
+                            close();
+                        }}
+                        searchTerm={searchTerm}
+                        onSearchChange={setSearchTerm}
                         opened={opened}
-                        withArrow
-                        onDismiss={close}
-                        width="target"
-                        middlewares={{ size: true }}
-                    >
-                        <Popover.Target>
-                            <Button
-                                onClick={() => {
-                                    if (opened) {
-                                        close();
-                                    } else {
-                                        open();
-                                    }
-                                }}
-                            >
-                                Change image
-                            </Button>
-                        </Popover.Target>
-                        <Popover.Dropdown style={{ overflow: "auto" }}>
-                            <TextInput
-                                mb="xs"
-                                value={searchTerm}
-                                label="Search"
-                                onChange={(event) => {
-                                    const value = event.currentTarget.value;
-                                    setSearchTerm(value);
-                                }}
-                                pos="sticky"
-                                top="0px"
-                            />
-                            <AssetPicker
-                                onSelect={(asset) => {
-                                    setTokenImage(asset.url);
-                                    queueUpdate(asset.url, "image");
-                                    close();
-                                }}
-                                filter={assetPickerFilter}
-                            />
-                        </Popover.Dropdown>
-                    </Popover>
+                        open={open}
+                        close={close}
+                    />
                 </Stack>
             </Fieldset>
             <Fieldset style={{ overflow: "auto" }} legend="Character Info">
