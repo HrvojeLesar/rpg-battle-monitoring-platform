@@ -18,8 +18,18 @@ import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
 import { turnOrderAtoms } from "../stores/turn_order_store";
 import { raycast } from "../utils/raycast";
 import { shortestPath } from "../utils/highlighted_cells_shortest_path";
+import { NotificationData, notifications } from "@mantine/notifications";
 
 export const CELL_FT = 5;
+
+const errorNotification = (
+    title: string,
+    message: string,
+): NotificationData => ({
+    title,
+    message,
+    color: "red",
+});
 
 export class RpgDragHandler extends DragHandler {
     protected dragLayer: Layer;
@@ -256,6 +266,12 @@ export class RpgDragHandler extends DragHandler {
         }
 
         if (!turnOrder.isOnTurn(token)) {
+            notifications.show(
+                errorNotification(
+                    "Not token's turn",
+                    "It's another tokens turn",
+                ),
+            );
             return false;
         }
 
@@ -270,6 +286,12 @@ export class RpgDragHandler extends DragHandler {
         }
 
         if (distanceDisplay.distance > entry.speed) {
+            notifications.show(
+                errorNotification(
+                    "Not enough movement",
+                    `Trying to use ${distanceDisplay.distance} left ${entry.speed}`,
+                ),
+            );
             return false;
         }
 
