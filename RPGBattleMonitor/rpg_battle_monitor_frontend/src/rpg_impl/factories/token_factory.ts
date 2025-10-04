@@ -23,7 +23,7 @@ export class RpgTokenFactory {
         const data =
             tokenData ??
             new RpgTokenData({
-                image: isImage ? "/public/W_m.jpeg" : undefined,
+                image: isImage ? "/public/rpg/token-default.jpeg" : undefined,
             });
 
         const token = new RpgToken(

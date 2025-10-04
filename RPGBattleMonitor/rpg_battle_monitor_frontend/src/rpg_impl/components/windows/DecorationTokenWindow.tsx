@@ -122,6 +122,8 @@ export const DecorationTokenWindow = (props: DecorationTokenWindowProps) => {
                                     const value = event.currentTarget.value;
                                     setSearchTerm(value);
                                 }}
+                                pos="sticky"
+                                top="0px"
                             />
                             <AssetPicker
                                 onSelect={(asset) => {

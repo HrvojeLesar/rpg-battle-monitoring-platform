@@ -1,3 +1,4 @@
+import { Asset } from "@/board_core/assets/game_assets";
 import { GBoard, GEventEmitter } from "@/board_core/board";
 import { IMessagable } from "@/board_core/interfaces/messagable";
 import { GDragAndDropRegistry } from "@/board_core/registry/drag_and_drop_registry";
@@ -30,11 +31,18 @@ import {
     Stack,
     Image,
     ActionIcon,
+    Popover,
+    Button,
 } from "@mantine/core";
-import { useDebouncedCallback, useForceUpdate } from "@mantine/hooks";
+import {
+    useDebouncedCallback,
+    useDisclosure,
+    useForceUpdate,
+} from "@mantine/hooks";
 import { IconDeviceFloppy } from "@tabler/icons-react";
 import { useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AssetPicker } from "../Assets/AssetPicker";
 
 export const RPG_TOKEN_WINDOW_PREFIX = "rpg-token-";
 
@@ -91,6 +99,21 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
     const [deathSaves, setDeathSaves] = useState(token.deathSaves);
     const [size, setSize] = useState(token.size);
 
+    const [opened, { close, open }] = useDisclosure(false);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const [tokenImage, setTokenImage] = useState(token.image);
+
+    const assetPickerFilter = (asset: Asset) => {
+        if (searchTerm.trim().length === 0) {
+            return true;
+        }
+
+        return asset.originalFilename
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase());
+    };
+
     const queueUpdate = useCallback<
         <K extends RpgTokenDataPublicAttributes>(
             value: RpgTokenData[K],
@@ -146,6 +169,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                 setHitDice(token.hitDice);
                 setDeathSaves(token.deathSaves);
                 setSize(token.size);
+                setTokenImage(token.image);
             }
         };
 
@@ -174,31 +198,76 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
             hitPoints !== token.hitPoints ||
             hitDice !== token.hitDice ||
             deathSaves !== token.deathSaves ||
-            size !== token.size
+            size !== token.size ||
+            tokenImage !== token.image
         );
     };
 
     return (
         <Stack gap="xs" pb="xs" justify="center" align="stretch">
             <Fieldset legend="Image">
-                <Flex justify="center" align="center">
-                    <Image
-                        maw="512px"
-                        mah="512px"
-                        src={getUrl(token.image ?? "")}
-                        style={{
-                            alignSelf: "center",
-                        }}
-                        draggable
-                        onDragStart={(e) => {
-                            GDragAndDropRegistry.emit(
-                                e as unknown as DragEvent,
-                                RPG_TOKEN_DROP,
-                                token.getUId(),
-                            );
-                        }}
-                    />
-                </Flex>
+                <Stack gap="xs" pb="xs" justify="center" align="stretch">
+                    {tokenImage && (
+                        <Image
+                            maw="512px"
+                            mah="512px"
+                            src={getUrl(tokenImage)}
+                            style={{
+                                alignSelf: "center",
+                            }}
+                            draggable
+                            onDragStart={(e) => {
+                                GDragAndDropRegistry.emit(
+                                    e as unknown as DragEvent,
+                                    RPG_TOKEN_DROP,
+                                    token.getUId(),
+                                );
+                            }}
+                        />
+                    )}
+                    <Popover
+                        opened={opened}
+                        withArrow
+                        onDismiss={close}
+                        width="target"
+                        middlewares={{ size: true }}
+                    >
+                        <Popover.Target>
+                            <Button
+                                onClick={() => {
+                                    if (opened) {
+                                        close();
+                                    } else {
+                                        open();
+                                    }
+                                }}
+                            >
+                                Change image
+                            </Button>
+                        </Popover.Target>
+                        <Popover.Dropdown style={{ overflow: "auto" }}>
+                            <TextInput
+                                mb="xs"
+                                value={searchTerm}
+                                label="Search"
+                                onChange={(event) => {
+                                    const value = event.currentTarget.value;
+                                    setSearchTerm(value);
+                                }}
+                                pos="sticky"
+                                top="0px"
+                            />
+                            <AssetPicker
+                                onSelect={(asset) => {
+                                    setTokenImage(asset.url);
+                                    queueUpdate(asset.url, "image");
+                                    close();
+                                }}
+                                filter={assetPickerFilter}
+                            />
+                        </Popover.Dropdown>
+                    </Popover>
+                </Stack>
             </Fieldset>
             <Fieldset style={{ overflow: "auto" }} legend="Character Info">
                 <Flex gap="xs" wrap="wrap">
