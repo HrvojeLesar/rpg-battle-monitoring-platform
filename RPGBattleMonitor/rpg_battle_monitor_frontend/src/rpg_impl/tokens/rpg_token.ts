@@ -194,6 +194,8 @@ export class RpgToken extends Token implements ITargetable {
         if (tempHitPoints < 0) {
             damageToApply = -tempHitPoints;
             tempHitPoints = 0;
+        } else {
+            damageToApply = 0;
         }
 
         hitPoints -= damageToApply;

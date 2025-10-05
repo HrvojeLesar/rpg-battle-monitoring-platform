@@ -11,10 +11,81 @@ import { GBoard } from "@/board_core/board";
 
 export const HEALTH_BAR_HEIGHT = 36;
 
+class HealthBarBackground extends Container {
+    public static RADIUS: number = 20;
+    public token: RpgToken;
+    public background: Graphics;
+    public tempHitPointsBar: Graphics;
+    public hitPointsBar: Graphics;
+
+    public constructor(token: RpgToken) {
+        super();
+
+        this.token = token;
+        this.background = new Graphics();
+        this.hitPointsBar = new Graphics();
+        this.tempHitPointsBar = new Graphics();
+
+        this.addChild(
+            this.background,
+            this.hitPointsBar,
+            this.tempHitPointsBar,
+        );
+    }
+
+    protected drawBackground(): void {
+        this.background.clear();
+        this.background
+            .roundRect(
+                0,
+                0,
+                this.token.displayedEntity!.width,
+                HEALTH_BAR_HEIGHT,
+                HealthBarBackground.RADIUS,
+            )
+            .fill({
+                color: "gray",
+                alpha: 1,
+            });
+    }
+
+    protected drawHitPointsBar(): void {
+        const width =
+            this.token.displayedEntity!.width *
+            (this.token.tokenData.hitPoints.current /
+                this.token.tokenData.hitPoints.maximum);
+        this.hitPointsBar.clear();
+        this.hitPointsBar.roundRect(0, 0, width, HEALTH_BAR_HEIGHT).fill({
+            color: "red",
+            alpha: 1,
+        });
+    }
+
+    protected drawTempHitPointsBar(): void {
+        const width = Math.min(
+            this.token.displayedEntity!.width,
+            this.token.displayedEntity!.width *
+                (this.token.tokenData.hitPoints.temporary /
+                    this.token.tokenData.hitPoints.maximum),
+        );
+        this.tempHitPointsBar.clear();
+        this.tempHitPointsBar.roundRect(0, 0, width, HEALTH_BAR_HEIGHT).fill({
+            color: "blue",
+            alpha: 1,
+        });
+    }
+
+    public draw(): void {
+        this.drawBackground();
+        this.drawHitPointsBar();
+        this.drawTempHitPointsBar();
+    }
+}
+
 export class HealthBar extends Container {
     public token: RpgToken;
     public healthText: Text;
-    public background: Graphics;
+    public background: HealthBarBackground;
 
     public constructor(token: RpgToken) {
         super({
@@ -22,9 +93,8 @@ export class HealthBar extends Container {
         });
 
         this.token = token;
-        this.background = new Graphics();
+        this.background = new HealthBarBackground(token);
         this.healthText = new Text({
-            width: this.tokenWidth,
             height: HEALTH_BAR_HEIGHT,
             text: this.healthLabel,
             resolution: 2,
@@ -33,8 +103,9 @@ export class HealthBar extends Container {
                 fill: 0x000000,
             },
         });
+        this.correctTextPosition();
 
-        this.drawBackground();
+        this.background.draw();
 
         this.addChild(this.background, this.healthText);
 
@@ -53,22 +124,6 @@ export class HealthBar extends Container {
         return `${this.token.tokenData.hitPoints.current}${this.token.tokenData.hitPoints.temporary > 0 ? `+${this.token.tokenData.hitPoints.temporary}` : ""}/${this.token.tokenData.hitPoints.maximum}`;
     }
 
-    protected drawBackground(color?: ColorSource): void {
-        this.background.clear();
-        this.background
-            .roundRect(
-                0,
-                0,
-                this.token.displayedEntity!.width,
-                HEALTH_BAR_HEIGHT,
-                20,
-            )
-            .fill({
-                color: color ?? 0xffff00,
-                alpha: 1,
-            });
-    }
-
     protected get tokenWidth(): number {
         return this.token.displayedEntity!.width;
     }
@@ -83,8 +138,19 @@ export class HealthBar extends Container {
             this.token.displayedEntity!.width !== this.background.width
         ) {
             this.healthText.text = this.healthLabel;
+            this.correctTextPosition();
             this.healthText.width = this.tokenWidth;
-            this.drawBackground();
+            this.background.draw();
+        }
+    }
+
+    protected correctTextPosition(): void {
+        if (this.healthText.width > this.tokenWidth) {
+            this.healthText.width = this.tokenWidth;
+        }
+
+        if (this.healthText.width < this.tokenWidth) {
+            this.healthText.x = (this.tokenWidth - this.healthText.width) / 2;
         }
     }
 }
