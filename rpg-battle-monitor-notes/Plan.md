@@ -8,15 +8,15 @@
 				- [x] Detect where the token is getting dropped
 				- [x] Create token entity on the board
 				- [x] Position token better - currently it usually isn't dropped where expected
-		- [ ] Adding new token data
-		- [ ] Token health bar ??
-		- [ ] Draw floating ui around selected token ??
+		- [x] Adding new token data
+		- [x] Token health bar ??
+		- [x] Draw floating ui around selected token ??
 	- [ ] Log
 		- [ ] Log message type - based on type choose how to display the message
 		- [ ] Paginated message handling on the server - only last x messages need to be shown to the user and scrolling/pagination can request for more
 
 - [ ] Character customisation
-	- [ ] Changing token image
+	- [x] Changing token image
 	- [ ] Changing character stats
 		- [ ] Character builder
 		- [ ] Built in monsters
@@ -32,10 +32,10 @@
 			- [x] Raytrace from mouse start position to current position. From cells that collide with the ray find the shortest path to the mouse position, highlight those cells
 		![[Pasted image 20250924184914.png]]
 		- [x] Display ft moved based on character speed
-			- [ ] For other players display a line where the character attempts to move to
+			- [x] For other players display a line where the character attempts to move to
 		- [x] Display speed left to use in turn
 		- [x] Disallow moving beyond character speed
-		- [ ] Disallow moving to same space as enemy 
+		- [x] Disallow moving to same space as enemy 
 		- [ ] Add harsh terrain
 			- [ ] Double speed used when passing
 - [ ] Walls
@@ -50,15 +50,15 @@
 		- [ ] Choose skill to use
 		- [ ] For each token that is not friendly
 			- [ ] Add friendly logic
-				- [ ] Add tag list to token data
+				- [x] Add tag list to token data
 				- [ ] Check for existence of a tag "friendly" tag when highlighting tokens (this can be maybe team based, so group and friendly npc tokens can be assigned one group while any hostile tokens can be assigned another group)
 			- [x] "Draw" a line from the attacking token to other tokens
 			- [x] Check if line is in skill range, e.g. 5 ft
 			- [x] Highlight all tokens in skill range
 			- [ ] Some spells/attacks don't require a target
 		- [ ] Target selection logic
-			- [ ] Overlay token layer
-			- [ ] Highlight valid token targets
+			- [x] Overlay token layer
+			- [x] Highlight valid token targets
 			- [ ] If attack/spell is targeted only allow clicking on highlighted tokens
 			- [ ] If attack/spell can have free selection allow clicking any cell
 		- [ ] AoE spells
@@ -66,13 +66,21 @@
 			- [ ] Cone
 			- [ ] Cube
 			- [ ] Sphere
-			- [ ] Cylinder
 	- [ ] Add melee attack
-		- [ ] Highlight attackable tokens in range
+		- [x] Highlight attackable tokens in range
 		- [ ] Roll for hit
-			- [ ] If hit roll for damage
+			- [x] If hit roll for damage
 			- [ ] Display rolls to users
-			- [ ] If hit and damaged update health of target
+			- [x] If hit and damaged update health of target
 	- [ ] Add ranged attack
 		- [ ] Add at least one spell
 		- [ ] Raytrace between start and target, if in range and target is seen roll for hit/damage
+	- [ ] Action display
+		- [ ] List all actions a token can do
+			- [ ] Group by spells, cantrips, melee, other (help, revive, use potion...)
+- [ ] Animate move can work like this
+	- [ ] on applyUpdateAction add animation to queue
+	- [ ] animation is queued until a transitive message with the right id is received
+	- [ ] if multiple messages are received for animating they must be queued and played one after other
+	- [ ] Animator class should clear the queue by itself if animations are stale (sitting in queue for 30 seconds)
+- [ ] Clone token data so multiple of the same npc can be added
