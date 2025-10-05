@@ -13,10 +13,12 @@ import { OnTurnMarker } from "../graphics/on_turn_marker";
 import { RpgScene } from "../scene/scene";
 import { InRangeHighlight } from "../graphics/in_range_highlight";
 import { GridCell, GridCellPosition } from "@/board_core/grid/cell";
+import { HealthBar } from "../graphics/health_bar";
 
 export class RpgToken extends Token {
     protected onTurnMarker: OnTurnMarker;
     protected inRangeHighlight: InRangeHighlight;
+    protected healthBar: HealthBar;
 
     public constructor(
         scene: Scene,
@@ -48,6 +50,10 @@ export class RpgToken extends Token {
         });
         this.inRangeHighlight.visible = false;
         this.addChild(this.inRangeHighlight);
+
+        this.healthBar = new HealthBar(this);
+        // this.healthBar.visible = false;
+        this.addChild(this.healthBar);
 
         this.addUpdateFnToTicker();
     }
