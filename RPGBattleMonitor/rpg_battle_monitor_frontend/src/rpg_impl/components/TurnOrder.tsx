@@ -1,10 +1,19 @@
 import { turnOrderAtoms } from "@/rpg_impl/stores/turn_order_store";
-import { Box, Checkbox, Flex } from "@mantine/core";
+import {
+    Box,
+    Button,
+    Checkbox,
+    Fieldset,
+    Flex,
+    Stack,
+    Text,
+} from "@mantine/core";
 import { useAtomValue } from "jotai";
 import { ReactNode, useEffect, useState } from "react";
 import { TurnOrder as RPGTurnOrder, TurnOrderEntry } from "../turn/turn_order";
 import { queueEntityUpdate } from "@/websocket/websocket";
 import { useDebouncedCallback } from "@mantine/hooks";
+import { Maul } from "../actions/weapons/maul";
 
 export const TurnOrder = () => {
     const { turnOrder } = useAtomValue(turnOrderAtoms.currentTurnOrder);
@@ -15,6 +24,46 @@ export const TurnOrder = () => {
         }
 
         return turnOrder.state;
+    };
+
+    const combatButtons = () => {
+        if (turnOrder === undefined) {
+            return <></>;
+        }
+
+        const isInCombat = turnOrder.isInCombat();
+
+        return (
+            <>
+                {!isInCombat && (
+                    <Button
+                        onClick={() => {
+                            turnOrder.startCombat();
+                        }}
+                    >
+                        Start combat
+                    </Button>
+                )}
+                {isInCombat && (
+                    <>
+                        <Button
+                            onClick={() => {
+                                turnOrder.stopCombat();
+                            }}
+                        >
+                            End combat
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                turnOrder.nextTurn();
+                            }}
+                        >
+                            Next turn
+                        </Button>
+                    </>
+                )}
+            </>
+        );
     };
 
     const displayTokens = () => {
@@ -39,15 +88,45 @@ export const TurnOrder = () => {
                         </TokenTurnEntry>
                     );
                 })}
+                <Fieldset legend="Actions">
+                    <Stack>
+                        <Text>Todo: List tokens actions and group them</Text>
+                        {combatButtons()}
+                        <Button
+                            onClick={() => {
+                                // TODO: emit message that other clients can handle and sync state
+                                const action = new Maul();
+                                const onTurn = turnOrder.getTokenOnTurn();
+                                if (onTurn === undefined) {
+                                    return;
+                                }
+
+                                turnOrder.scene.targetSelectionHandler.doAction(
+                                    onTurn.token,
+                                    action,
+                                );
+                            }}
+                        >
+                            Melee attack
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                turnOrder.scene.targetSelectionHandler.cancelAction();
+                            }}
+                        >
+                            Cancel attack
+                        </Button>
+                    </Stack>
+                </Fieldset>
             </Flex>
         );
     };
 
     return (
-        <Flex direction="column">
-            <div>{turnOrderState()}</div>
+        <Stack gap="xs" pb="xs" justify="center" align="stretch">
+            {turnOrderState()}
             {displayTokens()}
-        </Flex>
+        </Stack>
     );
 };
 

@@ -11,6 +11,8 @@ import { Token } from "@/board_core/token/token";
 import { RpgToken } from "../tokens/rpg_token";
 import { InRangeHandler } from "../handlers/in_range_handler";
 import { OccupiedSpaceHandler } from "../handlers/occupied_space_handler";
+import { TargetSelectionLayer } from "../layers/traget_selection_layer";
+import { TargetSelectionHandler } from "../handlers/target_selection_handler";
 
 export type RpgSceneOptions = { turnOrder?: TurnOrder } & SceneOptions;
 
@@ -38,12 +40,22 @@ export class RpgScene extends Scene {
     protected _rpgDragHandler: RpgDragHandler;
     protected _inRangeHandler: InRangeHandler;
     protected _occupiedSpaceHandler: OccupiedSpaceHandler;
+    protected _targetSelectionHandler: TargetSelectionHandler;
 
     public constructor(options: RpgSceneOptions) {
         super({
             layers: new Layers(defaultLayersExt()),
             ...options,
         });
+
+        const targetSelectionLayerConstructor = {
+            name: "targetSelection",
+            container: new TargetSelectionLayer(this),
+            zIndex: this.layers.layers.length,
+            label: "Target selection layer",
+        };
+
+        this.layers.getLayer(targetSelectionLayerConstructor);
 
         this._turnOrder = options.turnOrder;
 
@@ -55,6 +67,12 @@ export class RpgScene extends Scene {
 
         this._inRangeHandler = new InRangeHandler(this);
         this._occupiedSpaceHandler = new OccupiedSpaceHandler(this);
+
+        this.addLayersToStage();
+
+        this._targetSelectionHandler = new TargetSelectionHandler({
+            scene: this,
+        });
     }
 
     public get turnOrder(): Maybe<TurnOrder> {
@@ -124,5 +142,14 @@ export class RpgScene extends Scene {
 
     public get occupiedSpaceHandler(): OccupiedSpaceHandler {
         return this._occupiedSpaceHandler;
+    }
+
+    public get targetSelectionLayer(): TargetSelectionLayer {
+        return this.layers.getLayer("targetSelection")
+            .container as TargetSelectionLayer;
+    }
+
+    public get targetSelectionHandler(): TargetSelectionHandler {
+        return this._targetSelectionHandler;
     }
 }

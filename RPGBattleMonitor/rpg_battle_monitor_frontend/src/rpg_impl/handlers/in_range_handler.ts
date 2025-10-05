@@ -80,11 +80,16 @@ export class InRangeHandler {
         return tokensInRange;
     }
 
-    // TODO: Does not work with larger tokens
-    public highlightTokensInRange(from: RpgToken, range: number): void {
+    public highlightTokensInRange(
+        from: RpgToken,
+        range: number,
+        tokens?: RpgToken[],
+    ): void {
         this.clearHighlight();
 
-        this.tokensInRange(from, range).forEach((token) => {
+        const inRange = tokens ?? this.tokensInRange(from, range);
+
+        inRange.forEach((token) => {
             token.isHighlighted = true;
         });
     }

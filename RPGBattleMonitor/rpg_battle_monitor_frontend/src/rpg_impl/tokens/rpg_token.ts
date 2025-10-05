@@ -14,8 +14,9 @@ import { RpgScene } from "../scene/scene";
 import { InRangeHighlight } from "../graphics/in_range_highlight";
 import { GridCell, GridCellPosition } from "@/board_core/grid/cell";
 import { HealthBar } from "../graphics/health_bar";
+import { ITargetable } from "../interface/targetable";
 
-export class RpgToken extends Token {
+export class RpgToken extends Token implements ITargetable {
     protected onTurnMarker: OnTurnMarker;
     protected inRangeHighlight: InRangeHighlight;
     protected healthBar: HealthBar;
@@ -182,5 +183,25 @@ export class RpgToken extends Token {
         }
 
         return cells;
+    }
+
+    public takeDamage(damage: number): void {
+        let damageToApply = damage;
+        let hitPoints = this.tokenData.hitPoints.current;
+        let tempHitPoints = this.tokenData.hitPoints.temporary;
+
+        tempHitPoints -= damageToApply;
+        if (tempHitPoints < 0) {
+            damageToApply = -tempHitPoints;
+            tempHitPoints = 0;
+        }
+
+        hitPoints -= damageToApply;
+        if (hitPoints < 0) {
+            hitPoints = 0;
+        }
+
+        this.tokenData.hitPoints.temporary = tempHitPoints;
+        this.tokenData.hitPoints.current = hitPoints;
     }
 }

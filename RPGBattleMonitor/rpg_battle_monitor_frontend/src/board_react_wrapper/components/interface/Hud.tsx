@@ -119,51 +119,6 @@ const HudLeft = () => {
                 >
                     Add selection to turn order
                 </Button>
-                <Button
-                    flex={1}
-                    style={{
-                        pointerEvents: "all",
-                    }}
-                    onClick={() => {
-                        turnOrder.startCombat();
-
-                        queueEntityUpdate(() => {
-                            return turnOrder;
-                        });
-                    }}
-                >
-                    Start combat
-                </Button>
-                <Button
-                    flex={1}
-                    style={{
-                        pointerEvents: "all",
-                    }}
-                    onClick={() => {
-                        turnOrder.stopCombat();
-
-                        queueEntityUpdate(() => {
-                            return turnOrder;
-                        });
-                    }}
-                >
-                    Stop combat
-                </Button>
-                <Button
-                    flex={1}
-                    style={{
-                        pointerEvents: "all",
-                    }}
-                    onClick={() => {
-                        turnOrder.nextTurn();
-
-                        queueEntityUpdate(() => {
-                            return turnOrder;
-                        });
-                    }}
-                >
-                    Next turn
-                </Button>
             </Flex>
         );
     };
