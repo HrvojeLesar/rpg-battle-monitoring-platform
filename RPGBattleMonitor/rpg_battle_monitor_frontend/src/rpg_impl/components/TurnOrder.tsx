@@ -8,7 +8,7 @@ import {
     Stack,
     Text,
 } from "@mantine/core";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { ReactNode, useEffect, useState } from "react";
 import { TurnOrder as RPGTurnOrder, TurnOrderEntry } from "../turn/turn_order";
 import { queueEntityUpdate } from "@/websocket/websocket";
@@ -17,6 +17,7 @@ import { Maul } from "../actions/weapons/maul";
 
 export const TurnOrder = () => {
     const { turnOrder } = useAtomValue(turnOrderAtoms.currentTurnOrder);
+    const refreshTurnOrder = useSetAtom(turnOrderAtoms.currentTurnOrder);
 
     const turnOrderState = () => {
         if (turnOrder === undefined) {
@@ -91,19 +92,32 @@ export const TurnOrder = () => {
                 <Fieldset legend="Actions">
                     <Stack>
                         <Text>Todo: List tokens actions and group them</Text>
+                        <Text>
+                            Actions left {turnOrder.getTokenOnTurn()?.action}
+                        </Text>
+                        <Text>
+                            Bonus actions left{" "}
+                            {turnOrder.getTokenOnTurn()?.bonusAction}
+                        </Text>
                         {combatButtons()}
                         <Button
                             onClick={() => {
                                 // TODO: emit message that other clients can handle and sync state
                                 const action = new Maul();
-                                const onTurn = turnOrder.getTokenOnTurn();
-                                if (onTurn === undefined) {
+                                const onTurnEntry = turnOrder.getTokenOnTurn();
+                                if (onTurnEntry === undefined) {
                                     return;
                                 }
 
-                                turnOrder.scene.targetSelectionHandler.doAction(
-                                    onTurn.token,
+                                turnOrder.doAction(
+                                    onTurnEntry.token,
                                     action,
+                                    () => {
+                                        refreshTurnOrder();
+                                        queueEntityUpdate(() => {
+                                            return turnOrder;
+                                        });
+                                    },
                                 );
                             }}
                         >

@@ -15,6 +15,12 @@ import {
     abilityScoreModifier,
     AbilityScoreType,
 } from "../characters_stats/ability_score";
+import { Action, ActionOnCanceled, ActionOnFinished } from "../actions/action";
+import { notifications } from "@mantine/notifications";
+import {
+    anotherTokensTurnNotification,
+    errorNotification,
+} from "../utils/notification_utils";
 
 export enum TurnOrderState {
     OutOfCombat = "OutOfCombat",
@@ -35,6 +41,8 @@ export type TurnOrderEntrySerialized = {
     surprised: boolean;
     baseSpeed: number;
     speed: number;
+    action: number;
+    bonusAction: number;
 };
 
 export type TurnOrderEntry = {
@@ -43,6 +51,8 @@ export type TurnOrderEntry = {
     surprised: boolean;
     baseSpeed: number;
     speed: number;
+    action: number;
+    bonusAction: number;
 };
 
 function convertUIdsToTokens(
@@ -58,6 +68,8 @@ function convertUIdsToTokens(
                     surprised: entry.surprised,
                     baseSpeed: entry.baseSpeed,
                     speed: entry.speed,
+                    action: entry.action,
+                    bonusAction: entry.bonusAction,
                 });
             }
             return acc;
@@ -113,6 +125,8 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
                 surprised: entry.surprised,
                 baseSpeed: entry.baseSpeed,
                 speed: entry.speed,
+                action: entry.action,
+                bonusAction: entry.bonusAction,
             })),
             sceneUid: this.scene.getUId(),
             turnOrderState: this._state,
@@ -162,6 +176,8 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
                     surprised: false,
                     baseSpeed: token.tokenData.speed.walk,
                     speed: token.tokenData.speed.walk, // TODO: get speed from the current token state and apply modifiers
+                    action: 1,
+                    bonusAction: 1,
                 });
             });
 
@@ -220,7 +236,7 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
                 AbilityScoreType.Dexterity,
             );
             entry.initiative = rolled + dexModifier;
-            entry.speed = entry.baseSpeed;
+            this.resetEntryVars(entry);
         });
 
         this._tokens.sort((a, b) => {
@@ -281,12 +297,85 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
     }
 
     protected processEntryNextTurn(nextToken: TurnOrderEntry): void {
-        nextToken.speed = nextToken.baseSpeed;
+        this.resetEntryVars(nextToken);
 
         if (nextToken.surprised) {
             nextToken.surprised = false;
             this.nextTurn();
         }
+    }
+
+    public doAction(
+        token: RpgToken,
+        action: Action,
+        onFinished?: ActionOnFinished,
+    ): void {
+        if (this.isInCombat() && !this.isDoActionValid(token, action)) {
+            return;
+        }
+
+        this.scene.targetSelectionHandler.doAction(
+            token,
+            action,
+            (initiator, target, action) => {
+                const entry = this.getToken(token);
+                if (entry !== undefined) {
+                    if (action.actionType === "action") {
+                        entry.action--;
+                    } else if (action.actionType === "bonusAction") {
+                        entry.bonusAction--;
+                    }
+                }
+
+                onFinished?.(initiator, target, action);
+            },
+        );
+    }
+
+    protected isDoActionValid(token: RpgToken, action: Action): boolean {
+        if (!this.isOnTurn(token)) {
+            anotherTokensTurnNotification();
+            return false;
+        }
+
+        const entry = this.getToken(token);
+        if (entry === undefined) {
+            notifications.show(
+                errorNotification(
+                    "Token not in turn order",
+                    "Token using the action is not in the current turn order",
+                ),
+            );
+            return false;
+        }
+
+        if (entry.action <= 0 && action.actionType === "action") {
+            notifications.show(
+                errorNotification(
+                    "Not enough actions",
+                    "Token does not have enough actions to perform this action",
+                ),
+            );
+            return false;
+        }
+
+        if (entry.bonusAction <= 0 && action.actionType === "bonusAction") {
+            notifications.show(
+                errorNotification(
+                    "Not enough bonus actions",
+                    "Token does not have enough bonus actions to perform this action",
+                ),
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    protected resetEntryVars(entry: TurnOrderEntry): void {
+        entry.speed = entry.baseSpeed;
+        entry.action = 1;
+        entry.bonusAction = 1;
     }
 }
 

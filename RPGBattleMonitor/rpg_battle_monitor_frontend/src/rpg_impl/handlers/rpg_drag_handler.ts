@@ -18,18 +18,13 @@ import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
 import { turnOrderAtoms } from "../stores/turn_order_store";
 import { raycast } from "../utils/raycast";
 import { shortestPath } from "../utils/highlighted_cells_shortest_path";
-import { NotificationData, notifications } from "@mantine/notifications";
+import { notifications } from "@mantine/notifications";
+import {
+    anotherTokensTurnNotification,
+    errorNotification,
+} from "../utils/notification_utils";
 
 export const CELL_FT = 5;
-
-const errorNotification = (
-    title: string,
-    message: string,
-): NotificationData => ({
-    title,
-    message,
-    color: "red",
-});
 
 export class RpgDragHandler extends DragHandler {
     protected dragLayer: Layer;
@@ -268,12 +263,7 @@ export class RpgDragHandler extends DragHandler {
         }
 
         if (!turnOrder.isOnTurn(token)) {
-            notifications.show(
-                errorNotification(
-                    "Not token's turn",
-                    "It's another tokens turn",
-                ),
-            );
+            anotherTokensTurnNotification();
             return false;
         }
 
@@ -308,6 +298,7 @@ export class RpgDragHandler extends DragHandler {
             return false;
         }
 
+        // TODO: Move this into turn order
         entry.speed -= distanceDisplay.distance;
 
         return true;

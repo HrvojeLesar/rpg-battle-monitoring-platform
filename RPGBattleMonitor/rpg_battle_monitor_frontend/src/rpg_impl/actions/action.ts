@@ -5,6 +5,19 @@ import { RpgToken } from "../tokens/rpg_token";
 
 export type TargetingType = "self" | "ally" | "hostile";
 export type AreaOfEffectType = "line" | "cone" | "cube" | "sphere" | "cylinder";
+export type ActionType = "action" | "bonusAction";
+
+export type ActionOnFinished = (
+    initiator: RpgToken,
+    target: ITargetable | ITargetable[],
+    action: Action,
+    data?: {
+        descriminator: string;
+        values: unknown;
+    },
+) => void;
+
+export type ActionOnCanceled = (initiator: RpgToken, action: Action) => void;
 
 export type ActionOptions = {
     baseDamage: string;
@@ -12,6 +25,7 @@ export type ActionOptions = {
     damageType: string;
     targeting: TargetingType[];
     areaOfEffect?: AreaOfEffectType;
+    actionType?: ActionType;
 };
 
 export abstract class Action {
@@ -20,6 +34,7 @@ export abstract class Action {
     public damageType: string;
     public targeting: TargetingType[];
     public areaOfEffect?: AreaOfEffectType;
+    public actionType: ActionType = "action";
 
     protected die: Die;
 
@@ -29,6 +44,9 @@ export abstract class Action {
         this.damageType = options.damageType;
         this.targeting = options.targeting;
         this.areaOfEffect = options.areaOfEffect;
+        if (options.actionType) {
+            this.actionType = options.actionType;
+        }
 
         this.die = GDieParser.parse(this.baseDamage);
     }

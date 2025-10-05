@@ -50,10 +50,12 @@ class HealthBarBackground extends Container {
     }
 
     protected drawHitPointsBar(): void {
-        const width =
+        const width = Math.min(
+            this.token.displayedEntity!.width,
             this.token.displayedEntity!.width *
-            (this.token.tokenData.hitPoints.current /
-                this.token.tokenData.hitPoints.maximum);
+                (this.token.tokenData.hitPoints.current /
+                    this.token.tokenData.hitPoints.maximum),
+        );
         this.hitPointsBar.clear();
         this.hitPointsBar.roundRect(0, 0, width, HEALTH_BAR_HEIGHT).fill({
             color: "red",

@@ -1,5 +1,5 @@
 import { FederatedPointerEvent } from "pixi.js";
-import { Action } from "../actions/action";
+import { Action, ActionOnFinished } from "../actions/action";
 import { TargetSelectionLayer } from "../layers/traget_selection_layer";
 import { RpgScene } from "../scene/scene";
 import { RpgToken } from "../tokens/rpg_token";
@@ -25,7 +25,11 @@ export class TargetSelectionHandler {
         this.occupiedSpaceHandler = this.scene.occupiedSpaceHandler;
     }
 
-    public doAction(initiator: RpgToken, action: Action): void {
+    public doAction(
+        initiator: RpgToken,
+        action: Action,
+        actionFinishedCallback?: ActionOnFinished,
+    ): void {
         this.startAction();
 
         const range = action.cellRange;
@@ -37,7 +41,12 @@ export class TargetSelectionHandler {
 
         // TODO: Handle here the kind of selection it needs to be
         // currently only supported is direct target
-        this.overlayTargetTokens(initiator, targets, action);
+        this.overlayTargetTokens(
+            initiator,
+            targets,
+            action,
+            actionFinishedCallback,
+        );
     }
 
     public cancelAction(): void {
@@ -54,9 +63,10 @@ export class TargetSelectionHandler {
         initiator: RpgToken,
         tokens: RpgToken[],
         action: Action,
+        onFinished?: ActionOnFinished,
     ): void {
         tokens.forEach((token) => {
-            this.newTokenOverlay(initiator, token, action);
+            this.newTokenOverlay(initiator, token, action, onFinished);
         });
     }
 
@@ -64,11 +74,18 @@ export class TargetSelectionHandler {
         initiator: RpgToken,
         token: RpgToken,
         action: Action,
+        onFinished?: ActionOnFinished,
     ): TargetTokenOverlay {
         const overlay = new TargetTokenOverlay(
             token,
             (event: FederatedPointerEvent, token: RpgToken) => {
-                this.singleTargetSelect(event, token, action, initiator);
+                this.singleTargetSelect(
+                    event,
+                    token,
+                    action,
+                    initiator,
+                    onFinished,
+                );
             },
         );
         this.targetSelectionLayer.addChild(overlay);
@@ -81,6 +98,7 @@ export class TargetSelectionHandler {
         target: RpgToken,
         action: Action,
         initiator: RpgToken,
+        onFinished?: ActionOnFinished,
     ): void {
         this.cancelAction();
         const damagedTargets = action.damageTarget(initiator, target);
@@ -89,6 +107,11 @@ export class TargetSelectionHandler {
             return damagedTargets
                 .filter((target) => target instanceof RpgToken)
                 .map((target) => target.tokenData);
+        });
+
+        onFinished?.(initiator, target, action, {
+            descriminator: "damagedTargets",
+            values: damagedTargets,
         });
     }
 }
