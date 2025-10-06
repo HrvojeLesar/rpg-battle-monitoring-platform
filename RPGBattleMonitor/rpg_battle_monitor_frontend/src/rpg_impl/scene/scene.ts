@@ -19,17 +19,27 @@ export type RpgSceneOptions = { turnOrder?: TurnOrder } & SceneOptions;
 function defaultLayersExt() {
     const layers = defaultLayers();
 
+    const animateLayer = {
+        name: "animate",
+        container: new Container({
+            label: "animateLayer",
+            eventMode: "none",
+        }),
+        zIndex: 3,
+        label: "Animate layer",
+    };
+
     const dragLayer = {
         name: "drag",
         container: new Container({
             label: "dragLayer",
             eventMode: "none",
         }),
-        zIndex: 3,
+        zIndex: 4,
         label: "Drag layer",
     };
 
-    const defaultLayersExt = [...layers, dragLayer];
+    const defaultLayersExt = [...layers, animateLayer, dragLayer];
     defaultLayersExt[2].zIndex = dragLayer.zIndex + 1;
 
     return defaultLayersExt;

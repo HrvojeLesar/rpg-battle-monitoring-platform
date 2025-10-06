@@ -1,5 +1,9 @@
 import { JoinData } from "../../websocket/websocket";
-import { IMessagable } from "../interfaces/messagable";
+import {
+    DefaultAttributes,
+    IMessagable,
+    TypedJson,
+} from "../interfaces/messagable";
 
 export type EventNames = {
     "board-init-started": () => void;
@@ -14,7 +18,11 @@ export type EventNames = {
 
     "entity-added": (entity: IMessagable) => void;
     "entity-removed": (entity: IMessagable | IMessagable[]) => void;
-    "entity-updated": (entity: IMessagable) => void;
+    "entity-updated": <T extends DefaultAttributes>(
+        entity: IMessagable,
+        oldData?: T,
+        newData?: TypedJson<T>,
+    ) => void;
 };
 
 export type EventEmitterTypes = {

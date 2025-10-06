@@ -11,6 +11,7 @@ import { Scene } from "@/board_core/scene";
 import { shortestPath } from "../utils/highlighted_cells_shortest_path";
 
 // TODO: Make better, currently breaks easily
+// TODO: Process multiple movements in "parallel"
 class RpgTokenAnimator {
     protected animateMoveQueue: (() => void)[] = [];
 
@@ -36,7 +37,7 @@ class RpgTokenAnimator {
         );
         arrow.setTo(to);
 
-        let cellPoints: HighlightedCell[] = [];
+        const cellPoints: HighlightedCell[] = [];
         raycast(arrow.getFrom(), arrow.getTo(), {
             onPoint: (point) => {
                 const cellPoint = this.highlightCell(
@@ -49,13 +50,14 @@ class RpgTokenAnimator {
                 }
             },
         });
-        cellPoints = shortestPath(cellPoints);
+        const shortestPathCells = shortestPath(cellPoints);
 
-        for (const cellPoint of cellPoints) {
+        // TODO: sometimes incorrect or not shown
+        for (const cellPoint of shortestPathCells) {
             cellPoint.visible = true;
         }
 
-        currentScene.layers.getLayer("drag").container.addChild(arrow);
+        currentScene.layers.getLayer("animate").container.addChild(arrow);
 
         const cleanup = () => {
             for (const cellPoint of cellPoints) {
@@ -107,7 +109,7 @@ class RpgTokenAnimator {
         const cell = GridCell.getGridCellFromPoint(point, scene.grid);
 
         const existingHighlight = scene.layers
-            .getLayer("drag")
+            .getLayer("animate")
             .container.children.find(
                 (child) =>
                     child instanceof HighlightedCell &&
@@ -118,7 +120,7 @@ class RpgTokenAnimator {
 
         if (existingHighlight === undefined) {
             const highlightCell = new HighlightedCell(cell, scene.grid, token);
-            scene.layers.getLayer("drag").container.addChild(highlightCell);
+            scene.layers.getLayer("animate").container.addChild(highlightCell);
             highlightCell.visible = false;
 
             return highlightCell;

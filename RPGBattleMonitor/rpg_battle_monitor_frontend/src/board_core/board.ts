@@ -278,8 +278,14 @@ function initWebsocketListeners() {
                         data.uid,
                     );
                     if (entity && entity.shouldApplyChanges(data)) {
+                        const oldData = entity.getAttributes();
                         entity.applyUpdateAction(data);
-                        GEventEmitter.emit("entity-updated", entity);
+                        GEventEmitter.emit(
+                            "entity-updated",
+                            entity,
+                            oldData,
+                            data,
+                        );
                     }
                 });
                 break;

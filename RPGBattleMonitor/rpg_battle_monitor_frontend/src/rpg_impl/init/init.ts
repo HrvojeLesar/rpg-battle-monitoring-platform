@@ -30,6 +30,9 @@ import { GTokenWindowRegistry } from "../registry/token_window_registry";
 import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
 import { openDecorationTokenWindow } from "../components/windows/DecorationTokenWindow";
 import { openRpgTokenWindow } from "../components/windows/RpgTokenWindow";
+import { TokenAttributes } from "@/board_core/token/token";
+import { TypedJson } from "@/board_core/interfaces/messagable";
+import { GRpgTokenAnimator } from "../handlers/animate";
 
 export const initializeRPG = (entityRegistry: EntityRegistry) => {
     registerEntities(entityRegistry);
@@ -39,6 +42,20 @@ export const initializeRPG = (entityRegistry: EntityRegistry) => {
     GEventEmitter.on("socket-join-finished", socketJoinFinishedListener);
     GEventEmitter.once("board-destroyed", () => {
         GEventEmitter.off("socket-join-finished", socketJoinFinishedListener);
+    });
+
+    GEventEmitter.on("entity-updated", (entity, oldData, newData) => {
+        if (
+            entity instanceof RpgToken &&
+            oldData !== undefined &&
+            newData !== undefined
+        ) {
+            animateTokenMoves(
+                entity,
+                oldData as TokenAttributes,
+                newData as TypedJson<TokenAttributes>,
+            );
+        }
     });
 
     GTokenWindowRegistry.registerHandler((token) => {
@@ -140,4 +157,17 @@ const socketJoinFinishedListener = () => {
         icon: TokenIcon,
         content: TurnOrderComponent,
     });
+
+const animateTokenMoves = (
+    token: RpgToken,
+    oldData: TokenAttributes,
+    newData: TypedJson<TokenAttributes>,
+) => {
+    const oldPosition = new Point(oldData.position.x, oldData.position.y);
+    token.position.set(oldPosition.x, oldPosition.y);
+
+    GRpgTokenAnimator.animateMove(
+        token,
+        new Point(newData.position.x, newData.position.y),
+    );
 };

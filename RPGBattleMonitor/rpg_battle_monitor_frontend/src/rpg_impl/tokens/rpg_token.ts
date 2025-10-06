@@ -87,15 +87,8 @@ export class RpgToken extends Token implements ITargetable {
     }
 
     public applyUpdateAction(changes: TypedJson<TokenAttributes>): void {
-        // const oldPosition = this.position.clone();
         super.applyUpdateAction(changes);
 
-        // this.position.set(oldPosition.x, oldPosition.y);
-        //
-        // GRpgTokenAnimator.animateMove(
-        //     this,
-        //     new Point(changes.position.x, changes.position.y),
-        // );
     }
 
     public destroy(options?: DestroyOptions): void {
