@@ -12,7 +12,7 @@ import { shortestPath } from "../utils/highlighted_cells_shortest_path";
 
 // TODO: Make better, currently breaks easily
 // TODO: Process multiple movements in "parallel"
-class RpgTokenAnimator {
+export class RpgTokenAnimator {
     protected animateMoveQueue: (() => void)[] = [];
 
     public constructor() {}
@@ -129,5 +129,3 @@ class RpgTokenAnimator {
         return undefined;
     }
 }
-
-export const GRpgTokenAnimator = new RpgTokenAnimator();

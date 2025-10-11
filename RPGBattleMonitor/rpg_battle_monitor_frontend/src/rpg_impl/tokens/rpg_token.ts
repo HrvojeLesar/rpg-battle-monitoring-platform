@@ -8,18 +8,19 @@ import { DeleteAction, TypedJson } from "@/board_core/interfaces/messagable";
 import { TurnOrder } from "../turn/turn_order";
 import { GBoard } from "@/board_core/board";
 import { queueEntityUpdate } from "@/websocket/websocket";
-import { GRpgTokenAnimator } from "../handlers/animate";
 import { OnTurnMarker } from "../graphics/on_turn_marker";
 import { RpgScene } from "../scene/scene";
 import { InRangeHighlight } from "../graphics/in_range_highlight";
 import { GridCell, GridCellPosition } from "@/board_core/grid/cell";
 import { HealthBar } from "../graphics/health_bar";
 import { ITargetable } from "../interface/targetable";
+import { RpgTokenAnimator } from "../handlers/animate";
 
 export class RpgToken extends Token implements ITargetable {
     protected onTurnMarker: OnTurnMarker;
     protected inRangeHighlight: InRangeHighlight;
     protected healthBar: HealthBar;
+    public animator: RpgTokenAnimator;
 
     public constructor(
         scene: Scene,
@@ -57,6 +58,8 @@ export class RpgToken extends Token implements ITargetable {
         this.addChild(this.healthBar);
 
         this.addUpdateFnToTicker();
+
+        this.animator = new RpgTokenAnimator();
     }
 
     public get tokenData(): RpgTokenData {
@@ -88,7 +91,6 @@ export class RpgToken extends Token implements ITargetable {
 
     public applyUpdateAction(changes: TypedJson<TokenAttributes>): void {
         super.applyUpdateAction(changes);
-
     }
 
     public destroy(options?: DestroyOptions): void {
