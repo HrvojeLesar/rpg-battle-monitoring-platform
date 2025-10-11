@@ -20,6 +20,7 @@ import { notifications } from "@mantine/notifications";
 import {
     anotherTokensTurnNotification,
     errorNotification,
+    infoNotification,
 } from "../utils/notification_utils";
 
 export enum TurnOrderState {
@@ -300,6 +301,12 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
         this.resetEntryVars(nextToken);
 
         if (nextToken.surprised) {
+            notifications.show(
+                infoNotification(
+                    "Skipping token",
+                    `${nextToken.token.tokenData.name} is surprised, skipping turn`,
+                ),
+            );
             nextToken.surprised = false;
             this.nextTurn();
         }

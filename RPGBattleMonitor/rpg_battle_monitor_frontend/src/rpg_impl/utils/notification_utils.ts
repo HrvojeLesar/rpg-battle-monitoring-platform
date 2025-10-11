@@ -14,3 +14,12 @@ export const anotherTokensTurnNotification = () => {
         errorNotification("Not token's turn", "It's another tokens turn"),
     );
 };
+
+export const infoNotification = (
+    title: string,
+    message: string,
+): NotificationData => ({
+    title,
+    message,
+    color: "blue",
+});

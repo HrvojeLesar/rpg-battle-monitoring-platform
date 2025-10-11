@@ -225,7 +225,12 @@ export type TokenTurnEntrySurprisedProps = {
 export const TokenTurnEntry = ({ children }: TokenTurnEntryProps) => {
     return (
         <Fieldset legend="Tokens in encounter">
-            <Flex gap="xs" direction="column">
+            <Flex
+                gap="xs"
+                direction="column"
+                mah="512px"
+                style={{ overflow: "auto" }}
+            >
                 {children}
             </Flex>
         </Fieldset>
