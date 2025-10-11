@@ -34,7 +34,7 @@ export class SelectHandler {
     public selectionHolderContainer: SelectionHolderContainer;
     protected _resizeHandler: ResizeHandler;
     protected _selectionState: SelectionState = SelectionState.None;
-    protected selectionBox: SelectionBox;
+    public selectionBox: SelectionBox;
 
     protected clampWidthRight: boolean = false;
     protected clampWidthLeft: boolean = false;

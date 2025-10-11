@@ -383,4 +383,16 @@ export class Scene implements IMessagable<SceneAttributes> {
         this._selectHandler.unregisterSelect(token);
         this._dragHandler.unregisterDrag(token);
     }
+
+    public freeDrag(): void {
+        this.viewport.drag({});
+        this.selectHandler.selectionBox.pause = true;
+    }
+
+    public dragWithSelectionBox(): void {
+        this.viewport.drag({
+            mouseButtons: "middle-right",
+        });
+        this.selectHandler.selectionBox.pause = false;
+    }
 }

@@ -8,6 +8,7 @@ export class SelectionBox extends Graphics {
     protected _scene: Scene;
     protected _viewport: Viewport;
     protected selectHandler: SelectHandler;
+    public pause: boolean = false;
 
     public constructor(scene: Scene, selectHandler: SelectHandler) {
         super({ label: "selectionBox" });
@@ -28,7 +29,7 @@ export class SelectionBox extends Graphics {
                 return onPointerUp();
             }
 
-            if (this.selectHandler.pause) {
+            if (this.selectHandler.pause || this.pause) {
                 return onPointerUp();
             }
 
@@ -91,7 +92,7 @@ export class SelectionBox extends Graphics {
                 return;
             }
 
-            if (this.selectHandler.pause) {
+            if (this.selectHandler.pause || this.pause) {
                 this.selectHandler.clearSelections();
                 return;
             }

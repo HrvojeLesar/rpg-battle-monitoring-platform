@@ -189,6 +189,37 @@ const HudLeft = () => {
         );
     };
 
+    const switchViewportDragging = () => {
+        if (!(currentScene instanceof RpgScene)) {
+            return <></>;
+        }
+
+        return (
+            <>
+                <Button
+                    style={{
+                        pointerEvents: "all",
+                    }}
+                    onClick={() => {
+                        currentScene.freeDrag();
+                    }}
+                >
+                    Free drag
+                </Button>
+                <Button
+                    style={{
+                        pointerEvents: "all",
+                    }}
+                    onClick={() => {
+                        currentScene.dragWithSelectionBox();
+                    }}
+                >
+                    With selection box
+                </Button>
+            </>
+        );
+    };
+
     return (
         <SidesFlexBox>
             <Flex direction="column" gap="xs" style={{ overflow: "auto" }}>
@@ -202,6 +233,7 @@ const HudLeft = () => {
                     <SelectionControls.ContainerProperties />
                 </SelectionControls>
                 {inRange()}
+                {switchViewportDragging()}
             </Flex>
         </SidesFlexBox>
     );
