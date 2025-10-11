@@ -1,9 +1,8 @@
 import { Box, Button, Flex, Paper } from "@mantine/core";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { SceneSelection } from "./SceneSelection";
 import classes from "../../../css/hud.module.css";
 import { ReactNode } from "react";
-import { GBoard } from "@/board_core/board";
 import { Resizable } from "re-resizable";
 import { SidebarTabs } from "./SidebarTabs";
 import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
@@ -13,6 +12,7 @@ import { turnOrderAtoms } from "@/rpg_impl/stores/turn_order_store";
 import { RpgToken } from "@/rpg_impl/tokens/rpg_token";
 import { queueEntityUpdate } from "@/websocket/websocket";
 import { SelectionControls } from "../selection_controls/SelectionControls";
+import { LayerSelect } from "./LayerSelect";
 
 const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
     return (
@@ -32,40 +32,7 @@ const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
 
 const HudLeft = () => {
     const currentScene = useAtomValue(sceneAtoms.getCurrentScene);
-    const currentSceneLayer = useAtomValue(sceneAtoms.getCurrentSceneLayer);
-    const refreshScenes = useSetAtom(sceneAtoms.refreshScenes);
     const { turnOrder } = useAtomValue(turnOrderAtoms.currentTurnOrder);
-
-    const addLayerSwitchButton = () => {
-        if (!currentScene) {
-            return <></>;
-        }
-
-        return (
-            <Button
-                style={{
-                    pointerEvents: "all",
-                }}
-                onClick={() => {
-                    const selectedLayer = GBoard.scene?.selectedLayer;
-                    if (selectedLayer?.name === "gridBackground") {
-                        GBoard.scene?.selectLayer("token");
-                    } else if (selectedLayer?.name === "token") {
-                        GBoard.scene?.selectLayer("grid");
-                    } else if (selectedLayer?.name === "grid") {
-                        GBoard.scene?.selectLayer("gridBackground");
-                    } else {
-                        GBoard.scene?.selectLayer("token");
-                    }
-
-                    refreshScenes();
-                }}
-            >
-                Switch layer events (Current layer:
-                {currentSceneLayer?.name})
-            </Button>
-        );
-    };
 
     const addTurnOrderButton = () => {
         if (!currentScene || !(currentScene instanceof RpgScene)) {
@@ -164,31 +131,6 @@ const HudLeft = () => {
         );
     };
 
-    const inRange = () => {
-        if (!(currentScene instanceof RpgScene)) {
-            return <></>;
-        }
-
-        return (
-            <Button
-                style={{
-                    pointerEvents: "all",
-                }}
-                onClick={() => {
-                    const token = currentScene.selectHandler.selections.at(0);
-                    if (token instanceof RpgToken) {
-                        currentScene.inRangeHandler.highlightTokensInRange(
-                            token,
-                            1,
-                        );
-                    }
-                }}
-            >
-                Highlight in range
-            </Button>
-        );
-    };
-
     const switchViewportDragging = () => {
         if (!(currentScene instanceof RpgScene)) {
             return <></>;
@@ -224,7 +166,7 @@ const HudLeft = () => {
         <SidesFlexBox>
             <Flex direction="column" gap="xs" style={{ overflow: "auto" }}>
                 <SceneSelection />
-                {addLayerSwitchButton()}
+                <LayerSelect />
                 {addTurnOrderButton()}
                 {addSelectionToTurnOrder()}
                 {focusOnSelection()}
@@ -232,7 +174,6 @@ const HudLeft = () => {
                     <SelectionControls.DeleteSelection />
                     <SelectionControls.ContainerProperties />
                 </SelectionControls>
-                {inRange()}
                 {switchViewportDragging()}
             </Flex>
         </SidesFlexBox>

@@ -1,4 +1,5 @@
 import {
+    ColorSource,
     Container,
     ContainerOptions,
     DestroyOptions,
@@ -15,6 +16,7 @@ export type DistanceDisplayOptions = {
 export class OnTurnMarker extends Container {
     public token: RpgToken;
     public background: Graphics;
+    public color: ColorSource = "#5e33f7";
 
     protected elapsed: number = 0;
     protected amplitude: number = 10;
@@ -43,16 +45,16 @@ export class OnTurnMarker extends Container {
 
     protected drawBackground(): void {
         this.background.clear();
-        this.background.circle(0, 0, 20).fill({ color: "gray" });
+        this.background.circle(0, 0, 20).fill({ color: this.color });
         this.background.circle(0, 0, 10).fill({ color: "black", alpha: 0.9 });
         this.background
             .moveTo(-15, 10)
             .lineTo(15, 10)
             .lineTo(0, 45)
             .lineTo(-15, 10)
-            .fill({ color: "gray", width: 5 })
+            .fill({ color: this.color, width: 5 })
             .closePath()
-            .stroke({ color: "gray", width: 5 });
+            .stroke({ color: this.color, width: 5 });
     }
 
     public destroy(options?: DestroyOptions): void {

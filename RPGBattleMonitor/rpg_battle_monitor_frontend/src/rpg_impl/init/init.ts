@@ -157,6 +157,7 @@ const socketJoinFinishedListener = () => {
         icon: TokenIcon,
         content: TurnOrderComponent,
     });
+};
 
 const animateTokenMoves = (
     token: RpgToken,
@@ -166,7 +167,7 @@ const animateTokenMoves = (
     const oldPosition = new Point(oldData.position.x, oldData.position.y);
     token.position.set(oldPosition.x, oldPosition.y);
 
-    GRpgTokenAnimator.animateMove(
+    token.animator.animateMove(
         token,
         new Point(newData.position.x, newData.position.y),
     );

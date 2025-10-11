@@ -10,6 +10,7 @@ import {
     Image,
     Paper,
     Group,
+    Avatar,
 } from "@mantine/core";
 import { useAtomValue, useSetAtom } from "jotai";
 import { ReactNode, useEffect, useState } from "react";
@@ -114,16 +115,7 @@ export const TurnOrder = () => {
                                     wrap="wrap"
                                 >
                                     <AssetHoverPreviewDefault
-                                        target={
-                                            <Image
-                                                draggable="false"
-                                                maw="32px"
-                                                mah="32px"
-                                                miw="32px"
-                                                mih="32px"
-                                                src={imageUrl}
-                                            />
-                                        }
+                                        target={<Avatar src={imageUrl} />}
                                         dropdown={
                                             <Image
                                                 mah="256px"
