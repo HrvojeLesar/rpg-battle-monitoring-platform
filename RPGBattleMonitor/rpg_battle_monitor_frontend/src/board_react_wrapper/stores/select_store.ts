@@ -6,6 +6,7 @@ export type SelectState = {
     selections: ContainerExtension[];
 };
 
+// @ts-ignore
 const initialState: SelectState = {
     selections: [],
 };

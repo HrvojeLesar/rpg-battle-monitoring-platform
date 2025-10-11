@@ -69,7 +69,7 @@ export abstract class Action {
     ): ITargetable[];
 
     protected getSingleTargetAttackDagamage(
-        attacker: RpgToken,
+        _attacker: RpgToken,
         target: ITargetable,
     ): Maybe<number> {
         // TODO: Read lucky value from some other place

@@ -32,7 +32,6 @@ import { openDecorationTokenWindow } from "../components/windows/DecorationToken
 import { openRpgTokenWindow } from "../components/windows/RpgTokenWindow";
 import { TokenAttributes } from "@/board_core/token/token";
 import { TypedJson } from "@/board_core/interfaces/messagable";
-import { GRpgTokenAnimator } from "../handlers/animate";
 
 export const initializeRPG = (entityRegistry: EntityRegistry) => {
     registerEntities(entityRegistry);

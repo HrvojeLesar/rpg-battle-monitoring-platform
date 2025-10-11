@@ -17,7 +17,6 @@ import {
     Divider,
     Flex,
     Paper,
-    ScrollArea,
     Title,
 } from "@mantine/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";

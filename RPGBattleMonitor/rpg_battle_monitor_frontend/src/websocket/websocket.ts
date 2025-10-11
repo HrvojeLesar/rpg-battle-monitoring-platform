@@ -1,13 +1,6 @@
 import { io, ManagerOptions, Socket, SocketOptions } from "socket.io-client";
 import { GBoard, GEventEmitter } from "../board_core/board";
 import { IMessagable, TypedJson } from "../board_core/interfaces/messagable";
-import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
-import { sidebarTabAtoms } from "@/board_react_wrapper/stores/sidebar_tab_store";
-import {
-    TokenIcon,
-    Tokens,
-} from "@/board_react_wrapper/components/interface/Tokens";
-import { TurnOrder } from "@/rpg_impl/components/TurnOrder";
 
 export type JoinData = {
     data: TypedJson[];

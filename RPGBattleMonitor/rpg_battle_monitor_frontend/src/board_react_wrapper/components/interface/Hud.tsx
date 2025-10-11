@@ -108,6 +108,7 @@ const HudLeft = () => {
                         return;
                     }
 
+                    // @ts-ignore
                     selection.getOccupiedCells();
 
                     const pos = selection.position.clone();

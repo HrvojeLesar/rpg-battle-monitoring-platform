@@ -1,5 +1,5 @@
 import { Asset } from "@/board_core/assets/game_assets";
-import { GBoard, GEventEmitter } from "@/board_core/board";
+import { GEventEmitter } from "@/board_core/board";
 import { IMessagable } from "@/board_core/interfaces/messagable";
 import { GDragAndDropRegistry } from "@/board_core/registry/drag_and_drop_registry";
 import { tokenAtoms } from "@/board_react_wrapper/stores/token_store";
@@ -22,7 +22,6 @@ import { queueEntityUpdate } from "@/websocket/websocket";
 import {
     Fieldset,
     Flex,
-    MultiSelect,
     NumberInput,
     Select,
     TextInput,
@@ -31,19 +30,13 @@ import {
     Stack,
     Image,
     ActionIcon,
-    Popover,
-    Button,
     TagsInput,
 } from "@mantine/core";
-import {
-    useDebouncedCallback,
-    useDisclosure,
-    useForceUpdate,
-} from "@mantine/hooks";
+import { useDisclosure, useForceUpdate } from "@mantine/hooks";
 import { IconDeviceFloppy } from "@tabler/icons-react";
 import { useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AssetPicker, DefaultAssetPicker } from "../Assets/AssetPicker";
+import { DefaultAssetPicker } from "../Assets/AssetPicker";
 import { TextIncrementableNumberInput } from "../TextIncrementableNumberInput";
 import { COMBAT_TAGS } from "@/rpg_impl/characters_stats/tags";
 
@@ -278,7 +271,9 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                         value={alignment}
                         onChange={(value) => {
                             const alignment = value ?? undefined;
+                            // @ts-ignore
                             setAlignment(alignment);
+                            // @ts-ignore
                             queueUpdate(alignment, "alignment");
                         }}
                     />
@@ -475,6 +470,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                             const size = value ?? undefined;
                             if (isValidSize(size)) {
                                 setSize(size as unknown as Size);
+                                // @ts-ignore
                                 queueUpdate(size, "size");
                             }
                         }}

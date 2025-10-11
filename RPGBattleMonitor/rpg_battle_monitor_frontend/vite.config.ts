@@ -4,7 +4,7 @@ import path from "path";
 
 // @ts-expect-error process is a nodejs global
 let host = process.env.TAURI_DEV_HOST;
-host = "0.0.0.0";
+// host = "0.0.0.0";
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({

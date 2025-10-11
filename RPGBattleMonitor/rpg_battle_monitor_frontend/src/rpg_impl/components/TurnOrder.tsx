@@ -1,6 +1,5 @@
 import { turnOrderAtoms } from "@/rpg_impl/stores/turn_order_store";
 import {
-    Box,
     Button,
     Checkbox,
     Fieldset,
@@ -262,7 +261,7 @@ export type TokenTurnEntrySpeedProps = {
     entry: TurnOrderEntry;
 };
 
-const Speed = ({ entry, turnOrder }: TokenTurnEntrySpeedProps) => {
+const Speed = ({ entry }: TokenTurnEntrySpeedProps) => {
     const speed = entry.speed;
 
     return <Text>Speed: {speed}</Text>;
@@ -273,7 +272,7 @@ export type TokenTurnEntryInitiativeProps = {
     entry: TurnOrderEntry;
 };
 
-const Initiative = ({ entry, turnOrder }: TokenTurnEntryInitiativeProps) => {
+const Initiative = ({ entry }: TokenTurnEntryInitiativeProps) => {
     const initiative = entry.initiative;
 
     return <Text>Initiative: {initiative}</Text>;

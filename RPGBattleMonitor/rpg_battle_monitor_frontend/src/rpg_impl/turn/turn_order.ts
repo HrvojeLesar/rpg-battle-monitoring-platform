@@ -15,7 +15,7 @@ import {
     abilityScoreModifier,
     AbilityScoreType,
 } from "../characters_stats/ability_score";
-import { Action, ActionOnCanceled, ActionOnFinished } from "../actions/action";
+import { Action, ActionOnFinished } from "../actions/action";
 import { notifications } from "@mantine/notifications";
 import {
     anotherTokensTurnNotification,
