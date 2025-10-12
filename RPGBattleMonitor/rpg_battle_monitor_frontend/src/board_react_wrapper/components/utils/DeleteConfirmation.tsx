@@ -1,13 +1,12 @@
 import { ActionIcon, Button, Flex, Popover, Text } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
-import { ReactNode, useState } from "react";
+import { cloneElement, ReactElement, useState } from "react";
 
 export type DeleteConfirmationProps = {
     onDelete: () => void;
     title: string;
     confirmText?: string;
-    // TODO: add on click to target
-    target?: ReactNode;
+    target?: ReactElement;
 };
 
 export const DeleteConfirmation = (props: DeleteConfirmationProps) => {
@@ -15,10 +14,25 @@ export const DeleteConfirmation = (props: DeleteConfirmationProps) => {
 
     const [opened, setOpened] = useState(false);
 
+    const clonedTarget = () => {
+        if (target === undefined || target === null) {
+            return undefined;
+        }
+
+        return cloneElement(target, {
+            onClick: (e) => {
+                if (typeof e.stopPropagation === "function") {
+                    e.stopPropagation();
+                }
+                setOpened((o) => !o);
+            },
+        });
+    };
+
     return (
         <Popover withArrow shadow="xs" opened={opened} onChange={setOpened}>
             <Popover.Target>
-                {target ?? (
+                {clonedTarget() ?? (
                     <ActionIcon
                         onClick={(e) => {
                             e.stopPropagation();

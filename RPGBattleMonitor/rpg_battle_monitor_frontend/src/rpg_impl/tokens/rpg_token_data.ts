@@ -98,7 +98,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
 
     public tags: string[];
 
-    public healthState: HealthState;
+    protected _healthState: HealthState;
 
     // TODO: Spellcasting, cantrips, spell slots
     //
@@ -136,7 +136,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
         this._size = options?.size ?? "medium";
         this.skills = options?.skills ?? getEmptySkills();
         this.tags = options?.tags ?? [];
-        this.healthState = HealthState.Healthy;
+        this._healthState = options?.healthState ?? HealthState.Healthy;
     }
 
     public getAttributes(): RpgTokenAttributes {
@@ -164,7 +164,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
             size: this._size,
             skills: this.skills,
             tags: this.tags,
-            healthState: this.healthState,
+            healthState: this._healthState,
         };
     }
 
@@ -191,7 +191,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
         this._size = changes.size;
         this.skills = changes.skills;
         this.tags = changes.tags;
-        this.healthState = changes.healthState;
+        this._healthState = changes.healthState;
 
         super.applyUpdateAction(changes);
     }
@@ -231,5 +231,13 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
 
     public get size(): Size {
         return this._size;
+    }
+
+    public get healthState(): HealthState {
+        return this._healthState;
+    }
+
+    public set healthState(value: HealthState) {
+        this._healthState = value;
     }
 }

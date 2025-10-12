@@ -6,7 +6,6 @@ import { RpgToken } from "../tokens/rpg_token";
 import { InRangeHandler } from "./in_range_handler";
 import { OccupiedSpaceHandler } from "./occupied_space_handler";
 import { TargetTokenOverlay } from "../graphics/target_token_overlay";
-import { queueEntityUpdate } from "@/websocket/websocket";
 import { notifications } from "@mantine/notifications";
 import { infoNotification } from "../utils/notification_utils";
 
@@ -124,13 +123,13 @@ export class TargetSelectionHandler {
     }
 
     protected singleTargetSelect(
-        _event: FederatedPointerEvent,
+        event: FederatedPointerEvent,
         target: RpgToken,
         action: Action,
         initiator: RpgToken,
         onFinished?: ActionOnFinished,
     ): void {
         this.cancelAction();
-        action.doAction(_event, target, initiator, onFinished);
+        action.doAction(target, initiator, event, onFinished);
     }
 }

@@ -1,4 +1,3 @@
-import { ITargetable } from "@/rpg_impl/interface/targetable";
 import { RpgToken } from "@/rpg_impl/tokens/rpg_token";
 import { Action, ActionOnFinished } from "../action";
 import { FederatedPointerEvent } from "pixi.js";
@@ -16,9 +15,9 @@ export class Maul extends Action {
 
     public damageTarget(
         attacker: RpgToken,
-        target: ITargetable | ITargetable[],
-    ): ITargetable[] {
-        const damagedTargets: ITargetable[] = [];
+        target: RpgToken | RpgToken[],
+    ): RpgToken[] {
+        const damagedTargets: RpgToken[] = [];
         if (!Array.isArray(target)) {
             target = [target];
         }
@@ -39,9 +38,9 @@ export class Maul extends Action {
     }
 
     public doAction(
-        _event: FederatedPointerEvent,
         target: RpgToken,
         initiator: RpgToken,
+        _event?: FederatedPointerEvent,
         onFinished?: ActionOnFinished,
     ): void {
         const damagedTargets = this.damageTarget(initiator, target);

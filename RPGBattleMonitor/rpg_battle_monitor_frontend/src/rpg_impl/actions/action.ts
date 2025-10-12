@@ -194,9 +194,9 @@ export abstract class Action {
     }
 
     public abstract doAction(
-        _event: FederatedPointerEvent,
         target: RpgToken,
         initiator: RpgToken,
+        event?: FederatedPointerEvent,
         onFinished?: ActionOnFinished,
     ): void;
 }

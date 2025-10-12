@@ -10,6 +10,7 @@ export enum HealthState {
 
 export type HealthStateOptions = {
     damageOverflow: number;
+    damaged: boolean;
     stabilize: boolean;
 };
 
@@ -55,6 +56,14 @@ function importantCharacterHealthState(
         options.damageOverflow >= token.hitPoints.maximum
     ) {
         return HealthState.Dead;
+    }
+
+    if (options?.damaged && token.healthState === HealthState.Stabilized) {
+        return HealthState.Unconcious;
+    }
+
+    if (token.hitPoints.current <= 0 && token.deathSaves.successes >= 3) {
+        return HealthState.Stabilized;
     }
 
     if (token.hitPoints.current <= 0 && token.deathSaves.failures < 3) {

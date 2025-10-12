@@ -18,8 +18,11 @@ import {
     TokenIcon,
     Tokens,
 } from "@/board_react_wrapper/components/interface/Tokens";
-import { TurnOrder as TurnOrderComponent } from "../components/TurnOrder";
-import { RPGAssetUpload } from "../components/Assets/Upload";
+import {
+    TurnOrder as TurnOrderComponent,
+    TurnOrderIcon,
+} from "../components/TurnOrder";
+import { AssetIcon, RPGAssetUpload } from "../components/Assets/Upload";
 import { DecorationToken } from "../tokens/decoration_token";
 import { DecorationTokenConverter } from "../converters/decoration_token_coverter";
 import { DecorationTokenFactory } from "../factories/decoration_token_factory";
@@ -137,6 +140,13 @@ const socketJoinFinishedListener = () => {
     GAtomStore.set(sidebarTabAtoms.resetTabs);
 
     GAtomStore.set(sidebarTabAtoms.addTab, {
+        value: "Turn order",
+        title: "Turn order",
+        icon: TurnOrderIcon,
+        content: TurnOrderComponent,
+    });
+
+    GAtomStore.set(sidebarTabAtoms.addTab, {
         value: "Token Data",
         title: "Token Data",
         icon: TokenIcon,
@@ -146,16 +156,16 @@ const socketJoinFinishedListener = () => {
     GAtomStore.set(sidebarTabAtoms.addTab, {
         value: "Assets",
         title: "Assets",
-        icon: TokenIcon,
+        icon: AssetIcon,
         content: RPGAssetUpload,
     });
 
-    GAtomStore.set(sidebarTabAtoms.addTab, {
-        value: "Turn order",
-        title: "Turn order",
-        icon: TokenIcon,
-        content: TurnOrderComponent,
-    });
+    // GAtomStore.set(sidebarTabAtoms.addTab, {
+    //     value: "Turn order",
+    //     title: "Turn order",
+    //     icon: TokenIcon,
+    //     content: TurnOrderComponent,
+    // });
 };
 
 const animateTokenMoves = (

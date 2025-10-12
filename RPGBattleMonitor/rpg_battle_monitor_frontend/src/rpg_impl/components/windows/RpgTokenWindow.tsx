@@ -40,6 +40,8 @@ import { DefaultAssetPicker } from "../Assets/AssetPicker";
 import { TextIncrementableNumberInput } from "../TextIncrementableNumberInput";
 import { COMBAT_TAGS } from "@/rpg_impl/characters_stats/tags";
 import { calculateProficiencyBonus } from "@/rpg_impl/characters_stats/experience";
+import { HealthState } from "@/rpg_impl/characters_stats/health_state";
+import { turnOrderAtoms } from "@/rpg_impl/stores/turn_order_store";
 
 export const RPG_TOKEN_WINDOW_PREFIX = "rpg-token-";
 
@@ -73,6 +75,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
 
     const disabled = !editMode;
     const refreshTokens = useSetAtom(tokenAtoms.refreshTokens);
+    const refreshTurnOrder = useSetAtom(turnOrderAtoms.currentTurnOrder);
 
     const updatedFields = useRef<Partial<RpgTokenData>>({});
 
@@ -102,6 +105,8 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
     const [searchTerm, setSearchTerm] = useState("");
 
     const [tokenImage, setTokenImage] = useState(token.image);
+
+    const [healthState, setHealthState] = useState(token.healthState);
 
     const assetPickerFilter = (asset: Asset) => {
         if (searchTerm.trim().length === 0) {
@@ -170,6 +175,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                 setSize(token.size);
                 setTokenImage(token.image);
                 setTags(token.tags);
+                setHealthState(token.healthState);
             }
         };
 
@@ -200,7 +206,8 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
             deathSaves !== token.deathSaves ||
             size !== token.size ||
             tokenImage !== token.image ||
-            tags !== token.tags
+            tags !== token.tags ||
+            healthState !== token.healthState
         );
     };
 
@@ -510,6 +517,26 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                             }}
                         />
                     </Fieldset>
+                    <Select
+                        disabled={disabled}
+                        label="Health state"
+                        data={Object.keys(HealthState).map((value) => ({
+                            label: value,
+                            value: HealthState[
+                                value as keyof typeof HealthState
+                            ],
+                        }))}
+                        value={healthState}
+                        onChange={(value) => {
+                            if (value === null) {
+                                return;
+                            }
+
+                            const healthState = value as HealthState;
+                            setHealthState(healthState);
+                            queueUpdate(healthState, "healthState");
+                        }}
+                    />
                 </Flex>
             </Fieldset>
             {isUpdated() && (
@@ -520,6 +547,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                         variant="outline"
                         onClick={() => {
                             saveToken();
+                            refreshTurnOrder();
                         }}
                     >
                         <IconDeviceFloppy />

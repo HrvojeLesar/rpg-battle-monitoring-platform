@@ -10,6 +10,7 @@ import {
     Paper,
     Group,
     Avatar,
+    Radio,
 } from "@mantine/core";
 import { useAtomValue, useSetAtom } from "jotai";
 import { ReactNode, useEffect, useState } from "react";
@@ -21,6 +22,7 @@ import {
 import { queueEntityUpdate } from "@/websocket/websocket";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { Maul } from "../actions/weapons/maul";
+import { DeathSave as DeathSaveAction } from "../actions/death_save";
 import { AssetHoverPreviewDefault } from "@/board_react_wrapper/components/assets/AssetHoverPreview";
 import { getUrl } from "@/board_react_wrapper/utils/utils";
 import { defaultImageUrl } from "@/board_react_wrapper/components/interface/Tokens";
@@ -30,6 +32,11 @@ import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 import { RpgToken } from "../tokens/rpg_token";
 import { RpgScene } from "../scene/scene";
 import { IconSwords } from "@tabler/icons-react";
+import { DeleteConfirmation } from "@/board_react_wrapper/components/utils/DeleteConfirmation";
+import { HealthState } from "../characters_stats/health_state";
+import { GEventEmitter } from "@/board_core/board";
+import { RpgTokenData } from "../tokens/rpg_token_data";
+import { IMessagable } from "@/board_core/interfaces/messagable";
 
 export const TurnOrderIcon = () => {
     return <IconSwords size={20} />;
@@ -39,6 +46,24 @@ export const TurnOrder = () => {
     const { turnOrder } = useAtomValue(turnOrderAtoms.currentTurnOrder);
     const refreshTurnOrder = useSetAtom(turnOrderAtoms.currentTurnOrder);
     const currentScene = useAtomValue(sceneAtoms.getCurrentScene);
+
+    useEffect(() => {
+        const tryUpdate = (entity: IMessagable) => {
+            if (entity instanceof RpgTokenData) {
+                const updatedEntity = turnOrder?.tokens.find(
+                    (entry) => entry.token.tokenData === entity,
+                );
+                if (updatedEntity !== undefined) {
+                    refreshTurnOrder();
+                }
+            }
+        };
+        GEventEmitter.on("entity-updated", tryUpdate);
+
+        return () => {
+            GEventEmitter.off("entity-updated", tryUpdate);
+        };
+    }, [turnOrder, refreshTurnOrder]);
 
     const combatButtons = () => {
         if (turnOrder === undefined) {
@@ -83,7 +108,7 @@ export const TurnOrder = () => {
                                 : "Out of combat"}
                         </Text>
                     </Group>
-                    {turnOrder.tokens.map((entry, idx) => {
+                    {turnOrder.actionableTokens.map((entry, idx) => {
                         const uid = entry.token.getUId();
                         const token = entry.token;
                         const isOnTurn = turnOrder.tokenIdxOnTurn === idx;
@@ -130,18 +155,32 @@ export const TurnOrder = () => {
                                     >
                                         <Text>{`${token.tokenData.name}`}</Text>
                                     </Paper>
-                                    <TokenTurnEntry.Surprised
-                                        turnOrder={turnOrder}
-                                        entry={entry}
-                                    />
-                                    <TokenTurnEntry.Initiative
-                                        turnOrder={turnOrder}
-                                        entry={entry}
-                                    />
-                                    <TokenTurnEntry.Speed
-                                        turnOrder={turnOrder}
-                                        entry={entry}
-                                    />
+                                    {token.tokenData.healthState !==
+                                        HealthState.Unconcious && (
+                                        <>
+                                            <TokenTurnEntry.Surprised
+                                                turnOrder={turnOrder}
+                                                entry={entry}
+                                            />
+                                            <TokenTurnEntry.Initiative
+                                                turnOrder={turnOrder}
+                                                entry={entry}
+                                            />
+                                            <TokenTurnEntry.Speed
+                                                turnOrder={turnOrder}
+                                                entry={entry}
+                                            />
+                                        </>
+                                    )}
+                                    {token.tokenData.healthState ===
+                                        HealthState.Unconcious && (
+                                        <>
+                                            <TokenTurnEntry.DeathSave
+                                                turnOrder={turnOrder}
+                                                entry={entry}
+                                            />
+                                        </>
+                                    )}
                                 </Flex>
                             </Flex>
                         );
@@ -183,6 +222,26 @@ export const TurnOrder = () => {
                         </Button>
                         <Button
                             onClick={() => {
+                                // TODO: emit message that other clients can handle and sync state
+                                const action = new DeathSaveAction();
+                                const onTurnEntry = turnOrder.getTokenOnTurn();
+                                if (onTurnEntry === undefined) {
+                                    return;
+                                }
+
+                                const token = onTurnEntry.token;
+                                action.doAction(token, token, undefined, () => {
+                                    refreshTurnOrder();
+                                    queueEntityUpdate(() => {
+                                        return [turnOrder, token.tokenData];
+                                    });
+                                });
+                            }}
+                        >
+                            Roll death save
+                        </Button>
+                        <Button
+                            onClick={() => {
                                 turnOrder.scene.targetSelectionHandler.cancelAction();
                             }}
                         >
@@ -194,47 +253,63 @@ export const TurnOrder = () => {
         );
     };
 
-    console.log();
-
     const turnControls = () => {
         return (
             <Fieldset legend="Controls">
                 <Flex gap="xs" direction="column" mah="512px">
                     {(turnOrder?.isInCombat() === false ||
                         turnOrder === undefined) && (
-                        <Button
-                            onClick={() => {
-                                if (currentScene instanceof RpgScene) {
-                                    let turnOrderInner: Maybe<RPGTurnOrder> =
-                                        turnOrder;
-                                    if (turnOrderInner === undefined) {
-                                        turnOrderInner =
-                                            TurnOrderFactory.create(
-                                                currentScene,
-                                            );
+                        <Flex gap="xs" align="center">
+                            <Button
+                                onClick={() => {
+                                    if (currentScene instanceof RpgScene) {
+                                        let turnOrderInner: Maybe<RPGTurnOrder> =
+                                            turnOrder;
+                                        if (turnOrderInner === undefined) {
+                                            turnOrderInner =
+                                                TurnOrderFactory.create(
+                                                    currentScene,
+                                                );
+                                        }
+
+                                        const selections =
+                                            currentScene.selectHandler.selections.reduce<
+                                                RpgToken[]
+                                            >((acc, selection) => {
+                                                if (
+                                                    selection instanceof
+                                                    RpgToken
+                                                ) {
+                                                    acc.push(selection);
+                                                }
+
+                                                return acc;
+                                            }, []);
+
+                                        turnOrderInner.addToken(selections);
+
+                                        queueEntityUpdate(() => {
+                                            return turnOrderInner;
+                                        });
                                     }
+                                }}
+                            >
+                                Add selection to turn order
+                            </Button>
+                            <DeleteConfirmation
+                                title="Clear turn order"
+                                confirmText="Are you sure you want to clear turn order ?"
+                                onDelete={() => {
+                                    if (turnOrder !== undefined) {
+                                        turnOrder.clear();
 
-                                    const selections =
-                                        currentScene.selectHandler.selections.reduce<
-                                            RpgToken[]
-                                        >((acc, selection) => {
-                                            if (selection instanceof RpgToken) {
-                                                acc.push(selection);
-                                            }
-
-                                            return acc;
-                                        }, []);
-
-                                    turnOrderInner.addToken(selections);
-
-                                    queueEntityUpdate(() => {
-                                        return turnOrderInner;
-                                    });
-                                }
-                            }}
-                        >
-                            Add selection to turn order
-                        </Button>
+                                        queueEntityUpdate(() => {
+                                            return turnOrder;
+                                        });
+                                    }
+                                }}
+                            />
+                        </Flex>
                     )}
                     {turnOrder && turnOrder.isInCombat() === false && (
                         <Button
@@ -251,16 +326,17 @@ export const TurnOrder = () => {
                     )}
 
                     {turnOrder && turnOrder.isInCombat() && (
-                        <Button
-                            onClick={() => {
+                        <DeleteConfirmation
+                            title="End combat"
+                            confirmText="Are you sure you want to end combat ?"
+                            onDelete={() => {
                                 turnOrder.stopCombat();
                                 queueEntityUpdate(() => {
                                     return turnOrder;
                                 });
                             }}
-                        >
-                            End combat
-                        </Button>
+                            target={<Button>End combat</Button>}
+                        />
                     )}
                 </Flex>
             </Fieldset>
@@ -349,6 +425,46 @@ const Initiative = ({ entry }: TokenTurnEntryInitiativeProps) => {
     return <Text>Initiative: {initiative}</Text>;
 };
 
+export type TokenTurnEntryDeathSaveProps = {
+    turnOrder: RPGTurnOrder;
+    entry: TurnOrderEntry;
+};
+
+const DeathSave = ({ entry }: TokenTurnEntryDeathSaveProps) => {
+    const tokenData = entry.token.tokenData;
+    const deathSaves = tokenData.deathSaves;
+
+    return (
+        <Stack>
+            <Group>
+                {Array.from({ length: 3 }).map((_, idx) => {
+                    return (
+                        <Radio
+                            key={idx}
+                            color="green"
+                            readOnly
+                            checked={idx < deathSaves.successes}
+                        />
+                    );
+                })}
+            </Group>
+            <Group>
+                {Array.from({ length: 3 }).map((_, idx) => {
+                    return (
+                        <Radio
+                            key={idx}
+                            color="red"
+                            readOnly
+                            checked={idx < deathSaves.failures}
+                        />
+                    );
+                })}
+            </Group>
+        </Stack>
+    );
+};
+
 TokenTurnEntry.Surprised = Surprised;
 TokenTurnEntry.Speed = Speed;
 TokenTurnEntry.Initiative = Initiative;
+TokenTurnEntry.DeathSave = DeathSave;

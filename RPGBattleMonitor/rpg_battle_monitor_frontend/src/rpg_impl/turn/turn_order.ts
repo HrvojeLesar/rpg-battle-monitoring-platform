@@ -22,6 +22,7 @@ import {
     errorNotification,
     infoNotification,
 } from "../utils/notification_utils";
+import { HealthState } from "../characters_stats/health_state";
 
 export enum TurnOrderState {
     OutOfCombat = "OutOfCombat",
@@ -164,6 +165,12 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
         return this._tokens;
     }
 
+    public get actionableTokens(): Readonly<TurnOrderEntry[]> {
+        return this._tokens.filter(
+            (entry) => entry.token.tokenData.healthState !== HealthState.Dead,
+        );
+    }
+
     // TODO: logic for adding tokens during combat
     public addToken(token: RpgToken | RpgToken[]): void {
         if (this.isInCombat()) {
@@ -235,6 +242,14 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
 
         this.rollInitiative();
 
+        for (let idx = 0; idx < this._tokens.length; idx++) {
+            if (!this._tokens[idx].surprised) {
+                break;
+            }
+            this._tokens[idx].surprised = false;
+            this.tokenIdxOnTurn = this.nextTokenIdxOnTurn();
+        }
+
         GAtomStore.set(turnOrderAtoms.currentTurnOrder);
     }
 
@@ -278,7 +293,7 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
             return;
         }
 
-        this.tokenIdxOnTurn = (this.tokenIdxOnTurn + 1) % this._tokens.length;
+        this.tokenIdxOnTurn = this.nextTokenIdxOnTurn();
         this.turnCount++;
 
         const nextToken = this.tokens.at(this.tokenIdxOnTurn);
@@ -319,6 +334,18 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
                 ),
             );
             nextToken.surprised = false;
+            this.nextTurn();
+        }
+
+        const areAllTokensDead =
+            this._tokens.filter(
+                (entry) =>
+                    entry.token.tokenData.healthState !== HealthState.Dead,
+            ).length === this._tokens.length;
+        if (
+            nextToken.token.tokenData.healthState === HealthState.Dead &&
+            !areAllTokensDead
+        ) {
             this.nextTurn();
         }
     }
@@ -394,6 +421,16 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
         entry.speed = entry.baseSpeed;
         entry.action = 1;
         entry.bonusAction = 1;
+    }
+
+    public clear(): void {
+        this.removeToken(this._tokens.map((entry) => entry.token));
+
+        GAtomStore.set(turnOrderAtoms.currentTurnOrder);
+    }
+
+    public nextTokenIdxOnTurn(): number {
+        return (this.tokenIdxOnTurn + 1) % this._tokens.length;
     }
 }
 

@@ -6,11 +6,7 @@ import { ReactNode } from "react";
 import { Resizable } from "re-resizable";
 import { SidebarTabs } from "./SidebarTabs";
 import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
-import { TurnOrderFactory } from "@/rpg_impl/factories/turn_order_factory";
 import { RpgScene } from "@/rpg_impl/scene/scene";
-import { turnOrderAtoms } from "@/rpg_impl/stores/turn_order_store";
-import { RpgToken } from "@/rpg_impl/tokens/rpg_token";
-import { queueEntityUpdate } from "@/websocket/websocket";
 import { SelectionControls } from "../selection_controls/SelectionControls";
 import { LayerSelect } from "./LayerSelect";
 
@@ -134,7 +130,7 @@ const HudRight = () => {
                     pointerEvents: "all",
                 }}
                 defaultSize={{
-                    width: 300,
+                    width: 400,
                 }}
                 enable={{
                     top: false,

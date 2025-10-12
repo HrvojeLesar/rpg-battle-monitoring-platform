@@ -1,7 +1,13 @@
 import { ContainerExtensionOptions } from "@/board_core/extensions/container_extension";
 import { Scene } from "@/board_core/scene";
 import { Token, TokenAttributes } from "@/board_core/token/token";
-import { DestroyOptions, Point, SpriteOptions, Ticker } from "pixi.js";
+import {
+    ColorMatrixFilter,
+    DestroyOptions,
+    Point,
+    SpriteOptions,
+    Ticker,
+} from "pixi.js";
 import { RpgTokenData } from "./rpg_token_data";
 import { sizeToGridCellMultiplier } from "../characters_stats/combat";
 import { DeleteAction, TypedJson } from "@/board_core/interfaces/messagable";
@@ -15,12 +21,17 @@ import { GridCell, GridCellPosition } from "@/board_core/grid/cell";
 import { HealthBar } from "../graphics/health_bar";
 import { ITargetable } from "../interface/targetable";
 import { RpgTokenAnimator } from "../handlers/animate";
+import {
+    calculateNextHealthState,
+    HealthState,
+} from "../characters_stats/health_state";
 
 export class RpgToken extends Token implements ITargetable {
     protected onTurnMarker: OnTurnMarker;
     protected inRangeHighlight: InRangeHighlight;
     protected healthBar: HealthBar;
     public animator: RpgTokenAnimator;
+    protected blackAndWhiteFilter: ColorMatrixFilter;
 
     public constructor(
         scene: Scene,
@@ -37,6 +48,7 @@ export class RpgToken extends Token implements ITargetable {
             this.displayedEntity.height =
                 scene.grid.cellSize *
                 sizeToGridCellMultiplier(this.tokenData.size);
+            this.displayedEntity.filters = [];
         }
 
         this.isResizable = false;
@@ -60,6 +72,9 @@ export class RpgToken extends Token implements ITargetable {
         this.addUpdateFnToTicker();
 
         this.animator = new RpgTokenAnimator();
+
+        this.blackAndWhiteFilter = new ColorMatrixFilter();
+        this.blackAndWhiteFilter.blackAndWhite(true);
     }
 
     public get tokenData(): RpgTokenData {
@@ -123,6 +138,20 @@ export class RpgToken extends Token implements ITargetable {
         if (this.scene instanceof RpgScene) {
             this.updateOnTurnMarker(this.scene, ticker);
         }
+
+        if (
+            this.tokenData.healthState === HealthState.Dead &&
+            this.displayedEntity &&
+            this.displayedEntity.filters?.length === 0
+        ) {
+            this.displayedEntity.filters = [this.blackAndWhiteFilter];
+        } else if (
+            this.tokenData.healthState !== HealthState.Dead &&
+            this.displayedEntity &&
+            this.displayedEntity.filters?.length > 0
+        ) {
+            this.displayedEntity.filters = [];
+        }
     }
 
     protected updateOnTurnMarker(scene: RpgScene, _ticker: Ticker): void {
@@ -180,6 +209,7 @@ export class RpgToken extends Token implements ITargetable {
         return cells;
     }
 
+    // TODO: taking damage while unconscious must add a death saving throw failure, 2 on crit
     public takeDamage(damage: number): void {
         let damageToApply = damage;
         let hitPoints = this.tokenData.hitPoints.current;
@@ -195,10 +225,20 @@ export class RpgToken extends Token implements ITargetable {
 
         hitPoints -= damageToApply;
         if (hitPoints < 0) {
+            damageToApply = -hitPoints;
             hitPoints = 0;
         }
 
         this.tokenData.hitPoints.temporary = tempHitPoints;
         this.tokenData.hitPoints.current = hitPoints;
+
+        const nextHealthState = calculateNextHealthState(this.tokenData, {
+            damageOverflow: damageToApply,
+            damaged: true,
+        });
+
+        if (nextHealthState !== this.tokenData.healthState) {
+            this.tokenData.healthState = nextHealthState;
+        }
     }
 }
