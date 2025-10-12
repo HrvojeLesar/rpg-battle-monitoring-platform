@@ -210,7 +210,7 @@ export class RpgToken extends Token implements ITargetable {
     }
 
     // TODO: taking damage while unconscious must add a death saving throw failure, 2 on crit
-    public takeDamage(damage: number): void {
+    public takeDamage(damage: number, isCritical: boolean): void {
         let damageToApply = damage;
         let hitPoints = this.tokenData.hitPoints.current;
         let tempHitPoints = this.tokenData.hitPoints.temporary;
@@ -231,6 +231,13 @@ export class RpgToken extends Token implements ITargetable {
 
         this.tokenData.hitPoints.temporary = tempHitPoints;
         this.tokenData.hitPoints.current = hitPoints;
+
+        if (this.tokenData.healthState === HealthState.Unconcious) {
+            this.tokenData.deathSaves.failures += 1;
+            if (isCritical) {
+                this.tokenData.deathSaves.failures += 1;
+            }
+        }
 
         const nextHealthState = calculateNextHealthState(this.tokenData, {
             damageOverflow: damageToApply,

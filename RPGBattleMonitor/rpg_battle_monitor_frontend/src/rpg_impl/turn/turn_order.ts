@@ -240,13 +240,22 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
             return;
         }
 
+        if (this.areAllTokensOutOfAction()) {
+            notifications.show(
+                infoNotification("Stoping combat", "No token can act"),
+            );
+            this.stopCombat();
+            return;
+        }
+
         this.rollInitiative();
 
         for (let idx = 0; idx < this._tokens.length; idx++) {
-            if (!this._tokens[idx].surprised) {
+            const entry = this._tokens[idx];
+            if (this.isActionable(entry)) {
                 break;
             }
-            this._tokens[idx].surprised = false;
+            entry.surprised = false;
             this.tokenIdxOnTurn = this.nextTokenIdxOnTurn();
         }
 
@@ -337,14 +346,16 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
             this.nextTurn();
         }
 
-        const areAllTokensDead =
-            this._tokens.filter(
-                (entry) =>
-                    entry.token.tokenData.healthState !== HealthState.Dead,
-            ).length === this._tokens.length;
+        if (this.areAllTokensOutOfAction()) {
+            notifications.show(
+                infoNotification("Stoping combat", "No token can act"),
+            );
+            this.stopCombat();
+        }
+
         if (
             nextToken.token.tokenData.healthState === HealthState.Dead &&
-            !areAllTokensDead
+            !this.areAllTokensOutOfAction()
         ) {
             this.nextTurn();
         }
@@ -431,6 +442,24 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
 
     public nextTokenIdxOnTurn(): number {
         return (this.tokenIdxOnTurn + 1) % this._tokens.length;
+    }
+
+    protected areAllTokensOutOfAction(): boolean {
+        return this._tokens.every(
+            (entry) =>
+                entry.token.tokenData.healthState === HealthState.Dead ||
+                entry.token.tokenData.healthState === HealthState.Stabilized,
+        );
+    }
+
+    public isActionable(entry: TurnOrderEntry): boolean {
+        return (
+            !entry.surprised &&
+            !(
+                entry.token.tokenData.healthState === HealthState.Dead ||
+                entry.token.tokenData.healthState === HealthState.Stabilized
+            )
+        );
     }
 }
 

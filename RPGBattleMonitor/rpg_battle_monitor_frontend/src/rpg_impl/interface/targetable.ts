@@ -1,3 +1,3 @@
 export interface ITargetable {
-    takeDamage(damage: number): void;
+    takeDamage(damage: number, isCritical: boolean): void;
 }

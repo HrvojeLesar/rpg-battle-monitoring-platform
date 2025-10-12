@@ -83,6 +83,10 @@ export const TurnOrder = () => {
                                     return turnOrder;
                                 });
                             }}
+                            disabled={
+                                turnOrder.getTokenOnTurn()?.token.tokenData
+                                    .healthState !== HealthState.Healthy
+                            }
                         >
                             Next turn
                         </Button>
@@ -97,6 +101,11 @@ export const TurnOrder = () => {
             return "No turn order";
         }
 
+        const tokens =
+            turnOrder.state === TurnOrderState.InCombat
+                ? turnOrder.actionableTokens
+                : turnOrder.tokens;
+
         return (
             <Flex direction="column">
                 <TokenTurnEntry>
@@ -108,7 +117,7 @@ export const TurnOrder = () => {
                                 : "Out of combat"}
                         </Text>
                     </Group>
-                    {turnOrder.actionableTokens.map((entry, idx) => {
+                    {tokens.map((entry, idx) => {
                         const uid = entry.token.getUId();
                         const token = entry.token;
                         const isOnTurn = turnOrder.tokenIdxOnTurn === idx;
@@ -198,6 +207,11 @@ export const TurnOrder = () => {
                         </Text>
                         {combatButtons()}
                         <Button
+                            disabled={
+                                turnOrder.getTokenOnTurn()?.token.tokenData
+                                    .healthState !== HealthState.Healthy ||
+                                turnOrder.getTokenOnTurn()?.action === 0
+                            }
                             onClick={() => {
                                 // TODO: emit message that other clients can handle and sync state
                                 const action = new Maul();
@@ -218,9 +232,13 @@ export const TurnOrder = () => {
                                 );
                             }}
                         >
-                            Melee attack
+                            Maul attack
                         </Button>
                         <Button
+                            disabled={
+                                turnOrder.getTokenOnTurn()?.token.tokenData
+                                    .healthState !== HealthState.Unconcious
+                            }
                             onClick={() => {
                                 // TODO: emit message that other clients can handle and sync state
                                 const action = new DeathSaveAction();
@@ -233,6 +251,7 @@ export const TurnOrder = () => {
                                 action.doAction(token, token, undefined, () => {
                                     refreshTurnOrder();
                                     queueEntityUpdate(() => {
+                                        turnOrder.nextTurn();
                                         return [turnOrder, token.tokenData];
                                     });
                                 });
@@ -244,6 +263,11 @@ export const TurnOrder = () => {
                             onClick={() => {
                                 turnOrder.scene.targetSelectionHandler.cancelAction();
                             }}
+                            disabled={
+                                turnOrder.getTokenOnTurn()?.token.tokenData
+                                    .healthState !== HealthState.Healthy ||
+                                turnOrder.getTokenOnTurn()?.action === 0
+                            }
                         >
                             Cancel attack
                         </Button>

@@ -23,13 +23,16 @@ export class Maul extends Action {
         }
 
         for (const targetable of target) {
-            const damage = this.getSingleTargetAttackDagamage(
+            const damageResults = this.getSingleTargetAttackDamage(
                 attacker,
                 targetable,
             );
 
-            if (damage) {
-                targetable.takeDamage(damage);
+            if (damageResults.damage) {
+                targetable.takeDamage(
+                    damageResults.damage,
+                    damageResults.isCritical ?? false,
+                );
                 damagedTargets.push(targetable);
             }
         }

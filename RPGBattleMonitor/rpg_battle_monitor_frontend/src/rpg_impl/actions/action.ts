@@ -25,6 +25,15 @@ export type ActionOnFinished = (
     },
 ) => void;
 
+export type SingleTargetAttackDamage = {
+    damage: Maybe<number>;
+    isCritical: Maybe<boolean>;
+    isCriticalFailure: Maybe<boolean>;
+    isMiss: Maybe<boolean>;
+    attackRolls: Rolls;
+    damageRolls: Maybe<Rolls>;
+};
+
 export type ActionOnCanceled = (initiator: RpgToken, action: Action) => void;
 
 export type ActionOptions = {
@@ -76,10 +85,10 @@ export abstract class Action {
         target: ITargetable | ITargetable[],
     ): ITargetable[];
 
-    protected getSingleTargetAttackDagamage(
+    protected getSingleTargetAttackDamage(
         _attacker: RpgToken,
         target: ITargetable,
-    ): Maybe<number> {
+    ): Partial<SingleTargetAttackDamage> {
         // TODO: Read lucky value from some other place
         const attackRollResults = this.attackRoll({
             isLucky: false,
@@ -88,15 +97,20 @@ export abstract class Action {
 
         const attackRoll = attackRollResults.rolls[0];
         if (attackRoll.isCritialFailure) {
-            return;
+            return {
+                attackRolls: attackRollResults,
+                isCriticalFailure: true,
+            };
         }
 
         if (
             target instanceof RpgToken &&
             attackRoll.value < target.tokenData.armorClass
         ) {
-            // Miss
-            return;
+            return {
+                attackRolls: attackRollResults,
+                isMiss: true,
+            };
         }
 
         const damageRoll = this.rollDamage({
@@ -110,8 +124,13 @@ export abstract class Action {
             return acc;
         }, 0);
 
-        // // TODO: apply modifier
-        return baseDamage + 0;
+        return {
+            // TODO: apply modifier, currently 0
+            damage: baseDamage + 0,
+            isCritical: attackRoll.isCriticalSuccess,
+            attackRolls: attackRollResults,
+            damageRolls: damageRoll,
+        };
     }
 
     public filterTargets(
