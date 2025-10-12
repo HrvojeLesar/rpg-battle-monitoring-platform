@@ -78,14 +78,26 @@ export class TargetSelectionHandler {
     ): TargetTokenOverlay {
         const overlay = new TargetTokenOverlay(
             token,
-            (event: FederatedPointerEvent, token: RpgToken) => {
-                this.singleTargetSelect(
-                    event,
-                    token,
-                    action,
-                    initiator,
-                    onFinished,
-                );
+            initiator,
+            (event, token, type) => {
+                if (type === "selectTarget") {
+                    this.targetSelectionLayer.children.forEach((child) => {
+                        if (
+                            child instanceof TargetTokenOverlay &&
+                            child !== overlay
+                        ) {
+                            child.destroyArrow();
+                        }
+                    });
+                } else {
+                    this.singleTargetSelect(
+                        event,
+                        token,
+                        action,
+                        initiator,
+                        onFinished,
+                    );
+                }
             },
         );
         this.targetSelectionLayer.addChild(overlay);
