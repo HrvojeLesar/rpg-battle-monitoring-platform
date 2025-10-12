@@ -16,6 +16,7 @@ import { getUrl } from "@/board_react_wrapper/utils/utils";
 import { RPG_ASSET_DROP } from "@/rpg_impl/utils/rpg_token_drop";
 import { Button, Fieldset, Flex, Image, Paper, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
+import { IconFileAnalytics } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 
 const assetUploadWindow = (props?: Partial<AssetUploadProps>): WindowEntry => {
@@ -24,6 +25,10 @@ const assetUploadWindow = (props?: Partial<AssetUploadProps>): WindowEntry => {
         content: <AssetUpload {...props} />,
         name: "asset-upload",
     };
+};
+
+export const AssetIcon = () => {
+    return <IconFileAnalytics />;
 };
 
 export const RPGAssetUpload = () => {

@@ -9,6 +9,14 @@ use tracing_subscriber::filter::LevelFilter;
 
 #[tokio::main]
 async fn main() {
+    tokio::spawn(async {
+        start_server().await;
+    })
+    .await
+    .unwrap();
+}
+
+async fn start_server() {
     tracing_subscriber::fmt()
         .with_max_level(LevelFilter::DEBUG)
         .with_writer(std::io::stderr)

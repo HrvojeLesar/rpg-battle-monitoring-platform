@@ -1,6 +1,5 @@
 import { tokenAtoms } from "@/board_react_wrapper/stores/token_store";
 import { Button, Fieldset, Flex, Image, Paper, Text } from "@mantine/core";
-import { IconToiletPaper } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { DeleteConfirmation } from "../utils/DeleteConfirmation";
 import { RpgTokenData } from "@/rpg_impl/tokens/rpg_token_data";
@@ -15,6 +14,7 @@ import { AssetHoverPreviewDefault } from "../assets/AssetHoverPreview";
 import { TokenDataBase } from "@/board_core/token/token_data";
 import { GTokenWindowRegistry } from "@/rpg_impl/registry/token_window_registry";
 import { TokenDataFactory } from "@/rpg_impl/factories/token_data_factory";
+import { IconChess } from "@tabler/icons-react";
 
 export const defaultImageUrl = getUrl("/public/rpg/default.jpeg");
 
@@ -32,17 +32,17 @@ export const Tokens = () => {
 
     return (
         <Flex direction="column" gap="xs">
+            <RpgTokensFieldset tokens={rpgTokens} deleteToken={deleteToken} />
             <DecorationTokensFieldset
                 tokens={decorationTokens}
                 deleteToken={deleteToken}
             />
-            <RpgTokensFieldset tokens={rpgTokens} deleteToken={deleteToken} />
         </Flex>
     );
 };
 
 export const TokenIcon = () => {
-    return <IconToiletPaper size={20} />;
+    return <IconChess size={20} />;
 };
 
 type DecorationTokensFieldsetProps = {

@@ -5066,11 +5066,13 @@ dependencies = [
 name = "rpg_battle_monitor_frontend"
 version = "0.1.0"
 dependencies = [
+ "rpg_battle_monitor_lib",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-opener",
+ "tracing-subscriber",
 ]
 
 [[package]]

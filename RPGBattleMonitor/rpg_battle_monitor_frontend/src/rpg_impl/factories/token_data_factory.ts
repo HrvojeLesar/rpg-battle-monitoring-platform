@@ -3,7 +3,9 @@ import { RpgTokenData } from "../tokens/rpg_token_data";
 
 export class TokenDataFactory {
     public static create(): RpgTokenData {
-        const tokenData = new RpgTokenData();
+        const tokenData = new RpgTokenData({
+            image: "/public/rpg/token-default.jpeg",
+        });
 
         GBoard.entityRegistry.entities.add(tokenData);
         GBoard.websocket.queue(tokenData, "createQueue");

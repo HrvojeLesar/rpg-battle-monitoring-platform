@@ -29,6 +29,11 @@ import { TurnOrderFactory } from "../factories/turn_order_factory";
 import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 import { RpgToken } from "../tokens/rpg_token";
 import { RpgScene } from "../scene/scene";
+import { IconSwords } from "@tabler/icons-react";
+
+export const TurnOrderIcon = () => {
+    return <IconSwords size={20} />;
+};
 
 export const TurnOrder = () => {
     const { turnOrder } = useAtomValue(turnOrderAtoms.currentTurnOrder);

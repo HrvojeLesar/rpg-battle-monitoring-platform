@@ -39,6 +39,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { DefaultAssetPicker } from "../Assets/AssetPicker";
 import { TextIncrementableNumberInput } from "../TextIncrementableNumberInput";
 import { COMBAT_TAGS } from "@/rpg_impl/characters_stats/tags";
+import { calculateProficiencyBonus } from "@/rpg_impl/characters_stats/experience";
 
 export const RPG_TOKEN_WINDOW_PREFIX = "rpg-token-";
 
@@ -300,6 +301,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                             return (
                                 <NumberInput
                                     key={key}
+                                    hideControls
                                     disabled={disabled}
                                     label={key}
                                     leftSection={<Text>{modifierText()}</Text>}
@@ -321,6 +323,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                     </Fieldset>
                     <NumberInput
                         disabled={disabled}
+                        hideControls
                         label="Inspiration modifier"
                         value={inspirationModifier}
                         onChange={(value) => {
@@ -331,9 +334,24 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                     />
                     <Fieldset legend="Saving throws">
                         {Object.entries(savingThrows).map(([key, score]) => {
+                            const proficiencyBonus = () => {
+                                if (score.proficient === false) {
+                                    return undefined;
+                                }
+
+                                return (
+                                    <Text>
+                                        +
+                                        {calculateProficiencyBonus(
+                                            experience.level,
+                                        )}
+                                    </Text>
+                                );
+                            };
                             return (
                                 <NumberInput
                                     key={key}
+                                    hideControls
                                     disabled={disabled}
                                     label={key}
                                     leftSection={
@@ -360,6 +378,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                                             }}
                                         />
                                     }
+                                    rightSection={proficiencyBonus()}
                                     value={score.score}
                                     onChange={(value) => {
                                         const updatedSavingThrows = {
@@ -378,6 +397,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                     </Fieldset>
                     <NumberInput
                         disabled={disabled}
+                        hideControls
                         label="Passive wisdom"
                         value={passiveWisdom}
                         onChange={(value) => {
@@ -388,6 +408,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                     />
                     <NumberInput
                         disabled={disabled}
+                        hideControls
                         label="Armor class"
                         value={armorClass}
                         onChange={(value) => {
@@ -398,11 +419,13 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                     />
                     <NumberInput
                         disabled={true}
+                        hideControls
                         label="Initiative"
                         value={""}
                     />
                     <NumberInput
                         disabled={disabled}
+                        hideControls
                         label="Speed"
                         value={speed.walk}
                         onChange={(value) => {
@@ -443,6 +466,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                             return (
                                 <NumberInput
                                     key={key}
+                                    hideControls
                                     disabled={disabled}
                                     label={key}
                                     value={value}
