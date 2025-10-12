@@ -7,6 +7,8 @@ import { InRangeHandler } from "./in_range_handler";
 import { OccupiedSpaceHandler } from "./occupied_space_handler";
 import { TargetTokenOverlay } from "../graphics/target_token_overlay";
 import { queueEntityUpdate } from "@/websocket/websocket";
+import { notifications } from "@mantine/notifications";
+import { infoNotification } from "../utils/notification_utils";
 
 export type TargetSelectionHandlerOptions = {
     scene: RpgScene;
@@ -34,8 +36,24 @@ export class TargetSelectionHandler {
 
         const range = action.cellRange;
 
-        // TODO: filter out invalid targets
-        const targets = this.inRangeHandler.tokensInRange(initiator, range);
+        const targets = action
+            .filterTargets(
+                initiator,
+                this.inRangeHandler.tokensInRange(initiator, range),
+            )
+            .filter((target) => target instanceof RpgToken);
+
+        if (targets.length === 0) {
+            this.cancelAction();
+            notifications.show(
+                infoNotification(
+                    "No targets in range",
+                    "There are no valid targets in range",
+                ),
+            );
+
+            return;
+        }
 
         this.inRangeHandler.highlightTokensInRange(initiator, range, targets);
 
@@ -113,17 +131,6 @@ export class TargetSelectionHandler {
         onFinished?: ActionOnFinished,
     ): void {
         this.cancelAction();
-        const damagedTargets = action.damageTarget(initiator, target);
-
-        queueEntityUpdate(() => {
-            return damagedTargets
-                .filter((target) => target instanceof RpgToken)
-                .map((target) => target.tokenData);
-        });
-
-        onFinished?.(initiator, target, action, {
-            descriminator: "damagedTargets",
-            values: damagedTargets,
-        });
+        action.doAction(_event, target, initiator, onFinished);
     }
 }

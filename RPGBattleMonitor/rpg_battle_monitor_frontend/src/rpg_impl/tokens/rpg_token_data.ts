@@ -40,6 +40,7 @@ import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
 import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
 import { getRpgTokenWindowName } from "../components/windows/RpgTokenWindow";
 import { queueEntityUpdate } from "@/websocket/websocket";
+import { HealthState } from "../characters_stats/health_state";
 
 export type RpgTokenAttributes = {
     tint: Maybe<number>;
@@ -64,6 +65,7 @@ export type RpgTokenAttributes = {
     size: Size;
     skills: Skills;
     tags: string[];
+    healthState: HealthState;
 } & TokenDataBaseAttributes;
 
 export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
@@ -95,6 +97,8 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
     public tint: Maybe<number> = undefined;
 
     public tags: string[];
+
+    public healthState: HealthState;
 
     // TODO: Spellcasting, cantrips, spell slots
     //
@@ -132,6 +136,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
         this._size = options?.size ?? "medium";
         this.skills = options?.skills ?? getEmptySkills();
         this.tags = options?.tags ?? [];
+        this.healthState = HealthState.Healthy;
     }
 
     public getAttributes(): RpgTokenAttributes {
@@ -159,6 +164,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
             size: this._size,
             skills: this.skills,
             tags: this.tags,
+            healthState: this.healthState,
         };
     }
 
@@ -185,6 +191,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
         this._size = changes.size;
         this.skills = changes.skills;
         this.tags = changes.tags;
+        this.healthState = changes.healthState;
 
         super.applyUpdateAction(changes);
     }

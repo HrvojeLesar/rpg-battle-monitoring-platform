@@ -1,7 +1,15 @@
+import { FederatedPointerEvent } from "pixi.js";
+import {
+    HOSTILE_NPC_TAG,
+    PARTY_TAG,
+    SPECIAL_NPC_HOSTILE_TAG,
+} from "../characters_stats/tags";
 import { ITargetable } from "../interface/targetable";
 import { Die, GD20, printRolls, RollOptions, Rolls } from "../rolls/dice";
 import { GDieParser } from "../rolls/die_parser";
 import { RpgToken } from "../tokens/rpg_token";
+import { RpgTokenData } from "../tokens/rpg_token_data";
+import { HealthState } from "../characters_stats/health_state";
 
 export type TargetingType = "self" | "ally" | "hostile";
 export type AreaOfEffectType = "line" | "cone" | "cube" | "sphere" | "cylinder";
@@ -105,4 +113,90 @@ export abstract class Action {
         // // TODO: apply modifier
         return baseDamage + 0;
     }
+
+    public filterTargets(
+        attacker: RpgToken,
+        targets: ITargetable[],
+    ): ITargetable[] {
+        if (this.targeting.length === 0) {
+            return targets;
+        }
+
+        let filteredTargets: ITargetable[] = [];
+
+        for (const targeting of this.targeting) {
+            let result: ITargetable[] = [];
+            switch (targeting) {
+                case "ally":
+                    result = this.targetFriendly(attacker, targets);
+                    break;
+                case "hostile":
+                    result = this.targetHostile(attacker, targets);
+                    break;
+                case "self":
+                    result = this.targetSelf(attacker);
+                    break;
+            }
+
+            filteredTargets = [...filteredTargets, ...result];
+        }
+
+        return [...new Set(filteredTargets)];
+    }
+
+    public targetHostile(attacker: RpgToken, targets: ITargetable[]) {
+        return targets.filter((target) => {
+            return (
+                target instanceof RpgToken &&
+                this.isHostile(attacker.tokenData, target.tokenData) &&
+                target.tokenData.healthState !== HealthState.Dead
+            );
+        });
+    }
+
+    public targetFriendly(attacker: RpgToken, targets: ITargetable[]) {
+        return targets.filter((target) => {
+            return (
+                target instanceof RpgToken &&
+                !this.isHostile(attacker.tokenData, target.tokenData) &&
+                target.tokenData.healthState !== HealthState.Dead
+            );
+        });
+    }
+
+    public targetSelf(self: RpgToken): ITargetable[] {
+        return [self];
+    }
+
+    public isHostile(attacker: RpgTokenData, other: RpgTokenData): boolean {
+        let hostileTargetTags = [SPECIAL_NPC_HOSTILE_TAG, HOSTILE_NPC_TAG];
+        const attackerAlignment =
+            attacker.tags.find(
+                (tag) =>
+                    tag === PARTY_TAG ||
+                    tag === SPECIAL_NPC_HOSTILE_TAG ||
+                    tag === HOSTILE_NPC_TAG,
+            ) ?? HOSTILE_NPC_TAG;
+        if (
+            attackerAlignment === SPECIAL_NPC_HOSTILE_TAG ||
+            attackerAlignment === HOSTILE_NPC_TAG
+        ) {
+            hostileTargetTags = [PARTY_TAG];
+        }
+
+        for (const tag of hostileTargetTags) {
+            if (other.tags.includes(tag)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public abstract doAction(
+        _event: FederatedPointerEvent,
+        target: RpgToken,
+        initiator: RpgToken,
+        onFinished?: ActionOnFinished,
+    ): void;
 }
