@@ -80,6 +80,29 @@ where
     tracing::info!("Migrations completed");
 }
 
+/// # Safety
+/// Does not start a transaction
+#[tracing::instrument]
+pub async unsafe fn run_migrations_no_transaction<DB>(pool: &sqlx::Pool<DB>)
+where
+    DB: sqlx::Database,
+    <DB as sqlx::Database>::Connection: sqlx::migrate::Migrate,
+{
+    tracing::info!("Running pending migrations");
+    #[cfg(feature = "db_sqlite")]
+    sqlx::migrate!("./migrations/sqlite")
+        .run(pool)
+        .await
+        .expect("Failed running migrations");
+
+    #[cfg(feature = "db_postgres")]
+    sqlx::migrate!("./migrations/postgres")
+        .run(pool)
+        .await
+        .expect("Failed running migrations");
+    tracing::info!("Migrations completed");
+}
+
 trait IntoSqlxConnectOptions: Sized {
     type Database: sqlx::Database;
 

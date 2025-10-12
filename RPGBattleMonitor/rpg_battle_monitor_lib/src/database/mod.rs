@@ -23,9 +23,9 @@ pub async fn get_sea_orm_database(url: &str, max_connections: u32) -> sea_orm::D
 
         let backend = db.get_database_backend();
         if let sea_orm::DatabaseBackend::Sqlite = backend {
-            use crate::database::setup::run_migrations;
+            use crate::database::setup::run_migrations_no_transaction;
 
-            let mut pool = db.get_sqlite_connection_pool().clone();
+            let pool = db.get_sqlite_connection_pool().clone();
 
             // TODO: Credit to https://briandouglas.ie/sqlite-defaults/
             let connect_options = (*pool.connect_options())
@@ -41,7 +41,9 @@ pub async fn get_sea_orm_database(url: &str, max_connections: u32) -> sea_orm::D
                 .page_size(8192);
             pool.set_connect_options(connect_options);
 
-            run_migrations(&mut pool).await;
+            unsafe {
+                run_migrations_no_transaction(&pool).await;
+            }
         }
     }
 
