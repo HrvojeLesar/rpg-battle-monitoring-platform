@@ -166,6 +166,17 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
 
     // TODO: logic for adding tokens during combat
     public addToken(token: RpgToken | RpgToken[]): void {
+        if (this.isInCombat()) {
+            notifications.show(
+                errorNotification(
+                    "Combat is already in progress",
+                    "Cannot add tokens to encounter during combat",
+                ),
+            );
+
+            return;
+        }
+
         const tokens = Array.isArray(token) ? token : [token];
 
         tokens

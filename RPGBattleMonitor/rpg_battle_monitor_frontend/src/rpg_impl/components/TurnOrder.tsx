@@ -25,10 +25,15 @@ import { AssetHoverPreviewDefault } from "@/board_react_wrapper/components/asset
 import { getUrl } from "@/board_react_wrapper/utils/utils";
 import { defaultImageUrl } from "@/board_react_wrapper/components/interface/Tokens";
 import { GTokenWindowRegistry } from "../registry/token_window_registry";
+import { TurnOrderFactory } from "../factories/turn_order_factory";
+import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
+import { RpgToken } from "../tokens/rpg_token";
+import { RpgScene } from "../scene/scene";
 
 export const TurnOrder = () => {
     const { turnOrder } = useAtomValue(turnOrderAtoms.currentTurnOrder);
     const refreshTurnOrder = useSetAtom(turnOrderAtoms.currentTurnOrder);
+    const currentScene = useAtomValue(sceneAtoms.getCurrentScene);
 
     const combatButtons = () => {
         if (turnOrder === undefined) {
@@ -39,27 +44,14 @@ export const TurnOrder = () => {
 
         return (
             <>
-                {!isInCombat && (
-                    <Button
-                        onClick={() => {
-                            turnOrder.startCombat();
-                        }}
-                    >
-                        Start combat
-                    </Button>
-                )}
                 {isInCombat && (
                     <>
                         <Button
                             onClick={() => {
-                                turnOrder.stopCombat();
-                            }}
-                        >
-                            End combat
-                        </Button>
-                        <Button
-                            onClick={() => {
                                 turnOrder.nextTurn();
+                                queueEntityUpdate(() => {
+                                    return turnOrder;
+                                });
                             }}
                         >
                             Next turn
@@ -197,8 +189,82 @@ export const TurnOrder = () => {
         );
     };
 
+    console.log();
+
+    const turnControls = () => {
+        return (
+            <Fieldset legend="Controls">
+                <Flex gap="xs" direction="column" mah="512px">
+                    {(turnOrder?.isInCombat() === false ||
+                        turnOrder === undefined) && (
+                        <Button
+                            onClick={() => {
+                                if (currentScene instanceof RpgScene) {
+                                    let turnOrderInner: Maybe<RPGTurnOrder> =
+                                        turnOrder;
+                                    if (turnOrderInner === undefined) {
+                                        turnOrderInner =
+                                            TurnOrderFactory.create(
+                                                currentScene,
+                                            );
+                                    }
+
+                                    const selections =
+                                        currentScene.selectHandler.selections.reduce<
+                                            RpgToken[]
+                                        >((acc, selection) => {
+                                            if (selection instanceof RpgToken) {
+                                                acc.push(selection);
+                                            }
+
+                                            return acc;
+                                        }, []);
+
+                                    turnOrderInner.addToken(selections);
+
+                                    queueEntityUpdate(() => {
+                                        return turnOrderInner;
+                                    });
+                                }
+                            }}
+                        >
+                            Add selection to turn order
+                        </Button>
+                    )}
+                    {turnOrder && turnOrder.isInCombat() === false && (
+                        <Button
+                            onClick={() => {
+                                turnOrder.startCombat();
+
+                                queueEntityUpdate(() => {
+                                    return turnOrder;
+                                });
+                            }}
+                        >
+                            Start combat
+                        </Button>
+                    )}
+
+                    {turnOrder && turnOrder.isInCombat() && (
+                        <Button
+                            onClick={() => {
+                                turnOrder.stopCombat();
+                                queueEntityUpdate(() => {
+                                    return turnOrder;
+                                });
+                            }}
+                        >
+                            End combat
+                        </Button>
+                    )}
+                </Flex>
+            </Fieldset>
+        );
+    };
+
     return (
         <Stack gap="xs" pb="xs" justify="center" align="stretch">
+            {turnControls()}
             {displayTokens()}
         </Stack>
     );

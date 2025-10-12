@@ -1,6 +1,18 @@
 import { GBoard } from "@/board_core/board";
 import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
-import { Button, Combobox, MantineStyleProp, useCombobox } from "@mantine/core";
+import {
+    Button,
+    Combobox,
+    Flex,
+    MantineStyleProp,
+    UnstyledButton,
+    useCombobox,
+} from "@mantine/core";
+import {
+    IconStackBack,
+    IconStackFront,
+    IconStackMiddle,
+} from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { ReactNode } from "react";
 
@@ -19,16 +31,34 @@ export type LayerSelectProps = {
 
 const defaultLayers: LayerSelectOption[] = [
     {
-        key: "gridBackground",
-        label: "Grid background",
-    },
-    {
         key: "token",
-        label: "Tokens",
+        label: "Tokens layer",
+        comboboxItem: (
+            <Flex align="center">
+                <IconStackFront />
+                Tokens layer
+            </Flex>
+        ),
     },
     {
         key: "grid",
-        label: "Grid",
+        label: "Grid layer",
+        comboboxItem: (
+            <Flex align="center">
+                <IconStackMiddle />
+                Grid layer
+            </Flex>
+        ),
+    },
+    {
+        key: "gridBackground",
+        label: "Grid background layer",
+        comboboxItem: (
+            <Flex align="center">
+                <IconStackBack />
+                Grid background layer
+            </Flex>
+        ),
     },
 ];
 
@@ -56,7 +86,9 @@ export const LayerSelect = (props: LayerSelectProps) => {
             return undefined;
         }
 
-        return layers.find((layer) => layer.key === layerName)?.label;
+        const layer = layers.find((layer) => layer.key === layerName);
+
+        return layer?.comboboxItem ?? layer?.label;
     };
 
     return (
@@ -79,8 +111,7 @@ export const LayerSelect = (props: LayerSelectProps) => {
                             pointerEvents: "all",
                         }}
                     >
-                        Switch layer events (Current layer:
-                        {currentLayerName()})
+                        {currentLayerName()}
                     </Button>
                 </Combobox.Target>
 

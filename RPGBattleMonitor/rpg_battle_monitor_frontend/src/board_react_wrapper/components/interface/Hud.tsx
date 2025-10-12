@@ -32,63 +32,6 @@ const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
 
 const HudLeft = () => {
     const currentScene = useAtomValue(sceneAtoms.getCurrentScene);
-    const { turnOrder } = useAtomValue(turnOrderAtoms.currentTurnOrder);
-
-    const addTurnOrderButton = () => {
-        if (!currentScene || !(currentScene instanceof RpgScene)) {
-            return <></>;
-        }
-
-        return (
-            <Button
-                style={{
-                    pointerEvents: "all",
-                }}
-                onClick={() => {
-                    TurnOrderFactory.create(currentScene);
-                }}
-            >
-                Add turn order to current scene {turnOrder?.getUId()}
-            </Button>
-        );
-    };
-
-    const addSelectionToTurnOrder = () => {
-        if (!turnOrder || !currentScene) {
-            return <></>;
-        }
-
-        return (
-            <Flex gap="xs">
-                <Button
-                    flex={1}
-                    style={{
-                        pointerEvents: "all",
-                    }}
-                    onClick={() => {
-                        const selections =
-                            currentScene.selectHandler.selections.reduce<
-                                RpgToken[]
-                            >((acc, selection) => {
-                                if (selection instanceof RpgToken) {
-                                    acc.push(selection);
-                                }
-
-                                return acc;
-                            }, []);
-
-                        turnOrder.addToken(selections);
-
-                        queueEntityUpdate(() => {
-                            return turnOrder;
-                        });
-                    }}
-                >
-                    Add selection to turn order
-                </Button>
-            </Flex>
-        );
-    };
 
     const focusOnSelection = () => {
         if (!currentScene) {
@@ -168,8 +111,6 @@ const HudLeft = () => {
             <Flex direction="column" gap="xs" style={{ overflow: "auto" }}>
                 <SceneSelection />
                 <LayerSelect />
-                {addTurnOrderButton()}
-                {addSelectionToTurnOrder()}
                 {focusOnSelection()}
                 <SelectionControls>
                     <SelectionControls.DeleteSelection />
