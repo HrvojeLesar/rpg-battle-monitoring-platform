@@ -1,10 +1,4 @@
-import {
-    Container,
-    DestroyOptions,
-    Graphics,
-    Text,
-    Ticker,
-} from "pixi.js";
+import { Container, DestroyOptions, Graphics, Text, Ticker } from "pixi.js";
 import { RpgToken } from "../tokens/rpg_token";
 import { GBoard } from "@/board_core/board";
 
@@ -100,7 +94,7 @@ export class HealthBar extends Container {
             text: this.healthLabel,
             resolution: 2,
             style: {
-                fontSize: 24 / this.token.scene.viewport.scale.x,
+                fontSize: 120,
                 fill: 0x000000,
             },
         });
