@@ -43,6 +43,7 @@ export class DecorationTokenFactory {
                 eventMode: "static",
                 cursor: "pointer",
                 position: { x: scene.grid.x, y: scene.grid.y },
+                layer: scene.selectedLayer.name,
             },
         );
 

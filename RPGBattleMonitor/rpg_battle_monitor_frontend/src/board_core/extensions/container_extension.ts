@@ -36,6 +36,7 @@ export type ContainerExtensionOptions = {
     isSelectable?: boolean;
     selectionOutline?: SelectionOutline;
     isResizable?: boolean;
+    layer?: string;
 } & ContainerOptions;
 
 export type Ghost = ContainerExtension;
@@ -103,6 +104,7 @@ export abstract class ContainerExtension<
         this.isDraggable = options?.isDraggable ?? DEFAULTS.isDraggable;
         this.isSelectable = options?.isSelectable ?? DEFAULTS.isSelectable;
         this.isResizable = options?.isResizable ?? DEFAULTS.isResizable;
+        this.layer = options?.layer;
 
         this._grid = grid;
 
