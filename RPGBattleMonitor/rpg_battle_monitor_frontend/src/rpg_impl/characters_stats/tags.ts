@@ -9,4 +9,5 @@ export const COMBAT_TAGS = [
     NPC_TAG,
     HOSTILE_NPC_TAG,
     SPECIAL_NPC_TAG,
+    SPECIAL_NPC_HOSTILE_TAG,
 ];
