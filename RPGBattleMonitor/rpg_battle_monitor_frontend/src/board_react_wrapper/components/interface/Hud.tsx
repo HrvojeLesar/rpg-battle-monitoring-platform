@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Paper } from "@mantine/core";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { SceneSelection } from "./SceneSelection";
 import classes from "../../../css/hud.module.css";
 import { ReactNode } from "react";
@@ -9,6 +9,8 @@ import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 import { RpgScene } from "@/rpg_impl/scene/scene";
 import { SelectionControls } from "../selection_controls/SelectionControls";
 import { LayerSelect } from "./LayerSelect";
+import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
+import { openDiceRollWindow } from "@/rpg_impl/components/windows/DiceRollWindow";
 
 const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
     return (
@@ -102,6 +104,24 @@ const HudLeft = () => {
         );
     };
 
+    const openWindow = useSetAtom(windowAtoms.openWindow);
+    const diceRollWindow = () => {
+        return (
+            <>
+                <Button
+                    style={{
+                        pointerEvents: "all",
+                    }}
+                    onClick={() => {
+                        openWindow(openDiceRollWindow());
+                    }}
+                >
+                    Dice roll
+                </Button>
+            </>
+        );
+    };
+
     return (
         <SidesFlexBox>
             <Flex direction="column" gap="xs" style={{ overflow: "auto" }}>
@@ -113,6 +133,7 @@ const HudLeft = () => {
                     <SelectionControls.ContainerProperties />
                 </SelectionControls>
                 {switchViewportDragging()}
+                {diceRollWindow()}
             </Flex>
         </SidesFlexBox>
     );
