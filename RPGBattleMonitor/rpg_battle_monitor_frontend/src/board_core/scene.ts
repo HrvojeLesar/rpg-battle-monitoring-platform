@@ -27,6 +27,7 @@ export type SceneAttributes = {
     gridUid: string;
     name: string;
     sortPosition: Maybe<number>;
+    hidden: boolean;
 };
 
 export type SceneOptions = {
@@ -35,6 +36,7 @@ export type SceneOptions = {
     gridOptions?: GridOptions;
     sortPosition?: number;
     layers?: Layers;
+    hidden?: boolean;
 };
 
 export const WORLD_SIZE = 6000 * 8;
@@ -59,14 +61,18 @@ export class Scene implements IMessagable<SceneAttributes> {
 
     protected _selectedLayer: Layer;
 
+    public hidden: boolean;
+
     public constructor(options: SceneOptions) {
         this._uid = newUId();
         this.name = options.name;
         this._grid = options.grid ?? new Grid(options.gridOptions);
 
+        this._sortPosition = options.sortPosition ?? undefined;
         this._layers = options.layers ?? Layers.getDefaultLayers();
         this._selectedLayer = this._layers.getLayer("token");
         this._selectedLayer.container.eventMode = "passive";
+        this.hidden = options.hidden ?? true;
 
         this._viewport = new Viewport({
             events: GBoard.app.renderer.events,
@@ -243,6 +249,7 @@ export class Scene implements IMessagable<SceneAttributes> {
             gridUid: this._grid.getUId(),
             name: this.name,
             sortPosition: this._sortPosition,
+            hidden: this.hidden,
         };
     }
 
@@ -250,6 +257,8 @@ export class Scene implements IMessagable<SceneAttributes> {
         this._uid = changes.uid;
         this._sortPosition = changes.sortPosition;
         this.name = changes.name;
+        this.hidden = changes.hidden ?? true;
+
         GAtomStore.set(sceneAtoms.refreshScenes);
     }
 
