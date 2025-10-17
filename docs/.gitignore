@@ -1,0 +1,15 @@
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.lof
+*.log
+*.lol
+*.lot
+*.out
+*.xml
+*.toc
+*.fdb_latexmk
+*.fls
+*.pyg
+_minted-*
