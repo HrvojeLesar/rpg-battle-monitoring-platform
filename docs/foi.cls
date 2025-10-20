@@ -384,6 +384,17 @@ unicode
     
     \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 
+\newpage
+\thispagestyle{plain}
+
+    {\begin{center}\bfseries{Sažetak}\end{center}}
+
+\noindent \@sazetak
+
+\begin{flushleft}
+\textbf{Ključne riječi}: \@kljucneRijeci
+\end{flushleft}
+
 
 }
 

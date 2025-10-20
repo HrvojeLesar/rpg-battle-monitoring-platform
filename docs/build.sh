@@ -14,7 +14,7 @@ if [ -n "$OTHER_PIDS" ]; then
     done
 fi
 
-pdflatex -interaction nonstopmode -shell-escape main.tex
-biber main
-pdflatex -interaction nonstopmode -shell-escape main.tex
-pdflatex -interaction nonstopmode -shell-escape main.tex
+pdflatex -interaction nonstopmode -shell-escape izrada_platforme_za_pracenje_bitke_u_igri_igranja_uloga.tex
+biber izrada_platforme_za_pracenje_bitke_u_igri_igranja_uloga
+pdflatex -interaction nonstopmode -shell-escape izrada_platforme_za_pracenje_bitke_u_igri_igranja_uloga.tex
+pdflatex -interaction nonstopmode -shell-escape izrada_platforme_za_pracenje_bitke_u_igri_igranja_uloga.tex
