@@ -10,14 +10,14 @@ pub struct DatabaseConfig {
 
 pub struct Config {
     pub database: DatabaseConfig,
-    pub assets_base_path: String,
+    pub assets: AssetsConfig,
 }
 
 impl Config {
     pub fn load_from_env() -> Result<Self> {
         Ok(Self {
             database: DatabaseConfig::load_from_env()?,
-            assets_base_path: "./assets".to_string(),
+            assets: AssetsConfig::load_from_env(),
         })
     }
 }
@@ -59,4 +59,16 @@ pub fn config() -> &'static Config {
     static INSTANCE: OnceLock<Config> = OnceLock::new();
 
     INSTANCE.get_or_init(|| Config::load_from_env().unwrap_or_else(|err| panic!("{err}")))
+}
+
+pub struct AssetsConfig {
+    pub base_path: String,
+}
+
+impl AssetsConfig {
+    pub fn load_from_env() -> Self {
+        Self {
+            base_path: env::var("ASSETS_BASE_PATH").unwrap_or_else(|_| "./assets".to_string()),
+        }
+    }
 }

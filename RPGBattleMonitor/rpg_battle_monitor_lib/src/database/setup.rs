@@ -39,7 +39,7 @@ pub async fn create_database(database_url: &str) {
         .await
         .expect("Cannot verify if database exists")
     {
-        tracing::info!("Starting database creation");
+        tracing::info!("Starting database creation on url {database_url}");
 
         sqlx::Any::create_database(database_url)
             .await

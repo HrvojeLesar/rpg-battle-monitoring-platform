@@ -37,7 +37,7 @@ impl AppStateConfig<local_adapter::Local> {
 
     fn get_fs_handler_from_config() -> local_adapter::Local {
         let config = config::config();
-        Local::new(config.assets_base_path.clone().into())
+        Local::new(config.assets.base_path.clone().into())
     }
 
     async fn get_database() -> DatabaseConnection {

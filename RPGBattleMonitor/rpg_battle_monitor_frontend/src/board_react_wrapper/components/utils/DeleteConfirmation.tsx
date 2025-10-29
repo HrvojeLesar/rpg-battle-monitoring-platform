@@ -20,7 +20,7 @@ export const DeleteConfirmation = (props: DeleteConfirmationProps) => {
         }
 
         return cloneElement(target, {
-            onClick: (e) => {
+            onClick: (e: any) => {
                 if (typeof e.stopPropagation === "function") {
                     e.stopPropagation();
                 }

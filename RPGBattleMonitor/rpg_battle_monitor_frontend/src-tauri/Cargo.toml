@@ -25,3 +25,4 @@ serde_json = "1"
 
 rpg_battle_monitor_lib = { path = "../../rpg_battle_monitor_lib" }
 tracing-subscriber = "0.3.19"
+tauri-plugin-fs = "2"
