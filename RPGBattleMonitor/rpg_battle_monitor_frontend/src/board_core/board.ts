@@ -211,12 +211,12 @@ export async function init(
 
     if (isDev()) {
         globalThis.__PIXI_APP__ = application;
-
-        boardApplication.websocket = Websocket.createDefaultSocket(
-            boardInitOptions.gameId,
-        );
-        initWebsocketListeners();
     }
+
+    boardApplication.websocket = Websocket.createDefaultSocket(
+        boardInitOptions.gameId,
+    );
+    initWebsocketListeners();
 
     boardApplication.app.renderer.on("resize", resize);
     window.addEventListener("orientationchange", triggerRendererResize);

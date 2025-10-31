@@ -20,15 +20,12 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
-            let db_file_path = app
-                .path()
-                .resolve("rpg_battle_monitor.db", tauri::path::BaseDirectory::AppData)
-                .expect("rpg_battle_monitor.db file path")
-                .to_str()
-                .expect("rpg_battle_monitor.db file path")
-                .to_string();
+            let db = db_file_path(app);
+            let assets = assets_file_path(app);
+            std::env::set_var("DATABASE_URL", format!("sqlite://{db}"));
+            std::env::set_var("ASSETS_BASE_PATH", assets);
+
             tauri::async_runtime::spawn(async move {
-                std::env::set_var("DATABASE_URL", format!("sqlite://{db_file_path}"));
                 start_server().await;
             });
 
@@ -48,4 +45,22 @@ async fn start_server() {
     let state: AppState<Local> = AppState::new(AppStateConfig::get_default_config().await).await;
 
     BattleMonitorWebServer::new(state).serve(None).await;
+}
+
+fn db_file_path(app: &tauri::App) -> String {
+    app.path()
+        .resolve("rpg_battle_monitor.db", tauri::path::BaseDirectory::AppData)
+        .expect("rpg_battle_monitor.db file path")
+        .to_str()
+        .expect("rpg_battle_monitor.db file path")
+        .to_string()
+}
+
+fn assets_file_path(app: &tauri::App) -> String {
+    app.path()
+        .resolve("assets/", tauri::path::BaseDirectory::AppData)
+        .expect("Assets file path")
+        .to_str()
+        .expect("Assets file path")
+        .to_string()
 }
