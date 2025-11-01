@@ -134,7 +134,6 @@ export class HealthBar extends Container {
         ) {
             this.healthText.text = this.healthLabel;
             this.correctTextPosition();
-            this.healthText.width = this.tokenWidth;
             this.background.draw();
         }
     }
