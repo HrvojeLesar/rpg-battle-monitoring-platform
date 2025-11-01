@@ -1,5 +1,5 @@
 import { FederatedPointerEvent } from "pixi.js";
-import { Action, ActionOnFinished } from "../actions/action";
+import { Action, ActionCallbacks } from "../actions/action";
 import { TargetSelectionLayer } from "../layers/traget_selection_layer";
 import { RpgScene } from "../scene/scene";
 import { RpgToken } from "../tokens/rpg_token";
@@ -29,7 +29,7 @@ export class TargetSelectionHandler {
     public doAction(
         initiator: RpgToken,
         action: Action,
-        actionFinishedCallback?: ActionOnFinished,
+        callbacks?: ActionCallbacks,
     ): void {
         this.startAction();
 
@@ -58,12 +58,7 @@ export class TargetSelectionHandler {
 
         // TODO: Handle here the kind of selection it needs to be
         // currently only supported is direct target
-        this.overlayTargetTokens(
-            initiator,
-            targets,
-            action,
-            actionFinishedCallback,
-        );
+        this.overlayTargetTokens(initiator, targets, action, callbacks);
     }
 
     public cancelAction(): void {
@@ -80,10 +75,10 @@ export class TargetSelectionHandler {
         initiator: RpgToken,
         tokens: RpgToken[],
         action: Action,
-        onFinished?: ActionOnFinished,
+        callbacks?: ActionCallbacks,
     ): void {
         tokens.forEach((token) => {
-            this.newTokenOverlay(initiator, token, action, onFinished);
+            this.newTokenOverlay(initiator, token, action, callbacks);
         });
     }
 
@@ -91,7 +86,7 @@ export class TargetSelectionHandler {
         initiator: RpgToken,
         token: RpgToken,
         action: Action,
-        onFinished?: ActionOnFinished,
+        callbacks?: ActionCallbacks,
     ): TargetTokenOverlay {
         const overlay = new TargetTokenOverlay(
             token,
@@ -112,7 +107,7 @@ export class TargetSelectionHandler {
                         token,
                         action,
                         initiator,
-                        onFinished,
+                        callbacks,
                     );
                 }
             },
@@ -127,9 +122,9 @@ export class TargetSelectionHandler {
         target: RpgToken,
         action: Action,
         initiator: RpgToken,
-        onFinished?: ActionOnFinished,
+        callbacks?: ActionCallbacks,
     ): void {
         this.cancelAction();
-        action.doAction(target, initiator, event, onFinished);
+        action.doAction(target, initiator, event, callbacks);
     }
 }

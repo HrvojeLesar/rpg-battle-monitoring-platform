@@ -15,6 +15,41 @@ export type TargetingType = "self" | "ally" | "hostile";
 export type AreaOfEffectType = "line" | "cone" | "cube" | "sphere" | "cylinder";
 export type ActionType = "action" | "bonusAction";
 
+export type DamageResult = {
+    target: ITargetable;
+    damage: Partial<SingleTargetAttackDamage>;
+};
+
+export type ApplyDamageCallback = (
+    damageResults: DamageResult[],
+    applyDamage: () => void,
+) => void;
+
+export type ApplyDamageResult = {
+    damageResults: DamageResult[];
+    applyDamage: () => ITargetable[];
+};
+
+export type ActionCallbacks = {
+    onFinished?: ActionOnFinished;
+    onCanceled?: ActionOnCanceled;
+    onAttackRollCallback?: (
+        attackRollResults: Rolls,
+        initiator: RpgToken,
+        target: ITargetable,
+    ) => void;
+    onDamageRollCallback?: (
+        damageRollResults: Rolls,
+        initiator: RpgToken,
+        target: ITargetable,
+    ) => void;
+    onTargetDamageCallback?: (
+        initiator: RpgToken,
+        targets: DamageResult[],
+    ) => void;
+    actCallback?: (damageResults: DamageResult[], act: () => void) => void;
+};
+
 export type ActionOnFinished = (
     initiator: RpgToken,
     target: ITargetable | ITargetable[],
@@ -83,17 +118,21 @@ export abstract class Action {
     public abstract damageTarget(
         attacker: RpgToken,
         target: ITargetable | ITargetable[],
-    ): ITargetable[];
+        callbacks?: ActionCallbacks,
+    ): ITargetable[] | ApplyDamageResult;
 
     protected getSingleTargetAttackDamage(
-        _attacker: RpgToken,
+        attacker: RpgToken,
         target: ITargetable,
+        callbacks?: ActionCallbacks,
     ): Partial<SingleTargetAttackDamage> {
         // TODO: Read lucky value from some other place
         const attackRollResults = this.attackRoll({
             isLucky: false,
         });
         printRolls("Attack rolls", attackRollResults);
+
+        callbacks?.onAttackRollCallback?.(attackRollResults, attacker, target);
 
         const attackRoll = attackRollResults.rolls[0];
         if (attackRoll.isCritialFailure) {
@@ -117,6 +156,8 @@ export abstract class Action {
             isCritical: attackRoll.isCriticalSuccess,
         });
         printRolls("Damage rolls", damageRoll);
+
+        callbacks?.onDamageRollCallback?.(attackRollResults, attacker, target);
 
         const baseDamage = damageRoll.rolls.reduce<number>((acc, roll) => {
             acc += roll.value;
@@ -216,6 +257,6 @@ export abstract class Action {
         target: RpgToken,
         initiator: RpgToken,
         event?: FederatedPointerEvent,
-        onFinished?: ActionOnFinished,
+        callbacks?: ActionCallbacks,
     ): void;
 }

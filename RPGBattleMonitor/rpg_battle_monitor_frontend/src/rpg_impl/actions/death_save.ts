@@ -1,7 +1,7 @@
 import { FederatedPointerEvent } from "pixi.js";
 import { ITargetable } from "../interface/targetable";
 import { RpgToken } from "../tokens/rpg_token";
-import { Action, ActionOnFinished } from "./action";
+import { Action, ActionCallbacks } from "./action";
 import { printRolls } from "../rolls/dice";
 import {
     calculateNextHealthState,
@@ -26,7 +26,7 @@ export class DeathSave extends Action {
         target: RpgToken,
         initiator: RpgToken,
         _event?: FederatedPointerEvent,
-        onFinished?: ActionOnFinished,
+        callbacks?: ActionCallbacks,
     ): void {
         const result = this.rollDamage();
         printRolls("Death save", result);
@@ -55,7 +55,7 @@ export class DeathSave extends Action {
             initiator.tokenData.healthState = nextHealthState;
         }
 
-        onFinished?.(initiator, target, this, {
+        callbacks?.onFinished?.(initiator, target, this, {
             descriminator: "deathSave",
             values: undefined,
         });

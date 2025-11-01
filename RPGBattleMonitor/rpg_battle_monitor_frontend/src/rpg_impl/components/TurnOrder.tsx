@@ -37,6 +37,8 @@ import { HealthState } from "../characters_stats/health_state";
 import { GEventEmitter } from "@/board_core/board";
 import { RpgTokenData } from "../tokens/rpg_token_data";
 import { IMessagable } from "@/board_core/interfaces/messagable";
+import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
+import { openDiceRollWindow } from "./windows/DiceRollWindow";
 
 export const TurnOrderIcon = () => {
     return <IconSwords size={20} />;
@@ -46,6 +48,7 @@ export const TurnOrder = () => {
     const { turnOrder } = useAtomValue(turnOrderAtoms.currentTurnOrder);
     const refreshTurnOrder = useSetAtom(turnOrderAtoms.currentTurnOrder);
     const currentScene = useAtomValue(sceneAtoms.getCurrentScene);
+    const openWindow = useSetAtom(windowAtoms.openWindow);
 
     useEffect(() => {
         const tryUpdate = (entity: IMessagable) => {
@@ -78,6 +81,7 @@ export const TurnOrder = () => {
                     <>
                         <Button
                             onClick={() => {
+                                turnOrder.scene.targetSelectionHandler.cancelAction();
                                 turnOrder.nextTurn();
                                 queueEntityUpdate(() => {
                                     return turnOrder;
@@ -220,10 +224,8 @@ export const TurnOrder = () => {
                                     return;
                                 }
 
-                                turnOrder.doAction(
-                                    onTurnEntry.token,
-                                    action,
-                                    () => {
+                                turnOrder.doAction(onTurnEntry.token, action, {
+                                    onFinished: () => {
                                         refreshTurnOrder();
                                         queueEntityUpdate(() => {
                                             return turnOrder;
@@ -248,12 +250,14 @@ export const TurnOrder = () => {
                                 }
 
                                 const token = onTurnEntry.token;
-                                action.doAction(token, token, undefined, () => {
-                                    refreshTurnOrder();
-                                    queueEntityUpdate(() => {
-                                        turnOrder.nextTurn();
-                                        return [turnOrder, token.tokenData];
-                                    });
+                                action.doAction(token, token, undefined, {
+                                    onFinished: () => {
+                                        refreshTurnOrder();
+                                        queueEntityUpdate(() => {
+                                            turnOrder.nextTurn();
+                                            return [turnOrder, token.tokenData];
+                                        });
+                                    },
                                 });
                             }}
                         >

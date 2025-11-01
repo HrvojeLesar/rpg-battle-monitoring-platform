@@ -15,7 +15,7 @@ import {
     abilityScoreModifier,
     AbilityScoreType,
 } from "../characters_stats/ability_score";
-import { Action, ActionOnFinished } from "../actions/action";
+import { Action, ActionCallbacks } from "../actions/action";
 import { notifications } from "@mantine/notifications";
 import {
     anotherTokensTurnNotification,
@@ -364,16 +364,15 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
     public doAction(
         token: RpgToken,
         action: Action,
-        onFinished?: ActionOnFinished,
+        callbacks?: ActionCallbacks,
     ): void {
         if (this.isInCombat() && !this.isDoActionValid(token, action)) {
             return;
         }
 
-        this.scene.targetSelectionHandler.doAction(
-            token,
-            action,
-            (initiator, target, action) => {
+        this.scene.targetSelectionHandler.doAction(token, action, {
+            ...callbacks,
+            onFinished: (initiator, target, action) => {
                 const entry = this.getToken(token);
                 if (entry !== undefined) {
                     if (action.actionType === "action") {
@@ -383,9 +382,9 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
                     }
                 }
 
-                onFinished?.(initiator, target, action);
+                callbacks?.onFinished?.(initiator, target, action);
             },
-        );
+        });
     }
 
     protected isDoActionValid(token: RpgToken, action: Action): boolean {

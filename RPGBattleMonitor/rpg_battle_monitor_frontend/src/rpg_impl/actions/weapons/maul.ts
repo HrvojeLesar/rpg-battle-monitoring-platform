@@ -1,5 +1,10 @@
 import { RpgToken } from "@/rpg_impl/tokens/rpg_token";
-import { Action, ActionOnFinished } from "../action";
+import {
+    Action,
+    ActionCallbacks,
+    ApplyDamageResult,
+    DamageResult,
+} from "../action";
 import { FederatedPointerEvent } from "pixi.js";
 import { queueEntityUpdate } from "@/websocket/websocket";
 
@@ -16,47 +21,102 @@ export class Maul extends Action {
     public damageTarget(
         attacker: RpgToken,
         target: RpgToken | RpgToken[],
-    ): RpgToken[] {
+        callbacks?: ActionCallbacks,
+    ): RpgToken[] | ApplyDamageResult {
         const damagedTargets: RpgToken[] = [];
         if (!Array.isArray(target)) {
             target = [target];
         }
 
-        for (const targetable of target) {
-            const damageResults = this.getSingleTargetAttackDamage(
-                attacker,
-                targetable,
-            );
+        const damageResults: DamageResult[] = [];
 
-            if (damageResults.damage) {
-                targetable.takeDamage(
-                    damageResults.damage,
-                    damageResults.isCritical ?? false,
-                );
-                damagedTargets.push(targetable);
-            }
+        for (const targetable of target) {
+            damageResults.push({
+                target: targetable,
+                damage: this.getSingleTargetAttackDamage(
+                    attacker,
+                    targetable,
+                    callbacks,
+                ),
+            });
         }
 
-        return damagedTargets;
+        callbacks?.onTargetDamageCallback?.(attacker, damageResults);
+
+        const applyDamage = (): RpgToken[] => {
+            if (damagedTargets.length > 0) {
+                return damagedTargets;
+            }
+
+            for (const entry of damageResults) {
+                const { target: targetable, damage: damageResult } = entry;
+                if (damageResult.damage) {
+                    targetable.takeDamage(
+                        damageResult.damage,
+                        damageResult.isCritical ?? false,
+                    );
+                    if (targetable instanceof RpgToken) {
+                        damagedTargets.push(targetable);
+                    }
+                }
+            }
+
+            return damagedTargets;
+        };
+
+        if (callbacks?.actCallback !== undefined) {
+            return {
+                damageResults,
+                applyDamage,
+            };
+        } else {
+            return applyDamage();
+        }
     }
 
     public doAction(
         target: RpgToken,
         initiator: RpgToken,
         _event?: FederatedPointerEvent,
-        onFinished?: ActionOnFinished,
+        callbacks?: ActionCallbacks,
     ): void {
-        const damagedTargets = this.damageTarget(initiator, target);
+        const damageTargetResult = this.damageTarget(
+            initiator,
+            target,
+            callbacks,
+        );
 
-        queueEntityUpdate(() => {
-            return damagedTargets
-                .filter((target) => target instanceof RpgToken)
-                .map((target) => target.tokenData);
-        });
+        let damagedTargets: RpgToken[] = [];
+        if (Array.isArray(damageTargetResult)) {
+            damagedTargets = damageTargetResult;
+        }
 
-        onFinished?.(initiator, target, this, {
-            descriminator: "damagedTargets",
-            values: damagedTargets,
-        });
+        const act = () => {
+            if (!Array.isArray(damageTargetResult)) {
+                damagedTargets = damageTargetResult
+                    .applyDamage()
+                    .filter((target) => target instanceof RpgToken);
+            }
+
+            queueEntityUpdate(() => {
+                return damagedTargets
+                    .filter((target) => target instanceof RpgToken)
+                    .map((target) => target.tokenData);
+            });
+
+            callbacks?.onFinished?.(initiator, target, this, {
+                descriminator: "damagedTargets",
+                values: damagedTargets,
+            });
+        };
+
+        if (
+            callbacks?.actCallback !== undefined &&
+            !Array.isArray(damageTargetResult)
+        ) {
+            callbacks.actCallback(damageTargetResult.damageResults, act);
+        } else {
+            act();
+        }
     }
 }
