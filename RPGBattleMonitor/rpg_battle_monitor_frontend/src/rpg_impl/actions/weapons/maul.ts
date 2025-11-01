@@ -91,7 +91,12 @@ export class Maul extends Action {
             damagedTargets = damageTargetResult;
         }
 
+        let acted = false;
         const act = () => {
+            if (acted) {
+                return;
+            }
+
             if (!Array.isArray(damageTargetResult)) {
                 damagedTargets = damageTargetResult
                     .applyDamage()
@@ -108,6 +113,8 @@ export class Maul extends Action {
                 descriminator: "damagedTargets",
                 values: damagedTargets,
             });
+
+            acted = true;
         };
 
         if (

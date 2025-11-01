@@ -12,13 +12,7 @@ import {
 } from "@dnd-kit/core";
 import { ReactNode, useEffect } from "react";
 import { Resizable } from "re-resizable";
-import {
-    CloseButton,
-    Divider,
-    Flex,
-    Paper,
-    Title,
-} from "@mantine/core";
+import { CloseButton, Divider, Flex, Paper, Title } from "@mantine/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import { IconArrowsDiagonal } from "@tabler/icons-react";
 import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
@@ -34,6 +28,7 @@ export type WindowProps = {
     top: number;
     zIndex: number;
     resizable?: boolean;
+    onClose?: () => void;
 };
 
 export type WindowHeaderProps = {
@@ -69,7 +64,7 @@ const WindowHeader = (props: WindowHeaderProps) => {
 };
 
 export function Window(props: WindowProps) {
-    const { id, children, styles, left, top, zIndex, title } = props;
+    const { id, children, styles, left, top, zIndex, title, onClose } = props;
     const { attributes, listeners, setNodeRef, transform, isDragging } =
         useDraggable({
             id,
@@ -144,6 +139,7 @@ export function Window(props: WindowProps) {
                         attributes={attributes}
                         title={title}
                         onClose={() => {
+                            onClose?.();
                             removeWindow(id);
                         }}
                     />
@@ -199,6 +195,7 @@ export const WindowOverlay = () => {
                         zIndex={w.zIndex}
                         title={w.title}
                         resizable={w.resizable}
+                        onClose={w.onClose}
                     >
                         {w.content}
                     </Window>

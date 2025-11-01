@@ -231,7 +231,20 @@ export const TurnOrder = () => {
                                             return turnOrder;
                                         });
                                     },
-                                );
+                                    actCallback: (damageResults, act) => {
+                                        if (damageResults.length > 0) {
+                                            openWindow(
+                                                openDiceRollWindow({
+                                                    onClose: () => {
+                                                        act();
+                                                    },
+                                                    act,
+                                                    damageResults,
+                                                }),
+                                            );
+                                        }
+                                    },
+                                });
                             }}
                         >
                             Maul attack

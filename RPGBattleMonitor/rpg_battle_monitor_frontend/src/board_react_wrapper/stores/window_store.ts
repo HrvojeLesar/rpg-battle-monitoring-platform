@@ -19,6 +19,7 @@ export type WindowEntry = {
     zIndex?: number;
     content?: JSX.Element;
     resizable?: boolean;
+    onClose?: () => void;
 };
 
 type WindowEntryInner = {
