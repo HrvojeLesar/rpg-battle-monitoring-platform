@@ -7,6 +7,7 @@ import {
     AssetUploadProps,
 } from "@/board_react_wrapper/components/assets/AssetUpload";
 import { DeleteConfirmation } from "@/board_react_wrapper/components/utils/DeleteConfirmation";
+import { AssetUploadResponse } from "@/board_react_wrapper/requests/assets";
 import { assetsAtoms } from "@/board_react_wrapper/stores/asset_store";
 import {
     windowAtoms,
@@ -14,10 +15,19 @@ import {
 } from "@/board_react_wrapper/stores/window_store";
 import { getUrl } from "@/board_react_wrapper/utils/utils";
 import { RPG_ASSET_DROP } from "@/rpg_impl/utils/rpg_token_drop";
-import { Button, Fieldset, Flex, Image, Paper, Text } from "@mantine/core";
+import {
+    ActionIcon,
+    Button,
+    Fieldset,
+    Flex,
+    Image,
+    Paper,
+    Text,
+} from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { IconFileAnalytics } from "@tabler/icons-react";
+import { IconEye, IconEyeOff, IconFileAnalytics } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
+import { useState } from "react";
 
 const assetUploadWindow = (props?: Partial<AssetUploadProps>): WindowEntry => {
     return {
@@ -35,8 +45,12 @@ export const RPGAssetUpload = () => {
     const assets = useAtomValue(assetsAtoms.assets);
 
     const openWindow = useSetAtom(windowAtoms.openWindow);
-    const onSuccess = (asset: Asset) => {
-        GBoard.assetsRegistry.add(asset);
+    const onSuccess = (asset: AssetUploadResponse) => {
+        GBoard.assetsRegistry.add({
+            creator: GBoard.whoAmI,
+            visibleToUsers: [GBoard.whoAmI],
+            ...asset,
+        });
     };
 
     return (
@@ -57,66 +71,106 @@ export const RPGAssetUpload = () => {
             <Fieldset legend="Asset list" style={{ overflow: "auto" }}>
                 <Flex direction="column" gap="xs">
                     {assets.map((asset, idx) => {
-                        return (
-                            <Flex
-                                key={idx}
-                                gap="xs"
-                                align="center"
-                                draggable
-                                onDragStart={(e) => {
-                                    GDragAndDropRegistry.emit(
-                                        e as unknown as DragEvent,
-                                        RPG_ASSET_DROP,
-                                        JSON.stringify(asset),
-                                    );
-                                }}
-                            >
-                                <AssetHoverPreviewDefault
-                                    target={
-                                        <Image
-                                            src={getUrl(asset.url)}
-                                            maw="32px"
-                                            mah="32px"
-                                            miw="32px"
-                                            mih="32px"
-                                            style={{ cursor: "pointer" }}
-                                            onClick={() => {
-                                                modals.open({
-                                                    title: "Image preview",
-                                                    centered: true,
-                                                    children: (
-                                                        <Image
-                                                            src={getUrl(
-                                                                asset.url,
-                                                            )}
-                                                        />
-                                                    ),
-                                                });
-                                            }}
-                                        />
-                                    }
-                                    dropdown={
-                                        <Image
-                                            mah="calc(100vh - (var(--mantine-spacing-xl) * 2))"
-                                            maw="calc(100vw - (var(--mantine-spacing-xl) * 2))"
-                                            src={getUrl(asset.url)}
-                                        />
-                                    }
-                                />
-                                <Paper>
-                                    <Text>{asset.originalFilename}</Text>
-                                </Paper>
-                                <DeleteConfirmation
-                                    title="Delete asset"
-                                    onDelete={() => {
-                                        GBoard.assetsRegistry.remove(asset);
-                                    }}
-                                />
-                            </Flex>
-                        );
+                        return <AssetItem key={idx} asset={asset} />;
                     })}
                 </Flex>
             </Fieldset>
+        </Flex>
+    );
+};
+
+type AssetItemProps = {
+    asset: Asset;
+};
+const AssetItem = (props: AssetItemProps) => {
+    const { asset } = props;
+
+    const save = useSetAtom(assetsAtoms.save);
+
+    const isPublic = () => {
+        return asset.visibleToUsers.includes("*");
+    };
+
+    const [hidden, setHidden] = useState(!isPublic());
+
+    const toggleHiddenHandler = () => {
+        if (!hidden) {
+            asset.visibleToUsers = asset.visibleToUsers.filter(
+                (v) => v !== "*",
+            );
+        } else {
+            asset.visibleToUsers.push("*");
+        }
+
+        setHidden((hidden) => !hidden);
+        save();
+    };
+
+    const showButton = () => {
+        return GBoard.whoAmI === asset.creator || GBoard.isDm;
+    };
+
+    return (
+        <Flex
+            gap="xs"
+            align="center"
+            draggable
+            onDragStart={(e) => {
+                GDragAndDropRegistry.emit(
+                    e as unknown as DragEvent,
+                    RPG_ASSET_DROP,
+                    JSON.stringify(asset),
+                );
+            }}
+        >
+            <AssetHoverPreviewDefault
+                target={
+                    <Image
+                        src={getUrl(asset.url)}
+                        maw="32px"
+                        mah="32px"
+                        miw="32px"
+                        mih="32px"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => {
+                            modals.open({
+                                title: "Image preview",
+                                centered: true,
+                                children: <Image src={getUrl(asset.url)} />,
+                            });
+                        }}
+                    />
+                }
+                dropdown={
+                    <Image
+                        mah="calc(100vh - (var(--mantine-spacing-xl) * 2))"
+                        maw="calc(100vw - (var(--mantine-spacing-xl) * 2))"
+                        src={getUrl(asset.url)}
+                    />
+                }
+            />
+            <Paper>
+                <Text>{asset.originalFilename}</Text>
+            </Paper>
+            {showButton() && (
+                <ActionIcon
+                    onClick={() => {
+                        toggleHiddenHandler();
+                    }}
+                    variant="outline"
+                    title={hidden ? "Make public" : "Make private"}
+                >
+                    {hidden ? <IconEyeOff /> : <IconEye />}
+                </ActionIcon>
+            )}
+            {showButton() && (
+                <DeleteConfirmation
+                    title="Delete asset"
+                    onDelete={() => {
+                        GBoard.assetsRegistry.remove(asset);
+                    }}
+                />
+            )}
         </Flex>
     );
 };

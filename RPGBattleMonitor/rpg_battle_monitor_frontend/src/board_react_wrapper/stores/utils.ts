@@ -2,7 +2,7 @@ import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 import { GAtomStore } from "./state_store";
 
 const getNextSortPosition = () => {
-    const scenes = GAtomStore.get(sceneAtoms.getScenes);
+    const scenes = GAtomStore.get(sceneAtoms.sceneAtom).scenes;
     const maxSortPosition = scenes.reduce<Maybe<number>>((acc, scene) => {
         if (acc === undefined) {
             return scene.sortPosition;

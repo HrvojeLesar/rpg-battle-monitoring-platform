@@ -1,5 +1,7 @@
 import { atom } from "jotai";
 import { Asset } from "@/board_core/assets/game_assets";
+import { GBoard } from "@/board_core/board";
+import { isPubliclyVisible } from "@/board_core/utils/visible_to_users";
 
 export type AssetUrl = string;
 
@@ -16,7 +18,16 @@ const initialState: AssetStoreState = {
 const assetsAtom = atom(initialState);
 
 const assets = atom((get) => {
-    return get(assetsAtom).assets;
+    const assets = get(assetsAtom).assets;
+    if (!GBoard.isDm) {
+        return assets.filter(
+            (a) =>
+                isPubliclyVisible(a.visibleToUsers) ||
+                a.creator === GBoard.whoAmI,
+        );
+    }
+
+    return assets;
 });
 
 const saveChangesFlag = atom((get) => {
@@ -49,6 +60,14 @@ const setAssets = atom(null, (_, set, assets: Asset[]) => {
     });
 });
 
+const save = atom(null, (_, set) => {
+    set(assetsAtom, (state) => {
+        state.saveChangesFlag = !state.saveChangesFlag;
+
+        return { ...state };
+    });
+});
+
 export const assetsAtoms = {
     assetsAtom,
     assets,
@@ -56,4 +75,5 @@ export const assetsAtoms = {
     setAssets,
     saveChangesFlag,
     removeAsset,
+    save,
 };

@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Paper } from "@mantine/core";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { SceneSelection } from "./SceneSelection";
 import classes from "../../../css/hud.module.css";
 import { ReactNode } from "react";
@@ -9,9 +9,6 @@ import { sceneAtoms } from "@/board_react_wrapper/stores/scene_store";
 import { RpgScene } from "@/rpg_impl/scene/scene";
 import { SelectionControls } from "../selection_controls/SelectionControls";
 import { LayerSelect } from "./LayerSelect";
-import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
-import { openDiceRollWindow } from "@/rpg_impl/components/windows/DiceRollWindow";
-import { GBoard } from "@/board_core/board";
 
 const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
     return (
@@ -116,7 +113,6 @@ const HudLeft = () => {
                     <SelectionControls.ContainerProperties />
                 </SelectionControls>
                 {switchViewportDragging()}
-                {GBoard.whoAmI}
             </Flex>
         </SidesFlexBox>
     );

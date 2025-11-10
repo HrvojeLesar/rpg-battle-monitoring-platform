@@ -10,8 +10,12 @@ import newUId from "../utils/uuid_generator";
 import { assetsAtoms } from "@/board_react_wrapper/stores/asset_store";
 import { GAtomStore } from "@/board_react_wrapper/stores/state_store";
 import { queueEntityUpdate } from "@/websocket/websocket";
+import { VisibleToUsers } from "../utils/visible_to_users";
 
-export type Asset = AssetUploadResponse;
+export type Asset = {
+    creator: string;
+    visibleToUsers: VisibleToUsers;
+} & AssetUploadResponse;
 
 export type GameAssetsAttributes = {
     assets: Asset[];
@@ -95,7 +99,7 @@ export class GameAssets implements IMessagable<GameAssetsAttributes> {
     }
 
     public get assets(): Asset[] {
-        return GAtomStore.get(assetsAtoms.assets);
+        return GAtomStore.get(assetsAtoms.assetsAtom).assets;
     }
 
     public remove(asset: Asset): Maybe<Asset> {
