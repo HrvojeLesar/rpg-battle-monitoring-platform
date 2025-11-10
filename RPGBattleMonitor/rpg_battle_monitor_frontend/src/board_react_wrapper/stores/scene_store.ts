@@ -31,7 +31,12 @@ export const sortedScenes = (scenes: Scene[]): Scene[] => {
 const sceneAtom = atom(initialState);
 
 const getScenes = atom((get) => {
-    return get(sceneAtom).scenes;
+    const scenes = get(sceneAtom).scenes;
+    if (!GBoard.isDm) {
+        return scenes.filter((s) => !s.hidden);
+    }
+
+    return scenes;
 });
 
 const getCurrentScene = atom((get) => {

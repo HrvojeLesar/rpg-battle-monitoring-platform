@@ -56,15 +56,17 @@ export const SceneSelection = () => {
                     }
                 }}
             />
-            <Tooltip label="Scene settings">
-                <ActionIcon
-                    onClick={() => {
-                        openWindow(openSceneSettings());
-                    }}
-                >
-                    <IconSettings />
-                </ActionIcon>
-            </Tooltip>
+            {GBoard.isDm && (
+                <Tooltip label="Scene settings">
+                    <ActionIcon
+                        onClick={() => {
+                            openWindow(openSceneSettings());
+                        }}
+                    >
+                        <IconSettings />
+                    </ActionIcon>
+                </Tooltip>
+            )}
         </Flex>
     );
 };

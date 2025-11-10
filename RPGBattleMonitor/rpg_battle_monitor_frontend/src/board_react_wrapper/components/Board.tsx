@@ -3,7 +3,9 @@ import { PixiApplication } from "../../components/PixiApplication";
 import { BoardRoute } from "../routes/board";
 
 export const Board = () => {
-    const { gameId } = BoardRoute.useParams();
+    const { gameId, playerId } = BoardRoute.useParams();
+
+    const player = playerId?.length === 0 ? "dm" : playerId;
 
     return (
         <>
@@ -11,6 +13,7 @@ export const Board = () => {
                 applicationInitCallback={init}
                 resizeTo={window}
                 gameId={Number(gameId)}
+                playerId={player}
             />
         </>
     );

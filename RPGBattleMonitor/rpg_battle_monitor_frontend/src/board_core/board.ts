@@ -27,6 +27,7 @@ export type GameBoard = Board;
 
 export type BoardInitOptions = {
     gameId: number;
+    playerId?: string;
 };
 
 class Board {
@@ -41,10 +42,14 @@ class Board {
 
     protected _gameAssets?: GameAssets;
 
-    public constructor(eventEmitter: BoardEventEmitter) {
+    public playerId?: string;
+
+    public constructor(eventEmitter: BoardEventEmitter, playerId?: string) {
         this._eventEmitter = eventEmitter;
 
         this._entityRegistry = EntityRegistry.defaultEntityRegistry();
+
+        this.playerId = playerId;
     }
 
     public setApplication(application: Application) {
@@ -165,6 +170,14 @@ class Board {
 
         return assets;
     }
+
+    public get whoAmI(): string {
+        return (this.playerId ?? "dm").toLowerCase();
+    }
+
+    public get isDm(): boolean {
+        return this.whoAmI === "dm";
+    }
 }
 
 const GEventEmitter = new BoardEventEmitter();
@@ -213,6 +226,7 @@ export async function init(
         globalThis.__PIXI_APP__ = application;
     }
 
+    boardApplication.playerId = boardInitOptions.playerId;
     boardApplication.websocket = Websocket.createDefaultSocket(
         boardInitOptions.gameId,
     );
@@ -266,7 +280,7 @@ export function destroy(
     GEventEmitter.emit("board-destroyed");
 
     destroyEventListeners();
-    boardApplication = new Board(GEventEmitter);
+    boardApplication = new Board(GEventEmitter, boardApplication.playerId);
 }
 
 function initWebsocketListeners() {

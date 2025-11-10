@@ -45,7 +45,10 @@ export const GameList = () => {
                                 onClick={() => {
                                     navigate({
                                         to: BOARD_ROUTE_PATH,
-                                        params: { gameId: String(game.id) },
+                                        params: {
+                                            gameId: String(game.id),
+                                            // playerId: String("dm"),
+                                        },
                                     });
                                 }}
                             >

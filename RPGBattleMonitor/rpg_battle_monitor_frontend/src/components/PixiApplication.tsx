@@ -29,6 +29,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
         applicationOptions,
         applicationInitCallback,
         gameId,
+        playerId,
     } = props;
 
     console.log("pixi app rendered");
@@ -95,6 +96,7 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                 application = await applicationInitCallback(
                     {
                         gameId: gameId ?? 0,
+                        playerId: playerId,
                     },
                     {
                         ...options,
@@ -129,7 +131,13 @@ export const PixiApplication = (props: PixiApplicationProps) => {
                 destroy();
             });
         };
-    }, [applicationInitCallback, applicationOptions, resizeTo, gameId]);
+    }, [
+        applicationInitCallback,
+        applicationOptions,
+        resizeTo,
+        gameId,
+        playerId,
+    ]);
 
     return (
         <Flex>

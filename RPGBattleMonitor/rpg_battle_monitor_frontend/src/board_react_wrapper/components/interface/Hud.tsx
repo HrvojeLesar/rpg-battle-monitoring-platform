@@ -11,6 +11,7 @@ import { SelectionControls } from "../selection_controls/SelectionControls";
 import { LayerSelect } from "./LayerSelect";
 import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
 import { openDiceRollWindow } from "@/rpg_impl/components/windows/DiceRollWindow";
+import { GBoard } from "@/board_core/board";
 
 const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
     return (
@@ -104,24 +105,6 @@ const HudLeft = () => {
         );
     };
 
-    const openWindow = useSetAtom(windowAtoms.openWindow);
-    const diceRollWindow = () => {
-        return (
-            <>
-                <Button
-                    style={{
-                        pointerEvents: "all",
-                    }}
-                    onClick={() => {
-                        openWindow(openDiceRollWindow());
-                    }}
-                >
-                    Dice roll
-                </Button>
-            </>
-        );
-    };
-
     return (
         <SidesFlexBox>
             <Flex direction="column" gap="xs" style={{ overflow: "auto" }}>
@@ -133,7 +116,7 @@ const HudLeft = () => {
                     <SelectionControls.ContainerProperties />
                 </SelectionControls>
                 {switchViewportDragging()}
-                {diceRollWindow()}
+                {GBoard.whoAmI}
             </Flex>
         </SidesFlexBox>
     );

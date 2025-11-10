@@ -19,4 +19,5 @@ export type PixiApplicationProps = {
         socket?: Websocket,
     ) => Promise<Application>;
     gameId: number;
+    playerId: Maybe<string>;
 };
