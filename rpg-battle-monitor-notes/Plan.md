@@ -68,7 +68,7 @@
 			- [ ] Sphere
 	- [ ] Add melee attack
 		- [x] Highlight attackable tokens in range
-		- [ ] Roll for hit
+		- [x] Roll for hit
 			- [x] If hit roll for damage
 			- [ ] Display rolls to users
 			- [x] If hit and damaged update health of target

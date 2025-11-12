@@ -14,12 +14,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Technologies.md",
+                "file": "Plan.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Technologies"
+              "title": "Plan"
             }
           }
         ]
@@ -189,10 +189,10 @@
   },
   "active": "db59c08a81e6e893",
   "lastOpenFiles": [
+    "Technologies.md",
+    "Todo.md",
     "Plan.md",
     "Pasted image 20250924184914.png",
-    "Todo.md",
-    "Technologies.md",
     "Ui/Windows.md",
     "Client <-> Server/Websockets/Messages/Action.md",
     "Ui",

@@ -31,33 +31,91 @@
 
 \chapter{Uvod}
 
-Završni ili diplomski rad studenta/studentice je konačni rezultat uloženog napora u završetak studija.
-Obranom završnog ili diplomskog rada student/studentica stječe prava i obveze koje proizlaze iz završetka akademskog obrazovanja.
-S ciljem osiguranja potpore studentima pri pisanju završnog/diplomskog rada, izrađen je ovaj predložak oblikovanja samog rada.
+\begin{itemize}
+    \item Rpg
+    \item Cilj
+    \item Prvi dio...
+    \item Praktični dio
+\end{itemize}
 
-Načelna napomena o strukturi rada jest da se nazivi i struktura poglavlja obavezno
-Sadržajna preporuka je da u uvodu treba opisati što je tema završnog/diplomskog rada,
-zašto je tema značajna te koja je motivacija studenta/ studentice za odabir teme.
+\chapter{Igre uloga}
 
-\chapter{Opis pravila igre}
+Igre uloga predstavljaju jedan od najsloženijih i kreativnih spojeva
+priče, izvedbe i igre u suvremenoj kulturi. 
+Ovakva igra poziva igrače da zajednički stvaraju i nastanjuju zamišljeni svijet,        
+vođeni kombinacijom strukturiranih pravila i spontanog pripovijedanja.
+Svaka sesija je istovremeno i igra i priča, a njezin ishod oblikuju
+mašta igrača i slučajnost ishoda bacanja kockica.
 
-\lipsum[1-2]
+\section{Povijesni razvoj}
+
+\chapter{Opis pravila igre - Dungeons \& Dragons}
 
 \chapter{Prikaz implementacije}
 
+\chapter{Struktura programa}
+
+Razdvojeno na klijent, poslužitelj strukturu
+Koristi se peer to peer komunikacija, postoji server authoritive...
+
+\section{Poslužitelj}
+
+\section{Klijent}
+
+\section{Mrežna komunikacija}
+
+Naivna implementacija mrežne komunikacije između klijenata
+
+\subsection{Peer to peer komunikacija}
+\subsection{Stateless \& stateful komunikacija}
+
+\chapter{Korišteni alati i tehnologije za implementaciju}
+
+U ovom poglavlju će biti opisani alati i tehnologije korištene za implementaciju platforme.
+Korišteno je više različitih tehnologija, fokus je na tehnologije koje imaju
+fokus je na korištenje tehnologija koje su što više prikladne za implementacije 
+aplikacije kao web aplikaciju.
+Ovime se osigurava da je aplikacija dostupna, funkcionalna i prenosiva
+preko više različitih operativnih sustava i web preglednika.
+
+Aplikacija je podijeljena na dva dijela, na poslužitelja i klijenta.
+Poslužitelj se koristi za:
+\begin{itemize}
+    \item kreiranje igara,
+    \item povezivanje klijenata; sustav je napravljen s umrežavanjem klijenata,
+        više klijenata mogu igrati jednu igru i pratiti događanja,
+    \item spremanje i učitavanje podataka o aktivnim igrama;
+        promjene koje klijenti naprave kroz igru moraju biti spremljene
+        za kasnije učitavanje i sinkronizaciju ostalih klijenata,
+\end{itemize}
+
+Opisati svaki alat koji se koristi.
+Navesti u kratko gdje se koristi.
+Navesti da budu točni primjeri kasnije u radu.
+
+\section{Poslužitelj}
+
+\subsection{Tauri}
+\subsection{Axum}
+\subsection{Socketioxie}
+
+\section{Baza podataka}
+
+\section{Klijent}
+
+\subsection{Pixi.js}
+\subsection{React.js}
+\subsection{Jotai}
+\subsection{Socket.io}
+\subsection{Mantine}
+
 Ovo je glavni dio rada u kojem treba razraditi temu, pojasniti istraživanja, prikazati rezultate i slično. Poželjno je na početku poglavlja dati kratki opis strukture poglavlja, kako bi čitatelj/čitateljica rada mogao/mogla lakše pratiti složenu cjelinu.
 
-\section{Poglavlje druge razine }
-
-\lipsum[1]
+\section{Poglavlje druge razine}
 
 \subsection{Poglavlje treće razine}
 
-\lipsum[2]
-
 \subsubsection{Poglavlje četvrte razine}
-
-\lipsum[3-4]
 
 \chapter{Prikaz slučajeva korištenja}
 
@@ -221,9 +279,5 @@ Ovdje treba sažeto rezimirati najvažnije rezultate razrade teme rada. Potrebno
 
 \appendix
 \renewcommand{\thechapter}{\arabic{chapter}}
-
-\chapter{Prilog 1}
-
-\chapter{Prilog 2}
 
 \end{document}
