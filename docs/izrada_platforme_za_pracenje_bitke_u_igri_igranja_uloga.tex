@@ -135,6 +135,17 @@ princip suradničkog pripovijedanja i igre vođene likovima je ostao nepromijenj
 \chapter{Opis pravila igre - Dungeons \& Dragons}
 \label{chapter:opis-pravila-igre-dungeons-dragons}
 
+\section{Remove me}
+U ovom poglavlju ćemo proči kroz
+- uloge igraca
+    - dm
+    - igraci
+- pripremu za igru
+    - kreacija likova
+    - rase
+    - klase
+    - mogucnosti
+\section{Remove me}
 
 U ovome poglavlju će biti opisana pravila igre D\&D-a.
 Pravila igre su se razvila od početne koncepcije igre 70-tih godina 20. stoljeća.
@@ -161,6 +172,24 @@ Svaki igrač stvara pustolova (koji se naziva i likom) i udružuje se s drugim
 pustolovima. Radeći zajedno, grupa može istraživati mračnu tamnicu, ukleti dvorac,
 izgubljeni hram... Pustolovi mogu rješavati zagonetke, razgovarati s drugim
 likovima, boriti se protiv čudovišta i otkrivati čudesne čarobne predmete i blago.
+
+\section{Lista termina}
+\label{section:lista-termina}
+
+Ovo poglavlje će služiti za definiranje terminologije i kratica koje će se
+koristiti kroz rad. Svaki termin će biti kraće opisan i potencijalno imati
+engleski naziv (koji je uglavnom više prepoznatljiv nego hrvatski prijevod),
+no cijeli kontekst ne mora biti razumljiv u spisu, već će biti opisan u nekom od sljedećih poglavlja.
+
+\begin{itemize}
+    \item \textbf{D\&D} Dungeons \& Dragons
+    \item \textbf{DM} Dungeon Master
+    \item \textbf{NPC} Non-Player Character
+    \item \textbf{D20} Kockica s dvadeset strana
+    \item \textbf{D2, D4, D6, D8, D10, D12} Kockice s određenim brojem strana
+    \item \textbf{AC} Armour class, težina zadatka
+    \item \textbf{DC} Difficulty class, klasa oklopa
+\end{itemize}
 
 \section{Dungeon Master}
 \label{section:dungeon-master}
@@ -216,6 +245,38 @@ Aktivnosti na koje se DM može fokusirati za bolje zadovoljstvo igrača \cite{du
         likovi uključeni u priču koja se razvija i uživaju u susretima koji su vezani s
         glavnom radnjom i proširuju je.
 \end{itemize}
+
+\section{Sustav D20}
+\label{section:sustav-d20}
+
+Dvadeseto strana kockica je najčešće korištena za određivanje uspjeha ili neuspjeha
+radnji u D\&D-u i tu kockicu nazivom d20. Ponekad se koriste dvanaesto strane, osmo
+strane, šesto strane, četvero strane kockice i novčić, one također imaju nazive
+ovisno o broju strana, d12, d10, d8, d6, d4 i d2.
+
+Svi likovi i čudovišta u igri definirani su kroz šest osnovnih sposobnosti: 
+snaga, spremnost, izdržljivost, inteligencija, mudrost i karizma.
+Kod većine pustolova vrijednosti tih sposobnosti kreću se od 3 do 18,
+dok kod čudovišta mogu biti niske poput 1 ili visoke do 30. 
+Te vrijednosti, kao i modifikatori koji iz njih proizlaze, temelj su gotovo
+svakoh bacanja d20 kockice
+
+Tri glavne vrste bacanja čine srž pravila igre: provjera sposobnosti,
+bacanje za napad i bacanje za spas. Sve tri radnje slijede nekoliko koraka:
+\begin{enumerate}
+    \item bacanje kockice i dodavanje modifikatora. Na rezultat bačene d20 kockice dodajemo odgovarajući modifikator.
+    Najčešće je to modifikator jedne od šest sposobnosti, a ponekad uključuje i bonus stručnosti koji
+    odražava specifičnu vještinu lika.
+    \item uračunavanje dodatnih bonusa i kazni. Značajke klase, čarolije, specifične okolnosti ili neki drugi
+    efekti mogu dodati bonus na rezultat ili ga umanjiti.
+    \item usporedba rezultata s ciljanim brojem. Ako je ukupan zbroj jednak ili veći od ciljnog broj, radnja
+    (provjera, napad, spašavanje) je uspješno, u suprotnom, nije uspjela. DM obično određuje ciljne brojeve
+    i govori igračima jesi li uspjeli odraditi radnju. DM ne treba otkriti igračima ciljani broj za uspjeh.
+\end{enumerate}
+
+Ciljni broj za provjere sposobnosti i spas naziva se težina zadatka ili difficulty class (DC), dok se ciljni
+broj za napad naziva klasa oklopa ili Armour Class (AC). Ovo jednostavno pravilo temelj je 
+rješavanja većine situacija u D\&D-u.
 
 \chapter{Prikaz implementacije}
 
