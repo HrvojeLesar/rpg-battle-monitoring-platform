@@ -479,3 +479,6 @@ unicode
     
     \renewcommand{\thechapter}{\arabic{chapter}}
 }
+
+% \usepackage[section]{placeins}
+\usepackage{float}
