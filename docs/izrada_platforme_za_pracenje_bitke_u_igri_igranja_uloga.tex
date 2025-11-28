@@ -106,8 +106,8 @@ u wargaming zajednici, osobito kroz svoj rad na igri \texttt{Chainmail},
 srednjovjekovnoj miniaturskoj ratnoj igri koju je razvio i bio jedan
 od autora 1971. godine. 
 \texttt{Chainmail} je izvorno zamišljen kao skup pravila za simulaciju
-srednjevjekovnih bitaka s minijaturama, no uključivao je i fantastični dodatak
-koji je omogućava igračima da u igru unesu mistična bića i magijske elemente.
+srednjovjekovnih bitaka s minijaturama, no uključivao je i fantastični dodatak
+koji je omogućava igračima da u igru unesu mistična bića i čarobne elemente.
 Ova dopuna održavala je Gygaxovu fascinaciju srednjovjekovnom literaturom i
 fantastičnim narativima, posebno djelima J.R.R Tolkeina i 
 Roberta E. Howarda. \cite{sidhu2024fifty}
@@ -143,7 +143,7 @@ dodaju nove mehanike igre. Ovdje definiramo zadnje izdanje koje će se poglavlje
 implementacije koristiti i pratiti.
 
 Dungeons \& Dragons je igra igranja uloga posvećena pripovijedanju u svjetovima
-mača i magije. Dijeli elemente s dječjim igrama pretvaranja. Kao i te igre, D\&D pokreće
+mača i čarolije. Dijeli elemente s dječjim igrama pretvaranja. Kao i te igre, D\&D pokreće
 mašta. Radi se o zamišljanju visokog dvorca pod olujnim noćnim nebom i predočavanju kako bi
 pustolov mogao reagirati na izazove koje taj prizor predstavlja.
 Za razliku od igra pretvaranja, D\&D pričama daje strukturu, način određivanja posljedica
@@ -175,8 +175,11 @@ no cijeli kontekst ne mora biti razumljiv u spisu, već će biti opisan u nekom 
     \item \textbf{NPC} Non-Player Character
     \item \textbf{D20} Kockica s dvadeset strana
     \item \textbf{D2, D4, D6, D8, D10, D12} Kockice s određenim brojem strana
-    \item \textbf{AC} Armour class, težina zadatka
-    \item \textbf{DC} Difficulty class, klasa oklopa
+    \item \textbf{AC} Armour class, klasa oklopa
+    \item \textbf{DC} Difficulty class, težina zadatka
+    \item \textbf{HP} Hit points, životni bodovi
+    \item \textbf{XP} Experience points
+    \item \textbf{Ability score} Sposobnosti
 \end{itemize}
 
 \section{Dungeon Master}
@@ -270,23 +273,61 @@ rješavanja većine situacija u D\&D-u.
 \label{section:kreacija-lika}
 
 U ovom poglavlju će biti prikazana kreacija lika, odabir rase i
-klasa i ukratko prikazati pojedinosti koje likovi dobivaju odabirom.
-Na slici ispod se nalazi primjer praznog lista o liku (tzv. character sheet).
+klasa i ukratko prikazati pojedinosti koje likovi dobivaju odabirom rase i klase,
+te postupak kojim se dobivaju početne sposobnosti.
+
+Na slici ispod se nalazi primjer prazne stranice lista o liku (engl. character sheet).
 Character sheet koristi igračima za zapisivanje i praćenje karakteristika
 njihovih likova. Kako ćemo prolaziti kroz različite dijelove kreacije lika
 odgovarajući podaci na listu će biti popunjeni, da bi kroz primjer prošli
 kroz kreaciju lika.
 
+Character sheet se sastoji od tri stranice, prva stranica (Slika \ref{fig:character-sheet-p1})
+sadrži podatke o sposobnostima lika, njegovu klasu, rasu, vještine, trenutnu opremu, životne
+bodove.
+Druga stranica (Slika \ref{fig:character-sheet-p2})
+ima podatke o izgledu lika, starosti, visini, pozadinskoj priči, blagu.
+Dok treća stranica (Slika \ref{fig:character-sheet-p2})
+sadrži podatke o čarolijama pripremljenim i znanim čarolijama, te razinama
+i broj čarolija koje like može baciti prije potrebnog odmora.
+
+% Na gornjem dijelu character sheet-a nalaze se općeniti podaci o liku,
+% naziv lika, klasa i razina klase i bodovi iskustva (engl. experience points ili XP).
+% XP i razine su definirane posebno jer igrač za lika može odabrati više klasa i u svakoj klasi
+% imati više razina, no maksimalni broj razina ovisi o trenutnom broju XP-a.
+% Dodatno uz te podatke se nalazi zaleđe, ime igrača, rasa, moralni kompas (engl. alignment)
+% i bodovi iskustva.
+
+% Preostali dijelovi character sheet-a podijeljeni u tri stupca.
+% Prvi stupac sadrži sposobnosti lika raspoređene u nekoliko kategorija;
+% snaga, spremnost, izdržljivost, inteligencija, mudrost i karizma, u svaku
+% od sposobnosti će se kasnije zapisati vrijednost i modifikator svake sposobnosti.
+% Sadrži vještine lika, 
+
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{slike/character_sheet.png}
-    \caption{Character sheet \cite{charactershet2014}}
-    \label{fig:character-sheet}
+    \includegraphics[width=1\textwidth]{slike/character_sheet_p1.jpg}
+    \caption{Character sheet - Prva stranica\cite{charactershet2014}}
+    \label{fig:character-sheet-p1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{slike/character_sheet_p2.jpg}
+    \caption{Character sheet - Druga stranica\cite{charactershet2014}}
+    \label{fig:character-sheet-p2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{slike/character_sheet_p3.jpg}
+    \caption{Character sheet - Treća stranica\cite{charactershet2014}}
+    \label{fig:character-sheet-p3}
 \end{figure}
 
 % \begin{figure}[!htb]
 %     \centering
-%     \includegraphics[width=0.9\textwidth]{slike/character_sheet.png}
+%     \includegraphics[width=0.9\textwidth]{slike/character_sheet_p1.jpg}
 %     \caption{Character sheet \cite{charactershet2014}}
 %     \label{fig:character-sheet}
 % \end{figure}
