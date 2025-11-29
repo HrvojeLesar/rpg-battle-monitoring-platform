@@ -246,14 +246,14 @@ strane, šesto strane, četvero strane kockice i novčić, one također imaju na
 ovisno o broju strana, d12, d10, d8, d6, d4 i d2.
 
 Svi likovi i čudovišta u igri definirani su kroz šest osnovnih sposobnosti: 
-snaga, spremnost, izdržljivost, inteligencija, mudrost i karizma.
+snaga, spretnost, izdržljivost, inteligencija, mudrost i karizma.
 Kod većine pustolova vrijednosti tih sposobnosti kreću se od 3 do 18,
 dok kod čudovišta mogu biti niske poput 1 ili visoke do 30. 
 Te vrijednosti, kao i modifikatori koji iz njih proizlaze, temelj su gotovo
 svakoh bacanja d20 kockice
 
 Tri glavne vrste bacanja čine srž pravila igre: provjera sposobnosti,
-bacanje za napad i bacanje za spas. Sve tri radnje slijede nekoliko koraka:
+bacanje za napad i bacanje za spas (engl. \textit{saving throw}). Sve tri radnje slijede nekoliko koraka:
 \begin{enumerate}
     \item bacanje kockice i dodavanje modifikatora. Na rezultat bačene d20 kockice dodajemo odgovarajući modifikator.
     Najčešće je to modifikator jedne od šest sposobnosti, a ponekad uključuje i bonus stručnosti koji
@@ -276,7 +276,7 @@ U ovom poglavlju će biti prikazana kreacija lika, odabir rase i
 klasa i ukratko prikazati pojedinosti koje likovi dobivaju odabirom rase i klase,
 te postupak kojim se dobivaju početne sposobnosti.
 
-Na slici ispod se nalazi primjer prazne stranice lista o liku (engl. character sheet).
+Na slici ispod se nalazi primjer prazne stranice lista o liku (engl. \textit{character sheet}).
 Character sheet koristi igračima za zapisivanje i praćenje karakteristika
 njihovih likova. Kako ćemo prolaziti kroz različite dijelove kreacije lika
 odgovarajući podaci na listu će biti popunjeni, da bi kroz primjer prošli
@@ -302,28 +302,28 @@ i broj čarolija koje like može baciti prije potrebnog odmora.
 
 % Preostali dijelovi character sheet-a podijeljeni u tri stupca.
 % Prvi stupac sadrži sposobnosti lika raspoređene u nekoliko kategorija;
-% snaga, spremnost, izdržljivost, inteligencija, mudrost i karizma, u svaku
+% snaga, spretnost, izdržljivost, inteligencija, mudrost i karizma, u svaku
 % od sposobnosti će se kasnije zapisati vrijednost i modifikator svake sposobnosti.
 % Sadrži vještine lika, 
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{slike/character_sheet_p1.jpg}
-    \caption{Character sheet - Prva stranica\cite{charactershet2014}}
+    \caption{Character sheet - Prva stranica \cite{charactersheet2014}}
     \label{fig:character-sheet-p1}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{slike/character_sheet_p2.jpg}
-    \caption{Character sheet - Druga stranica\cite{charactershet2014}}
+    \caption{Character sheet - Druga stranica \cite{charactersheet2014}}
     \label{fig:character-sheet-p2}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{slike/character_sheet_p3.jpg}
-    \caption{Character sheet - Treća stranica\cite{charactershet2014}}
+    \caption{Character sheet - Treća stranica \cite{charactersheet2014}}
     \label{fig:character-sheet-p3}
 \end{figure}
 
@@ -334,7 +334,7 @@ i broj čarolija koje like može baciti prije potrebnog odmora.
 %     \label{fig:character-sheet}
 % \end{figure}
 
-\subsection{Odabir rase}
+\subsection{Rase}
 \label{section:rase}
 
 Svaki lik pripada rasi, jednoj od mnogih rasa dostupnih u D\&D-u.
@@ -344,16 +344,125 @@ Neke rase također imaju podrase, kao što su planinski patuljci ili
 Odabrana rasa doprinosi identitetu lika, uspostavlja opći izgled,
 pruža prirodne talente stečene kulturom i precima.
 Rasa daje određene rasne osobine, kao što su posebna osjetila, vještine
-s određenim oružjem ili alatima, vrsnost u jednoj ili više vještina ili 
+s određenim oružjem ili alatima, stručnost u jednoj ili više vještina ili 
 sposobnost korištenja manjih čarolija. Ove osobine se ponekad podudaraju
 i nadopunjuju sposobnosti određenih klasa.
 Najčešće rasne osobine su uvećanje jedne ili više sposobnosti,
-starost lika, moralni kompas, veličina, brzina, jezici koje lik razumije
+dob lika, moralni kompas, veličina, brzina, jezici koje lik razumije
 i kojima se može služiti i razgovarati, te podrase; Članovi podrase imaju
 osobine matične rase uz dodatne osobine definirane podrasom.
 
-Ukratko ćemo proći kroz različite rase i njihove osobine i sposobnosti:
-\subsection{Odabir klase}
+Ovdje će biti definirane različite rase, njihove podrase, dob,
+veličina, brzina i ostale sposobnosti koje se dobivaju odabirom pojedine rase. 
+Kao primjer će za patuljke biti navedeni detaljni podaci o rasi, dok će druge rase
+imati skraćenu podatke, razumijevanje svih različitih rasnih osobina nije nužno
+za implementaciju ni za razumijevanje igre:
+\begin{itemize}
+    \item Patuljak (engl. \textit{dwarf}) \cite{playershandbook2014}
+        \begin{itemize}
+            \item Povećanje sposobnosti: izdržljivost se povećava za 2.
+            \item Dob: patuljci sazrijevaju istom brzinom kao i ljudi, ali se smatraju mladima do
+                50. godine. Žive oko 350 godina.
+            \item Veličina: Srednja, patuljci su visoki između 4 i 5 stopa.
+            \item Brzina: brzina hoda je 25 stopa i ne smanjuje se nošenjem teškog oklopa
+            \item Dodatna svojstva rase:
+                \begin{itemize}
+                    \item Vid u mraku (engl. \textit{darkvision}): patuljci vide u mraku i svijetlostno prigušenim uvjetima
+                        do 60 stopa.
+                    \item Patuljačka otpornost (engl. \textit{dwarven resilience}): prednost (engl. \textit{advantage}) pri bacanju spasa protiv
+                        otrova i otpornost na otrov.
+                    \item Patuljačka borbena obuka (engl. \textit{dwarven combat training}): stručnost u korištenju bojne sjekire (engl. \textit{battleaxe}),
+                        sjekiricom (engl. \textit{handaxe}), lakim čekićem (engl. \textit{throwing hammer}) i
+                        ratnim čekićem (engl. \textit{warhammer}).
+                    \item Stručnost s alatom (engl. \textit{tool proficiency}): stručnost u korištenju jednog od
+                        vrsta alata: kovački alat, pivarski pribor, zidarski alat
+                    \item Poznavanje kamena (engl. \textit{stonecunning}): na sve provjere inteligencije 
+                        (vezane uz vještinu povijest), dodaje se dvostruki bonus stručnosti na provjeru.
+                \end{itemize}
+            \item Jezici: patuljci govore, pišu i čitaju zajednički (engl. \textit{common}) i patuljački
+            \item Podrase patuljaka: brdski patuljak; povećanje mudrosti za 1 i maksimalni
+                broj životnih bodova povećava se za 1 po razini. Planinski patuljak; povećanje snage za 2 i
+                stručnost s lakim i srednjim oklopom.
+        \end{itemize}
+    \item Vilenjak (engl. \textit{elf})
+        \begin{itemize}
+            \item Povećanje sposobnosti: spretnost se povećava za 2.
+            \item Dob: vilenjaci sazrijevaju istom brzinom kao i ljudi, ali se smatraju odraslima
+                tek oko 100. godine. Žive do 750 godina.
+            \item Veličina: Srednja, vilenjaci su visoki od ispod 5 do preko 6 stopa.
+            \item Brzina: brzina hoda je 30 stopa.
+            \item Tri podrase: visoki vilenjak (engl. \textit{high elf}); 
+                Šumski vilenjak (engl. \textit{wood elf}); 
+                Tamni vilenjak (engl. \textit{drow}); 
+        \end{itemize}
+
+    \item Halfling
+        \begin{itemize}
+            \item Povećanje sposobnosti: spretnost se povećava za 2.
+            \item Dob: halflinzi dosežu odraslu dob s 20 godina i žive do oko 150 godina.
+            \item Veličina: Mala, halflinzi su visoki oko 3 stope.
+            \item Brzina: brzina hoda je 25 stopa.
+            \item Jezici: govore, pišu i čitaju zajednički i halflingški (engl. \textit{halfling}).
+        \end{itemize}
+
+    \item Čovjek (engl. \textit{human})
+        \begin{itemize}
+            \item Povećanje sposobnosti: sve sposobnosti se povećavaju za 1.
+            \item Dob: ljudi dosežu odraslu dob u kasnim tinejdžerskim godinama i žive manje od stoljeća.
+            \item Veličina: Srednja, ljudi znatno variraju u visini i građi.
+            \item Brzina: brzina hoda je 30 stopa.
+            \item Jezici: ljudi govore, pišu i čitaju zajednički  i jedan dodatni jezik po izboru.
+        \end{itemize}
+
+    \item Dragonborn
+        \begin{itemize}
+            \item Povećanje sposobnosti: snaga se povećava za 2, a karizma za 1.
+            \item Dob: brzo rastu, odrasli su s 15 godina i žive oko 80 godina.
+            \item Veličina: Srednja, viši su i teži od ljudi, često preko 6 stopa.
+            \item Brzina: brzina hoda je 30 stopa.
+            \item Jezici: govore, pišu i čitaju zajednički  i zmajski (engl. \textit{draconic}).
+        \end{itemize}
+
+    \item Gnom (engl. \textit{gnome})
+        \begin{itemize}
+            \item Povećanje sposobnosti: inteligencija se povećava za 2.
+            \item Dob: gnomovi odrastaju oko 40. godine i žive 350 do 500 godina.
+            \item Veličina: Mala, visoki su između 3 i 4 stope.
+            \item Brzina: brzina hoda je 25 stopa.
+            \item Jezici: gnomovi govore, pišu i čitaju zajednički  i gnomski (engl. \textit{gnomish}).
+            \item Podvrste: šumski gnom (engl. \textit{forest gnome}) Kameni gnom (engl. \textit{rock gnome}).
+        \end{itemize}
+
+    \item Poluvilenjak (engl. \textit{half-elf})
+        \begin{itemize}
+            \item Povećanje sposobnosti: karizma se povećava za 2 i dvije druge sposobnosti po izboru za 1.
+            \item Dob: sazrijevaju kao ljudi, odrasli s 20 godina, žive preko 180 godina.
+            \item Veličina: Srednja, otprilike iste veličine kao ljudi.
+            \item Brzina: brzina hoda je 30 stopa.
+            \item Jezici: poluvilenjaci govore, pišu i čitaju zajednički , vilinski (engl. \textit{elvish}) 
+                i jedan dodatni jezik po izboru.
+        \end{itemize}
+
+    \item Poluork (engl. \textit{half-orc})
+        \begin{itemize}
+            \item Povećanje sposobnosti: snaga se povećava za 2, a izdržljivost za 1.
+            \item Dob: sazrijevaju brže od ljudi s oko 14 godina, žive do 75 godina.
+            \item Veličina: Srednja, krupniji su od ljudi.
+            \item Brzina: brzina hoda je 30 stopa.
+            \item Jezici: poluorkovi govore, pišu i čitaju zajednički i orkovski (engl. \textit{orc}).
+        \end{itemize}
+
+    \item Tiefling
+        \begin{itemize}
+            \item Povećanje sposobnosti: inteligencija se povećava za 1, a karizma za 2.
+            \item Dob: sazrijevaju kao ljudi, žive malo duže.
+            \item Veličina: Srednja, iste veličine i građe kao ljudi.
+            \item Brzina: brzina hoda je 30 stopa.
+            \item Jezici: tieflinzi govore, pišu i čitaju zajednički i pakleni (engl. \textit{infernal}).
+        \end{itemize}
+\end{itemize}
+
+\subsection{Klase}
 \label{section:klase}
 
 \section{Avanture}
