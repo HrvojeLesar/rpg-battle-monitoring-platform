@@ -180,6 +180,7 @@ no cijeli kontekst ne mora biti razumljiv u spisu, već će biti opisan u nekom 
     \item \textbf{HP} Hit points, životni bodovi
     \item \textbf{XP} Experience points
     \item \textbf{Ability score} Sposobnosti
+    \item \textbf{Hit die} Kockica za životne bodove
 \end{itemize}
 
 \section{Dungeon Master}
@@ -246,7 +247,12 @@ strane, šesto strane, četvero strane kockice i novčić, one također imaju na
 ovisno o broju strana, d12, d10, d8, d6, d4 i d2.
 
 Svi likovi i čudovišta u igri definirani su kroz šest osnovnih sposobnosti: 
-snaga, spretnost, izdržljivost, inteligencija, mudrost i karizma.
+snaga (engl. \textit{strength}),
+spretnost (engl. \textit{dexterity}),
+izdržljivost (engl. \textit{constitution}),
+inteligencija (engl. \textit{intelligence}),
+mudrost (engl. \textit{wisdom})
+i karizma (engl. \textit{charisma}).
 Kod većine pustolova vrijednosti tih sposobnosti kreću se od 3 do 18,
 dok kod čudovišta mogu biti niske poput 1 ili visoke do 30. 
 Te vrijednosti, kao i modifikatori koji iz njih proizlaze, temelj su gotovo
@@ -290,7 +296,7 @@ ima podatke o izgledu lika, starosti, visini, pozadinskoj priči, blagu.
 Omogućuje igraču da detaljno opiše svog lika, da se može lakše preuzeti ulogu lika
 te gledati fantastični svijet kroz oči lika.
 Dok treća stranica (Slika \ref{fig:character-sheet-p2})
-sadrži podatke o čarolijama pripremljenim i znanim čarolijama, te razinama
+sadrži podatke o čarolijama pripremljenim i znanim čarolijama, te razinama (engl. \textit{levels})
 i broj čarolija koje like može baciti prije potrebnog odmora.
 
 % Na gornjem dijelu character sheet-a nalaze se općeniti podaci o liku,
@@ -464,6 +470,45 @@ za implementaciju ni za razumijevanje igre:
 
 \subsection{Klase}
 \label{section:klase}
+
+Klasa je temelj onoga što likovi mogu učiniti. Ona je više od pukog zanimanja;
+ona je životni poziv lika. Klasa lika oblikuje način na koji igrači doživljavaju svijet
+i kako s njim komuniciraju. Klasa daje raznoliko posebne značajke, poput borčeve vještine
+s oružjem i oklopom ili magovim čarolijama. Na nižim razinama, klasa nudi tek dvije ili
+tri značajke, no kako lik napreduje, stječe nove, a postojeće se često poboljšavaju 
+\cite{playershandbook2014}.
+U tablici ispod se nalaze nazivi klasa, opisi, kockice za životne bodove koje svaka klasa
+koristi kod određivanja životnih bodova po razini, primarne sposobnosti klase,
+sposobnosti koje se koriste kod bacanja za spas, te stručnosti s oklopom i oružjem.
+Osim ovih sposobnosti svaka klasa ima specifične značajke no kroz njih nećemo prolaziti
+u ovom radu i dostupne su u \texttt{Player's Handbook}-u \cite{playershandbook2014}.
+
+\begin{table}[h!]
+    \centering
+    \caption{Tablica klasa}
+    \scriptsize
+    \renewcommand{\arraystretch}{1.3}
+
+    \begin{tabularx}{\linewidth}{|l|X|c|l|l|X|}
+        \hline
+        \textbf{Klasa} & \textbf{Opis} & \textbf{Hit dice} & \textbf{Primarna sposobnost} & \textbf{Bacanja za spas} & \textbf{Stručnosti s oklopom i oružjem} \\ \hline
+        Barbarin & Žestoki ratnik primitivnog podrijetla koji može ući u bojni bijes & d12 & Snaga & Snaga, izdržljivost & Laki i srednji oklopi, štitovi, jednostavno i borbeno oružje \\ \hline
+        Bard & Nadahnjujući mađioničar čija moć odjekuje glazbom stvaranja & d8 & Karizma & Spretnost, karizma & Laki oklop, jednostavno oružje, ručni samostreli, dugi mačevi, rapiri, kratki mačevi \\ \hline
+        Klerik & Svećenički prvak koji upravlja božanskom magijom u službi više sile & d8 & Mudrost & Mudrost, karizma & Laki i srednji oklopi, štitovi, jednostavno oružje \\ \hline
+        Druid & Svećenik "Stare Vjere", upravlja moćima prirode i poprima životinjske oblike & d8 & Mudrost & Inteligencija, mudrost & Laki i srednji oklopi (nemetalni), štitovi (nemetalni), toljage, bodeži, strelice, koplja, mlatovi, štapovi, sablje, srpovi, praćke \\ \hline
+        Borac & Majstor borbe, vješt s raznim oružjem i oklopima & d10 & Snaga ili spretnost & Snaga, izdržljivost & Svi oklopi, štitovi, jednostavno i borbeno oružje \\ \hline
+        Redovnik & Majstor borilačkih vještina koji koristi snagu tijela za fizičko i duhovno savršenstvo & d8 & Spretnost, mudrost & Snaga, spretnost & Jednostavno oružje, kratki mačevi \\ \hline
+        Paladin & Sveti ratnik vezan svetom zakletvom & d10 & Snaga, karizma & Mudrost, karizma & Svi oklopi, štitovi, jednostavno i borbeno oružje \\ \hline
+        Rendžer & Ratnik koji koristi borilačku vještinu i magiju prirode za borbu protiv prijetnji & d10 & Spretnost, mudrost & Snaga, spretnost & Laki i srednji oklopi, štitovi, jednostavno i borbeno oružje \\ \hline
+        Lupež & Nitkov koji koristi skrivanje i trikove kako bi svladao prepreke i neprijatelje & d8 & Spretnost & Spretnost, inteligencija & Laki oklop, jednostavno oružje, ručni samostreli, dugi mačevi, rapiri, kratki mačevi \\ \hline
+        Čarobnjak & Bacač čarolija koji crpi urođenu magiju iz dara ili krvne loze & d6 & Karizma & Izdržljivost, karizma & Bodeži, strelice, praćke, štapovi, laki samostreli \\ \hline
+        Vještac & Korisnik magije koja proizlazi iz pogodbe s izvanplanarnim entitetom & d8 & Karizma & Mudrost, karizma & Laki oklop, jednostavno oružje \\ \hline
+        Mag & Učeni korisnik magije sposoban manipulirati strukturama stvarnosti & d6 & Inteligencija & Inteligencija, mudrost & Bodeži, strelice, praćke, štapovi, laki samostreli \\ \hline
+    \end{tabularx}
+    \caption*{(Izvor: Player's Handbook \cite{playershandbook2014})}
+    \label{tab:klase}
+\end{table}
+\clearpage
 
 \section{Avanture}
 \label{section:avanture}
