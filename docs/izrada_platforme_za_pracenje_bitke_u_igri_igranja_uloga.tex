@@ -161,8 +161,8 @@ pustolovima. Radeći zajedno, grupa može istraživati mračnu tamnicu, ukleti d
 izgubljeni hram... Pustolovi mogu rješavati zagonetke, razgovarati s drugim
 likovima, boriti se protiv čudovišta i otkrivati čudesne čarobne predmete i blago.
 
-\section{Lista termina}
-\label{section:lista-termina}
+\section{Lista pojmova}
+\label{section:lista-pojmova}
 
 Ovo poglavlje će služiti za definiranje terminologije i kratica koje će se
 koristiti kroz rad. Svaki termin će biti kraće opisan i potencijalno imati
@@ -673,8 +673,76 @@ igre i direktno se isčitavaju iz pravila (npr. oprema koju lik dobiva).
 \subsection{Odmor}
 \label{section:odmor}
 
-\section{Bitka}
-\label{section:bitka}
+\section{Borba}
+\label{section:borba}
+
+Ovo poglavlje pruža pravila koja su potrebna kako bi likovi i čudovišta sudjelovali u borbi,
+bilo to da se radi o kratkom okršaju ili produženom sukobu. Kroz cijelo poglavlje
+pravila se odnose na igrača ili DM-a. DM kontrolira sva čudovišta i likove koji nisu
+igrači, a uključeni su u borbu, drugi igrači kontroliraju svoje likove.
+
+Tipičan sukob je između dvije strane i organiziran je u ciklus rundi i poteza.
+Runda predstavlja oko šest sekundi u svijetu igre. Tijekom runde, svaki sudionik
+u bitci ima svoj potez. Redoslijed poteza određuje se na početku borbenog susreta,
+kada svi bacaju inicijativu. Nakon što svi odrade potez, borba se nastavlja u
+slijedeću rundu ako nijedna strana nije pobijedila drugu.
+
+Prije početka borbe DM određuje tko bi mogao biti iznenađen na početku borbe.
+Ako nijedna strana ne pokušava biti prikrivena automatski primjećuju jedna drugu
+i ovaj korak se preskače, no ako se jedna strana uspješno prikrade ostvaruje prednost.
+Strana koje je iznenađena, tj. lik ili čudovište koje je iznenađeno se ne može pomaknuti ili 
+poduzeti akciju u svom prvom potezu borbe, također ne može poduzeti reakciju dok
+taj prvi potez ne završi. Član grupe može biti iznenađen čak i ako ostali članovi nisu \cite{playershandbook2014}.
+
+Inicijativa određuje redoslijed poteza tokom borbe. Kada borba počne svaki sudionik radi 
+provjeru spretnosti (engl. \textit{dexterity check}) kako bi odredio svoje mjesto u poretku inicijative.
+Baca D20 kockicu i na dobivenu vrijednost dodaje modifikator spretnosti.
+DM određuje inicijativu za sve likove, čudovišta koje ne kontroliraju drugi igrači.
+Nakon dobivenih vrijednosti za inicijativu, DM ih rangira od najviše do najmanje
+vrijednosti te određuje redoslijed poteza. U slučajevima kad igrači imaju istu
+inicijativu mogu međusobno odrediti tko nastupa prvu, ako čudovište i igrač imaju
+jednaku inicijativu DM određuje redoslijed.
+
+\subsection{Igračev potez}
+\label{section:igracev-potez}
+
+Kad je igrač na potezu može pomicati svog lika do udaljenosti
+određenom brzinom lika i odraditi jednu akciju. U pravilu svako polje je veličine
+pet sa pet stopa, što bi značilo da se lik sa brzinom od trideset
+stopa može pomaknuti maksimalno šest polja.
+Igrač odlučuje ako će se prvo kretati ili odraditi akciju.
+U poglavlju \ref{section:akcije} će biti opisane najčešće akcije koje likovi mogu
+odraditi, mnoge značajke različitih klasa i druge sposobnosti pružaju dodatne opcije za akcije.
+
+Razne značajke klase, čarolije i druge sposobnosti omogućavaju poduzimanje dodatne akcije u 
+trenutnom potezu. Dodatna akcije se može jedino poduzeti u slučaju kad značajka klase,
+čarolija ili neka druga sposobnost navodi da se nešto može odraditi kao dodatna akcija.
+Po potezu, jednako kao s akcijom, može se odraditi samo jedna dodatna akcija, te ako
+lik ima dostupno više dodatnih akcija potrebno je odrediti koju je najbolje iskoristiti u tom
+slučaju \cite[str. 189]{playershandbook2014}.
+
+Kao dio poteza lik može stupiti u interakciju s jednim predmetom ili značajkom
+okoline, ta interakcija se može dogoditi tijekom kretanja ili akcije.
+Na primjer, otvaranje vrata dok se lik kreće prema neprijatelju ili izvlačenje
+oružja kao dio iste akcije za napad bi spadale pod interakciju s okolinom.
+
+Određene posebne sposobnosti, čarolije i situacije omogućuju poduzimanje posebne akcije
+zvane reakcija. Reakcija je trenutni odgovor na okidač neke vrste, koji se može dogoditi
+tokom poteza igrača ili tuđeg poteza. Napad prilike (engl. \textit{Opportunity attack}) je 
+najčešća vrsta reakcije i više je opisana u poglavlju \ref{section:napadi}.
+
+\subsection{Kretanje i položaj}
+\label{section:kretanje-i-polozaj}
+
+Kad je lik na potezu može se pomaknuti do udaljenosti definirane brzinom lika.
+Po potezu lik može potrošiti proizvoljnu količinu brzine, ne mora potrošiti svu
+ili uopće iskoristiti brzinu.
+
+\subsection{Akcije}
+\label{section:akcije}
+
+\subsection{Napadi}
+\label{section:napadi}
 
 \chapter{Prikaz implementacije}
 
