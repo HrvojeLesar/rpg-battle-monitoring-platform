@@ -685,6 +685,7 @@ Ovo poglavlje pruža pravila koja su potrebna kako bi likovi i čudovišta sudje
 bilo to da se radi o kratkom okršaju ili produženom sukobu. Kroz cijelo poglavlje
 pravila se odnose na igrača ili DM-a. DM kontrolira sva čudovišta i likove koji nisu
 igrači, a uključeni su u borbu, drugi igrači kontroliraju svoje likove.
+Primjer borbe će biti prikazan u poglavlju \ref{section:primjer-borbe}.
 
 Tipičan sukob je između dvije strane i organiziran je u ciklus rundi i poteza.
 Runda predstavlja oko šest sekundi u svijetu igre. Tijekom runde, svaki sudionik
@@ -752,12 +753,12 @@ Borbe se rijetko odvijaju u praznim sobama. Špilje pune kamenja i guste šume
 su tipična mjesta odvijanja borbe i sadrže težak teren (engl. \textit{difficult terrain}).
 Za svako kretanje kroz ovakav teren potrebno je utrošiti jednu dodatnu stopu za svaku stopu
 koju lik želi preći. Na primjer, ako se radi o udaljenosti od pet stopa, za prolaz kroz
-težak teren potrebno je utrošiti deset stopa brzine.
+težak teren potrebno je utrošiti deset stopa brzine \cite[str. 190]{playershandbook2014}.
 
 Likovi se mogu kretati kroz prostor prijateljskih stvorenja, ali ne mogu završiti potez
 ili zaustaviti se na istom polju. Kroz prostor neprijateljskih stvorenja mogu se kretati samo
 ako je stvorenje barem dvije veličine veće ili manje od lika koji se kreće, no nije dozvoljeno
-završavanje kretanja u prostoru koji zauzima to stvorenje.
+završavanje kretanja u prostoru koji zauzima to stvorenje \cite[str. 191]{playershandbook2014}.
 
 U tablici ispod se nalaze veličine stvorenja i različite količine prostora koje zauzimaju,
 tokom borbe veća stvorenja kontroliraju veću količinu prostora, također objekti u okolini ponekad
@@ -802,7 +803,7 @@ koristiti u borbi. Svaka čarolija ima definirano vrijeme bacanja (engl. \textit
 koje određuje mora li bacač koristiti akciju, reakciju, minute ili sate vremena da baci čaroliju.
 U nekim slučajevima, kao kad čarolija ima vrijeme bacanja od više sati, bacanje čarolije nije
 nužno jedna akcija. Većina čarolija ima vrijeme bacanja od jedne akcije, pa je često takva čarolija
-korištena tokom borbe.
+korištena tokom borbe \cite[str. 192]{playershandbook2014}.
 
 \textbf{Trk} (engl. \textit{dash}), omogućava liku da potroši akciju kako bi se mogao
 na istom potezu dodatno kretati. Povećanje je jednako brzini lika, nakon što se primjene
@@ -810,27 +811,102 @@ bilo kakvi modifikatori brzine. Na primjer, s brzinom od trideset stopa, na isto
 moguće je pomaknuti se šestdeset stopa ako se iskoristi ova akcija.
 Bilo kakve promjene na brzinu također imaju utjecaj na dodatnu brzinu dobivenu ovom akcijom,
 na primjer ako je lik usporen i ima smanjenu brzinu s trideset na petnaest, korištenjem ove akcije
-će dobiti dodatnih petnaest brzine.
+će dobiti dodatnih petnaest brzine \cite[str. 192]{playershandbook2014}.
 
 \textbf{Isključivanje iz borbe} (engl. \textit{disengage}), akcija omogućuje kretanje bez da
-neprijatelji dobivaju napad prilike kad se lik kreće oko njih.
+neprijatelji dobivaju napad prilike kad se lik kreće oko njih \cite[str. 192]{playershandbook2014}.
 
 \textbf{Izmicanje} (engl. \textit{dodge}), akcija omogućava usredotočenost na izbjegavanje napada.
 Do početka slijedećeg poteza, svako bacanje napada protiv lika koji je iskoristio ovu akciju,
 ima odsutnost prednosti ako lik vidi napadača, a sva bacanja za spas
-na spretnost se izvode s prednošću.
+na spretnost se izvode s prednošću \cite[str. 192]{playershandbook2014}.
 
 \textbf{Pomoć}, likovi mogu pružiti pomoć drugom liku u izvršavanju nekog zadatka.
 Korištenjem ove akcije drugi lik dobiva prednost na slijedeću provjeru sposobnosti koju
 izvrši za obavljanje zadatka u kojem dobiva pomoć, pod uvjetom da napravi tu radnju prije
 nego pomagač opet dođe na potez. Također moguće je pomoći prijateljskom stvorenju u napadu
-na neprijatelja unutar pet stopa, napadač na svom potezu dobiva prednost na prvo bacanje za napad.
+na neprijatelja unutar pet stopa, napadač na svom potezu dobiva prednost na prvo bacanje za 
+napad \cite[str. 192]{playershandbook2014}.
 
 \textbf{Pretraga}, akcija može biti iskorištena za pretragu okoline i pronalaženju nečega.
-Ovisno o prirodi pretrage, DM može zatražiti da se napravi provjera vještine percepcija ili istraga.
+Ovisno o prirodi pretrage, DM može zatražiti da se napravi provjera vještine percepcija ili 
+istraga \cite[str. 193]{playershandbook2014}.
 
 \subsection{Napadi}
 \label{section:napadi}
+
+Napade možemo podijeliti u nekoliko vrsta, napadi na blizinu, na daljinu i
+napadi prilike. Svaka vrsta napada se ima razlike no svi imaju jednaku
+strukturu i način na koji se izvode \cite[str. 193-194]{playershandbook2014}:
+\begin{enumerate}
+    \item Odabir mete; potrebno je odabrati metu unutar dometa napada,
+        meta može biti stvorenje, predmet ili lokacija. Na primjer,
+        lokacija se može odabrati ako pokušavamo napasti nevidljivog
+        neprijatelja ili ako čarolija koju bacamo ima utjecaj na veće
+        područje.
+    \item Određivanje modifikatora; DM određuje ako se meta skriva iza zaklona
+        i ako napadač ima prednost ili nema prednost protiv mete. Uz to,
+        čarolije, posebne sposobnosti i drugi učinci mogu imati utjecaja.
+    \item Razriješivanje napada; igrač radi bacanje za napad (engl. \textit{attack roll}),
+        ovo bacanje određuje ako je meta uspješno pogođena napadom ili je napad promašio.
+        U slučaju pogotka određuje se šteta koja je napravljena meti, također bacanjem kockice,
+        ovisno o napadu koriste se različite kockica, neki napadi uzrokuju posebne učinke
+        uz štetu ili umjesto nje.
+\end{enumerate}
+
+Za izvođenje bacanja za napad koristi se d20 kockica te se na dobivenu vrijednost dodaju
+određeni modifikatori. Ako je ukupan zbroj bacanja i modifikatora jednak ili veći od klase
+oklopa mete, u tom slučaju napad pogađa. Dva najčešća modifikatora koji se dodaju
+su modifikator sposobnosti (engl. \textit{ability modifier}) i bonus stručnosti lika.
+Modifikator sposobnosti odgovara sposobnosti koja se koristi za napad, npr. može biti snaga
+ili spretnost ovisno o vrsti oružja. Bonus stručnosti se dodaje ako lik ima stručnost u korištenju
+oružja kojim napada.
+
+U rjeđim slučajevima kao rezultat bacanja d20 moguće je dobiti 1 ili 20. Ako je
+dobivena vrijednost 20, napad je uvijek pogodak, neovisno o bilo kakvim modifikatorima
+ili klasi oklopa mete, također ovakav napad je uvijek kritičan pogodak.
+Ako je dobivena vrijednost 1, napad uvijek promašuje i ne dodaje se modifikator ni
+ne provjerava klasa oklopa mete.
+Slična funkcija je kod ostalih bacanja d20, vrijednost od 20 je skoro uvijek uspjeh
+dok je vrijednost 1 neuspjeh.
+
+\subsection{Šteta i iscjeljivanje}
+\label{section:steta-i-iscjeljivanje}
+
+Ozljede i rizik od smrti stalni su pratitelji onih koji istražuju svjetove D\&D-a.
+Životni bodovi predstavljaju kombinaciju fizičke i mentalne izdržljivosti.
+Stvorenje s više životnih bodova teže je ubiti ili onesvijestiti. Ona s manje
+životnih bodova su krhkija. Trenutni životni bodovi stvorenju mogu biti bilo koji
+broj između nule i maksimuma životnih bodova.
+Kad kod stvorenje pretrpi štetu, ta šteta oduzima od životnih bodova,
+gubitak životnih bodova nema utjecaj na sposobnosti stvorenja sve dok je
+vrijednost veća od nula.
+
+Ako šteta ne rezultira smrću stvorenja, tada nije trajna. Likovi mogu
+vratiti životne bodove odmorom, korištenjem čarolija ili ispijanjem ljekovitog
+napitka. Kada stvorenje primi iscjeljivanje bilo koje vrste, vraćeni životni bodovi
+dodaju se trenutnim životnim bodovima i ne mogu premašiti maksimum životnih bodova
+tog lika ili stvorenja.
+
+Postoji nekoliko situacije koje se mogu dogoditi kad neki lik ili stvorenje padne na 
+nula životnih bodova. Manje važna stvorenja, čudovišta uglavnom umiru odmah
+nakon što im životni bodovi padnu na nulu, dok važniji likovi mogu pasti u
+nesvijest ili imati nekoliko pokušaja da se spase od smrti i stabiliziraju
+svoje stanje.
+U slučaju kad količina štete svede lika na nula životnih bodova i ostatak
+štete je veći ili jednak broju maksimalnih životnih bodova lika, lik umire u tom
+trenutku.
+Padom u nesvijest tijekom borbe znači da lik ili stvorenje na svom potezu
+mora izvršiti bacanje za spas od smrti (engl. \textit{death save}).
+Za spas se koristi d20 i sve vrijednosti jednake ili veće od deset
+približavaju lika životu, dok sve ispod deset smrti.
+Na treći uspjeh lik postaje stabilan, te se više ne mora spašavati od smrti,
+dok na treći neuspjeh lik umire. Bacanje dvadeset ili jedan se broji kao
+dva uspijeha ili neuspjeha.
+Stabilizirano stvorenje ima nula životnih bodova i onesviješteno je, odmorom
+se životni bodovi mogu povratiti, no odmor traje neko vrijeme i nije moguć
+tokom borbe. Tokom borbe iscjeljivanje na barem jedan životni bod
+je jedini način za osvijestiti lika ili stvorenje.
 
 \chapter{Prikaz implementacije}
 
@@ -889,6 +965,9 @@ Navesti da budu točni primjeri kasnije u radu.
 \subsection{Jotai}
 \subsection{Socket.io}
 \subsection{Mantine}
+
+\section{Primjer borbe}
+\label{section:primjer-borbe}
 
 Ovo je glavni dio rada u kojem treba razraditi temu, pojasniti istraživanja, prikazati rezultate i slično. Poželjno je na početku poglavlja dati kratki opis strukture poglavlja, kako bi čitatelj/čitateljica rada mogao/mogla lakše pratiti složenu cjelinu.
 
