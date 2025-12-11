@@ -275,6 +275,11 @@ Ciljni broj za provjere sposobnosti i spas naziva se težina zadatka ili difficu
 broj za napad naziva klasa oklopa ili Armour Class (AC). Ovo jednostavno pravilo temelj je 
 rješavanja većine situacija u D\&D-u.
 
+Kod nekih provjera sposobnosti, bacanja za napad ili bacanja za spas bacanje kockice se modificira
+posebnom situacijom koju nazivamo prednost (engl. \textit{advantage}) ili odsutnost prednosti (engl. \textit{disadvantage}).
+U ovoj situaciji kod bacanja D20 kockice, baca se dodatna D20 i ovisno o situaciji, ako je prednost ili odsutnost prednosti
+odabire se kockica s najvećom vrijednošću ili kockica s najmanjom vrijednošću.
+
 \section{Kreacija lika}
 \label{section:kreacija-lika}
 
@@ -362,7 +367,7 @@ za implementaciju ni za razumijevanje igre:
                 \begin{itemize}
                     \item Vid u mraku (engl. \textit{darkvision}): patuljci vide u mraku i svijetlostno prigušenim uvjetima
                         do 60 stopa.
-                    \item Patuljačka otpornost (engl. \textit{dwarven resilience}): prednost (engl. \textit{advantage}) pri bacanju spasa protiv
+                    \item Patuljačka otpornost (engl. \textit{dwarven resilience}): prednost pri bacanju spasa protiv
                         otrova i otpornost na otrov.
                     \item Patuljačka borbena obuka (engl. \textit{dwarven combat training}): stručnost u korištenju bojne sjekire (engl. \textit{battleaxe}),
                         sjekiricom (engl. \textit{handaxe}), lakim čekićem (engl. \textit{throwing hammer}) i
@@ -737,9 +742,92 @@ najčešća vrsta reakcije i više je opisana u poglavlju \ref{section:napadi}.
 Kad je lik na potezu može se pomaknuti do udaljenosti definirane brzinom lika.
 Po potezu lik može potrošiti proizvoljnu količinu brzine, ne mora potrošiti svu
 ili uopće iskoristiti brzinu.
+Kretanje se može razdijeliti kroz cijeli potez. Moguće je koristiti dio brzine prije
+i poslije akcije. Na primjer, ako je brzina lika trideset stopa, može se kretati deset stopa,
+iskoristiti neku akciju, a zatim se kretati još dvadeset stopa.
+Ako akcija uključuje više od jednog napada oružjem, kretanje se može dodatno razdvojiti
+između tih napada.
+
+Borbe se rijetko odvijaju u praznim sobama. Špilje pune kamenja i guste šume
+su tipična mjesta odvijanja borbe i sadrže težak teren (engl. \textit{difficult terrain}).
+Za svako kretanje kroz ovakav teren potrebno je utrošiti jednu dodatnu stopu za svaku stopu
+koju lik želi preći. Na primjer, ako se radi o udaljenosti od pet stopa, za prolaz kroz
+težak teren potrebno je utrošiti deset stopa brzine.
+
+Likovi se mogu kretati kroz prostor prijateljskih stvorenja, ali ne mogu završiti potez
+ili zaustaviti se na istom polju. Kroz prostor neprijateljskih stvorenja mogu se kretati samo
+ako je stvorenje barem dvije veličine veće ili manje od lika koji se kreće, no nije dozvoljeno
+završavanje kretanja u prostoru koji zauzima to stvorenje.
+
+U tablici ispod se nalaze veličine stvorenja i različite količine prostora koje zauzimaju,
+tokom borbe veća stvorenja kontroliraju veću količinu prostora, također objekti u okolini ponekad
+mogu koristiti kategorije veličine. 
+Prostor stvorenja je područje u stopama koje to stvorenje kontrolira tokom borbe, a nije
+izraz njihovih fizičkih dimenzija.
+
+\begin{table}[H]
+    \centering
+    \caption{Kategorije veličine}
+    \begin{tabularx}{0.66\linewidth}{|X|X|X|X|}
+        \hline
+        \textbf{Veličina} & \textbf{Prostor} \\ \hline
+        Sićušan & 2.5 sa 2.5 stopa \\ \hline
+        Mala & 5 sa 5 stopa \\ \hline
+        Srednja & 5 sa 5 stopa \\ \hline
+        Velika & 10 sa 10 stop \\ \hline
+        Ogromna & 15 sa 15 stopa \\ \hline
+        Gigantska & 20 sa 20 stopa ili više \\ \hline
+    \end{tabularx}
+    \\[10pt]
+    \caption*{(Izvor: Player's Handbook \cite[str. 191]{playershandbook2014})}
+    \label{tab:kategorije-velicine}
+\end{table}
 
 \subsection{Akcije}
 \label{section:akcije}
+
+Kad je lik na potezu i želi odraditi neku akciju, osim akcija koje dobiva od klase ili
+nekih drugih posebnih značajki uvijek može odraditi neku od slijedećih akcija 
+ili improvizirati akciju. Ako je akcija improvizirana DM odlučuje ako je moguća,
+koju vještinu lik može iskoristiti za akciju i kakvo bacanje kockice će odrediti
+uspješnost akcije.
+
+\textbf{Napad} je najčešća akcija u borbi, bilo da se zamahuje mačem,
+ispaljuje strijela iz luka ili tučnjava šakama, ovom akcijom izvodi se jedan napad
+izbliza ili napad na daljinu \cite[str. 192]{playershandbook2014}.
+Napadi će biti detaljnije opisani u poglavlju \ref{section:napadi}.
+
+\textbf{Bacanje čarolija}, mnoge vrste čudovišta i likova imaju pristup čarolijama i mogu iv
+koristiti u borbi. Svaka čarolija ima definirano vrijeme bacanja (engl. \textit{cast time}),
+koje određuje mora li bacač koristiti akciju, reakciju, minute ili sate vremena da baci čaroliju.
+U nekim slučajevima, kao kad čarolija ima vrijeme bacanja od više sati, bacanje čarolije nije
+nužno jedna akcija. Većina čarolija ima vrijeme bacanja od jedne akcije, pa je često takva čarolija
+korištena tokom borbe.
+
+\textbf{Trk} (engl. \textit{dash}), omogućava liku da potroši akciju kako bi se mogao
+na istom potezu dodatno kretati. Povećanje je jednako brzini lika, nakon što se primjene
+bilo kakvi modifikatori brzine. Na primjer, s brzinom od trideset stopa, na istom potezu
+moguće je pomaknuti se šestdeset stopa ako se iskoristi ova akcija.
+Bilo kakve promjene na brzinu također imaju utjecaj na dodatnu brzinu dobivenu ovom akcijom,
+na primjer ako je lik usporen i ima smanjenu brzinu s trideset na petnaest, korištenjem ove akcije
+će dobiti dodatnih petnaest brzine.
+
+\textbf{Isključivanje iz borbe} (engl. \textit{disengage}), akcija omogućuje kretanje bez da
+neprijatelji dobivaju napad prilike kad se lik kreće oko njih.
+
+\textbf{Izmicanje} (engl. \textit{dodge}), akcija omogućava usredotočenost na izbjegavanje napada.
+Do početka slijedećeg poteza, svako bacanje napada protiv lika koji je iskoristio ovu akciju,
+ima odsutnost prednosti ako lik vidi napadača, a sva bacanja za spas
+na spretnost se izvode s prednošću.
+
+\textbf{Pomoć}, likovi mogu pružiti pomoć drugom liku u izvršavanju nekog zadatka.
+Korištenjem ove akcije drugi lik dobiva prednost na slijedeću provjeru sposobnosti koju
+izvrši za obavljanje zadatka u kojem dobiva pomoć, pod uvjetom da napravi tu radnju prije
+nego pomagač opet dođe na potez. Također moguće je pomoći prijateljskom stvorenju u napadu
+na neprijatelja unutar pet stopa, napadač na svom potezu dobiva prednost na prvo bacanje za napad.
+
+\textbf{Pretraga}, akcija može biti iskorištena za pretragu okoline i pronalaženju nečega.
+Ovisno o prirodi pretrage, DM može zatražiti da se napravi provjera vještine percepcija ili istraga.
 
 \subsection{Napadi}
 \label{section:napadi}
