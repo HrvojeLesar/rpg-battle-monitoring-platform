@@ -666,18 +666,6 @@ igre i direktno se isčitavaju iz pravila (npr. oprema koju lik dobiva).
     \label{fig:character-vom-half-orc}
 \end{figure}
 
-\section{Avanture}
-\label{section:avanture}
-
-\subsection{Vrijeme i prolaz vremena}
-\label{section:vrijeme-i-prolaz-vremena}
-
-\subsection{Brzina}
-\label{section:brzina}
-
-\subsection{Odmor}
-\label{section:odmor}
-
 \section{Borba}
 \label{section:borba}
 
@@ -909,31 +897,94 @@ tokom borbe. Tokom borbe iscjeljivanje na barem jedan životni bod
 je jedini način za osvijestiti lika ili stvorenje.
 
 \chapter{Prikaz implementacije}
+\label{chapter:prikaz-implementacije}
 
-\chapter{Struktura programa}
+U ovom poglavlju će biti opisani alati i tehnologije korištene za implementaciju platforme.
+Korišteno je više različitih tehnologija, fokus je na odabir i korištenje tehnologija 
+koje su što više prikladne za implementacije web aplikacija.
+Ovime se osigurava da je aplikacija dostupna, funkcionalna i prenosiva
+preko više različitih operativnih sustava i web preglednika.
 
-Razdvojeno na klijent, poslužitelj strukturu
-Koristi se peer to peer komunikacija, postoji server authoritive...
+Platforma je implementirana na način da može biti korištena kao zasebna web
+aplikacija koja se spaja na udaljeni poslužitelj ili kao desktop aplikacija
+koja automatski u pozadini pokreće poslužitelj i omogućava korisniku 
+da koristi aplikaciju bez posebno pokretanja i postavljanja poslužitelja.
+Desktop i mobilna integracija je moguća kroz korištenje tauri programskog okvira.
+
+Tauri je programski okvir za izgradnju malih, brzih programa za sve desktop i mobilne platforme.
+Aplikacija može integrirati bilo koji frontend okvir koji se kompajlira u HTML, javascript, css
+i koristiti ove tehnologije za razvoj korisničkog sučelja, a istovremeno može koristiti jezike
+poput rusta, swifta, jave i kotlina za backend logiku i interakciju s hardverom \cite{tauridocs}.
+U ovom projektu tauri služi za pakiranje projekta u jednu izvršnu datoteku, te jednostavno
+postavljanje i pokretanje poslužitelja i jednog klijenta.
+
+Aplikacija se sastoji od dva odvojena dijela, to su poslužitelj i klijent.
+Poslužitelj služi za spremanje podataka, spajanje i sinkronizaciju podataka između
+povezanih klijenata, te učitavanje slika, kako bi bile dostupne klijentima preko web API-a,
+te kreiranje manjih sličica (engl. \textit{thumbnail}) iz učitanih slika, da klijenti ne bi
+trebali preuzimati cijele slike koje mogu biti veće rezolucije, a nikada neće biti potrebna
+takva rezolucija. Klijent sadrži svo korisničko sučelje i logiku igre, komunicira kroz
+poslužitelja s ostalim klijentima te prima promjene o stanju igre od poslužitelja.
+
+Cijela aplikacija je umrežena, sve promjene koje se događaju kod jednog klijenta budu
+sinkronizirane i prikazane kod ostalih klijenata koji su povezani u istu sesiju.
+Aplikacija koristi ravnopravne čvorove (engl. \textit{peer-to-peer})
+za umrežavanje zbog jednostavnosti implementacije i
+veće fleksibilnosti, prije implementacije u obzir je došlo umrežavanje s autoritativnim poslužiteljem,
+više o oba pristupa i zašto je odabrano peer-to-peer umrežavanje u poglavlju \ref{section:mrezna-komunikacija}.
+
 
 \section{Poslužitelj}
 
-\section{Klijent}
+U ovom potpoglavlju prolazimo kroz implementaciju poslužitelja, tehnologije koje su
+korištene i odluke koje su donesene vezane uz dizajn cijele aplikacije, kao što je
+odluka za implementaciju peer-to-peer umrežavanja umjesto autoritativnog poslužitelja.
 
-\section{Mrežna komunikacija}
+Poslužitelj je implementiran u programskom jeziku rust. Rust je sistemski programski jezik
+sa statičnim tipovima podataka, dizajniran za performanse i sigurnost. 
+Razvijen od strane Mozilla Research, stvoren je kao odgovor na dugogodišnju napetost između
+kontrole na niskoj razini koju pruže jezici poput C i C++-a i sigurnosti jezika više razine
+poput jave ili pythona. Rust sigurnost postiže sustavom zvan vlasništvo (engl. \textit{ownership}) i 
+provjeravanjem vlasništva nad varijablama tokom kompajliranja programa sustavom zvanim provjeravač
+posuđenog (engl. \textit{borrow checker}). Korištenjem ova dva sustava osigurava korektan pristup
+i dijeljenje memorije, izbjegava probleme s korištenjem izbrisane memorije, čitanja ili
+pisanje u memoriju koju više dretva istovremeno koristi, a pristup memoriji nije sinkroniziran \cite{rustdocs}. 
+
+Budući da rust nema sakupljača smeća (engl \textit{garbage collector}) i ima minimalan runtime,
+nevjerojatno je brz i memorijski učinkovit. Kod kompajliranja programa koristi apstrakcije bez troška, što
+znači da programer može koristiti koncepte programiranje više razine, poput iteratora ili generičnih funkcija,
+bez da računalo obavlja dodatni posao tijekom izvođenja, svi koncepti više razine tokom kompajliranja su 
+pretvoreni u nižu razinu, na primjer iteratori su pretvoreni u jednostavne for petlje, dok su generične funkcije
+pretvorene u više različitih funkcija koje kompajlirani program poziva \cite{rustdocs}.
+
+
+\subsection{Axum}
+\label{section:axum}
+
+\subsection{Socketioxie}
+\label{section:socketioxie}
+
+\subsection{Sqlite}
+\label{section:sqlite}
+
+\subsection{Mrežna komunikacija}
+\label{section:mrezna-komunikacija}
+
+\subsection{Endpoints}
+\label{section:endpoints}
 
 Naivna implementacija mrežne komunikacije između klijenata
+
+\subsection{Mrežne tehnologije u web preglednicima}
+\label{section:mrezne-tehnologije-u-web-preglednicima}
+
+
+\section{Klijent}
 
 \subsection{Peer to peer komunikacija}
 \subsection{Stateless \& stateful komunikacija}
 
 \chapter{Korišteni alati i tehnologije za implementaciju}
-
-U ovom poglavlju će biti opisani alati i tehnologije korištene za implementaciju platforme.
-Korišteno je više različitih tehnologija, fokus je na tehnologije koje imaju
-fokus je na korištenje tehnologija koje su što više prikladne za implementacije 
-aplikacije kao web aplikaciju.
-Ovime se osigurava da je aplikacija dostupna, funkcionalna i prenosiva
-preko više različitih operativnih sustava i web preglednika.
 
 Aplikacija je podijeljena na dva dijela, na poslužitelja i klijenta.
 Poslužitelj se koristi za:
@@ -954,7 +1005,6 @@ Navesti da budu točni primjeri kasnije u radu.
 
 \subsection{Tauri}
 \subsection{Axum}
-\subsection{Socketioxie}
 
 \section{Baza podataka}
 
