@@ -933,8 +933,36 @@ za umrežavanje zbog jednostavnosti implementacije i
 veće fleksibilnosti, prije implementacije u obzir je došlo umrežavanje s autoritativnim poslužiteljem,
 više o oba pristupa i zašto je odabrano peer-to-peer umrežavanje u poglavlju \ref{section:mrezna-komunikacija}.
 
+\section{Web aplikacije}
+\label{section:web-aplikacije}
+
+Web aplikacija je program klijent-poslužitelj arhitekture koji koristi
+web preglednik kao svog klijenta. Web aplikacija obavljanje interaktivnu
+uslugu povezivanja s poslužiteljem putem interneta ili intraneta \cite{shklar2009web}.
+
+Razlikuje se od tradicionalne web stranice na slijedeće načine \cite{shklar2009web}:
+\begin{itemize}
+    \item \textbf{Dinamičko naspram statičkog}: dok web stranica, u većini slučajeva
+        isporučuje sadržaj statičkih datoteka, web aplikacija prikazuje dinamički prilagođen
+        sadržaj na temelju parametara zahtjeva, korisničke sesije.
+    \item \textbf{Interaktivnost}: web aplikacije omogućuju korisnicima obavljanje specifičnih
+        zadataka, poput kupnje robe ili upravljanje zalihama.
+\end{itemize}
+
+Web aplikacije se temelje na distribuiranoj arhitekturi koja se sastoji od tri glavna elementa.
+Prvi element je klijent još nekad i nazivan frontend; to je obično web preglednik instaliran
+na korisnikovom računalu. Preglednik je odgovoran za prikazivanje sadržaja i rukovanje interakcijama
+korisnika.
+Drugi element je poslužitelj, ponekad zvan backend; ovaj element sluša dolazne zahtjeve od
+klijenata i generira odgovore. Obrađuje zadatke poput posluživanja statičkih datoteka,
+autentifikacije i prosljeđivanja dinamičkih zahtjeva aplikacijskim programima.
+Treći element je baza podataka; web aplikacije često zahtijevaju pristup trajnim podacima.
+Povezuju se s bazama podataka kako bi pohranile i dohvaćale informacije.
+Arhitektura aplikacije uključuje specifičnu logiku za omogućavanje pristupa podacima i
+upravljanje transakcijama \cite{casteleyn2009engineering}.
 
 \section{Poslužitelj}
+\label{section:posluzitelj}
 
 U ovom potpoglavlju prolazimo kroz implementaciju poslužitelja, tehnologije koje su
 korištene i odluke koje su donesene vezane uz dizajn cijele aplikacije, kao što je
@@ -950,13 +978,71 @@ posuđenog (engl. \textit{borrow checker}). Korištenjem ova dva sustava osigura
 i dijeljenje memorije, izbjegava probleme s korištenjem izbrisane memorije, čitanja ili
 pisanje u memoriju koju više dretva istovremeno koristi, a pristup memoriji nije sinkroniziran \cite{rustdocs}. 
 
-Budući da rust nema sakupljača smeća (engl \textit{garbage collector}) i ima minimalan runtime,
+Budući da rust nema sakupljača smeća (engl. \textit{garbage collector}) i ima minimalan runtime,
 nevjerojatno je brz i memorijski učinkovit. Kod kompajliranja programa koristi apstrakcije bez troška, što
 znači da programer može koristiti koncepte programiranje više razine, poput iteratora ili generičnih funkcija,
 bez da računalo obavlja dodatni posao tijekom izvođenja, svi koncepti više razine tokom kompajliranja su 
 pretvoreni u nižu razinu, na primjer iteratori su pretvoreni u jednostavne for petlje, dok su generične funkcije
 pretvorene u više različitih funkcija koje kompajlirani program poziva \cite{rustdocs}.
 
+\subsection{Protokoli za prijenos podataka između poslužitelja i klijenta}
+\label{section:protokoli}
+
+Implementirani poslužitelj koristi http i websockete za komunikaciju s klijentima.
+HTTP je protokol na kojim se temelji world wide web, dizajniran je za prijenos specijaliziranih
+poruka putem mreže. Koristi TCP kao svoj temeljni transportni sloj, što osigurava da su svi podaci
+preneseni u točnom redoslijedu i primljeni. Komunikacija http-a koristi model zahtjeva i odgovora.
+HTTP klijent poput web preglednika započinje komunikaciju slanje poruke zahtjeva prema http
+poslužitelju. Poslužitelj zatim zaprima zahtjev, obrađuje ga i generira poruku odgovora koju šalje
+natrag klijentu. Na ovaj način klijent može zatražiti bilo kakvu vrstu resursa od poslužitelja \cite{casteleyn2009engineering}.
+
+HTTP zahtjev se sastoji od nekoliko dijelova i počinje s metodom zahtjeva, putanju do resursa i broj verzije http-a,
+slijedeći redovi su popis zaglavlja, nakon zaglavlja je prazni redak iza kojeg se u poruku dodaje tijelo.
+Tijelo je opcionalno i ne mora biti prisutno u poruci. Ispod je primjer zahtjeva, korištena je metoda GET, pokušava se dohvatiti
+resurs index.html, verzija HTTP-a je 1.1 i u zahtjev uključeno je jedno zaglavlje, tijelo je prazno.
+Ovakvi zahtjevi su uglavnom slani s klijenta prema poslužitelju, no nije neubičajeno da dva poslužitelja komuniciraju
+preko http-a, te u ovom slučaju jedan poslužitelj preuzima ulogu klijenta.
+
+\begin{verbatim}
+GET /index.html HTTP/1.1
+User-Agent: Mozilla/5.0(X11;Linux x86_64) Chrome/143.0.0.0
+\end{verbatim}
+
+Klijent od poslužitelja prima odgovor na zahtjev. Struktura odgovora počinje statusnom linijom,
+koja sadrži verziju http-a, troznamenkasti statusni kod i kratko objašnjenje poslanog koda, npr. OK.
+U odgovoru, jednako kao kod zahtjeva, nakon prve linije dolazi lista zaglavlja koja su poslana, te
+nakon zaglavlja prazni redak i tijelo odgovora. U slučaju ispod tijelo je popunjeno i klijent prima
+html dokument koji može prikazati u web pregledniku.
+
+\begin{verbatim}
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Lenght: 40
+
+<html><h1>Hello World!</h1></html>
+\end{verbatim}
+
+HTTP protokol je protokol bez stanja, što znači da je životni vijek veze između klijenta 
+i poslužitelja ograničen na jednu razmjenu zahtjeva i odgovora. Poslužitelj ne održava stanje
+veze tijekom prijenosa uzastopnih naredbi. Ne može pamtiti niz interakcija niti grupirati
+zahtjeve zajedno. Budući da protokol ne održava informacije o sesiji, web aplikacije
+moraju koristiti druge mehanizme, poput kolačića za uspostavljanje trajnih sesija ili stanja
+kroz višestruke zahtjeve \cite{casteleyn2009engineering}.
+
+Websocket je protokol koji omogućuje dvosmjernu komunikaciju između klijenta i poslužitelja
+preko jedne, dugotrajne TCP veze. Za razliku od klasičnog http-a koji koristi model
+zahtjev odgovor, websocket omogućuje da obje strane šalju poruke u bilo kojem trenutku, bez
+potrebe za novim zahtjevima \cite{pimentel2012communicating}.
+Ova karakteristika je idealna za aplikacije koje zahtijevaju ažuriranja u stvarnom vremenu i možemo
+nazvati websocket kao protokol koji održava stanje, za razliku od http-a koji je bez stanja.
+Uspostava websocket veze počinje kao običan http zahtjev koji je nadograđen na websocket protokol.
+Klijent šalje posebni http GET zahtjev s zaglavljem \texttt{Upgrade: websocket}. 
+Poslužitelj odgovara statusom \texttt{101 Switching Protocols} ako prihvaća zahtjev.
+Nakon ovoga, veza prelazi na websocket protokol. Poruke se šalju u obliku okvira i
+postoji nekoliko vrsta okvira, to su tekst okviri, za slanje tekstualnih poruka,
+binarni okviri, za slanje biranih poruka i kontrolni okviri, za slanje keep-alive
+poruka i zatvaranje veze \cite{gupta2018overview}.
+U kasnijim poglavljima su prikazani primjeri gdje i kako se oba protokola koriste.
 
 \subsection{Axum}
 \label{section:axum}
