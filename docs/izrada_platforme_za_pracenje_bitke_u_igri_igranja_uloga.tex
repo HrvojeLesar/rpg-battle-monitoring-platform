@@ -1047,6 +1047,182 @@ U kasnijim poglavljima su prikazani primjeri gdje i kako se oba protokola korist
 \subsection{Axum}
 \label{section:axum}
 
+Axum je okvir za izradu web aplikacija u ekosustavu programskog jezika rust, dizajniran
+za izgradnju asinkronih http usluga s naglaskom na ergonomiju, modularnost i kompozabilnost.
+Pruža visokorazinsku apstrakciju za usmjeravanje, obradu zahtjeva i generiranje odgovora, 
+dok koristi nižerazinske komponente iz asinkronog rusta. Naglašava tipksi sigurno usmjeravanje
+bez korištenja makro komandi i mehanizme ekstrakcije, omogućujući deklarativno parsiranje
+zahtjeva putem ekstraktora, na primjer pruža ekstraktore za parametre puta ili parsiranje
+JSON tijela zahtjeva \cite{axum}.
+
+Axum se u aplikaciji koristi kao web poslužitelj, odgovoran je za povezivanje klijenata,
+spajanje s bazom podataka, pohranjivanje podataka o igrama, te upravljanje i 
+serviranje slika koje klijenti pohrane za neku igru. Kroz nekoliko primjera koda
+ćemo proči glavne značajke axum-a i način na koji se koristi kroz aplikaciju.
+
+\begin{minted}[samepage]{rust}
+pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
+    axum::Router::new()
+        .route("/assets/upload", routing::post(upload::upload))
+        .route(
+            "/assets/thumbnails/{image_id}",
+            routing::get(serve::thumbnails),
+        )
+        .route("/assets/{filename}", routing::get(serve::serve_file))
+        .layer(DefaultBodyLimit::disable())
+        .layer(RequestBodyLimitLayer::new(FILE_SIZE_LIMIT))
+        .with_state(state.clone())
+}
+\end{minted}
+\captionof{listing}{Kreiranje axum ruta za učitavanje i serviranje slika}
+\label{lst:kreiranje-axum-ruta-za-ucitavanje-i-serviranje-slika}
+
+U isječku koda \ref{lst:kreiranje-axum-ruta-za-ucitavanje-i-serviranje-slika}
+je prikazana funkcija koja kreira axum \texttt{Router} objekt s globalnim stanjem aplikacije
+\texttt{state}. U funkciji su definirane tri različite rute, detalji o rutama su poglavlju \ref{section:endpoints}.
+Funkcija \texttt{route} kao argumente prima putanju na koju će web poslužitelj reagirati ako
+je zatražena od klijenta, drugi argument registrira http metodu i funkciju koja se poziva za 
+generiranje odgovora na klijentov zahtjev. Na primjer \texttt{route("/assets/upload", routing::post(upload::upload))}
+registrira rutu \texttt{"/assets/upload"}, definira da prima samo zahtjev za \texttt{POST} metodu,
+te ako klijent napravi ispravan zahtjev na ovu rutu poziva funkciju \texttt{upload::upload}.
+Funkcija \texttt{with\_state} prima dijeljeno globalno stanje aplikacije i omogućava
+funkcijama koje generiraju odgovor klijentu pristup tome stanju, na primjer stanje
+može sadržavati vezu na bazu podataka. U slijedećem isječku je prikazana struktura
+globalnog dijeljenog stanja.
+
+\begin{minted}[samepage]{rust}
+pub struct AppStateConfig<F>
+where
+    F: Adapter,
+{
+    pub file_system_handler: F,
+    pub database: DatabaseConnection,
+    pub entity_queue: Arc<Mutex<EntityQueue>>,
+}
+
+impl AppStateConfig<local_adapter::Local> {
+    pub async fn get_default_config() -> AppStateConfig<local_adapter::Local> {
+        let database = Self::get_database().await;
+        let entity_queue = Arc::new(Mutex::new(EntityQueue::new(database.clone())));
+        Self {
+            file_system_handler: Self::get_fs_handler_from_config(),
+            database,
+            entity_queue,
+        }
+    }
+}
+
+impl<F> AppStateTrait for AppState<F> where F: Adapter
+{
+    type FsHandler = F;
+
+    fn get_fs_handler(&self) -> Self::FsHandler { self.fs_handler.clone() }
+    fn get_db(&self) -> DatabaseConnection { self.database.clone() }
+    fn get_entity_queue(&self) -> Arc<Mutex<EntityQueue>> { self.entity_queue.clone() }
+    fn get_scheduler(&self) -> Scheduler { self.scheduler.clone() }
+}
+
+\end{minted}
+\captionof{listing}{Implementacija dijeljenog globalnog stanja}
+\label{lst:implementacija-dijeljenog-globalnog-stanja}
+
+Zbog jednostavnosti aplikacija koristi jedno globalno stanje, iako axum podržava
+različito stanje za svaki \texttt{Router} objekt. Globalno stanje se sastoji od
+objekta za upravljanje datotekama, te u ovom slučaju stanje koristi implementaciju za
+pristup datotekama na lokalnom računalu tj. pristup datoteka na računalu koje pokreće
+poslužitelj. Stanje se također sastoji od veze s bazom reda čekanja entiteta \texttt{EntityQueue}.
+Red čekanja entiteta će biti detaljnije objašnjen u kasnijem poglavlju, no za sad je samo bitno
+znati da postoji u globalnom stanju i bude dostupan kroz ekstraktore u funkcijama za generiranje
+odgovora na zahtjeve klijenta.
+
+\begin{minted}[samepage]{rust}
+pub async fn upload<F: Adapter>(
+    asset_manager: AssetManager<F>,
+    conn: DbConn,
+    multipart: extract::Multipart,
+) -> Result<Json<UploadResponse>> {
+    let file = UploadedFile::from_multipart(multipart).await?;
+
+    let transaction = conn.begin().await?;
+
+    let asset = asset_manager
+        .create(
+            &transaction,
+            file.name.to_string(),
+            &file.data,
+            AssetType::File,
+        )
+        .await?;
+
+    let thumbnails = if infer::is_image(&file.data) {
+        asset_manager
+            .create_thumbnail_assets(&transaction, &asset, Some(&file.data))
+            .await?
+    } else { vec![] };
+
+    transaction.commit().await?;
+
+    Ok(Json(UploadResponse {
+        id: asset.id,
+        thumbnails: thumbnails
+            .into_iter()
+            .map(|t| gen_partial_asset_url(&t.name))
+            .collect(),
+        url: gen_partial_asset_url(&asset.name),
+        filename: asset.name,
+        original_filename: asset.original_filename,
+    }))
+}
+\end{minted}
+\captionof{listing}{Implementacija upload funkcije za učitavanje datoteka na poslužitelja}
+\label{lst:implementacija-upload-funkcije-za-ucitavanje-datoteka-na-posluzitelj}
+
+Isječak \ref{lst:implementacija-dijeljenog-globalnog-stanja}
+prikazuje cijelu implementaciju funkcije za učitavanje datoteke s klijenta na poslužitelja.
+U isječku \ref{lst:implementacija-dijeljenog-globalnog-stanja} 
+definirano je definirana struktura globalnog stanja koje aplikacija koristi, a u ovoj funkciji
+se koriste dva objekta iz izvedena iz tog stanja. Ti objekti su \texttt{AssetManager<F>} i
+\texttt{DbConn}, dok axum pruža implementaciju za \texttt{extract::Multipart}.
+Funkciju u ni jednom trenutku ne pozivamo ručno, već kroz registraciju rute i korištenjem
+rust kompajlera axum generira poziv na definiranu funkciju s točnim parametrima.
+To radi na način da svi parametri funkcije moraju implementirati trait \texttt{FromRequestParts},
+što omogućava axum-u mogućnost izvlačenja, postavljanja i prilagođavanje parametara.
+
+Nadalje u funkciji se axum-ov ekstraktor \texttt{extract::Multipart} koristi za dobivanje podataka
+o datoteci koja se šalje poslužitelju, nakon izvlačenja podataka pokreće se transakcija na razini
+baze podataka. Transakcija osigurava da će se u bazu zapisati podaci o učitanom dokumentu samo
+ako sve prođe bez greške. Ako se u bilo kojem trenutku kod pisanja podataka u bazu ili kasnijeg
+generiranja sličica originalne datoteke dogodi greška od koje se aplikacija ne može oporaviti,
+transkacija će biti obustavljena i podaci neće biti zapisani u bazu podataka.
+Kod završetka funkcije generira se odgovor koji se šalje klijentu. Odgovor je u JSON formatu,
+format je vidljiv kroz tip podataka koji funkcija vraća \texttt{Json<UploadResponse>}.
+
+\begin{minted}[samepage]{rust}
+pub struct DbConn(DatabaseConnection);
+impl<S> FromRequestParts<S> for DbConn
+where
+    S: AppStateTrait,
+{
+    type Rejection = Error;
+
+    async fn from_request_parts(
+        _parts: &mut Parts,
+        state: &S,
+    ) -> core::result::Result<Self, Self::Rejection> {
+        Ok(state.get_db().into())
+    }
+}
+\end{minted}
+\captionof{listing}{Implementacija ekstraktora za vezu s bazom podataka}
+\label{lst:implementacija-ekstraktora-za-vezu-s-bazom-podataka}
+
+Isječak iznad prikazuje implementaciju traita \texttt{FromRequestParts} koji omogućava
+axum-u, te na kraju programeru da koristi prilagođene ekstraktore u funkcijama za generiranje
+odgovora na klijentove zahtjeve. U isječku je definirano da varijabla \texttt{state} mora implementirati
+\texttt{AppStateTrait} (implementacija vidljiva u isječku \ref{lst:implementacija-dijeljenog-globalnog-stanja})
+što garantira da varijabla \texttt{state} ima metodu \texttt{get\_db} i može kreirati vezu s bazom podataka.
+Tu vezu dalje axum može proslijediti u funkcije koje koriste ekstraktor \texttt{DbConn}.
+
 \subsection{Socketioxie}
 \label{section:socketioxie}
 
