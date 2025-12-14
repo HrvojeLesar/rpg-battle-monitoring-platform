@@ -1060,6 +1060,8 @@ spajanje s bazom podataka, pohranjivanje podataka o igrama, te upravljanje i
 serviranje slika koje klijenti pohrane za neku igru. Kroz nekoliko primjera koda
 ćemo proči glavne značajke axum-a i način na koji se koristi kroz aplikaciju.
 
+\begin{figure}[H]
+\centering
 \begin{minted}[samepage]{rust}
 pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
     axum::Router::new()
@@ -1076,6 +1078,7 @@ pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
 \end{minted}
 \captionof{listing}{Kreiranje axum ruta za učitavanje i serviranje slika}
 \label{lst:kreiranje-axum-ruta-za-ucitavanje-i-serviranje-slika}
+\end{figure}
 
 U isječku koda \ref{lst:kreiranje-axum-ruta-za-ucitavanje-i-serviranje-slika}
 je prikazana funkcija koja kreira axum \texttt{Router} objekt s globalnim stanjem aplikacije
@@ -1090,6 +1093,8 @@ funkcijama koje generiraju odgovor klijentu pristup tome stanju, na primjer stan
 može sadržavati vezu na bazu podataka. U slijedećem isječku je prikazana struktura
 globalnog dijeljenog stanja.
 
+\begin{figure}[H]
+\centering
 \begin{minted}[samepage]{rust}
 pub struct AppStateConfig<F>
 where
@@ -1125,6 +1130,7 @@ impl<F> AppStateTrait for AppState<F> where F: Adapter
 \end{minted}
 \captionof{listing}{Implementacija dijeljenog globalnog stanja}
 \label{lst:implementacija-dijeljenog-globalnog-stanja}
+\end{figure}
 
 Zbog jednostavnosti aplikacija koristi jedno globalno stanje, iako axum podržava
 različito stanje za svaki \texttt{Router} objekt. Globalno stanje se sastoji od
@@ -1135,6 +1141,8 @@ Red čekanja entiteta će biti detaljnije objašnjen u kasnijem poglavlju, no za
 znati da postoji u globalnom stanju i bude dostupan kroz ekstraktore u funkcijama za generiranje
 odgovora na zahtjeve klijenta.
 
+\begin{figure}[H]
+\centering
 \begin{minted}[samepage]{rust}
 pub async fn upload<F: Adapter>(
     asset_manager: AssetManager<F>,
@@ -1176,8 +1184,9 @@ pub async fn upload<F: Adapter>(
 \end{minted}
 \captionof{listing}{Implementacija upload funkcije za učitavanje datoteka na poslužitelja}
 \label{lst:implementacija-upload-funkcije-za-ucitavanje-datoteka-na-posluzitelj}
+\end{figure}
 
-Isječak \ref{lst:implementacija-dijeljenog-globalnog-stanja}
+Isječak \ref{lst:implementacija-upload-funkcije-za-ucitavanje-datoteka-na-posluzitelj}
 prikazuje cijelu implementaciju funkcije za učitavanje datoteke s klijenta na poslužitelja.
 U isječku \ref{lst:implementacija-dijeljenog-globalnog-stanja} 
 definirano je definirana struktura globalnog stanja koje aplikacija koristi, a u ovoj funkciji
@@ -1197,6 +1206,8 @@ transkacija će biti obustavljena i podaci neće biti zapisani u bazu podataka.
 Kod završetka funkcije generira se odgovor koji se šalje klijentu. Odgovor je u JSON formatu,
 format je vidljiv kroz tip podataka koji funkcija vraća \texttt{Json<UploadResponse>}.
 
+\begin{figure}[H]
+\centering
 \begin{minted}[samepage]{rust}
 pub struct DbConn(DatabaseConnection);
 impl<S> FromRequestParts<S> for DbConn
@@ -1215,6 +1226,7 @@ where
 \end{minted}
 \captionof{listing}{Implementacija ekstraktora za vezu s bazom podataka}
 \label{lst:implementacija-ekstraktora-za-vezu-s-bazom-podataka}
+\end{figure}
 
 Isječak iznad prikazuje implementaciju traita \texttt{FromRequestParts} koji omogućava
 axum-u, te na kraju programeru da koristi prilagođene ekstraktore u funkcijama za generiranje
@@ -1223,17 +1235,102 @@ odgovora na klijentove zahtjeve. U isječku je definirano da varijabla \texttt{s
 što garantira da varijabla \texttt{state} ima metodu \texttt{get\_db} i može kreirati vezu s bazom podataka.
 Tu vezu dalje axum može proslijediti u funkcije koje koriste ekstraktor \texttt{DbConn}.
 
-\subsection{Socketioxie}
+\subsection{Socketioxide i Socket.IO}
 \label{section:socketioxie}
 
-\subsection{Sqlite}
-\label{section:sqlite}
+Socketioxide je implementacija socket.io poslužitelja \cite{socketioxide} u rust-u. 
+Biblioteka je prigodna za aplikaciju jer ima direktnu integraciju s axum-om.
+Socket.IO je biblioteka koja omogućava koja omogućuje događanjima vođenu dvosmjernu komunikaciju u stvarnom
+vremenu između web klijenata, obično web preglednika i poslužitelja. 
+Namijenjen je aplikacijama koje zahtijevaju trenutno slanje podataka između klijenta i
+poslužitelja, s minimalnim kašnjenjem.
+Za potrebe aplikacije socket.io je korišten za uspostavljanje websocket veze između
+klijenata i poslužitelja, te za prosljeđivanje podataka s jednog klijenta na drugi,
+bez da ti klijenti moraju biti direktno povezani jedni s drugima.
 
-\subsection{Mrežna komunikacija}
-\label{section:mrezna-komunikacija}
+Komunikacija kroz socket.io je bazirana na slanju događaja između klijenta i poslužitelja.
+Da bi se neki dio koda izvršio primitkom određenog događaja, klijent ili poslužitelj 
+trebaju imati registriran slušatelj (engl. \textit{listener}) za taj događaj.
+Na primjer, u isječku koda \ref{lst:postavljanje-socketioxide-poslužitelja-kao-axum-rutu}
+postoji linija \texttt{socket.on(JOIN\_EVENT, join\_handler::<T>);} koja označava da će
+poslužitelj reagirati na događaj \texttt{JOIN\_EVENT} koji dobije od klijenta.
+
+Isječak koda ispod prikazuje način na koji se socketioxide integrira s
+axum-om, kako se kreira namespace i ruta na koji se klijenti mogu spajati,
+te dodatne postavke vezane za spajanje i održavanje veze s klijentom, također
+opet je vidljivo globalno stanje aplikacije \texttt{AppStateTrait} koje se prosljeđuje
+u socketioxide kontekst kako bi i socketioxide imao pristup globalnom stanju aplikacije,
+u poglavlju \ref{section:mrezna-komunikacija} je
+konkretnije objašnjeno gdje se, u ovom kontekstu, globalno stanje koristi.
+Prije registracije nove rute potrebno je kreirati i konfigurirati socketioxide uslugu koja
+se može proslijediti u rutu. 
+Usluga ima postavljeno na šezdeset sekundi vremena čekanja za \texttt{ping} i \texttt{ack}
+događanja. Ovo su posebna događanja koja socketioxide koristi za provjeru veze s klijentom
+i uspješno dostavljenih poruka/događaja.
+Poslužitelj u nekom intervalu šalje ping događaj klijentu, te klijent ima šezdeset
+sekundi za poslati pong odgovor, u suprotnom veza s klijentom bude isključena.
+Na sličan način funkcionira ack događaj, kod ovog događaja klijent ima određeno vrijeme
+za slanje odgovora primitka nekog događaja od poslužitelja. 
+Ovim mehanizmima socket.io garantira da su klijenti aktivni, te ako nisu može isključiti
+vezu s njima i obustaviti slanje događaja prema neaktivnim klijentima.
+
+\texttt{io.ns("/", on\_connect::<T>);} definira da će se pozvati \texttt{on\_connect} funkcija
+kad se klijent spoji na namespace \texttt{/}. Socket.io koristi namespace kao jedan od načina
+za grupiranje povezanih klijenata i odabir klijenti kojima će se slati događaji, drugi način su
+sobe, poslužitelj odlučuje ako i u koju sobu će pridružiti klijenta. Sobe su koncept jedino
+dostupan poslužitelju, klijenti nemaju pristup popisu soba kojima su pridruženi.
+Spajanjem klijenta poziva se funkcija \texttt{on\_connect} koja služi da se povezanom klijentu
+registrira povratni poziv funkcije u slučaju ako se klijent isključi te postavlja vezu u
+određeno stanje. Drugi registrirani povratni poziv funkcije se koristi za povezivanje klijenta
+u određenu sobu i slanje podataka o igri tom klijentu, te povezivanje tog klijenta s 
+drugima u istoj sobi. Sve dok klijent ne pošalje odgovarajući \texttt{JOIN\_EVENT} događaj
+neće primati nikakve događaje od poslužitelja, ni poslužitelj neće primati nikakve druge
+događaje od klijenta. Više o povezivanju između klijenata i poslužitelja u poglavlju \ref{section:mrezna-komunikacija}.
+
+\begin{minted}[samepage]{rust}
+pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
+    let (service, io) = SocketIoBuilder::new()
+        .with_state(state.clone())
+        .ping_timeout(Duration::from_secs(60))
+        .ack_timeout(Duration::from_secs(60))
+        .connect_timeout(Duration::from_secs(60))
+        .build_svc();
+
+    io.ns("/", on_connect::<T>);
+
+    axum::Router::new().route_service(
+        "/socket.io/",
+        ServiceBuilder::new()
+            .layer(CorsLayer::permissive())
+            .service(service),
+    )
+}
+
+pub fn on_connect<T: AppStateTrait>(socket: SocketRef) {
+    let socket_clone = socket.clone();
+    socket.on_disconnect(move |reason: DisconnectReason| {
+        socket_clone.extensions.remove::<JoinedFlag>();
+    });
+
+    socket.on(JOIN_EVENT, join_handler::<T>);
+}
+
+\end{minted}
+\begin{figure}[H]
+\centering
+\captionof{listing}{Postavljanje socketioxide poslužitelja kao axum rutu}
+\label{lst:postavljanje-socketioxide-poslužitelja-kao-axum-rutu}
+\end{figure}
+
+\subsection{Baza podataka}
+\label{section:baza-podataka}
+
 
 \subsection{Endpoints}
 \label{section:endpoints}
+
+\subsection{Mrežna komunikacija}
+\label{section:mrezna-komunikacija}
 
 Naivna implementacija mrežne komunikacije između klijenata
 
@@ -1276,6 +1373,7 @@ Navesti da budu točni primjeri kasnije u radu.
 \subsection{React.js}
 \subsection{Jotai}
 \subsection{Socket.io}
+\label{section:socket-io-klijent}
 \subsection{Mantine}
 
 \section{Primjer borbe}
