@@ -757,7 +757,7 @@ izraz njihovih fizičkih dimenzija.
 \begin{table}[H]
     \centering
     \caption{Kategorije veličine}
-    \begin{tabularx}{0.66\linewidth}{|X|X|X|X|}
+    \begin{tabularx}{0.66\linewidth}{|X|X|}
         \hline
         \textbf{Veličina} & \textbf{Prostor} \\ \hline
         Sićušan & 2.5 sa 2.5 stopa \\ \hline
@@ -1082,7 +1082,7 @@ pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
 
 U isječku koda \ref{lst:kreiranje-axum-ruta-za-ucitavanje-i-serviranje-slika}
 je prikazana funkcija koja kreira axum \texttt{Router} objekt s globalnim stanjem aplikacije
-\texttt{state}. U funkciji su definirane tri različite rute, detalji o rutama su poglavlju \ref{section:endpoints}.
+\texttt{state}. U funkciji su definirane tri različite rute, detalji o rutama su u poglavlju \ref{section:endpoints}.
 Funkcija \texttt{route} kao argumente prima putanju na koju će web poslužitelj reagirati ako
 je zatražena od klijenta, drugi argument registrira http metodu i funkciju koja se poziva za 
 generiranje odgovora na klijentov zahtjev. Na primjer \texttt{route("/assets/upload", routing::post(upload::upload))}
@@ -1384,7 +1384,10 @@ ima relaciju na \texttt{assets} tablicu, jedan red u \textttt{thumbnails} tablic
 sličicu koja je generirana za originalnu učitanu sliku.
 Tablica \texttt{game} samo zadrži naziv igre i sustav koji igra koristi, dok \texttt{entity}
 tablica sadrži sve entitete vezane za neku igru i sve njihove podatke. Podaci i vrsta entiteta
-definirana je od strane klijenta tj. implementacije igre.
+definirana je od strane klijenta tj. implementacije igre, jednako tako klijent je odgovoran za
+spremanje id-a asset-a u neki od podataka u entitetu, poslužitelj nema način za pregled svih
+asset-a i provjeru kojoj igri pripadaju.
+
 
 
 \begin{figure}[H]
@@ -1394,8 +1397,36 @@ definirana je od strane klijenta tj. implementacije igre.
     \label{fig:shema-baze-podataka}
 \end{figure}
 
-\subsection{Endpoints}
+\subsection{API krajnje točke}
 \label{section:endpoints}
+
+U tablici ispod su definirane sve krajnje točke kojima klijenti imaju pristup i na
+koje poslužitelj odgovara. Većina komunikacije između poslužitelja i klijenta odvija se
+kroz websocket. Može se primijetiti da u popisu fali krajnja točka za
+pridruživanje igri, fali iz razloga što se pridruživanje izvršava kroz websocket
+te ima nekoliko koraka koje klijent mora odraditi da bi se uspješno pridružio igri.
+Više o načinu pridruživanja u poglavlju \ref{section:mrezna-komunikacija}.
+
+\begin{table}[H]
+    \centering
+    \caption{API krajnje točke [autorski rad]}
+    \begin{tabularx}{1\linewidth}{|X|c|X|}
+        \hline
+        \textbf{Ruta} & \textbf{HTTP Metoda} & \textbf{Opis} \\ \hline
+        /public/\{path\} & GET & Omogućava dohvaćanje datoteka koji su dostupni javnosti, 
+        na primjer ikonica ili css stilova \\ \hline
+        /socket.io/ & GET & Služi za povezivanje socket.io klijenata \\ \hline
+        /assets/upload & POST & Omogućuje učitavanje datoteka na poslužitelj.
+        Poslužitelj odgovara s id-em datoteke linkovima i id-evima sličica ukoliko
+        je učitana datoteka slika \\ \hline
+        /assets/thumbnails/\{image\_id\} & GET & Dohvaća sličicu definiranu parametrom \texttt{image\_id} \\ \hline
+        /assets/\{filename\} & GET & Dohvaća dokument definiran parametrom \texttt{filename} \\ \hline
+        /game/list & GET & U \texttt{JSON} formatu šalje popis svih dostupnih sesija igre \\ \hline
+        /game/create & POST & Kreira novu sesiju igre \\ \hline
+    \end{tabularx}
+    \\[10pt]
+    \label{tab:api-krajnje-tocke}
+\end{table}
 
 \subsection{Mrežna komunikacija}
 \label{section:mrezna-komunikacija}
