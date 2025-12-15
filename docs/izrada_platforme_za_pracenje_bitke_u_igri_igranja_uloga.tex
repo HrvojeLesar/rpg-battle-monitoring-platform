@@ -1261,7 +1261,7 @@ te dodatne postavke vezane za spajanje i održavanje veze s klijentom, također
 opet je vidljivo globalno stanje aplikacije \texttt{AppStateTrait} koje se prosljeđuje
 u socketioxide kontekst kako bi i socketioxide imao pristup globalnom stanju aplikacije,
 u poglavlju \ref{section:mrezna-komunikacija} je
-konkretnije objašnjeno gdje se, u ovom kontekstu, globalno stanje koristi.
+konkretno objašnjeno gdje se, u ovom kontekstu, globalno stanje koristi.
 Prije registracije nove rute potrebno je kreirati i konfigurirati socketioxide uslugu koja
 se može proslijediti u rutu. 
 Usluga ima postavljeno na šezdeset sekundi vremena čekanja za \texttt{ping} i \texttt{ack}
@@ -1296,7 +1296,7 @@ pub fn get_router<T: AppStateTrait>(state: T) -> axum::Router {
         .connect_timeout(Duration::from_secs(60))
         .build_svc();
 
-    io.ns("/", on_connect::<T>);
+    io.ns("/", on_connect::<T>.with(auth_middleware::<T>));
 
     axum::Router::new().route_service(
         "/socket.io/",
@@ -1431,11 +1431,114 @@ Više o načinu pridruživanja u poglavlju \ref{section:mrezna-komunikacija}.
 \subsection{Mrežna komunikacija}
 \label{section:mrezna-komunikacija}
 
-Naivna implementacija mrežne komunikacije između klijenata
+Mrežna komunikacija između klijenta i poslužitelja se odvija na dva načina.
+Prvi je kroz API krajnje točke, definirane u poglavlju \ref{section:endpoints},
+drugi je kroz websocket koristeći socket.io. 
+U isječku koda \ref{lst:postavljanje-socketioxide-poslužitelja-kao-axum-rutu} 
+je vidljivo korištenje funkcije \texttt{.with(auth:middleware::<T>)}, da bi se klijent
+uspješno povezao na websocket mora poslati određeni sadržaj pri povezivanju na \texttt{/socket.io/}
+krajnju točku. Sadržaj koji klijent mora poslati je \texttt{id} igre u koju se želi pridružiti.
+Poslužitelj će tada obaviti autentifikaciju i korištenjem \texttt{socket.extension.insert(auth);}
+zapisati podatke na instancu websocketa kako bi se podaci mogli kasnije koristiti, te da bi poslužitelj
+imao uvid u koju igru je klijent pridružen.
 
-\subsection{Mrežne tehnologije u web preglednicima}
-\label{section:mrezne-tehnologije-u-web-preglednicima}
+\begin{minted}[samepage]{rust}
+fn auth_middleware<T: AppStateTrait>(
+    socket: SocketRef,
+    State(app_state): State<T>,
+    Data(auth): Data<WebsocketAuthMessage>,
+) -> Result<(), websocket_auth::Error> {
+    match auth.authenticate(&app_state) {
+        Ok(()) => {
+            socket.extensions.insert(auth);
+            Ok(())
+        }
+        Err(e) => Err(e),
+    }
+}
+\end{minted}
+\begin{figure}[H]
+\centering
+\captionof{listing}{Autentifikacije websocket klijenta}
+\label{lst:autentifikacija-websocket-klijenta}
+\end{figure}
 
+U poglavlju \ref{section:socketioxie}
+je definirano da nakon uspješnog spajanja klijenta, da će poslužitelj samo reagirati
+na događaja odspajanja klijenta s veze i događaj \texttt{JOIN\_EVENT}.
+Kad je klijent spreman može poslati \texttt{JOIN\_EVENT} događaj na poslužitelj.
+Poslužitelj će u trenutku primitka ovog događaja početi proceduru za pridruživanje klijenta u igru.
+U isječku koda \ref{lst:procedura-za-pridruzivanje} je vidljiva cijela procedura pridruživanja klijenta
+u igru, započinje s čitanjem id-a igre kojoj se klijent pridružuje. Podatak je isčitan s websocket 
+instance koja je u trenutnu autentifikacije imala postavljene podatke o igri.
+Nakon toga poslužitelj pridružuje websocket u sobu. Sobe se koriste za slanje podataka između klijenata
+koji su povezani u istu igru. Također odmah nakon pridruživanja sobe, poslužitelj registrira
+slušatelj za događaj \texttt{ACTION} na websocket.
+U isječku je vidljivo ponovno korištenje \texttt{AppStateTrait} globalnog stanja za dohvaćanje reda 
+čekanja entiteta i pokretanje transakcije u bazi podataka.
+Red čekanja je korišten za periodično spremanje entiteta u bazu podataka, te kod svakog pridruživanja
+se dohvaća i sprema u bazu kako bi kod dohvaćanja entiteta svi bili zapisani u bazi podataka.
+Nakon dohvaćanja svih entiteta iz baze, poslužitelj u manjim dijelovima šalje događaje \texttt{JOIN\_EVENT}
+klijentu s podacima o entitetima i stanju slanja. Klijent je odgovoran za pretvaranje entiteta u objekte
+koje razumije i može koristiti tokom igre.
+Po završetku slanja entiteta poslužitelj šalje klijentu događaj \texttt{JOIN\_FINISHED\_EVENT} što
+označava da su svi entiteti uspješno poslani, te klijent ima sve podatke za pridruživanje i sinkronizaciju
+igre.
+
+\begin{minted}[samepage]{rust}
+#[tracing::instrument(skip(socket, app_state))]
+async fn join_handler<T: AppStateTrait>(
+    socket: SocketRef,
+    State(app_state): State<T>,
+    Extension(auth): Extension<WebsocketAuthMessage>,
+) {
+    let game_id = auth.game;
+    let room = format!("room-{game_id}");
+
+    socket.join(room);
+    socket.on(ACTION, action_handler::<T>);
+
+    let queue = app_state.get_entity_queue();
+    {
+        let mut lock = queue.lock().await;
+        if let Some(handle) = lock.flush().await { handle.await.ok(); }
+    }
+
+    tracing::debug!("Starting database entity fetch");
+    let db = app_state.get_db();
+    let transaction = db.begin().await?;
+
+    let entity_manager = EntityManager::new();
+
+    let entities = entity_manager.load_entities(&transaction, game_id).await?;
+
+    let total = entities.len();
+    let mut sent = 0;
+    tracing::debug!("Sending entities in {} chunks", total / CHUNK_SIZE);
+    entities.chunks(CHUNK_SIZE).for_each(|chunk| {
+        sent += chunk.len();
+        socket
+            .emit(JOIN_EVENT, &serde_json::json!({
+                    "progress": {
+                        "sent": sent,
+                        "total": total
+                    },
+                    "data": chunk
+                }),
+            )
+            .ok();
+    });
+
+    socket.emit(JOIN_FINISHED_EVENT, &()).ok();
+}
+\end{minted}
+\begin{figure}[H]
+\centering
+\captionof{listing}{Procedura za pridruživanje}
+\label{lst:procedura-za-pridruzivanje}
+\end{figure}
+
+Pridruženi klijenti komuniciraju kroz poslužitelja slanjem događaja \texttt{ACTION}.
 
 \section{Klijent}
 \label{section:klijent}
