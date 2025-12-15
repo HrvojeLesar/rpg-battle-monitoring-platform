@@ -1325,6 +1325,74 @@ pub fn on_connect<T: AppStateTrait>(socket: SocketRef) {
 \subsection{Baza podataka}
 \label{section:baza-podataka}
 
+Baze podataka koriste se u aplikacijama kako bi osigurale pouzda, trajan i strukturiran
+način pohrane informacija. Omogućuju organiziranje podataka u tablice i relacije, što olakšava
+upravljanje složenim skupovima podataka. Osim pohrane, baze podataka ključne su za
+očuvanje integriteta podataka putem transakcija, koje osiguravaju da podaci ostanu
+dosljedni čak i u slučaju kvarova sustava. Također omogućavaju aplikacijama pretraživanje
+i dohvaćanje specifičnih informacija putem upitnih jezika poput SQL-a \cite{kreibich2010using}.
+
+U aplikaciji se koristi SQLite za pohranu podataka. SQLite je odabran zbog jednostavnosti
+direktnog ugrađivanja baze podataka u aplikaciju. Za razliku od tradicionalnih baza podataka,
+popust PostgreSQL-a, koji koriste klijent-poslužitelj arhitekturu i zahtjevaju zaseban poslužiteljski
+proces za upravljanje podacima i zahtjevima, SQLite integrira cijeli mehanizam baze podataka izravno
+u aplikaciju. SQLite cijelu bazu podataka pohranjuje u jednu datoteku \cite{kreibich2010using}.
+
+Bez posebne konfiguracije SQLite nije najbolje namijenjen za istovremeno pisanje i čitanje podataka.
+Zato su u slijedećem isječku koda prikazane korištene postavke za SQLite vezu, kako bi se poboljšale
+performanse kod istovremenog pisanja i čitanja za više klijenata.
+\texttt{journal\_mode} je postavljena na \texttt{WAL} kako bi se omogućilo istovremeno čitanje i pisanje,
+\texttt{synchronous} opcija je postavljena na \texttt{NORMAL} kako bi se izbjegao gubitak podataka u
+slučaju da se dogodi neka greška pri pisanju podataka iz write ahead log-a (WAL-a) u bazu.
+Opcija \texttt{busy\_timeout} ima vrijednost od pet sekundi, te ova opcija omogućava bazi
+da pričeka određeno vrijeme prije vraćanja greške u slučaju da pokušava zapisivati u 
+redove zaključane drugom transakcijom. Opcija \texttt{cache\_size} povećava veličinu predmemorije
+i smanjuje broj zapisa koji će se raditi na disk. \texttt{foreign\_keys} uključuje provjeru 
+stranih ključeva na tablicama, bez ove opcije SQLite ne provjerava ako tablica ima relaciju na
+neku drugu tablicu, ni ako je ta relacija validna.
+Postavljanjem \texttt{auto\_vacuum} na \texttt{INCREMENTAL} omogućuje postepeno oslobađanje 
+prostora na disku kako se retci iz baze brišu, umjesto potpunog oslobađanja tijekom
+nekih od operacija nad bazom. Postavljanjem \texttt{temp\_store} na \texttt{MEMORY}
+SQLite će privremene tablice pohraniti u memoriji umjesto spremati ih na disk i kasnije
+odbaciti \cite{sqlitedefaults}.
+
+\begin{minted}[samepage]{rust}
+let pool = db.get_sqlite_connection_pool().clone();
+
+let connect_options = (*pool.connect_options())
+    .clone()
+    .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal)
+    .synchronous(sqlx::sqlite::SqliteSynchronous::Normal)
+    .busy_timeout(std::time::Duration::from_secs(5))
+    .pragma("cache_size", "-20000")
+    .foreign_keys(true)
+    .auto_vacuum(sqlx::sqlite::SqliteAutoVacuum::Incremental)
+    .pragma("temp_store", "MEMORY");
+pool.set_connect_options(connect_options);
+\end{minted}
+\begin{figure}[H]
+\centering
+\captionof{listing}{Postavljene SQLite opcije}
+\label{lst:postavljene-sqlite-opcije}
+\end{figure}
+
+Na slijedećoj slici je prikaz svih tablica i relacija u bazi podataka.
+Baza se sastoji od tablica \texttt{assets}, \texttt{thumbnails}, \texttt{game} i \texttt{entity}.
+Tablica \texttt{assets} definira datoteku učitanu na poslužitelja, ima nekoliko stupaca koji
+opisuju naziv, vrstu datoteke, originalni naziv datoteke. \texttt{Thumbnails} tablica
+ima relaciju na \texttt{assets} tablicu, jedan red u \textttt{thumbnails} tablici predstavlja 
+sličicu koja je generirana za originalnu učitanu sliku.
+Tablica \texttt{game} samo zadrži naziv igre i sustav koji igra koristi, dok \texttt{entity}
+tablica sadrži sve entitete vezane za neku igru i sve njihove podatke. Podaci i vrsta entiteta
+definirana je od strane klijenta tj. implementacije igre.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{slike/db_scheme.png}
+    \caption{Shema baze podataka [autorski rad]}
+    \label{fig:shema-baze-podataka}
+\end{figure}
 
 \subsection{Endpoints}
 \label{section:endpoints}
@@ -1339,6 +1407,7 @@ Naivna implementacija mrežne komunikacije između klijenata
 
 
 \section{Klijent}
+\label{section:klijent}
 
 \subsection{Peer to peer komunikacija}
 \subsection{Stateless \& stateful komunikacija}
@@ -1537,6 +1606,13 @@ Uz svaku preuzetu tvrdnju potrebno je navesti njezin izvor, tj. referencu. Refer
 Ovdje treba sažeto rezimirati najvažnije rezultate razrade teme rada. Potrebno je sažeto opisati što je predmet rada, koje su metode, tehnike, programski alati ili aplikacije korištene u razradi rada te koje su pretpostavke dokazane, a koje opovrgnute. Sadržajno, ono što se u uvodu rada najavljuje i kasnije je obuhvaćeno u samom radu, moralo bi biti opisano u zaključnom dijelu kroz rezultate rada. 
 
 \lipsum[1-2]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%  BIBLIOGRAPHY  %%%%%%%%%%%%%%
+%%%%%%%%%%%  BIBLIOGRAPHY  %%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \printbibliography[title=Popis literature]
 \addcontentsline{toc}{chapter}{Popis literature}
