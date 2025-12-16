@@ -1539,6 +1539,88 @@ async fn join_handler<T: AppStateTrait>(
 \end{figure}
 
 Pridruženi klijenti komuniciraju kroz poslužitelja slanjem događaja \texttt{ACTION}.
+Svi validni \texttt{ACTION} događaju će biti proslijeđeni do klijenata.
+Na slici ispod je prikazan primjer razmjene poruka između klijenata i poslužitelja.
+Na poslužitelja su spojena četri klijenta, klijent 1, 2 i 4 su spojeni u sobu \texttt{room-1}
+dok je klijent 3 spojen u sobu \texttt{room-2}. Klijent 1 pošalje validni događaj prema poslužitelju,
+poslužitelj će taj događaj procesirati te proslijediti događaj ostalim klijentima.
+Poslužitelj odabire primatelje prema sobi kojoj pripada pošiljatelj događaja, pošto u ovom primjeru
+pošiljatelj (Klijent 1) pripada u sobu \texttt{room-1}, događaj je proslijeđen klijentima 2 i 4,
+dok klijent 3 nema uvida da se uopće dogodila bilo kakva razmjena informacija i ne dobiva nikakav događaj.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{slike/razmejna_podataka_izmedu_klijenata.png}
+    \caption{Komunikacija između klijenata [autorski rad]}
+    \label{fig:mrežna-komunikacija-izmedu-klijenata}
+\end{figure}
+
+Isječak koda ispod prikazuje strukturu poruke koja je očekivana.
+Klijent poruku mora poslati u JSON formatu te poruka mora imati definiranu strukturu.
+Mora sadržavati polja \texttt{action} i \texttt{data}. Polje \texttt{action} definira vrstu
+akcije, postoji nekoliko definiranih vrsta \texttt{Update}, \texttt{Create}, \texttt{Delete},
+\texttt{Transitive} i \texttt{Other}. 
+
+Vrste \texttt{Update}, \texttt{Create}, \texttt{Delete}
+osim što klijentima označavaju da se neki entitet promijenio, poslužitelju daju do znanja
+da za entitete u \texttt{data} polju potrebno izvršiti određenu radnju, bilo to kreirati ih i 
+spremiti u bazu podataka, ažurirati postojeće vrijednosti ili izbrisati entitete.
+Zadnje dvije vrste \texttt{Transitive} i \texttt{Other} su vrste poruka koje su uvijek poslane
+samo do drugih klijenata, poslužitelj ne radi dodatno procesiranje ovih poruka. 
+\texttt{Transitive} je namijenjen porukama koje nemaju potrebe za poslužiteljom i ne ažuriraju
+podatke vezane uz igru, na primjer jedan klijent može poslati poruku da se drugom klijentu na
+ekranu otvori novi prozor. \texttt{Other} je vrlo slična vrsta \texttt{Transitive} s razlikom da
+klijent na ovu vrstu poruke ima mogućnost pridodati proizvoljne podatke, te ti podaci ne podliježu
+nekoj određenoj strukturi, definirani su samo kod klijenta.
+
+Funkcija polja \texttt{data} je slanje podataka o entitetima nad kojima se vrši neka radnja.
+Cijela struktura jednog entiteta definirana je od strane klijenta, no poslužitelj treba nekoliko
+podataka o entitetu kako bi ga mogao pohranjivati te sinkronizirati podatke između klijenata.
+Entiteti su definirani kroz nekoliko polja \texttt{uid}, \texttt{kind}, \texttt{timestamp} i
+\texttt{other\_values}. Polje \texttt{other\_values} služi kao rezervirano mjesto za bilo kakve
+dodatne podatke vezane uz entitet. Polje \texttt{uid} definira jedinstveni identifikator entiteta,
+odgovornost je klijenta da sve identifikatore zadrži jedinstvenima. \texttt{Kind} služi
+kako bi klijent mogao razlikovati između različitih vrsta entiteta koje kreira, u poglavlju
+\ref{section:klijent} je objašnjen način pretvaranja entiteta iz JSON
+formata u entitet objekt koji igra može koristiti.
+Zadnje definirano polje je \texttt{timestamp}, koje služi za sinkronizaciju podataka.
+Mrežna komunikacija je bazirana na mreži ravnopravnih čvorova, te svaki klijent
+ima odgovornost postaviti \texttt{timestamp} na vrijeme u milisekundama kad je
+zadnje napravljena neka promjena na entitetu. Poslužitelj koristi \texttt{timestamp} za
+identifikaciju promjena na entitetima i odlučivanja koje promjene su ažurne, a koje
+može odbaciti.
+
+\begin{minted}[samepage]{rust}
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum Action {
+    Update,
+    Create,
+    Delete,
+    Transitive,
+    Other(serde_json::Value),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClientsideEntity {
+    pub uid: UId,
+    pub kind: EntityKind,
+    pub timestamp: UtcTimestamp,
+    #[serde(flatten)]
+    pub other_values: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ActionMessage {
+    action: Action,
+    data: Vec<ClientsideEntity>,
+}
+\end{minted}
+\begin{figure}[H]
+\centering
+\captionof{listing}{Struktura Action poruke}
+\label{lst:struktura-action-poruke}
+\end{figure}
 
 \section{Klijent}
 \label{section:klijent}
