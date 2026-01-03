@@ -919,10 +919,10 @@ poslužitelja s ostalim klijentima te prima promjene o stanju igre od poslužite
 
 Cijela aplikacija je umrežena, sve promjene koje se događaju kod jednog klijenta budu
 sinkronizirane i prikazane kod ostalih klijenata koji su povezani u istu sesiju.
-Aplikacija koristi ravnopravne čvorove (engl. \textit{peer-to-peer})
-za umrežavanje zbog jednostavnosti implementacije i
-veće fleksibilnosti, prije implementacije u obzir je došlo umrežavanje s autoritativnim poslužiteljem,
-više o oba pristupa i zašto je odabrano peer-to-peer umrežavanje u poglavlju \ref{section:mrezna-komunikacija}.
+% Aplikacija koristi ravnopravne čvorove (engl. \textit{peer-to-peer})
+% za umrežavanje zbog jednostavnosti implementacije i
+% veće fleksibilnosti, prije implementacije u obzir je došlo umrežavanje s autoritativnim poslužiteljem,
+% više o oba pristupa i zašto je odabrano peer-to-peer umrežavanje u poglavlju \ref{section:mrezna-komunikacija}.
 
 \section{Web aplikacije}
 \label{section:web-aplikacije}
@@ -955,9 +955,9 @@ upravljanje transakcijama \cite{casteleyn2009engineering}.
 \section{Poslužitelj}
 \label{section:posluzitelj}
 
-U ovom potpoglavlju prolazimo kroz implementaciju poslužitelja, tehnologije koje su
-korištene i odluke koje su donesene vezane uz dizajn cijele aplikacije, kao što je
-odluka za implementaciju peer-to-peer umrežavanja umjesto autoritativnog poslužitelja.
+% U ovom potpoglavlju prolazimo kroz implementaciju poslužitelja, tehnologije koje su
+% korištene i odluke koje su donesene vezane uz dizajn cijele aplikacije, kao što je
+% odluka za implementaciju peer-to-peer umrežavanja umjesto autoritativnog poslužitelja.
 
 Poslužitelj je implementiran u programskom jeziku rust. Rust je sistemski programski jezik
 sa statičnim tipovima podataka, dizajniran za performanse i sigurnost. 
@@ -1616,24 +1616,74 @@ pub struct ActionMessage {
 \section{Klijent}
 \label{section:klijent}
 
-\subsection{Peer to peer komunikacija}
-\subsection{Stateless \& stateful komunikacija}
+Klijent je drugi glavni dio cijele aplikacije. 
+Pruža korisnicima korisničko sučelje za pračenje bitke na više različitih scena
+te uvid u trenutna događanja u igri.
+Implementiran je korištenjem web tehnologija i pokreće se u web pregledniku kroz web
+stranicu ili kroz tauri okvir kao zasebna desktop aplikacija.
 
 \subsection{Pixi.js}
 \label{section:pixijs}
 
+Pixi.js je biblioteka za 2D renderiranje izgrađena na WebGL i WebGPU tehnologijama.
+Omogućava razvijanje grafičkih aplikacija na web-u te je pogodna za izradu igara,
+interaktivnih oglasa, edukacijskih materijala i vizualizaciju podataka \cite{pixijs}.
+U aplikaciji se pixi.js koristi za prikaz različitih scena s poljima, pozadinskim grafikama,
+likovima, vizualizaciju poteza te bilo kakvih drugih grafičkih elemenata.
+
+Arhitektura pixi.js je podijeljena u nekoliko glavnih komponenata \cite{pixijs-architecture}:
+\begin{itemize}
+    \item Komponenta za renderiranje: prikazuje i crta scenski graf na ekran.
+    \item Kontejneri: Glavni objekti na sceni kroz koje se kreira scenski graf tj.
+        stablo objekata koji se mogu prikazati, objekti kao što su tekst, spriteovi i druga grafika.
+    \item Slikovno/zvučni elementi: sustav za asinkrono učitavanje i dekodiranje resursa poput 
+        slikovnih i zvučnih datoteka.
+    \item Ticker: periodični povratni pozivi na temeljeni na vremenskom intervalu.
+        Korisni za ažuriranje podataka, grafike ovisno o vremenu ili nekoj
+        promjeni podataka kroz vrijeme.
+    \item Događanja: interaktivnost kontejner objekata kroz emitiranje i reagiranje na
+        događaje, npr. klik na objekt ili prolaz pokazivača miša preko objekta.
+\end{itemize}
+
+Kombinacijom glavnih komponenata moguće je implementirati sve dijelove potrebne za aplikaciju.
+Na primjer, u aplikaciji se kontejneri koriste za prikaz scena i crtanje polja na ekran,
+slikovno/zvučni elementi za učitavanja slika i postavljanje slika u kontejnere, ticker za periodično
+crtanje obruba oko kontejnera te postepenu promjenu boje obruba, događanja su korištena i omogućavaju korisniku
+premještanje pozicije kontejnera i promjenu veličine određenih kontejnera. 
+Više detalja o implementaciji i korištenju svakih od navedenih elemenata u poglavlju \ref{section:sustav-scena}.
+
 \subsection{React.js}
 \label{section:reactjs}
 
-\subsection{Mantine}
-\label{section:mantine}
+React je javascript biblioteka namijenjena za izgradnju korisničkih sučelja u web aplikacijama \cite{reactjs}.
+Najčešće korištena za aplikacije s jednom stranicom, ovakve aplikacije uglavnom koriste 
+različite implementacije usmjerivača kako bi jedna web stranica imala više različitih stranica.
+Arhitektura react-a je temeljena na komponentama, one su neovisni, ponovno upotrebljivi građevni
+blokovi korisničkog sučelja. Komponente upravljaju vlastitim internim podacima te promjenom podataka u komponenti
+će react ponovno prikazati komponentu s novim podacima, na ovakav način react omogućuje ažurno korisničko
+sučelje \cite{reactjs}.
 
-\subsection{Jotai}
-\label{section:jotai}
+Pošto je react samo biblioteka za izradu korisničkih sučelja, ne grupira i ne dolazi s unaprijed kreiranim komponentama.
+Kako bi izbjegli potrebu za kreiranjem svake komponente, na primjer jednostavne tipke ili prozora za odabir više elemenata,
+aplikacija koristi biblioteku mantine. Mantine je biblioteka koja implementira veliki broj react komponenata i pruža
+unaprijed stilizirane i funkcionalne komponente koje se mogu dodatno prilagođavati.
+
+Još jedna biblioteka koja se koristi u aplikaciji je jotai. 
+Jotai je biblioteka za atomski pristup i upravljanje globalnim varijablama react stanja.
+Globalno stanje se izrađuje kroz kombinaciju atoma i promjene te potrebni prikazi promjena
+su optimizirani na temelju ovisnosti o atomu. Ovakav pristup rješava problem ponovnog i nepotrebnog
+renderiranje react konteksta, smanjuje ili eliminira potrebu za memoizacijom \cite{jotai}.
+U aplikaciji je jotai uglavnom korišten za usklađivanje promjena između korisničkog sučelja i
+pixi.js konteksta, tj. objekata koje pixi.js renderira.
 
 \subsection{Socket.io}
 \label{section:socket-io-klijent}
 
+\subsection{Entiteti}
+\label{section:entiteti}
+
+\subsection{Sustav scena}
+\label{section:sustav-scena}
 \section{Primjer borbe}
 \label{section:primjer-borbe}
 
