@@ -1679,6 +1679,82 @@ pixi.js konteksta, tj. objekata koje pixi.js renderira.
 \subsection{Socket.io}
 \label{section:socket-io-klijent}
 
+Glavnina socket.io funkcionalnosti je već spomenuta u poglavlju \ref{section:socketioxie}
+no ovdje dodatno prolazimo kroz funkciju koju socket.io i websocketi imaju na strani klijenta.
+Glavnu funkciju koju websocket ima na strani klijenta je pretvaranje podataka o entitetima iz JSON
+formata u javascript objekte, ta funkcionalnost je prikazana u isječku koda ispod.
+
+Klasa \texttt{Websocket} sadrži funkcije \texttt{initJoin} i \texttt{initWebsocketListeneres} korištene
+za pokretanje procesa spajanja klijenta s poslužiteljem, prihvaćanja i slanja \texttt{action} događaja.
+Funkcija \texttt{initJoin} definira dvije povratne (engl. \texttt{callback}) funkcije koje se koriste za
+reagiranje klijenta na događaje \texttt{join-finished} i \texttt{join} poslane od strane poslužitelja.
+Pozivanjem funkcije \texttt{initJoin} započinje proces povezivanja s poslužiteljem i dohvaćanja svih
+podataka o igri. Klijent uzastopno prihvaća JSON podatke kroz događaj \texttt{join} te ih sprema u
+red čekanja. Nakon primitka događaja \texttt{join-finished} klijent pokušava pretvoriti sve primljene
+podatke u entitete. Više o entitetima u poglavlju \ref{section:entiteti}.
+Događaj \texttt{join-finished} također zaustavlja klijenta od reagiranja na daljnje \texttt{join} događaje
+iz razloga što je klijent u tom trenutku u potpunosti pridruženi igri i ima sve potrebne podatke za 
+rekonstrukciju stanja igre.
+
+Druga funkcija \texttt{initWebsocketListeners} je korištena za kontinuiranu sinkronizaciju podataka
+tokom igre. Klijent reagira na svaki \texttt{action} događaj i ako je događaj validne strukture
+ažurira, kreira ili briše entitete. Kad događaj definira akciju vrste \texttt{update} klijent će
+pokušati ažurirati postojeće entitete s najnovijim podacima. Entiteti mogu definirati stanje kad
+se primljeni podaci smiju zamijeniti s novim primljenim podacima, no u većini slučajeva to je
+samo provjera ako je trenutni timestamp entiteta manji od timestamp vrijednosti dobivene iz
+događaja. Akcije \texttt{create} i \texttt{delete} dodaju entitete u red čekanja i odmah isprazne
+određeni red čekanja tj. \texttt{create} kreira sve novo primljene entitete dok, \texttt{delete}
+obriše sve entitete s klijenta.
+
+
+\begin{minted}[samepage]{typescript}
+export class Websocket {
+    public initJoin() {
+        const join = (joinData: JoinData) => { GBoard.entityRegistry.queue(joinData.data); };
+
+        const joinFinished = () => {
+            this.socket.off("join", join);
+            GBoard.entityRegistry.convertQueuedEntities();
+        };
+        this.socket.once("join-finished", joinFinished);
+        this.socket.on("join", join);
+        this.socket.emit("join");
+    }
+
+    public initWebsocketListeners() {
+        this.socket.on("action", (message) => {
+            switch (message.action) {
+                case "update": {
+                    message.data.forEach((data) => {
+                        const entity = GBoard.entityRegistry.entities.get(data.uid);
+                        if (entity && entity.shouldApplyChanges(data)) {
+                            entity.applyUpdateAction(data);
+                        }
+                    });
+                    break;
+                }
+                case "create": {
+                    GBoard.entityRegistry.queue(message.data);
+                    GBoard.entityRegistry.convertQueuedEntities();
+                    break;
+                }
+                case "delete": {
+                    GBoard.entityRegistry.queue(message.data);
+                    GBoard.entityRegistry.removeQueuedEntities();
+                    break;
+                }
+            }
+        });
+    }
+
+}
+\end{minted}
+\begin{figure}[H]
+\centering
+    \captionof{listing}{Pridruživanje igri, primanje i slanje \texttt{action} događaja}
+\label{lst:pridruzivanje-igri-primanje-i-slanje-action-dogadaja}
+\end{figure}
+
 \subsection{Entiteti}
 \label{section:entiteti}
 
