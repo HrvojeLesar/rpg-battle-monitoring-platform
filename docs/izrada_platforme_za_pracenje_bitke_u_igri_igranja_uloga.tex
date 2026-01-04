@@ -1746,7 +1746,6 @@ export class Websocket {
             }
         });
     }
-
 }
 \end{minted}
 \begin{figure}[H]
@@ -1757,6 +1756,95 @@ export class Websocket {
 
 \subsection{Entiteti}
 \label{section:entiteti}
+
+Entiteti su različite vrste objekata kojima klijent upravlja, sadrže podatke o igri i sinkroniziraju
+se između svih povezanih klijenata. Već definirano u poglavlju \ref{section:mrezna-komunikacija},
+entiteti moraju sadržavati polja \texttt{uid}, \texttt{kind}, \texttt{timestamp} da bi se mogli slati drugim
+klijentima. Pošto je klijent odgovoran za generiranje unikatnih vrijednosti \texttt{uid} koristi se dinamično 
+izgenerirani UUID kao vrijednost tog polja za svaki novokreirani entitet.
+Klijent podatke o entitetima prima u JSON formatu preko povezanog websocket-a,
+kako bi mogao pretvoriti dobivene podatke iz \texttt{join}
+ili \texttt{action} događaja u entitet potrebno je registrirati vrstu entiteta u globalnoj instanci klase 
+\texttt{EntityRegistry}. Ova klasa je odgovorna za definiranje vrsta entiteta, način i redoslijed
+kojim se pretvaraju JSON podaci u entitete te za dohvaćanje i spremanje svih korištenih entiteta.
+
+U isječku koda ispod definirano je nekoliko vrsta entiteta koje će sustav poznavati i imati mogućnost pretvoriti
+iz JSON formata u entitete. Kod registracije entiteta potrebno je definirati unikatni naziv entiteta i funkciju
+koja će biti odgovorna za pretvaranje JSON podataka u entitet. Redoslijed registracije je također bitan, pošto
+neki entiteti mogu ovisiti o drugim entitetima. Na primjer \texttt{RpgToken} entitet ovisi o \texttt{RpgTokenData}
+entitetu, kad klijent primi podatke od poslužitelja, može ih dobiti u bilo kakvom redoslijedu te se određivanjem
+redoslijeda definira koji podaci se mogu pretvoriti u entitet, dok drugi podaci moraju ostati u redu čekanja sve dok
+se ne kreira odgovarajući entitet o kojem ovise. Nije nužno da sve vrste entiteta budu registrirane kroz \texttt{EntityRegistry}
+klasu, no svi entiteti koji nisu registrirani nemaju mogućnost biti sinkronizirani preko svih klijenata.
+
+\begin{minted}[samepage]{typescript}
+const registerEntities = (registry: EntityRegistry) => {
+    registry.register(RpgScene.getKindStatic(), RpgSceneConverter.convert);
+    registry.register(RpgTokenData.getKindStatic(), RpgTokenDataConverter.convert);
+    registry.register(RpgToken.getKindStatic(), RpgTokenConverter.convert);
+    registry.register(TurnOrder.getKindStatic(), TurnOrderConverter.convert);
+    registry.register(DecorationTokenData.getKindStatic(), DecorationTokenDataConverter.convert);
+    registry.register(DecorationToken.getKindStatic(), DecorationTokenConverter.convert);
+};
+\end{minted}
+\begin{figure}[H]
+\centering
+    \captionof{listing}{Registracija različitih vrsta entiteta za implementaciju D\&D sustava}
+\label{lst:registracija-razlicitih-vrsta-entiteta}
+\end{figure}
+
+Funkcije za pretvaranje entiteta iz JSON formata su korištene interno u \texttt{EntityRegistry} klasi.
+Ove funkcije se pozivaju kad klijent primi podatke od entitetima od poslužitelja.
+Na primjer, u isječku koda \ref{lst:pridruzivanje-igri-primanje-i-slanje-action-dogadaja} na liniji
+26, funkcija \texttt{convertQueuedEntities()}, pretvara sve dobivene podatke u entitete
+prema definiranom redoslijedu i korištenjem registriranih funkcija za svaku vrstu entiteta.
+
+Isječak koda ispod prikazuje jednu od klasa koje implementiraju konverziju iz JSON podataka u entitet.
+Funkcija prima JSON objekt s poljima koja su definirana kroz tip podataka \texttt{TokenAttributes}, 
+prvo iz globalne \texttt{EntityRegistry} klase pokušava dohvatiti već postojeći \texttt{RpgToken}
+entitet te ako ga uspješno pronađe i podaci o entitetu se mogu mijenjati, na postojeći entitet
+su postavljanje najnoviji dobiveni podaci.
+Ako entitet ne postoji i nije dodan u \texttt{EntityRegistry}-u tada se pokušavaju dohvatiti
+entiteti \texttt{Scene} i \texttt{RpgTokenData}, o ovim entitetima ovisi entitet \texttt{RpgToken}
+i bez njih ga nije moguće kreirati. Nakon što sustav pronađe ovisne entitete kreira novi
+\texttt{RpgToken} entitet i dodjeljuje mu podatke dobivene od poslužitelja. 
+Na ovakav način svaki entitet se može sinkronizirati s drugim klijentima i moguće je
+rekonstruirati cijelo stanje igre kod inicijalnog spajanja klijenta.
+
+\begin{minted}[samepage]{typescript}
+export class RpgTokenConverter {
+    public static convert(attributes: TypedJson<TokenAttributes>): RpgToken {
+        const existingEntity = GBoard.entityRegistry.entities.get(attributes.uid);
+
+        if (existingEntity instanceof RpgToken && existingEntity.shouldApplyChanges(attributes)) {
+            existingEntity.applyUpdateAction(attributes);
+            return existingEntity;
+        }
+
+        const scene = GBoard.entityRegistry.entities.get(attributes.sceneUid);
+        const tokenData = GBoard.entityRegistry.entities.get(attributes.tokenData);
+
+        if (scene instanceof Scene && tokenData instanceof RpgTokenData) {
+            const token = new RpgToken(scene, tokenData);
+            token.applyUpdateAction(attributes);
+
+            scene.addToken(token, token.layer);
+
+            return token;
+        }
+
+        throw new Error("RpgToken conversion failed");
+    }
+}
+\end{minted}
+\begin{figure}[H]
+\centering
+    \captionof{listing}{Konverzija JSON podataka u RpgToken entitet}
+\label{lst:konverzija-json-podataka-u-rpgtoken-entitet}
+\end{figure}
+
+\subsection{Vrste entiteta}
+\label{section:vrste-entiteta}
 
 \subsection{Sustav scena}
 \label{section:sustav-scena}
