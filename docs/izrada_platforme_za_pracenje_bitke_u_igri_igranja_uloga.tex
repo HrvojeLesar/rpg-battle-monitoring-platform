@@ -1846,8 +1846,53 @@ export class RpgTokenConverter {
 \subsection{Vrste entiteta}
 \label{section:vrste-entiteta}
 
-\subsection{Sustav scena}
-\label{section:sustav-scena}
+Aplikacija implementira različite vrste entiteta i entiteti su podijeljeni u općenite
+entitete koji su namijenjeni kao osnovne klase koje se mogu proširiti i kreirati 
+više specijalizirani entiteti. Osnovni entiteti su:
+
+\begin{itemize}
+    \item \textbf{Grid}: predstavlja pixi.js kontejner korišten za prikaz polja.
+        Sastoji podatke o poljima, njihovu veličinu, ukupne dimenzije i poziciju.
+    \item \textbf{GameAssets}: entitet koji sprema sve slike i sličice
+        učitane na poslužitelja od strane klijenata i povezanih za instancu igre.
+        Ne sadrži podatke o samim slikama već poveznice kako bi klijenti mogli učitati sliku sa
+        poslužitelja u trenutku kad im zatreba.
+    \item \textbf{Scene}: entitet označava scenu, scena je bilo kakva skupina pixi.js kontejnera
+        koji će biti crtani i prikazani na ekranu.
+    \item \textbf{SpriteExtension}: pixi.js kontejner koji je moguće dodati na scenu.
+        Razlikuje se od običnog pixi.js kontejnera u tome što može sadržavati sliku i prikazivati je na sceni,
+        korisnik ima mogućnost premještanja i postavljanja ovog entiteta po sceni, također podržava promjenu veličine.
+    \item \textbf{EmptyTokenData}: entitet namijenjen za proširenje, ne sadrži nikakve podatke, osim potrebnih za
+        slanje na poslužitelja.
+    \item \textbf{Token}: spaja entitete \texttt{SpriteExtension} i \texttt{EmptyTokenData}, namijenjen proširenju
+        i korišten za prikazivanje entiteta na sceni, te povezivanja vanjskih podataka na taj entitet.
+\end{itemize}
+
+Definirani osnovni entiteti su dovoljni za proširenje i implementaciju sustava za pračenje bitki te se koriste
+u djelomičnoj implementaciji D\&D sustava, slijedeći su definirani prošireni entiteti:
+
+\begin{itemize}
+    \item \textbf{RpgScene}: proširenje scene, sadrži dodatne funkcionalnosti za scene, na primjer,
+        neke scene mogu biti skrivene od igrača, samo su prikazane DM-u. Omogućava dodatne kontrole
+        za \texttt{Token} entitete (likovi) na sceni, provjeru i prikaz udaljenosti koju koju se neki lik može
+        pomaknuti, provjeru ako je na određenom polju već drugi lik.
+    \item \textbf{RpgTokenData}: proširenje \texttt{EmptyTokenData} entiteta, sadrži sve podatke o D\&D liku,
+        na primjer trenutne životne bodove, ime lika, veličinu, trenutnu brzinu i ostale podatke koji opisuju lika.
+    \item \textbf{RpgToken}: proširenje \texttt{Token} entiteta. Interno koristi \texttt{RpgTokenData} entitet za dohvaćanje podataka
+        i mora biti povezan na neku scenu. Korišten za prikaz lika na sceni i kontroliranje lika. 
+        Ovakav pristup odvajanja podataka i entiteta koji se prikazuje na sceni omogućuje 
+        promjenu podataka na jednom mjestu, u \texttt{RpgTokenData} i svi podaci/promjene će 
+        biti vidljive i sinkronizirane na različitim scenama.
+        Ne dozvoljava ručnu promjenu i postavljanje veličine tokena, već je veličina određena
+        prema veličini definiranoj u \texttt{RpgTokenData} i poštuje veličinu tokena temeljenu na
+        D\&D pravilima.
+    \item \textbf{TurnOrder}: entitet korišten za pračenje poteza i odgovoran za cijeli tok bitke. 
+        Sprema podatke o redoslijedu poteza, koji lik je trenutno na potezu i koju su uključeni u borbu,
+        koliko akcija i brzine ima lik na potezu.
+    \item \textbf{DecorationTokenData}: sadrži poveznicu na sličicu koja će biti prikazana na sceni.
+    \item \textbf{DecorationToken}: entitet namjenjen za dodavanje dekoracija na scenu povezan s \texttt{DecorationTokenData}.
+\end{itemize}
+
 \section{Primjer borbe}
 \label{section:primjer-borbe}
 
