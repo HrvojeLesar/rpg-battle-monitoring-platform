@@ -36,4 +36,11 @@ export default defineConfig(async () => ({
             "@": path.resolve(__dirname, "./src"),
         },
     },
+    build: {
+        minify: "terser",
+        terserOptions: {
+            keep_classnames: true,
+            keep_fnames: true,
+        }
+    }
 }));
