@@ -31,17 +31,26 @@ import {
     Image,
     ActionIcon,
     TagsInput,
+    Grid,
 } from "@mantine/core";
 import { useDisclosure, useForceUpdate } from "@mantine/hooks";
-import { IconDeviceFloppy } from "@tabler/icons-react";
+import { IconDeviceFloppy, IconPlus } from "@tabler/icons-react";
 import { useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DefaultAssetPicker } from "../Assets/AssetPicker";
 import { TextIncrementableNumberInput } from "../TextIncrementableNumberInput";
 import { COMBAT_TAGS } from "@/rpg_impl/characters_stats/tags";
-import { calculateProficiencyBonus } from "@/rpg_impl/characters_stats/experience";
+import {
+    calculateLevel,
+    calculateProficiencyBonus,
+} from "@/rpg_impl/characters_stats/experience";
 import { HealthState } from "@/rpg_impl/characters_stats/health_state";
 import { turnOrderAtoms } from "@/rpg_impl/stores/turn_order_store";
+import {
+    CharacterClass,
+    CharacterClassNames,
+} from "@/rpg_impl/characters_stats/class";
+import { DeleteConfirmation } from "@/board_react_wrapper/components/utils/DeleteConfirmation";
 
 export const RPG_TOKEN_WINDOW_PREFIX = "rpg-token-";
 
@@ -260,7 +269,44 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                             queueUpdate(value, "name");
                         }}
                     />
-                    <Text>TODO: class + class level</Text>
+                    <TextIncrementableNumberInput
+                        disabled={disabled}
+                        label={"Experience points & Level"}
+                        initialValue={experience.value}
+                        onChange={(value) => {
+                            const updatedExperience = {
+                                value,
+                                level: calculateLevel(value),
+                            };
+                            setExperience(updatedExperience);
+                            queueUpdate(updatedExperience, "experience");
+                        }}
+                        rightSection={<Text>{experience.level}</Text>}
+                    />
+                    <ClassSelect
+                        characterClass={cClass}
+                        onAdd={() => {
+                            setClass((old) => {
+                                const cClasses = [
+                                    ...old,
+                                    { name: "bard", level: 1 },
+                                ];
+                                queueUpdate(cClasses, "class");
+
+                                return cClasses;
+                            });
+                        }}
+                        onDelete={(cls) => {
+                            const cClasses = [...cls];
+                            setClass(cClasses);
+                            queueUpdate(cClasses, "class");
+                        }}
+                        onChange={(cls) => {
+                            const cClasses = [...cls];
+                            setClass(cClasses);
+                            queueUpdate(cClasses, "class");
+                        }}
+                    />
                     <Select
                         disabled={disabled}
                         label="Race"
@@ -285,7 +331,6 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                             queueUpdate(alignment, "alignment");
                         }}
                     />
-                    <Text>TODO: Character Level</Text>
                     <Text>TODO: Equipment</Text>
                     <Fieldset legend="Ability score">
                         {Object.entries(abilityScore).map(([key, score]) => {
@@ -555,5 +600,85 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                 </Flex>
             )}
         </Stack>
+    );
+};
+
+type ClassSelectProps = {
+    characterClass: CharacterClass;
+    onChange?: (characterClass: CharacterClass) => void;
+    onDelete?: (characterClass: CharacterClass) => void;
+    onAdd?: () => void;
+};
+
+const ClassSelect = (props: ClassSelectProps) => {
+    const { characterClass, onChange, onDelete, onAdd } = props;
+
+    return (
+        <Fieldset legend="Classes & class levels">
+            <ActionIcon title="Add class" onClick={onAdd}>
+                <IconPlus />
+            </ActionIcon>
+            {characterClass.map((cls, idx) => {
+                return (
+                    <Grid key={idx}>
+                        <Grid.Col span={8}>
+                            <Select
+                                label="Class"
+                                data={Object.keys(CharacterClassNames).map(
+                                    (key) => ({
+                                        label: key,
+                                        value: CharacterClassNames[
+                                            key as keyof typeof CharacterClassNames
+                                        ],
+                                    }),
+                                )}
+                                value={cls.name}
+                                withScrollArea={false}
+                                onChange={(value) => {
+                                    if (value) {
+                                        characterClass[idx].name = value;
+                                        onChange?.(characterClass);
+                                    }
+                                }}
+                            />
+                        </Grid.Col>
+                        <Grid.Col span={3}>
+                            <Select
+                                label="Level"
+                                data={Array.from({ length: 20 }).map(
+                                    (_, idx) => {
+                                        return (idx + 1).toString();
+                                    },
+                                )}
+                                value={cls.level.toString()}
+                                withScrollArea={false}
+                                onChange={(value) => {
+                                    if (value && !isNaN(Number(value))) {
+                                        characterClass[idx].level =
+                                            Number(value);
+                                        onChange?.(characterClass);
+                                    }
+                                }}
+                            />
+                        </Grid.Col>
+                        <Grid.Col span={1}>
+                            <Flex w="100%" h="100%" direction="column" justify="end">
+                                <DeleteConfirmation
+                                    title="Remove class"
+                                    confirmText="Are you sure you want to remove this class ?"
+                                    onDelete={() => {
+                                        onDelete?.(
+                                            characterClass.filter(
+                                                (el) => el !== cls,
+                                            ),
+                                        );
+                                    }}
+                                />
+                            </Flex>
+                        </Grid.Col>
+                    </Grid>
+                );
+            })}
+        </Fieldset>
     );
 };

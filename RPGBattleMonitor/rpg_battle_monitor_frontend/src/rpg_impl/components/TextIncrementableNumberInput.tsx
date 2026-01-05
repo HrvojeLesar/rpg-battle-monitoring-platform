@@ -9,6 +9,7 @@ export type TextIncrementableNumberInputProps = {
     onChange?: (value: number) => void;
     initialValue?: number;
     disabled?: boolean;
+    rightSection?: JSX.Element;
 };
 
 export const isNumber = (value: string): boolean => {
@@ -32,6 +33,7 @@ export const TextIncrementableNumberInput = (
         initialValue,
         onChange,
         disabled,
+        rightSection,
     } = props;
 
     const [value, setValue] = useState<number | string>(initialValue ?? "");
@@ -118,6 +120,7 @@ export const TextIncrementableNumberInput = (
                     onBlur={() => {
                         updateValue(input);
                     }}
+                    rightSection={rightSection}
                 />
             </Input.Wrapper>
         </form>
