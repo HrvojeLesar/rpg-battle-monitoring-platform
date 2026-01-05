@@ -37,6 +37,7 @@ import {
     ActionIcon,
     TagsInput,
     Grid,
+    Box,
 } from "@mantine/core";
 import { useDisclosure, useForceUpdate } from "@mantine/hooks";
 import { IconDeviceFloppy, IconPlus } from "@tabler/icons-react";
@@ -233,69 +234,117 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
         );
     };
 
-    return (
-        <Stack gap="xs" pb="xs" justify="center" align="stretch">
-            <Fieldset legend="Image">
-                <Stack gap="xs" pb="xs" justify="center" align="stretch">
-                    {tokenImage && (
-                        <Image
-                            maw="512px"
-                            mah="512px"
-                            src={getUrl(tokenImage)}
-                            style={{
-                                alignSelf: "center",
-                            }}
-                            draggable
-                            onDragStart={(e) => {
-                                GDragAndDropRegistry.emit(
-                                    e as unknown as DragEvent,
-                                    RPG_TOKEN_DROP,
-                                    token.getUId(),
-                                );
-                            }}
-                        />
-                    )}
-                    <DefaultAssetPicker
-                        filter={assetPickerFilter}
-                        onSelect={(asset) => {
-                            setTokenImage(asset.url);
-                            queueUpdate(asset.url, "image");
-                            close();
-                        }}
-                        searchTerm={searchTerm}
-                        onSearchChange={setSearchTerm}
-                        opened={opened}
-                        open={open}
-                        close={close}
-                    />
-                </Stack>
-            </Fieldset>
-            <Fieldset style={{ overflow: "auto" }} legend="Character Info">
+    const generalInfo = () => {
+        return (
+            <Fieldset legend="General info">
                 <Flex gap="xs" wrap="wrap">
-                    <TextInput
-                        disabled={disabled}
-                        label="Name"
-                        value={name}
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            setName(value);
-                            queueUpdate(value, "name");
-                        }}
-                    />
-                    <TextIncrementableNumberInput
-                        disabled={disabled}
-                        label={"Experience points & Level"}
-                        initialValue={experience.value}
-                        onChange={(value) => {
-                            const updatedExperience = {
-                                value,
-                                level: calculateLevel(value),
-                            };
-                            setExperience(updatedExperience);
-                            queueUpdate(updatedExperience, "experience");
-                        }}
-                        rightSection={<Text>{experience.level}</Text>}
-                    />
+                    <Flex direction="column" gap="xs" wrap="wrap">
+                        <Box>
+                            <Fieldset legend="Image">
+                                <Stack
+                                    gap="xs"
+                                    pb="xs"
+                                    justify="center"
+                                    align="stretch"
+                                >
+                                    {tokenImage && (
+                                        <Image
+                                            maw="128px"
+                                            mah="128px"
+                                            src={getUrl(tokenImage)}
+                                            style={{
+                                                alignSelf: "center",
+                                            }}
+                                            draggable
+                                            onDragStart={(e) => {
+                                                GDragAndDropRegistry.emit(
+                                                    e as unknown as DragEvent,
+                                                    RPG_TOKEN_DROP,
+                                                    token.getUId(),
+                                                );
+                                            }}
+                                        />
+                                    )}
+                                    <DefaultAssetPicker
+                                        filter={assetPickerFilter}
+                                        onSelect={(asset) => {
+                                            setTokenImage(asset.url);
+                                            queueUpdate(asset.url, "image");
+                                            close();
+                                        }}
+                                        searchTerm={searchTerm}
+                                        onSearchChange={setSearchTerm}
+                                        opened={opened}
+                                        open={open}
+                                        close={close}
+                                    />
+                                </Stack>
+                            </Fieldset>
+                            <Flex direction="row" gap="xs" wrap="wrap">
+                                <TextInput
+                                    disabled={disabled}
+                                    label="Name"
+                                    value={name}
+                                    rightSection={" "}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setName(value);
+                                        queueUpdate(value, "name");
+                                    }}
+                                />
+                                <TextIncrementableNumberInput
+                                    disabled={disabled}
+                                    label={"Experience points & Level"}
+                                    initialValue={experience.value}
+                                    onChange={(value) => {
+                                        const updatedExperience = {
+                                            value,
+                                            level: calculateLevel(value),
+                                        };
+                                        setExperience(updatedExperience);
+                                        queueUpdate(
+                                            updatedExperience,
+                                            "experience",
+                                        );
+                                    }}
+                                    rightSection={
+                                        <Text>{experience.level}</Text>
+                                    }
+                                />
+                            </Flex>
+                        </Box>
+                        <Flex direction="row" gap="xs" wrap="wrap">
+                            <Select
+                                disabled={disabled}
+                                label="Race"
+                                data={Object.keys(Races)}
+                                value={race}
+                                onChange={(value) => {
+                                    const race = value ?? undefined;
+                                    setRace(race);
+                                    queueUpdate(race, "race");
+                                }}
+                            />
+                            <Select
+                                disabled={disabled}
+                                label="Alignment"
+                                data={Object.entries(Alignment).map(
+                                    ([key, alignment]) => ({
+                                        label: alignmentToString(alignment),
+                                        value: key,
+                                    }),
+                                )}
+                                value={alignment}
+                                onChange={(value) => {
+                                    const alignment = value ?? undefined;
+                                    // @ts-ignore
+                                    setAlignment(alignment);
+                                    // @ts-ignore
+                                    queueUpdate(alignment, "alignment");
+                                }}
+                            />
+                        </Flex>
+                    </Flex>
                     <ClassSelect
                         characterClass={cClass}
                         onAdd={() => {
@@ -320,167 +369,286 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                             queueUpdate(cClasses, "class");
                         }}
                     />
-                    <Select
-                        disabled={disabled}
-                        label="Race"
-                        data={Object.keys(Races)}
-                        value={race}
-                        onChange={(value) => {
-                            const race = value ?? undefined;
-                            setRace(race);
-                            queueUpdate(race, "race");
-                        }}
-                    />
-                    <Select
-                        disabled={disabled}
-                        label="Alignment"
-                        data={Object.entries(Alignment).map(([key, alignment]) => ({
-                            label: alignmentToString(alignment),
-                            value: key,
-                        }))}
-                        value={alignment}
-                        onChange={(value) => {
-                            const alignment = value ?? undefined;
-                            // @ts-ignore
-                            setAlignment(alignment);
-                            // @ts-ignore
-                            queueUpdate(alignment, "alignment");
-                        }}
-                    />
-                    <Text>TODO: Equipment</Text>
-                    <Fieldset legend="Ability score">
-                        {Object.entries(abilityScore).map(([key, score]) => {
-                            const abilityScoreType = key as AbilityScoreType;
-                            const scoreValue = score.score;
-                            const modifier = abilityScoreModifier(
-                                scoreValue,
-                                abilityScoreType,
-                            );
-                            const modifierText = () => {
-                                if (modifier === 0) {
-                                    return "0";
-                                }
+                </Flex>
+            </Fieldset>
+        );
+    };
 
-                                return modifier > 0
-                                    ? `+${modifier}`
-                                    : `${modifier}`;
-                            };
+    const abilityScoreInfo = () => {
+        return (
+            <Fieldset legend="Ability score info">
+                <Flex direction="column" gap="xs" wrap="wrap">
+                    <Flex direction="row" gap="xs" wrap="wrap">
+                        <Box>
+                            <Flex direction="row" gap="xs">
+                                <Fieldset legend="Ability score">
+                                    {Object.entries(abilityScore).map(
+                                        ([key, score]) => {
+                                            const abilityScoreType =
+                                                key as AbilityScoreType;
+                                            const scoreValue = score.score;
+                                            const modifier =
+                                                abilityScoreModifier(
+                                                    scoreValue,
+                                                    abilityScoreType,
+                                                );
+                                            const modifierText = () => {
+                                                if (modifier === 0) {
+                                                    return "0";
+                                                }
 
-                            return (
+                                                return modifier > 0
+                                                    ? `+${modifier}`
+                                                    : `${modifier}`;
+                                            };
+
+                                            return (
+                                                <NumberInput
+                                                    key={key}
+                                                    hideControls
+                                                    disabled={disabled}
+                                                    label={abilityScoreTypeToString(
+                                                        abilityScoreType,
+                                                    )}
+                                                    leftSection={
+                                                        <Text>
+                                                            {modifierText()}
+                                                        </Text>
+                                                    }
+                                                    value={score.score}
+                                                    onChange={(value) => {
+                                                        const updatedScore = {
+                                                            ...abilityScore,
+                                                            [key]: {
+                                                                score: value,
+                                                            },
+                                                        };
+                                                        setAbilityScore(
+                                                            updatedScore,
+                                                        );
+                                                        queueUpdate(
+                                                            updatedScore,
+                                                            "abilityScore",
+                                                        );
+                                                    }}
+                                                />
+                                            );
+                                        },
+                                    )}
+                                </Fieldset>
+                            </Flex>
+                        </Box>
+                        <Box>
+                            <Flex direction="column" gap="xs">
                                 <NumberInput
-                                    key={key}
-                                    hideControls
                                     disabled={disabled}
-                                    label={abilityScoreTypeToString(
-                                        abilityScoreType,
-                                    )}
-                                    leftSection={<Text>{modifierText()}</Text>}
-                                    value={score.score}
-                                    onChange={(value) => {
-                                        const updatedScore = {
-                                            ...abilityScore,
-                                            [key]: { score: value },
-                                        };
-                                        setAbilityScore(updatedScore);
-                                        queueUpdate(
-                                            updatedScore,
-                                            "abilityScore",
-                                        );
-                                    }}
-                                />
-                            );
-                        })}
-                    </Fieldset>
-                    <NumberInput
-                        disabled={disabled}
-                        hideControls
-                        label="Inspiration modifier"
-                        value={inspirationModifier}
-                        onChange={(value) => {
-                            const convertedValue = Number(value);
-                            setInspirationModifier(convertedValue);
-                            queueUpdate(convertedValue, "inspirationModifier");
-                        }}
-                    />
-                    <TextInput
-                        disabled={true}
-                        label="Proficiency bonus"
-                        value={calculateProficiencyBonus(experience.level)}
-                    />
-                    <Fieldset legend="Saving throws">
-                        {Object.entries(savingThrows).map(([key, score]) => {
-                            const abilityScoreType = key as AbilityScoreType;
-                            const ability = abilityScore[abilityScoreType];
-                            const modifier =
-                                (score.proficient
-                                    ? calculateProficiencyBonus(
-                                          experience.level,
-                                      )
-                                    : 0) +
-                                abilityScoreModifier(
-                                    ability.score,
-                                    abilityScoreType,
-                                );
-
-                            const modifierText = () => {
-                                if (modifier === 0) {
-                                    return "0";
-                                }
-
-                                return modifier > 0
-                                    ? `+${modifier}`
-                                    : `${modifier}`;
-                            };
-
-                            return (
-                                <NumberInput
-                                    key={key}
                                     hideControls
-                                    disabled={true}
-                                    label={abilityScoreTypeToString(
-                                        abilityScoreType,
-                                    )}
-                                    leftSection={
-                                        <Checkbox
-                                            checked={score.proficient}
-                                            disabled={disabled}
-                                            onChange={(event) => {
-                                                const value =
-                                                    event.currentTarget.checked;
-                                                const updatedSavingThrows = {
-                                                    ...savingThrows,
-                                                    [key]: {
-                                                        ...score,
-                                                        proficient: value,
-                                                    },
-                                                };
-                                                setSavingThrows(
-                                                    updatedSavingThrows,
-                                                );
-                                                queueUpdate(
-                                                    updatedSavingThrows,
-                                                    "savingThrows",
-                                                );
-                                            }}
-                                        />
-                                    }
-                                    rightSection={modifierText()}
-                                    value={ability.score}
+                                    label="Inspiration modifier"
+                                    value={inspirationModifier}
                                     onChange={(value) => {
-                                        const updatedSavingThrows = {
-                                            ...savingThrows,
-                                            [key]: { ...score, score: value },
-                                        };
-                                        setSavingThrows(updatedSavingThrows);
+                                        const convertedValue = Number(value);
+                                        setInspirationModifier(convertedValue);
                                         queueUpdate(
-                                            updatedSavingThrows,
-                                            "savingThrows",
+                                            convertedValue,
+                                            "inspirationModifier",
                                         );
                                     }}
                                 />
-                            );
-                        })}
-                    </Fieldset>
+                                <TextInput
+                                    disabled={true}
+                                    label="Proficiency bonus"
+                                    value={calculateProficiencyBonus(
+                                        experience.level,
+                                    )}
+                                />
+                                <Fieldset legend="Saving throws">
+                                    {Object.entries(savingThrows).map(
+                                        ([key, score]) => {
+                                            const abilityScoreType =
+                                                key as AbilityScoreType;
+                                            const ability =
+                                                abilityScore[abilityScoreType];
+                                            const modifier =
+                                                (score.proficient
+                                                    ? calculateProficiencyBonus(
+                                                          experience.level,
+                                                      )
+                                                    : 0) +
+                                                abilityScoreModifier(
+                                                    ability.score,
+                                                    abilityScoreType,
+                                                );
+
+                                            const modifierText = () => {
+                                                if (modifier === 0) {
+                                                    return "0";
+                                                }
+
+                                                return modifier > 0
+                                                    ? `+${modifier}`
+                                                    : `${modifier}`;
+                                            };
+
+                                            return (
+                                                <NumberInput
+                                                    key={key}
+                                                    hideControls
+                                                    disabled={true}
+                                                    label={abilityScoreTypeToString(
+                                                        abilityScoreType,
+                                                    )}
+                                                    leftSection={
+                                                        <Checkbox
+                                                            checked={
+                                                                score.proficient
+                                                            }
+                                                            disabled={disabled}
+                                                            onChange={(
+                                                                event,
+                                                            ) => {
+                                                                const value =
+                                                                    event
+                                                                        .currentTarget
+                                                                        .checked;
+                                                                const updatedSavingThrows =
+                                                                    {
+                                                                        ...savingThrows,
+                                                                        [key]: {
+                                                                            ...score,
+                                                                            proficient:
+                                                                                value,
+                                                                        },
+                                                                    };
+                                                                setSavingThrows(
+                                                                    updatedSavingThrows,
+                                                                );
+                                                                queueUpdate(
+                                                                    updatedSavingThrows,
+                                                                    "savingThrows",
+                                                                );
+                                                            }}
+                                                        />
+                                                    }
+                                                    rightSection={modifierText()}
+                                                    value={ability.score}
+                                                    onChange={(value) => {
+                                                        const updatedSavingThrows =
+                                                            {
+                                                                ...savingThrows,
+                                                                [key]: {
+                                                                    ...score,
+                                                                    score: value,
+                                                                },
+                                                            };
+                                                        setSavingThrows(
+                                                            updatedSavingThrows,
+                                                        );
+                                                        queueUpdate(
+                                                            updatedSavingThrows,
+                                                            "savingThrows",
+                                                        );
+                                                    }}
+                                                />
+                                            );
+                                        },
+                                    )}
+                                </Fieldset>
+                                <Fieldset legend="Skill proficiency">
+                                    {Object.entries(skills).map(
+                                        ([key, score]) => {
+                                            const skillType = key as SkillType;
+                                            const abilityScoreType =
+                                                abilityScoreSkillMap[skillType];
+                                            const ability =
+                                                abilityScore[abilityScoreType];
+                                            const modifier =
+                                                (score.proficient
+                                                    ? calculateProficiencyBonus(
+                                                          experience.level,
+                                                      )
+                                                    : 0) +
+                                                abilityScoreModifier(
+                                                    ability.score,
+                                                    abilityScoreType,
+                                                );
+
+                                            const modifierText = () => {
+                                                if (modifier === 0) {
+                                                    return "0";
+                                                }
+
+                                                return modifier > 0
+                                                    ? `+${modifier}`
+                                                    : `${modifier}`;
+                                            };
+
+                                            return (
+                                                <NumberInput
+                                                    key={key}
+                                                    hideControls
+                                                    disabled={true}
+                                                    label={`${skillTypeToString(skillType)} (${abilityScoreTypeToShortString(abilityScoreType)})`}
+                                                    value={ability.score}
+                                                    rightSection={
+                                                        <Text>
+                                                            {modifierText()}
+                                                        </Text>
+                                                    }
+                                                    leftSection={
+                                                        <Checkbox
+                                                            checked={
+                                                                score.proficient
+                                                            }
+                                                            disabled={disabled}
+                                                            onChange={(
+                                                                event,
+                                                            ) => {
+                                                                const value =
+                                                                    event
+                                                                        .currentTarget
+                                                                        .checked;
+                                                                const updatedSkillProficiency =
+                                                                    {
+                                                                        ...skills,
+                                                                        [key]: {
+                                                                            ...score,
+                                                                            proficient:
+                                                                                value,
+                                                                        },
+                                                                    };
+                                                                setSkills(
+                                                                    updatedSkillProficiency,
+                                                                );
+                                                                queueUpdate(
+                                                                    updatedSkillProficiency,
+                                                                    "skills",
+                                                                );
+                                                            }}
+                                                        />
+                                                    }
+                                                    onChange={(value) => {
+                                                        const updatedScore = {
+                                                            ...abilityScore,
+                                                            [key]: {
+                                                                score: value,
+                                                            },
+                                                        };
+                                                        setAbilityScore(
+                                                            updatedScore,
+                                                        );
+                                                        queueUpdate(
+                                                            updatedScore,
+                                                            "abilityScore",
+                                                        );
+                                                    }}
+                                                />
+                                            );
+                                        },
+                                    )}
+                                </Fieldset>
+                            </Flex>
+                        </Box>
+                    </Flex>
                     <NumberInput
                         disabled={disabled}
                         hideControls
@@ -492,38 +660,49 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                             queueUpdate(convertedValue, "passiveWisdom");
                         }}
                     />
-                    <NumberInput
-                        disabled={disabled}
-                        hideControls
-                        label="Armor class"
-                        value={armorClass}
-                        onChange={(value) => {
-                            const convertedValue = Number(value);
-                            setArmorClass(convertedValue);
-                            queueUpdate(convertedValue, "armorClass");
-                        }}
-                    />
-                    <NumberInput
-                        disabled={true}
-                        hideControls
-                        label="Initiative"
-                        value={""}
-                    />
-                    <NumberInput
-                        disabled={disabled}
-                        hideControls
-                        label="Speed"
-                        value={speed.walk}
-                        onChange={(value) => {
-                            const convertedValue = Number(value);
-                            const speed = {
-                                ...token.speed,
-                                walk: convertedValue,
-                            };
-                            setSpeed(speed);
-                            queueUpdate(speed, "speed");
-                        }}
-                    />
+                </Flex>
+            </Fieldset>
+        );
+    };
+
+    const combatInfo = () => {
+        // <NumberInput
+        //     disabled={true}
+        //     hideControls
+        //     label="Initiative"
+        //     value={""}
+        // />
+        return (
+            <Fieldset legend="Combat info">
+                <Flex direction="column" gap="xs" wrap="wrap">
+                    <Flex direction="row" gap="xs" wrap="wrap">
+                        <NumberInput
+                            disabled={disabled}
+                            hideControls
+                            label="Armor class"
+                            value={armorClass}
+                            onChange={(value) => {
+                                const convertedValue = Number(value);
+                                setArmorClass(convertedValue);
+                                queueUpdate(convertedValue, "armorClass");
+                            }}
+                        />
+                        <NumberInput
+                            disabled={disabled}
+                            hideControls
+                            label="Speed"
+                            value={speed.walk}
+                            onChange={(value) => {
+                                const convertedValue = Number(value);
+                                const speed = {
+                                    ...token.speed,
+                                    walk: convertedValue,
+                                };
+                                setSpeed(speed);
+                                queueUpdate(speed, "speed");
+                            }}
+                        />
+                    </Flex>
                     <Fieldset legend="Hit Points">
                         {Object.entries(hitPoints).map(([key, value]) => {
                             return (
@@ -585,91 +764,6 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                             }
                         }}
                     />
-                    <Fieldset legend="Skill proficiency">
-                        {Object.entries(skills).map(([key, score]) => {
-                            const skillType = key as SkillType;
-                            const abilityScoreType =
-                                abilityScoreSkillMap[skillType];
-                            const ability = abilityScore[abilityScoreType];
-                            const modifier =
-                                (score.proficient
-                                    ? calculateProficiencyBonus(
-                                          experience.level,
-                                      )
-                                    : 0) +
-                                abilityScoreModifier(
-                                    ability.score,
-                                    abilityScoreType,
-                                );
-
-                            const modifierText = () => {
-                                if (modifier === 0) {
-                                    return "0";
-                                }
-
-                                return modifier > 0
-                                    ? `+${modifier}`
-                                    : `${modifier}`;
-                            };
-
-                            return (
-                                <NumberInput
-                                    key={key}
-                                    hideControls
-                                    disabled={true}
-                                    label={`${skillTypeToString(skillType)} (${abilityScoreTypeToShortString(abilityScoreType)})`}
-                                    value={ability.score}
-                                    rightSection={<Text>{modifierText()}</Text>}
-                                    leftSection={
-                                        <Checkbox
-                                            checked={score.proficient}
-                                            disabled={disabled}
-                                            onChange={(event) => {
-                                                const value =
-                                                    event.currentTarget.checked;
-                                                const updatedSkillProficiency =
-                                                    {
-                                                        ...skills,
-                                                        [key]: {
-                                                            ...score,
-                                                            proficient: value,
-                                                        },
-                                                    };
-                                                setSkills(
-                                                    updatedSkillProficiency,
-                                                );
-                                                queueUpdate(
-                                                    updatedSkillProficiency,
-                                                    "skills",
-                                                );
-                                            }}
-                                        />
-                                    }
-                                    onChange={(value) => {
-                                        const updatedScore = {
-                                            ...abilityScore,
-                                            [key]: { score: value },
-                                        };
-                                        setAbilityScore(updatedScore);
-                                        queueUpdate(
-                                            updatedScore,
-                                            "abilityScore",
-                                        );
-                                    }}
-                                />
-                            );
-                        })}
-                    </Fieldset>
-                    <Fieldset legend="Tags">
-                        <TagsInput
-                            data={COMBAT_TAGS}
-                            value={tags}
-                            onChange={(tags) => {
-                                setTags(tags);
-                                queueUpdate(tags, "tags");
-                            }}
-                        />
-                    </Fieldset>
                     <Select
                         disabled={disabled}
                         label="Health state"
@@ -690,6 +784,35 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                             queueUpdate(healthState, "healthState");
                         }}
                     />
+                </Flex>
+            </Fieldset>
+        );
+    };
+
+    const metaInfo = () => {
+        return (
+            <Fieldset legend="Tags">
+                <TagsInput
+                    data={COMBAT_TAGS}
+                    value={tags}
+                    onChange={(tags) => {
+                        setTags(tags);
+                        queueUpdate(tags, "tags");
+                    }}
+                />
+            </Fieldset>
+        );
+    };
+
+    return (
+        <Stack gap="xs" pb="xs" justify="center" align="stretch">
+            <Fieldset style={{ overflow: "auto" }} legend="Character Info">
+                <Flex gap="xs" wrap="wrap">
+                    {generalInfo()}
+                    {abilityScoreInfo()}
+                    {combatInfo()}
+                    {metaInfo()}
+                    <Text>TODO: Equipment</Text>
                 </Flex>
             </Fieldset>
             {isUpdated() && (
