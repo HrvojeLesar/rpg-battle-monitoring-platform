@@ -22,38 +22,70 @@ export enum SkillType {
     Persuasion = "persuasion",
 }
 
+export function skillTypeToString(type: SkillType): string {
+    switch (type) {
+        case SkillType.Athletics:
+            return "Athletics";
+        case SkillType.Acrobatics:
+            return "Acrobatics";
+        case SkillType.SleightOfHand:
+            return "Sleight of Hand";
+        case SkillType.Stealth:
+            return "Stealth";
+        case SkillType.Arcana:
+            return "Arcana";
+        case SkillType.History:
+            return "History";
+        case SkillType.Investigation:
+            return "Investigation";
+        case SkillType.Nature:
+            return "Nature";
+        case SkillType.Religion:
+            return "Religion";
+        case SkillType.AnimalHandling:
+            return "Animal Handling";
+        case SkillType.Insight:
+            return "Insight";
+        case SkillType.Medicine:
+            return "Medicine";
+        case SkillType.Perception:
+            return "Perception";
+        case SkillType.Survival:
+            return "Survival";
+        case SkillType.Deception:
+            return "Deception";
+        case SkillType.Intimidation:
+            return "Intimidation";
+        case SkillType.Performance:
+            return "Performance";
+        case SkillType.Persuasion:
+            return "Persuasion";
+    }
+}
+
 export type AbilityScoreSkillMap = {
-    [key in AbilityScoreType]: SkillType[];
+    [key in SkillType]: AbilityScoreType;
 };
 
 export const abilityScoreSkillMap: AbilityScoreSkillMap = {
-    [AbilityScoreType.Strength]: [SkillType.Athletics],
-    [AbilityScoreType.Dexterity]: [
-        SkillType.Acrobatics,
-        SkillType.SleightOfHand,
-        SkillType.Stealth,
-    ],
-    [AbilityScoreType.Constitution]: [],
-    [AbilityScoreType.Intelligence]: [
-        SkillType.Arcana,
-        SkillType.History,
-        SkillType.Investigation,
-        SkillType.Nature,
-        SkillType.Religion,
-    ],
-    [AbilityScoreType.Wisdom]: [
-        SkillType.AnimalHandling,
-        SkillType.Insight,
-        SkillType.Medicine,
-        SkillType.Perception,
-        SkillType.Survival,
-    ],
-    [AbilityScoreType.Charisma]: [
-        SkillType.Deception,
-        SkillType.Intimidation,
-        SkillType.Performance,
-        SkillType.Persuasion,
-    ],
+    [SkillType.Athletics]: AbilityScoreType.Strength,
+    [SkillType.Acrobatics]: AbilityScoreType.Dexterity,
+    [SkillType.SleightOfHand]: AbilityScoreType.Dexterity,
+    [SkillType.Stealth]: AbilityScoreType.Dexterity,
+    [SkillType.Arcana]: AbilityScoreType.Intelligence,
+    [SkillType.History]: AbilityScoreType.Intelligence,
+    [SkillType.Investigation]: AbilityScoreType.Intelligence,
+    [SkillType.Nature]: AbilityScoreType.Intelligence,
+    [SkillType.Religion]: AbilityScoreType.Intelligence,
+    [SkillType.AnimalHandling]: AbilityScoreType.Wisdom,
+    [SkillType.Insight]: AbilityScoreType.Wisdom,
+    [SkillType.Medicine]: AbilityScoreType.Wisdom,
+    [SkillType.Perception]: AbilityScoreType.Wisdom,
+    [SkillType.Survival]: AbilityScoreType.Wisdom,
+    [SkillType.Deception]: AbilityScoreType.Charisma,
+    [SkillType.Intimidation]: AbilityScoreType.Charisma,
+    [SkillType.Performance]: AbilityScoreType.Charisma,
+    [SkillType.Persuasion]: AbilityScoreType.Charisma,
 };
 
 export type SkillEntry = EntryValue;

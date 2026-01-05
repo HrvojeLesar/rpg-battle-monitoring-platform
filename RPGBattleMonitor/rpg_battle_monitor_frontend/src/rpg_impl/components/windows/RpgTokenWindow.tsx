@@ -8,8 +8,13 @@ import { getUrl } from "@/board_react_wrapper/utils/utils";
 import {
     abilityScoreModifier,
     AbilityScoreType,
+    abilityScoreTypeToShortString,
+    abilityScoreTypeToString,
 } from "@/rpg_impl/characters_stats/ability_score";
-import { Alignment } from "@/rpg_impl/characters_stats/alignment";
+import {
+    Alignment,
+    alignmentToString,
+} from "@/rpg_impl/characters_stats/alignment";
 import {
     isValidSize,
     sizeMap,
@@ -51,6 +56,11 @@ import {
     CharacterClassNames,
 } from "@/rpg_impl/characters_stats/class";
 import { DeleteConfirmation } from "@/board_react_wrapper/components/utils/DeleteConfirmation";
+import {
+    abilityScoreSkillMap,
+    SkillType,
+    skillTypeToString,
+} from "@/rpg_impl/characters_stats/skills";
 
 export const RPG_TOKEN_WINDOW_PREFIX = "rpg-token-";
 
@@ -95,6 +105,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
     const [experience, setExperience] = useState(token.experience);
     const [equipment, setEquipment] = useState(token.equipment);
     const [abilityScore, setAbilityScore] = useState(token.abilityScore);
+    const [skills, setSkills] = useState(token.skills);
     const [inspirationModifier, setInspirationModifier] = useState(
         token.inspirationModifier,
     );
@@ -172,6 +183,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                 setExperience(token.experience);
                 setEquipment(token.equipment);
                 setAbilityScore(token.abilityScore);
+                setSkills(token.skills);
                 setInspirationModifier(token.inspirationModifier);
                 setSavingThrows(token.savingThrows);
                 setPassiveWisdom(token.passiveWisdom);
@@ -204,6 +216,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
             experience !== token.experience ||
             equipment !== token.equipment ||
             abilityScore !== token.abilityScore ||
+            skills !== token.skills ||
             inspirationModifier !== token.inspirationModifier ||
             savingThrows !== token.savingThrows ||
             passiveWisdom !== token.passiveWisdom ||
@@ -321,7 +334,10 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                     <Select
                         disabled={disabled}
                         label="Alignment"
-                        data={Object.keys(Alignment)}
+                        data={Object.entries(Alignment).map(([key, alignment]) => ({
+                            label: alignmentToString(alignment),
+                            value: key,
+                        }))}
                         value={alignment}
                         onChange={(value) => {
                             const alignment = value ?? undefined;
@@ -355,7 +371,9 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                                     key={key}
                                     hideControls
                                     disabled={disabled}
-                                    label={key}
+                                    label={abilityScoreTypeToString(
+                                        abilityScoreType,
+                                    )}
                                     leftSection={<Text>{modifierText()}</Text>}
                                     value={score.score}
                                     onChange={(value) => {
@@ -384,28 +402,44 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                             queueUpdate(convertedValue, "inspirationModifier");
                         }}
                     />
+                    <TextInput
+                        disabled={true}
+                        label="Proficiency bonus"
+                        value={calculateProficiencyBonus(experience.level)}
+                    />
                     <Fieldset legend="Saving throws">
                         {Object.entries(savingThrows).map(([key, score]) => {
-                            const proficiencyBonus = () => {
-                                if (score.proficient === false) {
-                                    return undefined;
+                            const abilityScoreType = key as AbilityScoreType;
+                            const ability = abilityScore[abilityScoreType];
+                            const modifier =
+                                (score.proficient
+                                    ? calculateProficiencyBonus(
+                                          experience.level,
+                                      )
+                                    : 0) +
+                                abilityScoreModifier(
+                                    ability.score,
+                                    abilityScoreType,
+                                );
+
+                            const modifierText = () => {
+                                if (modifier === 0) {
+                                    return "0";
                                 }
 
-                                return (
-                                    <Text>
-                                        +
-                                        {calculateProficiencyBonus(
-                                            experience.level,
-                                        )}
-                                    </Text>
-                                );
+                                return modifier > 0
+                                    ? `+${modifier}`
+                                    : `${modifier}`;
                             };
+
                             return (
                                 <NumberInput
                                     key={key}
                                     hideControls
-                                    disabled={disabled}
-                                    label={key}
+                                    disabled={true}
+                                    label={abilityScoreTypeToString(
+                                        abilityScoreType,
+                                    )}
                                     leftSection={
                                         <Checkbox
                                             checked={score.proficient}
@@ -430,8 +464,8 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                                             }}
                                         />
                                     }
-                                    rightSection={proficiencyBonus()}
-                                    value={score.score}
+                                    rightSection={modifierText()}
+                                    value={ability.score}
                                     onChange={(value) => {
                                         const updatedSavingThrows = {
                                             ...savingThrows,
@@ -450,7 +484,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                     <NumberInput
                         disabled={disabled}
                         hideControls
-                        label="Passive wisdom"
+                        label="Passive wisdom (Perception)"
                         value={passiveWisdom}
                         onChange={(value) => {
                             const convertedValue = Number(value);
@@ -551,7 +585,81 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                             }
                         }}
                     />
-                    <Text>TODO: Skill proficiency</Text>
+                    <Fieldset legend="Skill proficiency">
+                        {Object.entries(skills).map(([key, score]) => {
+                            const skillType = key as SkillType;
+                            const abilityScoreType =
+                                abilityScoreSkillMap[skillType];
+                            const ability = abilityScore[abilityScoreType];
+                            const modifier =
+                                (score.proficient
+                                    ? calculateProficiencyBonus(
+                                          experience.level,
+                                      )
+                                    : 0) +
+                                abilityScoreModifier(
+                                    ability.score,
+                                    abilityScoreType,
+                                );
+
+                            const modifierText = () => {
+                                if (modifier === 0) {
+                                    return "0";
+                                }
+
+                                return modifier > 0
+                                    ? `+${modifier}`
+                                    : `${modifier}`;
+                            };
+
+                            return (
+                                <NumberInput
+                                    key={key}
+                                    hideControls
+                                    disabled={true}
+                                    label={`${skillTypeToString(skillType)} (${abilityScoreTypeToShortString(abilityScoreType)})`}
+                                    value={ability.score}
+                                    rightSection={<Text>{modifierText()}</Text>}
+                                    leftSection={
+                                        <Checkbox
+                                            checked={score.proficient}
+                                            disabled={disabled}
+                                            onChange={(event) => {
+                                                const value =
+                                                    event.currentTarget.checked;
+                                                const updatedSkillProficiency =
+                                                    {
+                                                        ...skills,
+                                                        [key]: {
+                                                            ...score,
+                                                            proficient: value,
+                                                        },
+                                                    };
+                                                setSkills(
+                                                    updatedSkillProficiency,
+                                                );
+                                                queueUpdate(
+                                                    updatedSkillProficiency,
+                                                    "skills",
+                                                );
+                                            }}
+                                        />
+                                    }
+                                    onChange={(value) => {
+                                        const updatedScore = {
+                                            ...abilityScore,
+                                            [key]: { score: value },
+                                        };
+                                        setAbilityScore(updatedScore);
+                                        queueUpdate(
+                                            updatedScore,
+                                            "abilityScore",
+                                        );
+                                    }}
+                                />
+                            );
+                        })}
+                    </Fieldset>
                     <Fieldset legend="Tags">
                         <TagsInput
                             data={COMBAT_TAGS}
@@ -662,7 +770,12 @@ const ClassSelect = (props: ClassSelectProps) => {
                             />
                         </Grid.Col>
                         <Grid.Col span={1}>
-                            <Flex w="100%" h="100%" direction="column" justify="end">
+                            <Flex
+                                w="100%"
+                                h="100%"
+                                direction="column"
+                                justify="end"
+                            >
                                 <DeleteConfirmation
                                     title="Remove class"
                                     confirmText="Are you sure you want to remove this class ?"

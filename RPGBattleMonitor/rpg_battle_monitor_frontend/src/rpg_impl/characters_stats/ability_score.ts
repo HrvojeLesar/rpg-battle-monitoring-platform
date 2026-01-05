@@ -49,3 +49,41 @@ export function getEmptyAbilityScores(): AbilityScores {
         },
     };
 }
+
+export function abilityScoreTypeToString(
+    abilityScoreType: AbilityScoreType,
+): string {
+    switch (abilityScoreType) {
+        case AbilityScoreType.Strength:
+            return "Strength";
+        case AbilityScoreType.Dexterity:
+            return "Dexterity";
+        case AbilityScoreType.Constitution:
+            return "Constitution";
+        case AbilityScoreType.Intelligence:
+            return "Intelligence";
+        case AbilityScoreType.Wisdom:
+            return "Wisdom";
+        case AbilityScoreType.Charisma:
+            return "Charisma";
+    }
+}
+
+export function abilityScoreTypeToShortString(
+    abilityScoreType: AbilityScoreType,
+): string {
+    switch (abilityScoreType) {
+        case AbilityScoreType.Strength:
+            return "Str";
+        case AbilityScoreType.Dexterity:
+            return "Dex";
+        case AbilityScoreType.Constitution:
+            return "Con";
+        case AbilityScoreType.Intelligence:
+            return "Int";
+        case AbilityScoreType.Wisdom:
+            return "Wis";
+        case AbilityScoreType.Charisma:
+            return "Cha";
+    }
+}

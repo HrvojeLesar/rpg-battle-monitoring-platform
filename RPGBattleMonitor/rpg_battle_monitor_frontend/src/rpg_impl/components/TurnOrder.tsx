@@ -34,7 +34,7 @@ import { RpgScene } from "../scene/scene";
 import { IconSwords } from "@tabler/icons-react";
 import { DeleteConfirmation } from "@/board_react_wrapper/components/utils/DeleteConfirmation";
 import { HealthState } from "../characters_stats/health_state";
-import { GEventEmitter } from "@/board_core/board";
+import { GBoard, GEventEmitter } from "@/board_core/board";
 import { RpgTokenData } from "../tokens/rpg_token_data";
 import { IMessagable } from "@/board_core/interfaces/messagable";
 import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
@@ -386,7 +386,7 @@ export const TurnOrder = () => {
 
     return (
         <Stack gap="xs" pb="xs" justify="center" align="stretch">
-            {turnControls()}
+            {GBoard.isDm && turnControls()}
             {displayTokens()}
         </Stack>
     );
