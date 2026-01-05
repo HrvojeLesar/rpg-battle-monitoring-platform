@@ -1635,7 +1635,7 @@ Arhitektura pixi.js je podijeljena u nekoliko glavnih komponenata \cite{pixijs-a
 \begin{itemize}
     \item Komponenta za renderiranje: prikazuje i crta scenski graf na ekran.
     \item Kontejneri: Glavni objekti na sceni kroz koje se kreira scenski graf tj.
-        stablo objekata koji se mogu prikazati, objekti kao što su tekst, spriteovi i druga grafika.
+        stablo kontejner objekata koji se mogu prikazati, objekti kao što su tekst, sprite-ovi i druga grafika.
     \item Slikovno/zvučni elementi: sustav za asinkrono učitavanje i dekodiranje resursa poput 
         slikovnih i zvučnih datoteka.
     \item Ticker: periodični povratni pozivi na temeljeni na vremenskom intervalu.
@@ -1650,7 +1650,64 @@ Na primjer, u aplikaciji se kontejneri koriste za prikaz scena i crtanje polja n
 slikovno/zvučni elementi za učitavanja slika i postavljanje slika u kontejnere, ticker za periodično
 crtanje obruba oko kontejnera te postepenu promjenu boje obruba, događanja su korištena i omogućavaju korisniku
 premještanje pozicije kontejnera i promjenu veličine određenih kontejnera. 
-Više detalja o implementaciji i korištenju svakih od navedenih elemenata u poglavlju \ref{section:sustav-scena}.
+
+Sva grafika u pixi.js-u osnovana je na kontejnerima koji sadrže podređene kontejnere, slike, tekst ili grafiku.
+Pixi.js uvijek ima barem jedan kontejner tzv. korijenski kontejner u koji se dodaju drugi kontejneri.
+Kontejneri su povezani u stablo, gdje svaki čvor stabla može imati povezane druge kontejnere i grafika
+je prikazana na ekran prema redoslijedu kontejnera u stablu. 
+Za svaki kontejner koji sadrži druge kontejnere renderira se u dubinu tj. pixi.js će prolaziti kroz podređene 
+čvorove sve dok ne dođe do čvora koji je list stabla.
+List stabla je čvor koji nema podređeni čvor.
+
+U primjeru ispod prikazana je struktura kontejnera za crtanje i prikaz tokena u trenutku kad ga korisnik
+klikom miša premješta na drugu poziciju.
+U korijenski kontejner dodana je pozadina s poljima, označena s 1., pošto je prva u redoslijedu crtanja
+biti će prikazana u pozadini. Ovaj kontejner sadrži dva podređena kontejnera 2. prijašnja lokacija tokena
+i 3. token kontejner.
+Slijedeći kontejner koji će pixi.js renderirati je 2. prijašnja lokacija tokena,
+ovaj kontejner sadrži sličicu tokena na prijašnjoj lokaciji te polja preko kojih 
+je token prenešen, označena zelenom bojom. 
+Na slici \ref{fig:primjer-redoslijeda-renderiranja-kontejnera}
+vidljivo je da je sličica tokena iza polja označenih polja, baš iz razloga što
+je sličica renderirana prije označenih polja.
+Na isti način je renderiran 3. token kontejner. Taj kontejner sadrži više
+različitih elemenata, kao što su sličica, obrub, prikaz životnih bodova 
+(koji može biti dalje rastavljen na dijelove), prikaz pomaknute udaljenosti
+te indikator trenutnog tokena na potezu. 
+Sličica je iza obruba, prikaz životnih bodova, ne prekriva sličicu, ali bi bio
+prikazan iznad ako bi prekrivao, jednako tako vrijedi za prikaz udaljenosti i indikator.
+
+
+\begin{verbatim}
+Pixi.js Korijenski kontejner
+|
+|-- 1. Pozadina s poljima
+    |
+    |-- 2. Prijašnja lokacija tokena
+    |   |
+    |   |-- Sličica tokena
+    |   |-- Polja preko kojih je tokena prenesen
+    |
+    |-- 3. Token kontejner
+        |
+        |-- Sličica
+        |-- Obrub oko sličice
+        |-- Prikaz životnih bodova
+        |   |
+        |   |-- Obojana pozadina
+        |   |-- Tekst s vrijednostima
+        |
+        |-- Prikaz pomaknute udaljenosti
+        |-- Indikator trenutnog tokena na potezu
+\end{verbatim}
+\label{lst:primjer-stabla-kontejner-objekata}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{slike/pixi-containers.png}
+    \caption{Primjer redoslijeda renderiranja kontejnera [autorski rad]}
+    \label{fig:primjer-redoslijeda-renderiranja-kontejnera}
+\end{figure}
 
 \subsection{React.js}
 \label{section:reactjs}
