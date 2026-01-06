@@ -4,6 +4,7 @@ import {
     TokenDataBaseAttributes,
 } from "@/board_core/token/token_data";
 import {
+    abilityScoreModifier,
     AbilityScores,
     getEmptyAbilityScores,
 } from "../characters_stats/ability_score";
@@ -41,6 +42,7 @@ import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
 import { getRpgTokenWindowName } from "../components/windows/RpgTokenWindow";
 import { queueEntityUpdate } from "@/websocket/websocket";
 import { HealthState } from "../characters_stats/health_state";
+import { Action } from "../actions/action";
 
 export type RpgTokenAttributes = {
     tint: Maybe<number>;
@@ -244,5 +246,15 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
     public resetDeathSaves(): void {
         this.deathSaves.successes = 0;
         this.deathSaves.failures = 0;
+    }
+
+    public getAttackModifier<T, D>(action: Action<T, D>): number {
+        const abilityScoreType = action.abilityScoreModifierType;
+        const modifier = abilityScoreModifier(
+            this.abilityScore[abilityScoreType].score,
+            abilityScoreType,
+        );
+
+        return modifier;
     }
 }

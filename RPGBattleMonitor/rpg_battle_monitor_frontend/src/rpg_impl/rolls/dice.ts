@@ -21,6 +21,7 @@ export type Rolls = {
 export type RollOptions = {
     isLucky?: boolean;
     isCritical?: boolean;
+    modifier?: number;
 };
 
 export class Die {
@@ -46,7 +47,7 @@ export class Die {
                 }
             }
             rolls.push({
-                value,
+                value: value === 1 ? value : value + (options?.modifier ?? 0),
                 isCritialFailure: value === 1,
                 isCriticalSuccess: value === this.sides,
                 isLucky: options?.isLucky ?? false,

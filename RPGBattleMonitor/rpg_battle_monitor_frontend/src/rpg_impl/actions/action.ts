@@ -10,6 +10,7 @@ import { GDieParser } from "../rolls/die_parser";
 import { RpgToken } from "../tokens/rpg_token";
 import { RpgTokenData } from "../tokens/rpg_token_data";
 import { HealthState } from "../characters_stats/health_state";
+import { AbilityScoreType } from "../characters_stats/ability_score";
 
 export type TargetingType = "self" | "ally" | "hostile";
 export type AreaOfEffectType = "line" | "cone" | "cube" | "sphere" | "cylinder";
@@ -87,6 +88,7 @@ export abstract class Action<T = DamageResult[], D = undefined> {
     public targeting: TargetingType[];
     public areaOfEffect?: AreaOfEffectType;
     public actionType: ActionType = "action";
+    public abilityScoreModifierType: AbilityScoreType = AbilityScoreType.Strength;
 
     protected die: Die;
 
@@ -128,6 +130,7 @@ export abstract class Action<T = DamageResult[], D = undefined> {
     ): Partial<SingleTargetAttackDamage> {
         // TODO: Read lucky value from some other place
         const attackRollResults = this.attackRoll({
+            modifier: attacker.tokenData.getAttackModifier(this),
             isLucky: false,
         });
         printRolls("Attack rolls", attackRollResults);
