@@ -30,9 +30,9 @@ export type ApplyDamageResult = {
     applyDamage: () => ITargetable[];
 };
 
-export type ActionCallbacks = {
-    onFinished?: ActionOnFinished;
-    onCanceled?: ActionOnCanceled;
+export type ActionCallbacks<T = DamageResult[]> = {
+    onFinished?: ActionOnFinished<T>;
+    onCanceled?: ActionOnCanceled<T>;
     onAttackRollCallback?: (
         attackRollResults: Rolls,
         initiator: RpgToken,
@@ -43,17 +43,14 @@ export type ActionCallbacks = {
         initiator: RpgToken,
         target: ITargetable,
     ) => void;
-    onTargetDamageCallback?: (
-        initiator: RpgToken,
-        targets: DamageResult[],
-    ) => void;
-    actCallback?: (damageResults: DamageResult[], act: () => void) => void;
+    onTargetDamageCallback?: (initiator: RpgToken, targets: T) => void;
+    actCallback?: (damageResults: T, act: () => void) => void;
 };
 
-export type ActionOnFinished = (
+export type ActionOnFinished<T> = (
     initiator: RpgToken,
     target: ITargetable | ITargetable[],
-    action: Action,
+    action: Action<T>,
     data?: {
         descriminator: string;
         values: unknown;
@@ -69,7 +66,10 @@ export type SingleTargetAttackDamage = {
     damageRolls: Maybe<Rolls>;
 };
 
-export type ActionOnCanceled = (initiator: RpgToken, action: Action) => void;
+export type ActionOnCanceled<T> = (
+    initiator: RpgToken,
+    action: Action<T>,
+) => void;
 
 export type ActionOptions = {
     baseDamage: string;
@@ -80,7 +80,7 @@ export type ActionOptions = {
     actionType?: ActionType;
 };
 
-export abstract class Action {
+export abstract class Action<T = DamageResult[]> {
     public baseDamage: string;
     public rangeFt: number;
     public damageType: string;
@@ -118,13 +118,13 @@ export abstract class Action {
     public abstract damageTarget(
         attacker: RpgToken,
         target: ITargetable | ITargetable[],
-        callbacks?: ActionCallbacks,
+        callbacks?: ActionCallbacks<T>,
     ): ITargetable[] | ApplyDamageResult;
 
     protected getSingleTargetAttackDamage(
         attacker: RpgToken,
         target: ITargetable,
-        callbacks?: ActionCallbacks,
+        callbacks?: ActionCallbacks<T>,
     ): Partial<SingleTargetAttackDamage> {
         // TODO: Read lucky value from some other place
         const attackRollResults = this.attackRoll({
@@ -257,6 +257,6 @@ export abstract class Action {
         target: RpgToken,
         initiator: RpgToken,
         event?: FederatedPointerEvent,
-        callbacks?: ActionCallbacks,
+        callbacks?: ActionCallbacks<T>,
     ): void;
 }

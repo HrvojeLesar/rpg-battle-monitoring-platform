@@ -6,32 +6,60 @@ import { IconD4 } from "@/rpg_impl/icons/D4";
 import { IconD6 } from "@/rpg_impl/icons/D6";
 import { IconD8 } from "@/rpg_impl/icons/D8";
 import { DiceIconProps } from "@/rpg_impl/icons/diceIconProps";
-import { GD20 } from "@/rpg_impl/rolls/dice";
+import { GD20, Roll, Rolls } from "@/rpg_impl/rolls/dice";
 import { Button, Flex, Tabs } from "@mantine/core";
 import { useSet } from "@mantine/hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export type OpenDiceRollWindowProps = {
+type DiceRollWindow = {
     onClose: () => void;
     act: () => void;
+    title?: string;
+    uniqueName?: string;
+};
+
+export type OpenAttackDiceRollWindowProps = DiceRollWindow & {
     damageResults: DamageResult[];
 };
 
-export const openDiceRollWindow = (
-    props: OpenDiceRollWindowProps,
+export const openAttackDiceRollWindow = (
+    props: OpenAttackDiceRollWindowProps,
 ): WindowEntry => {
-    const { onClose } = props;
+    const { onClose, title, uniqueName } = props;
     return {
-        title: "Dice roll window",
-        content: <DiceCollection {...props} />,
-        name: "dice-roll-window",
+        title: title ?? "Dice roll window",
+        content: <AttackDiceCollection {...props} />,
+        name: uniqueName ?? "dice-roll-window",
         onClose: onClose,
     };
 };
 
-export type DiceCollectionProps = OpenDiceRollWindowProps;
+export type OpenDiceRollWindowProps = DiceRollWindow & {
+    results: Rolls;
+    onFinished?: ({
+        rolls,
+        roll,
+        act,
+    }: {
+        rolls: Rolls;
+        roll: Roll;
+        act: () => void;
+    }) => void;
+};
 
-export const DiceCollection = (props: DiceCollectionProps) => {
+export const openRollWindow = (props: OpenDiceRollWindowProps): WindowEntry => {
+    const { onClose, title, uniqueName } = props;
+    return {
+        title: title ?? "Dice roll window",
+        content: <DiceCollection {...props} />,
+        name: uniqueName ?? "dice-roll-window",
+        onClose: onClose,
+    };
+};
+
+export type AttackDiceCollectionProps = OpenAttackDiceRollWindowProps;
+
+export const AttackDiceCollection = (props: AttackDiceCollectionProps) => {
     const { act, damageResults } = props;
     const [shouldRollAttack, setShouldRollAttack] = useState(false);
     const [shouldRollDamage, setShouldRollDamage] = useState(false);
@@ -52,6 +80,11 @@ export const DiceCollection = (props: DiceCollectionProps) => {
 
     const damageRolls = damageResults.filter(
         (result) => result.damage.damageRolls !== undefined,
+    );
+
+    const attackRollCount = attackRolls.reduce(
+        (acc, result) => acc + (result.damage.attackRolls?.rolls.length ?? 0),
+        0,
     );
 
     const displayAttackRolls = () => {
@@ -121,9 +154,10 @@ export const DiceCollection = (props: DiceCollectionProps) => {
         <Tabs defaultValue="attack">
             <Tabs.List>
                 <Tabs.Tab value="attack">Roll attack</Tabs.Tab>
-                {finishedAttackRollCount == damageRolls.length && (
-                    <Tabs.Tab value="damage">Roll damage</Tabs.Tab>
-                )}
+                {finishedAttackRollCount == attackRollCount &&
+                    damageRolls.length > 0 && (
+                        <Tabs.Tab value="damage">Roll damage</Tabs.Tab>
+                    )}
             </Tabs.List>
             <Tabs.Panel value="attack">
                 <Flex direction="column" gap="xs">
@@ -135,11 +169,11 @@ export const DiceCollection = (props: DiceCollectionProps) => {
                             setShouldRollAttack(true);
                         }}
                     >
-                        Roll | Finished: {finishedAttackRollCount}
+                        Roll
                     </Button>
                 </Flex>
             </Tabs.Panel>
-            {finishedAttackRollCount == damageRolls.length && (
+            {finishedAttackRollCount == attackRollCount && (
                 <Tabs.Panel value="damage">
                     <Flex direction="column" gap="xs">
                         {displayDamageRolls()}
@@ -150,12 +184,60 @@ export const DiceCollection = (props: DiceCollectionProps) => {
                                 setShouldRollDamage(true);
                             }}
                         >
-                            Roll damage | Finished: {finishedDamageRollCount}
+                            Roll damage
                         </Button>
                     </Flex>
                 </Tabs.Panel>
             )}
         </Tabs>
+    );
+};
+
+export type DiceCollectionProps = OpenDiceRollWindowProps;
+
+export const DiceCollection = (props: DiceCollectionProps) => {
+    const { act, results, onFinished } = props;
+
+    const [shouldRoll, setShouldRoll] = useState(false);
+
+    const displayRolls = () => {
+        const die = results.die;
+        return (
+            <>
+                {results.rolls.map((result, idx) => {
+                    return (
+                        <DiceRoll
+                            key={idx}
+                            diceSides={die.sides}
+                            targetResult={result.value}
+                            roll={shouldRoll}
+                            onFinished={() => {
+                                onFinished?.({
+                                    rolls: results,
+                                    roll: result,
+                                    act,
+                                });
+                            }}
+                        />
+                    );
+                })}
+            </>
+        );
+    };
+
+    return (
+        <Flex direction="column" gap="xs">
+            {displayRolls()}
+            <Button
+                mb="xs"
+                disabled={shouldRoll}
+                onClick={() => {
+                    setShouldRoll(true);
+                }}
+            >
+                Roll
+            </Button>
+        </Flex>
     );
 };
 

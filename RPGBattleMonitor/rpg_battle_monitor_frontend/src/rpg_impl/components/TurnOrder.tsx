@@ -38,7 +38,10 @@ import { GBoard, GEventEmitter } from "@/board_core/board";
 import { RpgTokenData } from "../tokens/rpg_token_data";
 import { IMessagable } from "@/board_core/interfaces/messagable";
 import { windowAtoms } from "@/board_react_wrapper/stores/window_store";
-import { openDiceRollWindow } from "./windows/DiceRollWindow";
+import {
+    openAttackDiceRollWindow,
+    openRollWindow,
+} from "./windows/DiceRollWindow";
 
 export const TurnOrderIcon = () => {
     return <IconSwords size={20} />;
@@ -234,7 +237,7 @@ export const TurnOrder = () => {
                                     actCallback: (damageResults, act) => {
                                         if (damageResults.length > 0) {
                                             openWindow(
-                                                openDiceRollWindow({
+                                                openAttackDiceRollWindow({
                                                     onClose: () => {
                                                         act();
                                                     },
@@ -242,6 +245,8 @@ export const TurnOrder = () => {
                                                     damageResults,
                                                 }),
                                             );
+                                        } else {
+                                            act();
                                         }
                                     },
                                 });
@@ -249,33 +254,10 @@ export const TurnOrder = () => {
                         >
                             Maul attack
                         </Button>
-                        <Button
-                            disabled={
-                                turnOrder.getTokenOnTurn()?.token.tokenData
-                                    .healthState !== HealthState.Unconcious
-                            }
-                            onClick={() => {
-                                // TODO: emit message that other clients can handle and sync state
-                                const action = new DeathSaveAction();
-                                const onTurnEntry = turnOrder.getTokenOnTurn();
-                                if (onTurnEntry === undefined) {
-                                    return;
-                                }
-
-                                const token = onTurnEntry.token;
-                                action.doAction(token, token, undefined, {
-                                    onFinished: () => {
-                                        refreshTurnOrder();
-                                        queueEntityUpdate(() => {
-                                            turnOrder.nextTurn();
-                                            return [turnOrder, token.tokenData];
-                                        });
-                                    },
-                                });
-                            }}
-                        >
-                            Roll death save
-                        </Button>
+                        <ActionDeathSave
+                            turnOrder={turnOrder}
+                            refreshTurnOrder={refreshTurnOrder}
+                        />
                         <Button
                             onClick={() => {
                                 turnOrder.scene.targetSelectionHandler.cancelAction();
@@ -509,3 +491,56 @@ TokenTurnEntry.Surprised = Surprised;
 TokenTurnEntry.Speed = Speed;
 TokenTurnEntry.Initiative = Initiative;
 TokenTurnEntry.DeathSave = DeathSave;
+
+export type ActionDeathSaveProps = {
+    turnOrder: RPGTurnOrder;
+    refreshTurnOrder: () => void;
+};
+
+const ActionDeathSave = ({
+    turnOrder,
+    refreshTurnOrder,
+}: ActionDeathSaveProps) => {
+    const openWindow = useSetAtom(windowAtoms.openWindow);
+
+    return (
+        <Button
+            disabled={
+                turnOrder.getTokenOnTurn()?.token.tokenData.healthState !==
+                HealthState.Unconcious
+            }
+            onClick={() => {
+                // TODO: emit message that other clients can handle and sync state
+                const action = new DeathSaveAction();
+                const onTurnEntry = turnOrder.getTokenOnTurn();
+                if (onTurnEntry === undefined) {
+                    return;
+                }
+
+                const token = onTurnEntry.token;
+                action.doAction(token, token, undefined, {
+                    onFinished: () => {
+                        refreshTurnOrder();
+                        queueEntityUpdate(() => {
+                            turnOrder.nextTurn();
+                            return [turnOrder, token.tokenData];
+                        });
+                    },
+                    actCallback: (rolls, act) => {
+                        openWindow(
+                            openRollWindow({
+                                onClose: () => {
+                                    act();
+                                },
+                                act,
+                                results: rolls,
+                            }),
+                        );
+                    },
+                });
+            }}
+        >
+            Roll death save
+        </Button>
+    );
+};

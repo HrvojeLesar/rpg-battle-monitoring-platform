@@ -240,4 +240,9 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
     public set healthState(value: HealthState) {
         this._healthState = value;
     }
+
+    public resetDeathSaves(): void {
+        this.deathSaves.successes = 0;
+        this.deathSaves.failures = 0;
+    }
 }

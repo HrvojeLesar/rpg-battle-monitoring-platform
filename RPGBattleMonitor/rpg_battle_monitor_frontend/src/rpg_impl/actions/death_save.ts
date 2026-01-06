@@ -2,13 +2,13 @@ import { FederatedPointerEvent } from "pixi.js";
 import { ITargetable } from "../interface/targetable";
 import { RpgToken } from "../tokens/rpg_token";
 import { Action, ActionCallbacks } from "./action";
-import { printRolls } from "../rolls/dice";
+import { printRolls, Rolls } from "../rolls/dice";
 import {
     calculateNextHealthState,
     HealthState,
 } from "../characters_stats/health_state";
 
-export class DeathSave extends Action {
+export class DeathSave extends Action<Rolls> {
     public constructor() {
         super({
             baseDamage: "1d20",
@@ -26,7 +26,7 @@ export class DeathSave extends Action {
         target: RpgToken,
         initiator: RpgToken,
         _event?: FederatedPointerEvent,
-        callbacks?: ActionCallbacks,
+        callbacks?: ActionCallbacks<Rolls>,
     ): void {
         const result = this.rollDamage();
         printRolls("Death save", result);
@@ -36,7 +36,6 @@ export class DeathSave extends Action {
         if (deathSave.value >= 10) {
             if (deathSave.isCriticalSuccess) {
                 initiator.tokenData.hitPoints.current = 1;
-                initiator.tokenData.healthState = HealthState.Healthy;
             }
             initiator.tokenData.deathSaves.successes += 1;
         } else {
@@ -52,12 +51,36 @@ export class DeathSave extends Action {
         );
 
         if (nextHealthState !== initiator.tokenData.healthState) {
+            if (
+                nextHealthState === HealthState.Stabilized ||
+                nextHealthState === HealthState.Dead 
+            ) {
+                initiator.tokenData.resetDeathSaves();
+            }
             initiator.tokenData.healthState = nextHealthState;
         }
 
-        callbacks?.onFinished?.(initiator, target, this, {
-            descriminator: "deathSave",
-            values: undefined,
-        });
+        if (deathSave.isCriticalSuccess) {
+            initiator.tokenData.healthState = HealthState.Healthy;
+            initiator.tokenData.resetDeathSaves();
+        }
+
+        const acted = false;
+        const act = () => {
+            if (acted) {
+                return;
+            }
+
+            callbacks?.onFinished?.(initiator, target, this, {
+                descriminator: "deathSave",
+                values: undefined,
+            });
+        };
+
+        if (callbacks?.actCallback !== undefined) {
+            callbacks.actCallback(result, act);
+        } else {
+            act();
+        }
     }
 }

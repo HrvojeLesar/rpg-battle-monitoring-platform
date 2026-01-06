@@ -167,7 +167,9 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
 
     public get actionableTokens(): Readonly<TurnOrderEntry[]> {
         return this._tokens.filter(
-            (entry) => entry.token.tokenData.healthState !== HealthState.Dead,
+            (entry) =>
+                entry.token.tokenData.healthState !== HealthState.Dead &&
+                entry.token.tokenData.healthState !== HealthState.Stabilized,
         );
     }
 
@@ -357,6 +359,10 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
             nextToken.token.tokenData.healthState === HealthState.Dead &&
             !this.areAllTokensOutOfAction()
         ) {
+            this.nextTurn();
+        }
+
+        if (!this.isActionable(nextToken)) {
             this.nextTurn();
         }
     }
