@@ -11,7 +11,7 @@ import { doAction } from "./attack_do_action_impl";
 export class Maul extends Action {
     public constructor() {
         super({
-            baseDamage: "1d8",
+            baseDamage: "2d6",
             rangeFt: 5,
             damageType: "bludgeoning",
             targeting: ["hostile"],

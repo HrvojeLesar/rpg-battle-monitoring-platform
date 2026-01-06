@@ -88,7 +88,8 @@ export abstract class Action<T = DamageResult[], D = undefined> {
     public targeting: TargetingType[];
     public areaOfEffect?: AreaOfEffectType;
     public actionType: ActionType = "action";
-    public abilityScoreModifierType: AbilityScoreType = AbilityScoreType.Strength;
+    public abilityScoreModifierType: AbilityScoreType =
+        AbilityScoreType.Strength;
 
     protected die: Die;
 

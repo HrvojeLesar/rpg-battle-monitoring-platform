@@ -62,6 +62,8 @@ import {
     SkillType,
     skillTypeToString,
 } from "@/rpg_impl/characters_stats/skills";
+import { EquipmentMultiselect } from "../EquipmentMultiselect";
+import { PREDEFINED_ITEMS } from "@/rpg_impl/characters_stats/equipment";
 
 export const RPG_TOKEN_WINDOW_PREFIX = "rpg-token-";
 
@@ -804,6 +806,16 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
         );
     };
 
+    const equipmentInfo = () => {
+        return (
+            <Fieldset legend="Equipment">
+                <Flex direction="column" gap="xs" wrap="wrap">
+                    <EquipmentMultiselect data={PREDEFINED_ITEMS} />
+                </Flex>
+            </Fieldset>
+        );
+    };
+
     return (
         <Stack gap="xs" pb="xs" justify="center" align="stretch">
             <Fieldset style={{ overflow: "auto" }} legend="Character Info">
@@ -811,8 +823,8 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                     {generalInfo()}
                     {abilityScoreInfo()}
                     {combatInfo()}
+                    {equipmentInfo()}
                     {metaInfo()}
-                    <Text>TODO: Equipment</Text>
                 </Flex>
             </Fieldset>
             {isUpdated() && (
