@@ -72,7 +72,6 @@ const ContainerProperty = (props: ContainerPropertyProps) => {
 
     const [snapping, setSnapping] = useState(container.isSnapping);
     const [draggable, setDraggable] = useState(container.isDraggable);
-    const [selectable, setSelectable] = useState(container.isSelectable);
     const [resizable, setResizable] = useState(container.isResizable);
 
     return (
@@ -100,15 +99,6 @@ const ContainerProperty = (props: ContainerPropertyProps) => {
                 }}
             >
                 {draggable ? "Draggable" : "Not draggable"}
-            </Button>
-            <Button
-                onClick={() => {
-                    container.isSelectable = !container.isSelectable;
-                    setSelectable(container.isSelectable);
-                    updateFn(container);
-                }}
-            >
-                {selectable ? "Selectable" : "Not selectable"}
             </Button>
             <Button
                 onClick={() => {

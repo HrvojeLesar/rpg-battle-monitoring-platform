@@ -13,13 +13,14 @@ import {
     IconStackMiddle,
 } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { ReactNode } from "react";
+import { Fragment, ReactNode } from "react";
 
 export type LayerSelectOption = {
     key: string;
     label: string;
     comboboxItem?: ReactNode;
     icon?: ReactNode;
+    showToNonDm: boolean;
 };
 
 export type LayerSelectProps = {
@@ -38,6 +39,7 @@ const defaultLayers: LayerSelectOption[] = [
                 Tokens layer
             </Flex>
         ),
+        showToNonDm: true,
     },
     {
         key: "grid",
@@ -48,6 +50,7 @@ const defaultLayers: LayerSelectOption[] = [
                 Grid layer
             </Flex>
         ),
+        showToNonDm: false,
     },
     {
         key: "gridBackground",
@@ -58,6 +61,7 @@ const defaultLayers: LayerSelectOption[] = [
                 Grid background layer
             </Flex>
         ),
+        showToNonDm: false,
     },
 ];
 
@@ -73,11 +77,14 @@ export const LayerSelect = (props: LayerSelectProps) => {
         onDropdownClose: () => combobox.resetSelectedOption(),
     });
 
-    const options = layers.map((layer) => (
-        <Combobox.Option value={layer.key} key={layer.key}>
-            {layer.comboboxItem ?? layer.label}
-        </Combobox.Option>
-    ));
+    const options = layers.map((layer) => {
+        if (!GBoard.isDm && !layer.showToNonDm) return <Fragment key={layer.key}></Fragment>;
+        return (
+            <Combobox.Option value={layer.key} key={layer.key}>
+                {layer.comboboxItem ?? layer.label}
+            </Combobox.Option>
+        );
+    });
 
     const currentLayerName = () => {
         const layerName = currentSceneLayer?.name;

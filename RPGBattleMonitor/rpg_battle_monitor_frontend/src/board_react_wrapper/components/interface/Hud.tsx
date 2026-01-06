@@ -47,7 +47,6 @@ const HudLeft = () => {
                         return;
                     }
 
-                    // @ts-ignore
                     selection.getOccupiedCells();
 
                     const pos = selection.position.clone();
@@ -107,7 +106,6 @@ const HudLeft = () => {
             <Flex direction="column" gap="xs" style={{ overflow: "auto" }}>
                 <SceneSelection />
                 <LayerSelect />
-                {focusOnSelection()}
                 <SelectionControls>
                     <SelectionControls.DeleteSelection />
                     <SelectionControls.ContainerProperties />
