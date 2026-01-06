@@ -80,7 +80,7 @@ export type ActionOptions = {
     actionType?: ActionType;
 };
 
-export abstract class Action<T = DamageResult[]> {
+export abstract class Action<T = DamageResult[], D = undefined> {
     public baseDamage: string;
     public rangeFt: number;
     public damageType: string;
@@ -258,5 +258,6 @@ export abstract class Action<T = DamageResult[]> {
         initiator: RpgToken,
         event?: FederatedPointerEvent,
         callbacks?: ActionCallbacks<T>,
+        otherData?: D,
     ): void;
 }

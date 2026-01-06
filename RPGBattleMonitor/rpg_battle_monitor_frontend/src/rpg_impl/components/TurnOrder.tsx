@@ -42,6 +42,7 @@ import {
     openAttackDiceRollWindow,
     openRollWindow,
 } from "./windows/DiceRollWindow";
+import { Dash } from "../actions/dash";
 
 export const TurnOrderIcon = () => {
     return <IconSwords size={20} />;
@@ -253,6 +254,37 @@ export const TurnOrder = () => {
                             }}
                         >
                             Maul attack
+                        </Button>
+                        <Button
+                            disabled={
+                                turnOrder.getTokenOnTurn()?.token.tokenData
+                                    .healthState !== HealthState.Healthy ||
+                                turnOrder.getTokenOnTurn()?.action === 0
+                            }
+                            onClick={() => {
+                                // TODO: emit message that other clients can handle and sync state
+                                const action = new Dash();
+                                const onTurnEntry = turnOrder.getTokenOnTurn();
+                                if (onTurnEntry === undefined) {
+                                    return;
+                                }
+
+                                turnOrder.doAction(
+                                    onTurnEntry.token,
+                                    action,
+                                    {
+                                        onFinished: () => {
+                                            refreshTurnOrder();
+                                            queueEntityUpdate(() => {
+                                                return turnOrder;
+                                            });
+                                        },
+                                    },
+                                    turnOrder.getTokenOnTurn(),
+                                );
+                            }}
+                        >
+                            Dash
                         </Button>
                         <ActionDeathSave
                             turnOrder={turnOrder}

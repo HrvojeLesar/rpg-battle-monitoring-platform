@@ -6,7 +6,7 @@ import {
     DamageResult,
 } from "../action";
 import { FederatedPointerEvent } from "pixi.js";
-import { queueEntityUpdate } from "@/websocket/websocket";
+import { doAction } from "./attack_do_action_impl";
 
 export class Maul extends Action {
     public constructor() {
@@ -77,53 +77,9 @@ export class Maul extends Action {
     public doAction(
         target: RpgToken,
         initiator: RpgToken,
-        _event?: FederatedPointerEvent,
+        event?: FederatedPointerEvent,
         callbacks?: ActionCallbacks,
     ): void {
-        const damageTargetResult = this.damageTarget(
-            initiator,
-            target,
-            callbacks,
-        );
-
-        let damagedTargets: RpgToken[] = [];
-        if (Array.isArray(damageTargetResult)) {
-            damagedTargets = damageTargetResult;
-        }
-
-        let acted = false;
-        const act = () => {
-            if (acted) {
-                return;
-            }
-
-            if (!Array.isArray(damageTargetResult)) {
-                damagedTargets = damageTargetResult
-                    .applyDamage()
-                    .filter((target) => target instanceof RpgToken);
-            }
-
-            queueEntityUpdate(() => {
-                return damagedTargets
-                    .filter((target) => target instanceof RpgToken)
-                    .map((target) => target.tokenData);
-            });
-
-            callbacks?.onFinished?.(initiator, target, this, {
-                descriminator: "damagedTargets",
-                values: damagedTargets,
-            });
-
-            acted = true;
-        };
-
-        if (
-            callbacks?.actCallback !== undefined &&
-            !Array.isArray(damageTargetResult)
-        ) {
-            callbacks.actCallback(damageTargetResult.damageResults, act);
-        } else {
-            act();
-        }
+        doAction(this, target, initiator, event, callbacks);
     }
 }

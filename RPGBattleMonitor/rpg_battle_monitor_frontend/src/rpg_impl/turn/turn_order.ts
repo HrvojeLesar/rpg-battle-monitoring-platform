@@ -371,26 +371,55 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
         token: RpgToken,
         action: Action,
         callbacks?: ActionCallbacks,
+        otherData?: any,
     ): void {
         if (this.isInCombat() && !this.isDoActionValid(token, action)) {
             return;
         }
 
-        this.scene.targetSelectionHandler.doAction(token, action, {
-            ...callbacks,
-            onFinished: (initiator, target, action) => {
-                const entry = this.getToken(token);
-                if (entry !== undefined) {
-                    if (action.actionType === "action") {
-                        entry.action--;
-                    } else if (action.actionType === "bonusAction") {
-                        entry.bonusAction--;
+        if (
+            action.targeting.includes("self") ||
+            action.targeting.includes("ally") ||
+            action.targeting.includes("hostile")
+        ) {
+            this.scene.targetSelectionHandler.doAction(token, action, {
+                ...callbacks,
+                onFinished: (initiator, target, action) => {
+                    const entry = this.getToken(token);
+                    if (entry !== undefined) {
+                        if (action.actionType === "action") {
+                            entry.action--;
+                        } else if (action.actionType === "bonusAction") {
+                            entry.bonusAction--;
+                        }
                     }
-                }
 
-                callbacks?.onFinished?.(initiator, target, action);
-            },
-        });
+                    callbacks?.onFinished?.(initiator, target, action);
+                },
+            });
+        } else {
+            action.doAction(
+                token,
+                token,
+                undefined,
+                {
+                    ...callbacks,
+                    onFinished: (initiator, target, action) => {
+                        const entry = this.getToken(token);
+                        if (entry !== undefined) {
+                            if (action.actionType === "action") {
+                                entry.action--;
+                            } else if (action.actionType === "bonusAction") {
+                                entry.bonusAction--;
+                            }
+                        }
+
+                        callbacks?.onFinished?.(initiator, target, action);
+                    },
+                },
+                otherData,
+            );
+        }
     }
 
     protected isDoActionValid(token: RpgToken, action: Action): boolean {
