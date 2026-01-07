@@ -346,6 +346,7 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
             );
             nextToken.surprised = false;
             this.nextTurn();
+            return;
         }
 
         if (this.areAllTokensOutOfAction()) {
@@ -353,6 +354,7 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
                 infoNotification("Stoping combat", "No token can act"),
             );
             this.stopCombat();
+            return;
         }
 
         if (
@@ -360,10 +362,12 @@ export class TurnOrder implements IMessagable<TurnOrderAttributes> {
             !this.areAllTokensOutOfAction()
         ) {
             this.nextTurn();
+            return;
         }
 
         if (!this.isActionable(nextToken)) {
             this.nextTurn();
+            return;
         }
     }
 

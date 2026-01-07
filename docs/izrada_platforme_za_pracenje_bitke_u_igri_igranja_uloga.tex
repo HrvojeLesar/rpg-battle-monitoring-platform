@@ -166,10 +166,10 @@ no cijeli kontekst ne mora biti razumljiv u spisu, već će biti opisan u nekom 
     \item \textbf{NPC} Non-Player Character
     \item \textbf{D20} Kockica s dvadeset strana
     \item \textbf{D2, D4, D6, D8, D10, D12} Kockice s određenim brojem strana
-    \item \textbf{AC} Armour class, klasa oklopa
-    \item \textbf{DC} Difficulty class, težina zadatka
-    \item \textbf{HP} Hit points, životni bodovi
-    \item \textbf{XP} Experience points, bodovi iskustva
+    \item \textbf{AC} Klasa oklopa, armour class
+    \item \textbf{DC} Težina zadatka, difficulty class
+    \item \textbf{HP} Životni bodovi, hit points
+    \item \textbf{XP} Bodovi iskustva, Experience points
     \item \textbf{Ability score} Sposobnosti, rezultat sposobnosti
     \item \textbf{Hit die} Kockica za životne bodove
 \end{itemize}
@@ -1971,7 +1971,7 @@ pozicionirati ih na bilo koji dio scene te uređivati neke dijelove scene.
     \label{fig:dijagram-slucajeva-koristenja-aplikacije}
 \end{figure}
 
-\section{Sustav scena}
+\section{Sustav scena i korisničko sučelje}
 \label{sec:sustav-scena}
 
 Scene su temelj aplikacije, svaka scena je unikatna, može sadržavati različite tokene te
@@ -2075,6 +2075,185 @@ sva polja pozadine jednaka su poljima na pozadinskoj slici.
     \caption{Pozadina scene}
     \label{fig:pozadina-scene}
 \end{figure}
+
+Klikom na karticu \texttt{Token Data} otvara se prikaz svih kreiranih tokena.
+Tokeni su odvojeni u dvije grupe, \texttt{Tokens} i \texttt{Decoration tokens}.
+Trenutno je samo kreiran jedan dekoracijski token, korišten za pozadinu scene dok ne postoji ni jedan token za igru.
+Igrači imaju pregled tokena koje su sami kreirali te tokene koje im je dodijelio DM.
+Time je osiguran prikaz samo relevantnih tokena za igrače dok DM ima pregled svih tokena.
+Iz ove kartice moguće je dodavati tokene na scenu, na isti način kako je već bilo prikazano na slici \ref{fig:kreiranje-pozadinskog-tokena-na-sceni}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{slike/scene/08-token-data-tab.png}
+    \caption{Pregled tokena}
+    \label{fig:pregled-tokena}
+\end{figure}
+
+Novi tokeni se kreiraju pritiskom na tipku \texttt{Create new token}, vidljivo na slici \ref{fig:pregled-tokena}.
+Pritiskom tipke otvara se prozor za postavljanje tokena, Postavke imitiraju character sheet.
+Na slici \ref{fig:postavke-tokena} rekreiran je lik iz poglavlja \ref{section:primjer-lika}.
+Razina tokena je automatski izračunata prema broju bodova iskustva, upisane vrijednosti za sposobnosti automatski
+izračunavaju odgovarajuće modifikatore, na primjer, lik ima 15 snage što odgovara modifikatoru vrijednosti +2.
+Stručnosti u vještinama i bacanjima za spas također imaju automatski dodan modifikator odgovarajuće sposobnosti
+te dodatni modifikator vrijednosti za stručnost.
+
+U ovom prozoru se također može postaviti veličina lika, koja će odgovarati veličini lika na scenu.
+Veći likovi će zauzimati više prostora na sceni, kao što je definirano tablicom kategorija veličina (tablica  \ref{tab:kategorije-velicine}).
+Također moguće je postaviti opremu koju token koristi, ovime se određuje koji napadi će biti dostupni
+tokenu tokom bitke.
+Važan dio postavka je \texttt{tags} grupa. 
+Postavljanjem tagova DM može označiti koji token će biti dio:
+\begin{itemize}
+    \item \textbf{družine igrača}: \texttt{party} tag,
+    \item \textbf{neprijatelji}: \texttt{hostile-npc} tag,
+    \item \textbf{prijateljski NPC-ovi}: \texttt{npc} tag,
+    \item \textbf{posebni neprijatelji}: \texttt{special-npc-hostile}. 
+        Ova vrsta neprijatelja će padom na nula životnih bodova imati šansu
+        za bacanje spasa od smrti, objašnjenog u poglavlju \ref{section:steta-i-iscjeljivanje},
+        jednako kao članovi družine, dok tokeni označeni s \texttt{hostile-npc} tagom umiru
+        odmah nakon pada na nula životnih bodova.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{slike/scene/09-vom-character.png}
+    \caption{Isječak postavka tokena}
+    \label{fig:postavke-tokena}
+\end{figure}
+
+\section{Primjer bitke}
+\label{sec:primjer-bitke}
+
+U aplikaciji bitke se odvijaju između odabranih tokena na nekoj sceni.
+Svaka scena može imati samo jednu aktivnu bitku, no u bitci može sudjelovati
+bilo koji broj tokena.
+Da bi tokeni bili dodani u bitku potrebno ih je označiti.
+Tokeni se mogu označiti na dva načina,
+klikom na određeni token ili crtanjem površine u kojoj će svi tokeni biti označeni.
+Token je označen  kad ima crveni obrub oko sličice, ako se radi o skupini označenih tokena,
+svaki token će imati svoj obrub i cijela skupina će imati dodatni crveni obrub.
+
+Na slici \ref{fig:odabir-tokena-za-bitku}
+je prikazano označavanje više tokena.
+Označeni tokeni mogu biti dodani u bitku klikom na gumb \texttt{Add selection to turn order}
+unutar \texttt{Turn order} kartice. Proces je jednak za dodavanje jednog ili više tokena
+u bitku.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{slike/scene/10-battle-selection.png}
+    \caption{Odabir tokena za bitku}
+    \label{fig:odabir-tokena-za-bitku}
+\end{figure}
+
+Nakon dodavanja tokena u borbu popunjava se grupa \texttt{Tokens in encounter}.
+Grupa prikazuje sve tokene koji su dodani u borbu, status borbe,
+ako je započela ili nije te brzinu i inicijativu svakog tokena.
+Prije početka borbe DM može postaviti koji tokeni će biti iznenađeni.
+Iznenađeni tokeni će automatski biti preskočeni kad prvi put dođu na red.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{slike/scene/11-encounter-out-of-combat.png}
+    \caption{Tokeni u borbi}
+    \label{fig:tokeni-u-borbi}
+\end{figure}
+
+Bitka će započeti klikom na tipku \texttt{Start combat}.
+Pri pokretanju bitke svakom tokenu će se izračunati inicijativa i redoslijed
+poteza će biti postavljen i prikazan.
+Token koji je trenutno na potezu ima bijeli obrub u pregledu trenutnog poteza
+te je jedini token koji se može kretati po sceni.
+Pokušavanjem kretanja tokena koji trenutno nije na redu, korisnik dobiva poruku
+o greški i pozicija pomaknutog tokena nije promjenjena.
+
+Prikaz za brzinu se dinamički mijenja kako token iskoristi briznu za trenutni potez.
+Nakon ponovnog dolaska na potez brzina će biti resitirana na inicijalnu vrijednost
+brzine koju taj token ima.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{slike/scene/12-encounter-in-combat.png}
+    \caption{Početak borbe}
+    \label{fig:pocetak-borbe}
+\end{figure}
+
+Tokom borbe tokeni imaju određenu količinu brzine koju mogu utrošiti za premještanje na drugu poziciju.
+Polja preko kojih će token preći su označena zelenom bojom, token ne može završiti svoje kretanje na
+istom polju kao neki drugi token. U tom slučaju korisnik će dobiti grešku i token će biti resitiran na
+početnu poziciju, bez da izgubi ili iskoristi brzinu.
+Tokom odabira pozicije, ispod tokena je prikazan indikator udaljenosti koju će token preći, jednak broj
+prikazan u indikatoru će na kraju pomaka biti oduzet od tokenove trenutne brzine.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{slike/scene/13-moving-in-battle.png}
+    \caption{Pomicanje tokom borbe}
+    \label{fig:pomicanje-tokom-borbe}
+\end{figure}
+
+Token koji je na potezu može poduzeti akcije koje su pridodane tom tokenu.
+Na primjer, na slijedećoj slici igrač je na potezu (token na potezu ima indikator
+iznad sličice).
+Igrač može odabrati neku od akcija koje ima na izbor ili završiti potez.
+Na slici je igrač odabra napasti neprijatelja koristeći napad \texttt{Handaxe}.
+Klikom na napad automatski su crvenom bojom obrubljeni tokeni koje može napasti.
+Napad ima domet od 5 stopa, što znači da može napasti samo tokene udaljene jedno polje.
+Ovo je vidljivo na slici, tokeni pored su označeni dok token izvan dometa nema 
+crveni obrub.
+
+Da bi igrač odabrao metu napada mora kliknuti dva puta na metu.
+Prvim klikom biti će nacrtana crta između napadača i mete, dok će drugim
+klikom napad biti izvršen.
+Ovaj sustav duplog odabira je kreiran kako bi igrač mogao promjeniti metu u slučaju da se
+predomisli i želi napasti neku drugu metu. 
+Drugu prednost ovakvog pristupa je vezana uz napade koji imaju veći doseg.
+Aplikacija ne implementira zidove te će kao validne mete napada prikazati sve tokene u
+dosegu, to znači da je moguće napasti tokene iza zida. Zidovi su definirani pozadinom
+scene te je na igračima i DM-u da prate ako neki napad ne bi trebao biti moguć.
+Prikazom crte između napadača i mete je lakše identificirati ako je napad s većim dosegom uistinu izvodiv.
+
+Osim odabira akcije, igrači imaju uvid o broju akcija i bonus akcija koje još mogu iskoristiti tokom poteza.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{slike/scene/14-actions.png}
+    \caption{Dostupne akcije}
+    \label{fig:dostupne-akcije}
+\end{figure}
+
+Nakon odabira mete igrač baca kockicu da vidi ako će napad uspješno pogoditi metu i ako će 
+uspjeti nanijeti štetu meti. Klikom na tipku \texttt{Roll} kockica će biti bačena i 
+nakon nekog vremena će prikazati dobiveni broj, ako je napad uspješan u prozorčiću će se prikazati nova
+kartica \texttt{Roll damage}. U novoj kartici prikazana je kockica ili kockice za određivanje štete.
+Bacanje tih kockica meta će primiti štetu baziranu na vrijednostima bacanja, dodatni modifikatori za
+štetu su automatski dodani. Na slici \ref{fig:dostupne-akcije} je vidljivo
+da \texttt{Handaxe} napad radi 1d6 štete i ima modifikator +2 na dobivenu štetu.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{slike/scene/15-attack-roll.png}
+    \caption{Bacanje kockice za napad}
+    \label{fig:bacanje-kockice-za-napad}
+\end{figure}
+
+Kad token padne na nula životnih bodova, više neće biti prikazan kao sudionik
+borbe, sve dok borba traje, osim ako se radi o tokenima s tagom
+\texttt{party} ili \texttt{special-npc-hostile}.
+Oni ostaju u borbi jer moraju bacati kockice za spas od smrti.
+Kad dođu na potez imaju mogućnost odabira jedne akcije \texttt{Roll death save}.
+Klikom na ovu akciju otvara se prozor s kockicom, sličan prozoru na slici \ref{fig:bacanje-kockice-za-napad}.
+Nakon bacanja kockice i dobivanja rezultata aplikacija će automatski zabilježiti uspješni pokušaj spašavanja ili neuspješni.
+Uspjeh ili neuspjeh zabilježeni su u podacima tokena i prikazani u potezu kao popunjeni zeleni ili crveni kružići.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{slike/scene/16-death-save.png}
+    \caption{Bacanje za spas}
+    \label{fig:bacanje-za-spas}
+\end{figure}
+
 
 \chapter{Zaključak}
 

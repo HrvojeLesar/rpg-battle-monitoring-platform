@@ -1,11 +1,12 @@
 import { Asset } from "@/board_core/assets/game_assets";
-import { GEventEmitter } from "@/board_core/board";
+import { GBoard, GEventEmitter } from "@/board_core/board";
 import { IMessagable } from "@/board_core/interfaces/messagable";
 import { GDragAndDropRegistry } from "@/board_core/registry/drag_and_drop_registry";
 import { tokenAtoms } from "@/board_react_wrapper/stores/token_store";
 import { WindowEntry } from "@/board_react_wrapper/stores/window_store";
 import { getUrl } from "@/board_react_wrapper/utils/utils";
 import {
+    ABILITY_SCORE_TYPES_SORT_ORDER,
     abilityScoreModifier,
     AbilityScoreType,
     abilityScoreTypeToShortString,
@@ -45,7 +46,7 @@ import { useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DefaultAssetPicker } from "../Assets/AssetPicker";
 import { TextIncrementableNumberInput } from "../TextIncrementableNumberInput";
-import { COMBAT_TAGS } from "@/rpg_impl/characters_stats/tags";
+import { COMBAT_TAGS, PARTY_TAG } from "@/rpg_impl/characters_stats/tags";
 import {
     calculateLevel,
     calculateProficiencyBonus,
@@ -384,8 +385,17 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                         <Box>
                             <Flex direction="row" gap="xs">
                                 <Fieldset legend="Ability score">
-                                    {Object.entries(abilityScore).map(
-                                        ([key, score]) => {
+                                    {Object.entries(abilityScore)
+                                        .sort(
+                                            ([a], [b]) =>
+                                                ABILITY_SCORE_TYPES_SORT_ORDER.indexOf(
+                                                    a as AbilityScoreType,
+                                                ) -
+                                                ABILITY_SCORE_TYPES_SORT_ORDER.indexOf(
+                                                    b as AbilityScoreType,
+                                                ),
+                                        )
+                                        .map(([key, score]) => {
                                             const abilityScoreType =
                                                 key as AbilityScoreType;
                                             const scoreValue = score.score;
@@ -435,8 +445,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                                                     }}
                                                 />
                                             );
-                                        },
-                                    )}
+                                        })}
                                 </Fieldset>
                             </Flex>
                         </Box>
@@ -464,8 +473,17 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                                     )}
                                 />
                                 <Fieldset legend="Saving throws">
-                                    {Object.entries(savingThrows).map(
-                                        ([key, score]) => {
+                                    {Object.entries(savingThrows)
+                                        .sort(
+                                            ([a], [b]) =>
+                                                ABILITY_SCORE_TYPES_SORT_ORDER.indexOf(
+                                                    a as AbilityScoreType,
+                                                ) -
+                                                ABILITY_SCORE_TYPES_SORT_ORDER.indexOf(
+                                                    b as AbilityScoreType,
+                                                ),
+                                        )
+                                        .map(([key, score]) => {
                                             const abilityScoreType =
                                                 key as AbilityScoreType;
                                             const ability =
@@ -552,8 +570,7 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
                                                     }}
                                                 />
                                             );
-                                        },
-                                    )}
+                                        })}
                                 </Fieldset>
                                 <Fieldset legend="Skill proficiency">
                                     {Object.entries(skills).map(
@@ -792,14 +809,19 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
     };
 
     const metaInfo = () => {
+        let tagsData = COMBAT_TAGS;
+        if (!GBoard.isDm) {
+            tagsData = [PARTY_TAG];
+        }
+
         return (
             <Fieldset legend="Tags">
                 <TagsInput
-                    data={COMBAT_TAGS}
+                    data={tagsData}
                     value={tags}
-                    onChange={(tags) => {
-                        setTags(tags);
-                        queueUpdate(tags, "tags");
+                    onChange={(newTags) => {
+                        setTags(newTags);
+                        queueUpdate(newTags, "tags");
                     }}
                 />
             </Fieldset>

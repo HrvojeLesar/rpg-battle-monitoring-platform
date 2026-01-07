@@ -13,7 +13,7 @@ import {
     Radio,
 } from "@mantine/core";
 import { useAtomValue, useSetAtom } from "jotai";
-import { ReactNode, useEffect, useState } from "react";
+import { Fragment, ReactNode, useEffect, useState } from "react";
 import {
     TurnOrder as RPGTurnOrder,
     TurnOrderEntry,
@@ -109,10 +109,11 @@ export const TurnOrder = () => {
             return "No turn order";
         }
 
-        const tokens =
-            turnOrder.state === TurnOrderState.InCombat
-                ? turnOrder.actionableTokens
-                : turnOrder.tokens;
+        const tokens = turnOrder.tokens;
+
+        const actionableTokens = turnOrder.actionableTokens;
+
+        let index = 0;
 
         return (
             <Flex direction="column">
@@ -133,6 +134,15 @@ export const TurnOrder = () => {
                             token.tokenData.image !== undefined
                                 ? getUrl(token.tokenData.image)
                                 : defaultImageUrl;
+
+                        if (
+                            turnOrder.state === TurnOrderState.InCombat &&
+                            actionableTokens.findIndex((e) => {
+                                return e.token === token;
+                            }) === -1
+                        ) {
+                            return <Fragment key={uid}></Fragment>;
+                        }
                         return (
                             <Flex
                                 key={uid}
@@ -140,7 +150,7 @@ export const TurnOrder = () => {
                                 gap="xs"
                                 align="center"
                             >
-                                <Text>{`${idx + 1}.`}</Text>
+                                <Text>{`${++index}.`}</Text>
                                 <Flex
                                     p="xs"
                                     gap="xs"
@@ -205,7 +215,6 @@ export const TurnOrder = () => {
                 </TokenTurnEntry>
                 <Fieldset legend="Actions">
                     <Stack>
-                        <Text>Todo: List tokens actions and group them</Text>
                         <Text>
                             Actions left {turnOrder.getTokenOnTurn()?.action}
                         </Text>
@@ -253,7 +262,7 @@ export const TurnOrder = () => {
                                 });
                             }}
                         >
-                            Maul attack
+                            Handaxe (1d6) + 2
                         </Button>
                         <Button
                             disabled={
@@ -535,44 +544,53 @@ const ActionDeathSave = ({
 }: ActionDeathSaveProps) => {
     const openWindow = useSetAtom(windowAtoms.openWindow);
 
-    return (
-        <Button
-            disabled={
-                turnOrder.getTokenOnTurn()?.token.tokenData.healthState !==
-                HealthState.Unconcious
-            }
-            onClick={() => {
-                // TODO: emit message that other clients can handle and sync state
-                const action = new DeathSaveAction();
-                const onTurnEntry = turnOrder.getTokenOnTurn();
-                if (onTurnEntry === undefined) {
-                    return;
-                }
+    const disabled =
+        turnOrder.getTokenOnTurn()?.token.tokenData.healthState !==
+        HealthState.Unconcious;
 
-                const token = onTurnEntry.token;
-                action.doAction(token, token, undefined, {
-                    onFinished: () => {
-                        refreshTurnOrder();
-                        queueEntityUpdate(() => {
-                            turnOrder.nextTurn();
-                            return [turnOrder, token.tokenData];
-                        });
-                    },
-                    actCallback: (rolls, act) => {
-                        openWindow(
-                            openRollWindow({
-                                onClose: () => {
-                                    act();
-                                },
-                                act,
-                                results: rolls,
-                            }),
-                        );
-                    },
-                });
-            }}
-        >
-            Roll death save
-        </Button>
-    );
+    const button = () => {
+        if (disabled) {
+            return <Fragment></Fragment>;
+        }
+
+        return (
+            <Button
+                disabled={disabled}
+                onClick={() => {
+                    // TODO: emit message that other clients can handle and sync state
+                    const action = new DeathSaveAction();
+                    const onTurnEntry = turnOrder.getTokenOnTurn();
+                    if (onTurnEntry === undefined) {
+                        return;
+                    }
+
+                    const token = onTurnEntry.token;
+                    action.doAction(token, token, undefined, {
+                        onFinished: () => {
+                            refreshTurnOrder();
+                            queueEntityUpdate(() => {
+                                turnOrder.nextTurn();
+                                return [turnOrder, token.tokenData];
+                            });
+                        },
+                        actCallback: (rolls, act) => {
+                            openWindow(
+                                openRollWindow({
+                                    onClose: () => {
+                                        act();
+                                    },
+                                    act,
+                                    results: rolls,
+                                }),
+                            );
+                        },
+                    });
+                }}
+            >
+                Roll death save
+            </Button>
+        );
+    };
+
+    return button();
 };

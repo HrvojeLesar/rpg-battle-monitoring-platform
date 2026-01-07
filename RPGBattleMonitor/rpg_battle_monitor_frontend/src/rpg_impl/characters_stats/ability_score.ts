@@ -23,6 +23,15 @@ export enum AbilityScoreType {
     Charisma = "charisma",
 }
 
+export const ABILITY_SCORE_TYPES_SORT_ORDER = [
+    AbilityScoreType.Strength,
+    AbilityScoreType.Dexterity,
+    AbilityScoreType.Constitution,
+    AbilityScoreType.Intelligence,
+    AbilityScoreType.Wisdom,
+    AbilityScoreType.Charisma,
+];
+
 export type AbilityScores = {
     [key in AbilityScoreType]: AbilityScore;
 };
