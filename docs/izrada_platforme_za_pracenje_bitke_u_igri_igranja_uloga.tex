@@ -17,9 +17,18 @@
 \smjer{Organizacija poslovnih sustava} % (ili Poslovni sustavi, Ekonomika poduzetništva, Primjena informacijske tehnologije u poslovanju, Informacijsko i programsko inženjerstvo, Baze podataka i baze znanja, Organizacija poslovnih sustava, Informatika u obrazovanju)
 \titulaProfesora{Prof. dr. sc.}
 
-\sazetak{Opsega od 100 do 300 riječi. Sažetak upućuje na temu rada, ukratko se iznosi čime se rad bavi, teorijsko-metodološka polazišta, glavne teze i smjer rada te zaključci.}
+\sazetak{U ovom radu prikazan je razvoj i funkcionalnosti platforme za plaćenje bitke u igri igranja uloga s glavnim fokusom na
+    implementaciju pravila igre Dungeons \& Dragons.
+    Teorijski dio prolazi kroz povijest razvoja igri igranja uloga, od korijena u obuci časnika u zapovijadanju i planiranju bitke,
+    do današnjih igara. Nadalje opisuje sustav Dungeons \& Dragons kao jedan od najpoznatijih sustava za igranje igra uloga.
+    Prolazi kroz mnoga najbitnija pravila za razumijevanje igre.
+    \newline
+    \newline
+    Praktični dio se bavi prikazom implementacije umrežene aplikacije. Opisana je implementacija klijent i poslužitelj
+    dijelova aplikacije te uz primjere koda prikazani neki zanimljivi dijelovi implementacije i arhitekture aplikacije.
+}
 
-\kljucneRijeci{riječ; riječ; ...riječ; Obuhvaća 7+/-2 ključna pojma koji su glavni predmet rasprave u radu.}
+\kljucneRijeci{Računalne igre; Dungeons \& Dragons; Role playing game; Web aplikacija; Razvoj aplikacija; Mrežne igre}
 
 \begin{document}
 
@@ -31,6 +40,36 @@
 
 \chapter{Uvod}
 \label{chapter:uvod}
+
+Igre igranja uloga (engl. \textit{Role playing games}),
+su doživjele značajan porast u popularnostu u posljednjem desetljeću, kako u klasičnim
+stolnim varijantama tako i u digitalnom obliku. Iako se ove igre temelje na mašti i
+zajedničkom pripovijedanju, njihova mehanika često uključuje kompleksne sustave pravila,
+praćenje brojnih parametara likova te precizno vođenje borbenih susreta.
+Tradicionalni način igranja uz papir, olovku i minijature sve se češće nadopunjuje ili zamjenjuje
+digitalnim alatima koji olakšavaju administraciju igre.
+
+Suvremene softverske tehnologije omogućuju razvoj specijaliziranih platformi koje
+olakšavaju upravljanje i praćenje borbe u igrama igranja uloga. 
+Takve platforme mogu automatizirati izračune, osigurati konzistentnu primjenu pravila
+te unaprijediti korisničko iskustvo sudionika igre.
+Unatoč postojećim rješenjima, često postoji potreba za prilagodljivim sustavima koji su usmjereni
+na specifične zahtjeve određenog sustava igre ili načina igranja.
+
+Cilj ovog rada je razvoj i prikaz implementacije umrežene platforme za praćenje bitke u igrama igranja uloga,
+s primarnim fokusom na implementaciju pravila iz sustava Dungeons \& Dragons.
+U sklopu rada analizirani su funkcionalni zahtjevi sustava, odabrane su odgovarajuće tehnologije za implementaciju,
+kako bi aplikacija bila što više prenosiva i dostupna na različitim uređajima.
+Implementirano rješenje podržava osnovne i napredne elemente borbe.
+
+Prvi dio rada posvećen je teorijskoj obradi igara igranja uloga i upoznavanju s sustavom Dungeons \& Dragons.
+Sustav je dosta opsežan te se u ovom uglavnom spominju i objašnjavaju 
+osnovna i najbitnija terminologija i mehanike igre.
+
+Praktični dio rada prikazuje tehnologije korištene za implementaciju i dizajn platforme,
+opisuje kako i zašto su određene tehnologije odabrane i neke zanimljive implementacijske detalje.
+U aplikaciji je također djelomično implementiran sustav Dungeons \& Dragons te je primjer
+postavljanja scena i bitke prikazan na kraju.
 
 \chapter{Igre igranja uloga}
 \label{chapter:igra-igranja-uloga}
@@ -2256,6 +2295,8 @@ Uspjeh ili neuspjeh zabilježeni su u podacima tokena i prikazani u potezu kao p
 
 
 \chapter{Zaključak}
+
+Zaključak - sinteza rada (ne sažetak) s kritičkim prikazom (što je dobro napravljeno, što je moglo bolje, što bi se u budućnosti moglo proširiti)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
