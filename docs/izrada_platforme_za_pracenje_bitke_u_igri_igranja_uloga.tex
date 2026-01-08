@@ -17,15 +17,15 @@
 \smjer{Organizacija poslovnih sustava} % (ili Poslovni sustavi, Ekonomika poduzetništva, Primjena informacijske tehnologije u poslovanju, Informacijsko i programsko inženjerstvo, Baze podataka i baze znanja, Organizacija poslovnih sustava, Informatika u obrazovanju)
 \titulaProfesora{Prof. dr. sc.}
 
-\sazetak{U ovom radu prikazan je razvoj i funkcionalnosti platforme za plaćenje bitke u igri igranja uloga s glavnim fokusom na
+\sazetak{U ovom radu prikazan je razvoj i funkcionalnosti platforme za praćenje bitke u igri igranja uloga s glavnim fokusom na
     implementaciju pravila igre Dungeons \& Dragons.
-    Teorijski dio prolazi kroz povijest razvoja igri igranja uloga, od korijena u obuci časnika u zapovijadanju i planiranju bitke,
-    do današnjih igara. Nadalje opisuje sustav Dungeons \& Dragons kao jedan od najpoznatijih sustava za igranje igra uloga.
+    Teorijski dio prolazi kroz povijest razvoja igara igranja uloga, od korijena u obuci časnika u zapovijadanju i planiranju bitke,
+    do današnjih igara. Nadalje opisuje sustav Dungeons \& Dragons kao jedan od najpoznatijih sustava za igranje igara uloga.
     Prolazi kroz mnoga najbitnija pravila za razumijevanje igre.
     \newline
     \newline
     Praktični dio se bavi prikazom implementacije umrežene aplikacije. Opisana je implementacija klijent i poslužitelj
-    dijelova aplikacije te uz primjere koda prikazani neki zanimljivi dijelovi implementacije i arhitekture aplikacije.
+    dijelova aplikacije te uz primjere koda prikazani su neki zanimljivi dijelovi implementacije i arhitekture aplikacije.
 }
 
 \kljucneRijeci{Računalne igre; Dungeons \& Dragons; Role playing game; Web aplikacija; Razvoj aplikacija; Mrežne igre}
@@ -41,8 +41,8 @@
 \chapter{Uvod}
 \label{chapter:uvod}
 
-Igre igranja uloga (engl. \textit{Role playing games, RPG}),
-su doživjele značajan porast u popularnosti u posljednjem desetljeću, kako u klasičnim
+Igre igranja uloga (engl. \textit{Role playing games}, skraćeno RPG),
+doživjele su značajan porast popularnosti u posljednjem desetljeću, kako u klasičnim
 stolnim varijantama tako i u digitalnom obliku. Iako se ove igre temelje na mašti i
 zajedničkom pripovijedanju, njihova mehanika često uključuje kompleksne sustave pravila,
 praćenje brojnih parametara likova te precizno vođenje borbenih susreta.
@@ -62,14 +62,14 @@ U sklopu rada analizirani su funkcionalni zahtjevi sustava, odabrane su odgovara
 kako bi aplikacija bila što više prenosiva i dostupna na različitim uređajima.
 Implementirano rješenje podržava osnovne i napredne elemente borbe.
 
-Prvi dio rada posvećen je teorijskoj obradi igara igranja uloga i upoznavanju s sustavom Dungeons \& Dragons.
-Sustav je dosta opsežan te se u ovom uglavnom spominju i objašnjavaju 
+Prvi dio rada posvećen je teorijskoj obradi igara igranja uloga i upoznavanju sa sustavom Dungeons \& Dragons.
+Sustav je dosta opsežan te se u ovom radu uglavnom spominju i objašnjavaju 
 osnovna i najbitnija terminologija i mehanike igre.
 
 Praktični dio rada prikazuje tehnologije korištene za implementaciju i dizajn platforme,
 opisuje kako i zašto su određene tehnologije odabrane i neke zanimljive implementacijske detalje.
 U aplikaciji je također djelomično implementiran sustav Dungeons \& Dragons te je primjer
-postavljanja scena i bitke prikazan na kraju.
+postavljanja scena i bitke prikazan na kraju rada.
 
 \chapter{Igre igranja uloga}
 \label{chapter:igra-igranja-uloga}
@@ -1649,7 +1649,7 @@ pub struct ActionMessage {
 \label{section:klijent}
 
 Klijent je drugi glavni dio cijele aplikacije. 
-Pruža korisnicima korisničko sučelje za pračenje bitke na više različitih scena
+Pruža korisnicima korisničko sučelje za praćenje bitke na više različitih scena
 te uvid u trenutna događanja u igri.
 Implementiran je korištenjem web tehnologija i pokreće se u web pregledniku kroz web
 stranicu ili kroz tauri okvir kao zasebna desktop aplikacija.
@@ -1670,8 +1670,8 @@ Arhitektura pixi.js je podijeljena u nekoliko glavnih komponenata \cite{pixijs-a
         stablo kontejner objekata koji se mogu prikazati, objekti kao što su tekst, sprite-ovi i druga grafika.
     \item Slikovno/zvučni elementi: sustav za asinkrono učitavanje i dekodiranje resursa poput 
         slikovnih i zvučnih datoteka.
-    \item Ticker: periodični povratni pozivi na temeljeni na vremenskom intervalu.
-        Korisni za ažuriranje podataka, grafike ovisno o vremenu ili nekoj
+    \item Ticker: periodični povratni pozivi temeljeni na vremenskom intervalu.
+        Korisni su za ažuriranje podataka, grafike ovisno o vremenu ili nekoj
         promjeni podataka kroz vrijeme.
     \item Događanja: interaktivnost kontejner objekata kroz emitiranje i reagiranje na
         događaje, npr. klik na objekt ili prolaz pokazivača miša preko objekta.
@@ -1718,7 +1718,7 @@ Pixi.js Korijenski kontejner
     |-- 2. Prijašnja lokacija tokena
     |   |
     |   |-- Sličica tokena
-    |   |-- Polja preko kojih je tokena prenesen
+    |   |-- Polja preko kojih je token prenesen
     |
     |-- 3. Token kontejner
         |
@@ -1741,15 +1741,15 @@ Pixi.js Korijenski kontejner
     \label{fig:primjer-redoslijeda-renderiranja-kontejnera}
 \end{figure}
 
-\subsection{React.js}
+\subsection{React}
 \label{section:reactjs}
 
 React je javascript biblioteka namijenjena za izgradnju korisničkih sučelja u web aplikacijama \cite{reactjs}.
-Najčešće korištena za aplikacije s jednom stranicom, ovakve aplikacije uglavnom koriste 
+Najčešće je korištena za aplikacije s jednom stranicom. Ovakve aplikacije uglavnom koriste 
 različite implementacije usmjerivača kako bi jedna web stranica imala više različitih stranica.
 Arhitektura react-a je temeljena na komponentama, one su neovisni, ponovno upotrebljivi građevni
 blokovi korisničkog sučelja. Komponente upravljaju vlastitim internim podacima te promjenom podataka u komponenti
-će react ponovno prikazati komponentu s novim podacima, na ovakav način react omogućuje ažurno korisničko
+react će ponovno prikazati komponentu s novim podacima, na ovakav način react omogućuje ažurno korisničko
 sučelje \cite{reactjs}.
 
 Pošto je react samo biblioteka za izradu korisničkih sučelja, ne grupira i ne dolazi s unaprijed kreiranim komponentama.
@@ -1771,7 +1771,7 @@ pixi.js konteksta, tj. objekata koje pixi.js renderira.
 Glavnina socket.io funkcionalnosti je već spomenuta u poglavlju \ref{section:socketioxie}
 no ovdje dodatno prolazimo kroz funkciju koju socket.io i websocketi imaju na strani klijenta.
 Glavnu funkciju koju websocket ima na strani klijenta je pretvaranje podataka o entitetima iz JSON
-formata u javascript objekte, ta funkcionalnost je prikazana u isječku koda ispod.
+formata u javascript objekte. Ta funkcionalnost je prikazana u isječku koda ispod.
 
 Klasa \texttt{Websocket} sadrži funkcije \texttt{initJoin} i \texttt{initWebsocketListeneres} korištene
 za pokretanje procesa spajanja klijenta s poslužiteljem, prihvaćanja i slanja \texttt{action} događaja.
@@ -1782,7 +1782,7 @@ podataka o igri. Klijent uzastopno prihvaća JSON podatke kroz događaj \texttt{
 red čekanja. Nakon primitka događaja \texttt{join-finished} klijent pokušava pretvoriti sve primljene
 podatke u entitete. Više o entitetima u poglavlju \ref{section:entiteti}.
 Događaj \texttt{join-finished} također zaustavlja klijenta od reagiranja na daljnje \texttt{join} događaje
-iz razloga što je klijent u tom trenutku u potpunosti pridruženi igri i ima sve potrebne podatke za 
+iz razloga što je klijent u tom trenutku u potpunosti pridružen igri i ima sve potrebne podatke za 
 rekonstrukciju stanja igre.
 
 Druga funkcija \texttt{initWebsocketListeners} je korištena za kontinuiranu sinkronizaciju podataka
@@ -1847,13 +1847,13 @@ export class Websocket {
 \label{section:entiteti}
 
 Entiteti su različite vrste objekata kojima klijent upravlja, sadrže podatke o igri i sinkroniziraju
-se između svih povezanih klijenata. Već definirano u poglavlju \ref{section:mrezna-komunikacija},
-entiteti moraju sadržavati polja \texttt{uid}, \texttt{kind}, \texttt{timestamp} da bi se mogli slati drugim
+se između svih povezanih klijenata (već definirano u poglavlju \ref{section:mrezna-komunikacija}).
+Entiteti moraju sadržavati polja \texttt{uid}, \texttt{kind}, \texttt{timestamp} da bi se mogli slati drugim
 klijentima. Pošto je klijent odgovoran za generiranje unikatnih vrijednosti \texttt{uid} koristi se dinamično 
 izgenerirani UUID kao vrijednost tog polja za svaki novokreirani entitet.
 Klijent podatke o entitetima prima u JSON formatu preko povezanog websocket-a,
 kako bi mogao pretvoriti dobivene podatke iz \texttt{join}
-ili \texttt{action} događaja u entitet potrebno je registrirati vrstu entiteta u globalnoj instanci klase 
+ili \texttt{action} događaja u entitet. Da bi se ovo izvršilo potrebno je registrirati vrstu entiteta u globalnoj instanci klase 
 \texttt{EntityRegistry}. Ova klasa je odgovorna za definiranje vrsta entiteta, način i redoslijed
 kojim se pretvaraju JSON podaci u entitete te za dohvaćanje i spremanje svih korištenih entiteta.
 
@@ -1861,7 +1861,8 @@ U isječku koda ispod definirano je nekoliko vrsta entiteta koje će sustav pozn
 iz JSON formata u entitete. Kod registracije entiteta potrebno je definirati unikatni naziv entiteta i funkciju
 koja će biti odgovorna za pretvaranje JSON podataka u entitet. Redoslijed registracije je također bitan, pošto
 neki entiteti mogu ovisiti o drugim entitetima. Na primjer \texttt{RpgToken} entitet ovisi o \texttt{RpgTokenData}
-entitetu, kad klijent primi podatke od poslužitelja, može ih dobiti u bilo kakvom redoslijedu te se određivanjem
+entitetu. 
+Klijent može primiti podatke od poslužitelja u bilo kojem redoslijedu te se određivanjem
 redoslijeda definira koji podaci se mogu pretvoriti u entitet, dok drugi podaci moraju ostati u redu čekanja sve dok
 se ne kreira odgovarajući entitet o kojem ovise. Nije nužno da sve vrste entiteta budu registrirane kroz \texttt{EntityRegistry}
 klasu, no svi entiteti koji nisu registrirani nemaju mogućnost biti sinkronizirani preko svih klijenata.
@@ -1883,22 +1884,23 @@ const registerEntities = (registry: EntityRegistry) => {
 \end{figure}
 
 Funkcije za pretvaranje entiteta iz JSON formata su korištene interno u \texttt{EntityRegistry} klasi.
-Ove funkcije se pozivaju kad klijent primi podatke od entitetima od poslužitelja.
+Ove funkcije se pozivaju kad klijent primi podatke o entitetima od poslužitelja.
 Na primjer, u isječku koda \ref{lst:pridruzivanje-igri-primanje-i-slanje-action-dogadaja} na liniji
-26, funkcija \texttt{convertQueuedEntities()}, pretvara sve dobivene podatke u entitete
+26, funkcija \texttt{convertQueuedEntities}, pretvara sve dobivene podatke u entitete
 prema definiranom redoslijedu i korištenjem registriranih funkcija za svaku vrstu entiteta.
 
 Isječak koda ispod prikazuje jednu od klasa koje implementiraju konverziju iz JSON podataka u entitet.
-Funkcija prima JSON objekt s poljima koja su definirana kroz tip podataka \texttt{TokenAttributes}, 
-prvo iz globalne \texttt{EntityRegistry} klase pokušava dohvatiti već postojeći \texttt{RpgToken}
+Funkcija prima JSON objekt s poljima koja su definirana kroz tip podataka \texttt{TokenAttributes}.
+Prvo iz globalne \texttt{EntityRegistry} klase pokušava dohvatiti već postojeći \texttt{RpgToken}
 entitet te ako ga uspješno pronađe i podaci o entitetu se mogu mijenjati, na postojeći entitet
-su postavljanje najnoviji dobiveni podaci.
+se postavljaju najnoviji dobiveni podaci.
 Ako entitet ne postoji i nije dodan u \texttt{EntityRegistry}-u tada se pokušavaju dohvatiti
-entiteti \texttt{Scene} i \texttt{RpgTokenData}, o ovim entitetima ovisi entitet \texttt{RpgToken}
+entiteti \texttt{Scene} i \texttt{RpgTokenData}. 
+O ovim entitetima ovisi entitet \texttt{RpgToken}
 i bez njih ga nije moguće kreirati. Nakon što sustav pronađe ovisne entitete kreira novi
 \texttt{RpgToken} entitet i dodjeljuje mu podatke dobivene od poslužitelja. 
 Na ovakav način svaki entitet se može sinkronizirati s drugim klijentima i moguće je
-rekonstruirati cijelo stanje igre kod inicijalnog spajanja klijenta.
+rekonstruirati cjelo stanje igre kod inicijalnog spajanja klijenta.
 
 \begin{minted}[samepage]{typescript}
 export class RpgTokenConverter {
@@ -1957,13 +1959,13 @@ više specijalizirani entiteti. Osnovni entiteti su:
         i korišten za prikazivanje entiteta na sceni, te povezivanja vanjskih podataka na taj entitet.
 \end{itemize}
 
-Definirani osnovni entiteti su dovoljni za proširenje i implementaciju sustava za pračenje bitki te se koriste
+Definirani osnovni entiteti su dovoljni za proširenje i implementaciju sustava za praćenje bitki te se koriste
 u djelomičnoj implementaciji D\&D sustava, slijedeći su definirani prošireni entiteti:
 
 \begin{itemize}
     \item \textbf{RpgScene}: proširenje scene, sadrži dodatne funkcionalnosti za scene, na primjer,
         neke scene mogu biti skrivene od igrača, samo su prikazane DM-u. Omogućava dodatne kontrole
-        za \texttt{Token} entitete (likovi) na sceni, provjeru i prikaz udaljenosti koju koju se neki lik može
+        za \texttt{Token} entitete (likovi) na sceni, provjeru i prikaz udaljenosti za koju se neki lik može
         pomaknuti, provjeru ako je na određenom polju već drugi lik.
     \item \textbf{RpgTokenData}: proširenje \texttt{EmptyTokenData} entiteta, sadrži sve podatke o D\&D liku,
         na primjer trenutne životne bodove, ime lika, veličinu, trenutnu brzinu i ostale podatke koji opisuju lika.
@@ -1975,8 +1977,8 @@ u djelomičnoj implementaciji D\&D sustava, slijedeći su definirani prošireni 
         Ne dozvoljava ručnu promjenu i postavljanje veličine tokena, već je veličina određena
         prema veličini definiranoj u \texttt{RpgTokenData} i poštuje veličinu tokena temeljenu na
         D\&D pravilima.
-    \item \textbf{TurnOrder}: entitet korišten za pračenje poteza i odgovoran za cijeli tok bitke. 
-        Sprema podatke o redoslijedu poteza, koji lik je trenutno na potezu i koju su uključeni u borbu,
+    \item \textbf{TurnOrder}: entitet korišten za praćenje poteza i odgovoran za cijeli tok bitke. 
+        Sprema podatke o redoslijedu poteza, koji lik je trenutno na potezu i koji su uključeni u borbu,
         koliko akcija i brzine ima lik na potezu.
     \item \textbf{DecorationTokenData}: sadrži poveznicu na sličicu koja će biti prikazana na sceni.
     \item \textbf{DecorationToken}: entitet namjenjen za dodavanje dekoracija na scenu povezan s \texttt{DecorationTokenData}.
@@ -1993,7 +1995,7 @@ Svi korisnici, DM i igrači imaju mogućnost pregleda scena i upravljanje tokeni
 Tokeni mogu predstavljati likove igrača, NPC-ove, čudovišta ili kakve druge objekte,
 na primjer sličice dodane kao dekoracije ili sliku lokacije u pozadini.
 Upravljanje tokenima podrazumijeva kreiranje novih tokena, postavljanje i uređivanje
-podataka o tokenu, pozicioniranje tokena na sceni te tokom bitke korištenje akcija
+podataka o tokenu, pozicioniranje tokena na sceni te, tokom bitke, korištenje akcija
 dodijeljenih tokenu.
 
 Najveća razlika između DM-a i igrača je što DM može sakrivati
@@ -2006,7 +2008,7 @@ pozicionirati ih na bilo koji dio scene te uređivati neke dijelove scene.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{slike/use-case-dijagram.png}
-    \caption{Dijagram slučajeva korištenja aplikacije}
+    \caption{Dijagram slučajeva korištenja aplikacije [autorski rad]}
     \label{fig:dijagram-slucajeva-koristenja-aplikacije}
 \end{figure}
 
@@ -2017,13 +2019,13 @@ Scene su temelj aplikacije, svaka scena je unikatna, može sadržavati različit
 biti postavljena neovisno o drugim scenama.
 Kreiranjem nove igre, DM-u je prikazana prazna scena, tj. ekran bez ikakve scene,
 označeno s 1. je tipka za odabir scena, kreiranje novih scena i prilagođivanje scene.
-S desne strane se nalazi se meni za upravljanje podacima o tokenima, upravljane bitkom
+S desne strane se nalazi meni za upravljanje podacima o tokenima, upravljane bitkom
 i mogućnost za učitavanje slika, no više o ovim funkcionalnostima u kasnijem poglavlju.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{slike/scene/01-empty-scene.png}
-    \caption{Prazna scena}
+    \caption{Prazna scena [autorski rad]}
     \label{fig:prazna-scena}
 \end{figure}
 
@@ -2031,7 +2033,7 @@ Klikom na tipku, otvara se prozor za postavljanje scena. U prozoru je moguće do
 više scena, određivanje njihovog poretka, sakrivanje scena od igrača, postavljanje naziva i
 postavljanje veličine polja i količine polja prikazanih na sceni.
 Postavljanje poretka scena će promjeniti poredak u kojem se scene prikazuju u
-izborniku za odabir scena. Scena koja je postavljena kao prva scena će uvijek biti prikazana
+izborniku za odabir scena. Scena koja je postavljena kao prva scena uvijek će biti prikazana
 korisnicima pridruživanja u igru.
 
 Svaka scena se sastoji od rešetka ćelija/polja i moguće je postaviti broj ćelija u
@@ -2044,22 +2046,22 @@ kretati samo po ćelijama.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{slike/scene/02-scene-settings.png}
-    \caption{Postavke scena}
+    \caption{Postavke scena [autorski rad]}
     \label{fig:postavke-scena}
 \end{figure}
 
 Osim rešetaka ćelija, svaka scena sadrži nekoliko slojeva. Ti slojevi su
 \texttt{Token layer}, \texttt{Grid layer}, \texttt{Grid background layer}.
 Samo \texttt{Token layer} je dostupan igračima, dok su ostali slojevi dostupni samo DM-u.
-Odabirom sloja omogućava se uređivanje tokena na tom sloj, ovo omogućava izolaciju između
-tokena na različitim slojevima, tokene koji se nalaza ne drugim slojevima nije moguće uređivati.
+Odabirom sloja omogućava se uređivanje tokena na tom sloju. Ovo omogućava izolaciju između
+tokena na različitim slojevima, tokene koji se nalaze na drugim slojevima nije moguće uređivati.
 Uređivanje tokena uključuje dodavanje tokena u sloj, postavljanje njihove pozicije, promjenu veličine
 i brisanje tokena.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{slike/scene/03-scene-layers.png}
-    \caption{Slojevi scene}
+    \caption{Slojevi scene [autorski rad]}
     \label{fig:slojevi-scena}
 \end{figure}
 
@@ -2067,13 +2069,13 @@ Na slici \ref{fig:prazna-scena}, s desne strane je prikazan meni
 s više kartica. Za učitavanje slika na poslužitelj koristi se \texttt{Assets} kartica.
 Odabirom kartice prikazuje se tipka za učitavanje slike, klikom se otvara novi prozor za
 odabir slike, pregled i učitavanje slike. Nakon što korisnik učita sliku na poslužitelj,
-slika će biti vidljiva u \texttt{Assets} kartici pod \texttt{Assets list} kategorijom,
+slika će biti vidljiva u \texttt{Assets} kartici pod \texttt{Assets list} kategorijom -
 vidljivo na slici \ref{fig:kreiranje-pozadinskog-tokena-na-sceni}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{slike/scene/04-asset-upload.png}
-    \caption{Učitavanje pozadinske slike scene}
+    \caption{Učitavanje pozadinske slike scene [autorski rad]}
     \label{fig:ucitavanje-pozadinske-slike-scene}
 \end{figure}
 
@@ -2086,32 +2088,32 @@ kao pozadina za scenu.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{slike/scene/05-asset-drag-and-drop.png}
-    \caption{Kreiranje pozadinskog tokena na sceni}
+    \caption{Kreiranje pozadinskog tokena na sceni [autorski rad]}
     \label{fig:kreiranje-pozadinskog-tokena-na-sceni}
 \end{figure}
 
 Kao što je vidljivo na slici \ref{fig:kontrole-tokena}, 
-token je pre trenutno pre mali da bi bio korišten
+token je trenutno premali da bi bio korišten
 za pozadinu, još se može uočiti da ima crveni obrub i bijele kvadratiće na svakom vrhu
 te polovici svake stranice kvadratića.
 Crveni obrub signalizira korisniku da je taj token trenutno odabran. Odabrani token
-može se premještati klikom i prevući na drugu poziciju.
-Dok bijeli kvadratići označavaju točke kojima je moguće proširiti dimenzije označenog tokena.
-Postavljanjem pozicije i proširenjem tokena, pozadina scene je uspješno postavljena, vidljivo na slici
-\ref{fig:pozadina-scene},
-sva polja pozadine jednaka su poljima na pozadinskoj slici.
+može se premještati klikom i prevući na drugu poziciju,
+dok bijeli kvadratići označavaju točke kojima je moguće proširiti dimenzije označenog tokena.
+Postavljanjem pozicije i proširenjem tokena, pozadina scene je uspješno postavljena - vidljivo na slici
+\ref{fig:pozadina-scene}.
+Sva polja pozadine jednaka su poljima na pozadinskoj slici.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{slike/scene/06-decoration-token-controls.png}
-    \caption{Kontrole tokena}
+    \caption{Kontrole tokena [autorski rad]}
     \label{fig:kontrole-tokena}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{slike/scene/07-scene-background.png}
-    \caption{Pozadina scene}
+    \caption{Pozadina scene [autorski rad]}
     \label{fig:pozadina-scene}
 \end{figure}
 
@@ -2125,21 +2127,21 @@ Iz ove kartice moguće je dodavati tokene na scenu, na isti način kako je već 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{slike/scene/08-token-data-tab.png}
-    \caption{Pregled tokena}
+    \caption{Pregled tokena [autorski rad]}
     \label{fig:pregled-tokena}
 \end{figure}
 
 Novi tokeni se kreiraju pritiskom na tipku \texttt{Create new token}, vidljivo na slici \ref{fig:pregled-tokena}.
-Pritiskom tipke otvara se prozor za postavljanje tokena, Postavke imitiraju character sheet.
+Pritiskom tipke otvara se prozor za postavljanje tokena. Postavke imitiraju character sheet.
 Na slici \ref{fig:postavke-tokena} rekreiran je lik iz poglavlja \ref{section:primjer-lika}.
-Razina tokena je automatski izračunata prema broju bodova iskustva, upisane vrijednosti za sposobnosti automatski
+Razina tokena je automatski izračunata prema broju bodova iskustva. Upisane vrijednosti za sposobnosti automatski
 izračunavaju odgovarajuće modifikatore, na primjer, lik ima 15 snage što odgovara modifikatoru vrijednosti +2.
 Stručnosti u vještinama i bacanjima za spas također imaju automatski dodan modifikator odgovarajuće sposobnosti
 te dodatni modifikator vrijednosti za stručnost.
 
-U ovom prozoru se također može postaviti veličina lika, koja će odgovarati veličini lika na scenu.
+U ovom prozoru se također može postaviti veličina lika, koja će odgovarati veličini lika na sceni.
 Veći likovi će zauzimati više prostora na sceni, kao što je definirano tablicom kategorija veličina (tablica  \ref{tab:kategorije-velicine}).
-Također moguće je postaviti opremu koju token koristi, ovime se određuje koji napadi će biti dostupni
+Također moguće je postaviti opremu koju token koristi. Ovime se određuje koji napadi će biti dostupni
 tokenu tokom bitke.
 Važan dio postavka je \texttt{tags} grupa. 
 Postavljanjem tagova DM može označiti koji token će biti dio:
@@ -2157,7 +2159,7 @@ Postavljanjem tagova DM može označiti koji token će biti dio:
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{slike/scene/09-vom-character.png}
-    \caption{Isječak postavka tokena}
+    \caption{Isječak postavaka tokena [autorski rad]}
     \label{fig:postavke-tokena}
 \end{figure}
 
@@ -2182,7 +2184,7 @@ u bitku.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{slike/scene/10-battle-selection.png}
-    \caption{Odabir tokena za bitku}
+    \caption{Odabir tokena za bitku [autorski rad]}
     \label{fig:odabir-tokena-za-bitku}
 \end{figure}
 
@@ -2195,7 +2197,7 @@ Iznenađeni tokeni će automatski biti preskočeni kad prvi put dođu na red.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{slike/scene/11-encounter-out-of-combat.png}
-    \caption{Tokeni u borbi}
+    \caption{Tokeni u borbi [autorski rad]}
     \label{fig:tokeni-u-borbi}
 \end{figure}
 
@@ -2208,27 +2210,27 @@ Pokušavanjem kretanja tokena koji trenutno nije na redu, korisnik dobiva poruku
 o greški i pozicija pomaknutog tokena nije promjenjena.
 
 Prikaz za brzinu se dinamički mijenja kako token iskoristi briznu za trenutni potez.
-Nakon ponovnog dolaska na potez brzina će biti resitirana na inicijalnu vrijednost
+Nakon ponovnog dolaska na potez brzina će biti resetirana na inicijalnu vrijednost
 brzine koju taj token ima.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{slike/scene/12-encounter-in-combat.png}
-    \caption{Početak borbe}
+    \caption{Početak borbe [autorski rad]}
     \label{fig:pocetak-borbe}
 \end{figure}
 
 Tokom borbe tokeni imaju određenu količinu brzine koju mogu utrošiti za premještanje na drugu poziciju.
-Polja preko kojih će token preći su označena zelenom bojom, token ne može završiti svoje kretanje na
+Polja preko kojih će token preći su označena zelenom bojom. Token ne može završiti svoje kretanje na
 istom polju kao neki drugi token. U tom slučaju korisnik će dobiti grešku i token će biti resitiran na
 početnu poziciju, bez da izgubi ili iskoristi brzinu.
-Tokom odabira pozicije, ispod tokena je prikazan indikator udaljenosti koju će token preći, jednak broj
-prikazan u indikatoru će na kraju pomaka biti oduzet od tokenove trenutne brzine.
+Tokom odabira pozicije, ispod tokena je prikazan indikator udaljenosti koju će token preći. 
+Jednak broj prikazan u indikatoru će na kraju pomaka biti oduzet od tokenove trenutne brzine.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{slike/scene/13-moving-in-battle.png}
-    \caption{Pomicanje tokom borbe}
+    \caption{Pomicanje tokom borbe [autorski rad]}
     \label{fig:pomicanje-tokom-borbe}
 \end{figure}
 
@@ -2236,18 +2238,18 @@ Token koji je na potezu može poduzeti akcije koje su pridodane tom tokenu.
 Na primjer, na slijedećoj slici igrač je na potezu (token na potezu ima indikator
 iznad sličice).
 Igrač može odabrati neku od akcija koje ima na izbor ili završiti potez.
-Na slici je igrač odabra napasti neprijatelja koristeći napad \texttt{Handaxe}.
+Na slici je igrač odabrao napasti neprijatelja koristeći napad \texttt{Handaxe}.
 Klikom na napad automatski su crvenom bojom obrubljeni tokeni koje može napasti.
 Napad ima domet od 5 stopa, što znači da može napasti samo tokene udaljene jedno polje.
-Ovo je vidljivo na slici, tokeni pored su označeni dok token izvan dometa nema 
-crveni obrub.
+Ovo je vidljivo na slici \ref{fig:dostupne-akcije}.
+Tokeni pored su označeni dok token izvan dometa nema crveni obrub.
 
 Da bi igrač odabrao metu napada mora kliknuti dva puta na metu.
 Prvim klikom biti će nacrtana crta između napadača i mete, dok će drugim
 klikom napad biti izvršen.
 Ovaj sustav duplog odabira je kreiran kako bi igrač mogao promjeniti metu u slučaju da se
 predomisli i želi napasti neku drugu metu. 
-Drugu prednost ovakvog pristupa je vezana uz napade koji imaju veći doseg.
+Druga prednost ovakvog pristupa je vezana uz napade koji imaju veći doseg.
 Aplikacija ne implementira zidove te će kao validne mete napada prikazati sve tokene u
 dosegu, to znači da je moguće napasti tokene iza zida. Zidovi su definirani pozadinom
 scene te je na igračima i DM-u da prate ako neki napad ne bi trebao biti moguć.
@@ -2258,7 +2260,7 @@ Osim odabira akcije, igrači imaju uvid o broju akcija i bonus akcija koje još 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{slike/scene/14-actions.png}
-    \caption{Dostupne akcije}
+    \caption{Dostupne akcije [autorski rad]}
     \label{fig:dostupne-akcije}
 \end{figure}
 
@@ -2273,7 +2275,7 @@ da \texttt{Handaxe} napad radi 1d6 štete i ima modifikator +2 na dobivenu štet
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{slike/scene/15-attack-roll.png}
-    \caption{Bacanje kockice za napad}
+    \caption{Bacanje kockice za napad [autorski rad]}
     \label{fig:bacanje-kockice-za-napad}
 \end{figure}
 
@@ -2289,7 +2291,7 @@ Uspjeh ili neuspjeh zabilježeni su u podacima tokena i prikazani u potezu kao p
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{slike/scene/16-death-save.png}
-    \caption{Bacanje za spas}
+    \caption{Bacanje za spas [autorski rad]}
     \label{fig:bacanje-za-spas}
 \end{figure}
 
@@ -2304,9 +2306,9 @@ potrebama zajednice igrača, čime je stvoren alat koji pomaže u administraciji
 Gledajući aspekte koji su uspješno realizirani, najveća prednost platforme je
 sinkronizacija podataka u stvarnom vremenu koja osigurava svim sudionicima
 pregled identičnog stanja igre, što je ključno za online igranje.
-Razdjela platforme na poslužitelj i klijent infrastrukturu je omogućilo
-fleksibilnost kod implementacije D\&D sustava na klijentu,
-pošto poslužitelj zahtjeva minimalno strukturirane podatke te je na sličan način moguće
+Razdjela platforme na poslužitelj i klijent infrastrukturu omogućila je
+fleksibilnost kod implementacije D\&D sustava na strani klijenta,
+pošto poslužitelj zahtijeva minimalno strukturirane podatke te je na sličan način moguće
 implementirati druge RPG sustave.
 
 Postoje određeni segmenti koji su mogli biti bolje izvedeni.
@@ -2315,19 +2317,19 @@ Trenutna implementacija sustava pravila oslanja se na fiksne parametre D\&D sust
 Implementacija drugih RPG sustava je i dalje veliki i zahtjevni posao,
 uz implementirane entitete koje platforma pruža za proširenje.
 Osim toga, sustav za sinkroniziranje podataka između klijenata je trenutno
-naivno implementiran, bolja implementacija bi smanjila količinu podataka
-koji se šalju između klijenata, npr. samo promijenjeni podaci o entitetu).
-Također, korisničko sučelje, iako funkcionalno, zahtjeva daljnju doradu u smislu
-intuitivnosti i preglednosi za korisnike.
+naivno implementiran. Bolja implementacija bi smanjila količinu podataka
+koji se šalju između klijenata, npr. samo promijenjeni podaci o entitetu.
+Također, korisničko sučelje, iako funkcionalno, zahtijeva daljnju doradu u smislu
+intuitivnosti i preglednosti za korisnike.
 
 U budućnosti, projekt se može proširiti u nekoliko smjerova.
 Puno bi pomogao razvoj sustava za uvoz statistika čudovišta i čarolija,
 što bi uvelike smanjilo potrebni ručni rad za implementaciju detalja.
 Također, uvođenje sustava za dinamičku rasvjetu (fog of war), dodavanje
-koncepta zidova i vertikalnih razina te podrške za zvučne efekte bi značajno
+koncepta zidova i vertikalnih razina te podrške za zvučne efekte značajno bi
 doprinijelo atmosferi igre.
-Konačno, omogućavanje veće modularnosti platforme, gdje bi korisnici sami mogli
-definirati i implementirati pravila specifična za druge RPG sustave.
+% Konačno, omogućavanje veće modularnosti platforme, gdje bi korisnici sami mogli
+% definirati i implementirati pravila specifična za druge RPG sustave,.
 
 Rad predstavlja čvrst temelj za daljnji razvoj digitalnih alata u sferi igara igranja uloga,
 potvrđujući da tehnologija ne mora nužno zamijeniti maštu, već joj može pružiti okvir
@@ -2340,7 +2342,7 @@ za lakše i zabavnije funkcioniranje.
 \addcontentsline{toc}{chapter}{Popis slika}
  
 \listoftables
-\addcontentsline{toc}{chapter}{Popis popis tablica}
+\addcontentsline{toc}{chapter}{Popis tablica}
 
 \appendix
 \renewcommand{\thechapter}{\arabic{chapter}}
