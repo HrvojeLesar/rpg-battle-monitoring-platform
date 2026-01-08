@@ -41,8 +41,8 @@
 \chapter{Uvod}
 \label{chapter:uvod}
 
-Igre igranja uloga (engl. \textit{Role playing games}),
-su doživjele značajan porast u popularnostu u posljednjem desetljeću, kako u klasičnim
+Igre igranja uloga (engl. \textit{Role playing games, RPG}),
+su doživjele značajan porast u popularnosti u posljednjem desetljeću, kako u klasičnim
 stolnim varijantama tako i u digitalnom obliku. Iako se ove igre temelje na mašti i
 zajedničkom pripovijedanju, njihova mehanika često uključuje kompleksne sustave pravila,
 praćenje brojnih parametara likova te precizno vođenje borbenih susreta.
@@ -2293,17 +2293,45 @@ Uspjeh ili neuspjeh zabilježeni su u podacima tokena i prikazani u potezu kao p
     \label{fig:bacanje-za-spas}
 \end{figure}
 
-
 \chapter{Zaključak}
 
-Zaključak - sinteza rada (ne sažetak) s kritičkim prikazom (što je dobro napravljeno, što je moglo bolje, što bi se u budućnosti moglo proširiti)
+Razvoj platforme za praćenje bitke u igrama igranja uloga pokazao je kako se kompleksna,
+analogna pravila sustava Dungeons \& Dragons mogu uspješno digitalizirati i
+automatizirati korištenjem suvremenih web tehnologija.
+Kroz ovaj rad povezana je povijest strateških igara i ratnih simulacija s modernim
+potrebama zajednice igrača, čime je stvoren alat koji pomaže u administraciji vođenja igre.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%  BIBLIOGRAPHY  %%%%%%%%%%%%%%
-%%%%%%%%%%%  BIBLIOGRAPHY  %%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Gledajući aspekte koji su uspješno realizirani, najveća prednost platforme je
+sinkronizacija podataka u stvarnom vremenu koja osigurava svim sudionicima
+pregled identičnog stanja igre, što je ključno za online igranje.
+Razdjela platforme na poslužitelj i klijent infrastrukturu je omogućilo
+fleksibilnost kod implementacije D\&D sustava na klijentu,
+pošto poslužitelj zahtjeva minimalno strukturirane podatke te je na sličan način moguće
+implementirati druge RPG sustave.
+
+Postoje određeni segmenti koji su mogli biti bolje izvedeni.
+Trenutna implementacija sustava pravila oslanja se na fiksne parametre D\&D sustava,
+što platformu čini manje fleksibilnom za specifična kućna pravila.
+Implementacija drugih RPG sustava je i dalje veliki i zahtjevni posao,
+uz implementirane entitete koje platforma pruža za proširenje.
+Osim toga, sustav za sinkroniziranje podataka između klijenata je trenutno
+naivno implementiran, bolja implementacija bi smanjila količinu podataka
+koji se šalju između klijenata, npr. samo promijenjeni podaci o entitetu).
+Također, korisničko sučelje, iako funkcionalno, zahtjeva daljnju doradu u smislu
+intuitivnosti i preglednosi za korisnike.
+
+U budućnosti, projekt se može proširiti u nekoliko smjerova.
+Puno bi pomogao razvoj sustava za uvoz statistika čudovišta i čarolija,
+što bi uvelike smanjilo potrebni ručni rad za implementaciju detalja.
+Također, uvođenje sustava za dinamičku rasvjetu (fog of war), dodavanje
+koncepta zidova i vertikalnih razina te podrške za zvučne efekte bi značajno
+doprinijelo atmosferi igre.
+Konačno, omogućavanje veće modularnosti platforme, gdje bi korisnici sami mogli
+definirati i implementirati pravila specifična za druge RPG sustave.
+
+Rad predstavlja čvrst temelj za daljnji razvoj digitalnih alata u sferi igara igranja uloga,
+potvrđujući da tehnologija ne mora nužno zamijeniti maštu, već joj može pružiti okvir
+za lakše i zabavnije funkcioniranje.
 
 \printbibliography[title=Popis literature]
 \addcontentsline{toc}{chapter}{Popis literature}
