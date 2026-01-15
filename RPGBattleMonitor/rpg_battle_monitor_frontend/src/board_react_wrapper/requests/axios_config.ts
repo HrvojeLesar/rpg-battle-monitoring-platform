@@ -1,9 +1,17 @@
 import axios from "axios";
+import { getAxiosBaseUrl } from "../utils/utils";
+import { GAtomStore } from "../stores/state_store";
+import { connectionStore } from "../stores/connection_store";
 
-export const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_AXIOS_BASE_URL ?? "http://localhost:3000/api",
-    // withCredentials: true,
+export let axiosInstance = axios.create({
+    baseURL: getAxiosBaseUrl(),
 });
+
+export const setAxiosBaseUrl = (baseUrl: string) => {
+    axiosInstance = axios.create({
+        baseURL: baseUrl,
+    });
+};
 
 export enum GameGetRequests {
     GameList = "/game/list",
@@ -16,3 +24,7 @@ export enum GamePostRequests {
 export enum AssetPostRequests {
     AssetUpload = "/assets/upload",
 }
+
+GAtomStore.sub(connectionStore.getConnectionInfo, () => {
+    setAxiosBaseUrl(getAxiosBaseUrl());
+});

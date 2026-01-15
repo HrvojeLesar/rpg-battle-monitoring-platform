@@ -1,6 +1,7 @@
 import { io, ManagerOptions, Socket, SocketOptions } from "socket.io-client";
 import { GBoard, GEventEmitter } from "../board_core/board";
 import { IMessagable, TypedJson } from "../board_core/interfaces/messagable";
+import { getBaseUrl } from "@/board_react_wrapper/utils/utils";
 
 export type JoinData = {
     data: TypedJson[];
@@ -56,7 +57,7 @@ export class Websocket {
 
     public static createDefaultSocket(gameId: number): Websocket {
         return new Websocket(
-            `ws://${import.meta.env.VITE_BASE_URL ?? "localhost:3000"}`,
+            `ws://${getBaseUrl()}`,
             {
                 path: "/api/socket.io",
                 auth: {

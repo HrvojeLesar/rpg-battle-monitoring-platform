@@ -1,4 +1,4 @@
-import { ASSETS_URL_BASE } from "@/board_react_wrapper/utils/utils";
+import { assetsUrlBase } from "@/board_react_wrapper/utils/utils";
 import { Assets, ProgressCallback, Sprite, Texture } from "pixi.js";
 import { LOAD_TEXTURE } from "../converters/texture_converter";
 
@@ -37,7 +37,7 @@ class AssetManager {
             }
 
             const texture = textures[pair.url];
-            const path = pair.url.replace(ASSETS_URL_BASE, "");
+            const path = pair.url.replace(assetsUrlBase(), "");
             texture.label = `${LOAD_TEXTURE}${path}`;
             if (texture !== undefined) {
                 this.incrementTextureUseCount(texture);
@@ -64,7 +64,7 @@ class AssetManager {
 
         const identifier = texture.label?.replace(
             LOAD_TEXTURE,
-            ASSETS_URL_BASE,
+            assetsUrlBase(),
         );
 
         if (identifier === undefined) {
