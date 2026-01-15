@@ -4,7 +4,24 @@ import { createGame, fetchGames } from "../requests/games";
 import { queryClient } from "../../App";
 import { useNavigate } from "@tanstack/react-router";
 import { BOARD_ROUTE_PATH } from "../routes/board";
-import { Button, Flex } from "@mantine/core";
+import { Button, Container, Divider, Flex, Select } from "@mantine/core";
+import { useState } from "react";
+
+const createUsersArray = () => {
+    return Array.from({ length: 11 }, (_, index) => {
+        if (index === 0) {
+            return {
+                value: "dm",
+                label: "DM",
+            };
+        }
+
+        return {
+            value: String(index),
+            label: `Player ${index}`,
+        };
+    });
+};
 
 export const GameList = () => {
     const gameList = useQuery({
@@ -19,8 +36,6 @@ export const GameList = () => {
         },
     });
 
-    const navigate = useNavigate({});
-
     if (gameList.isPending) {
         return <div>Loading...</div>;
     }
@@ -32,32 +47,51 @@ export const GameList = () => {
     }
 
     return (
-        <Flex gap="xs" direction="column">
-            <Button onClick={() => createGameMutation.mutate()}>
-                Create Game
+        <Container>
+            <Flex gap="xs" direction="column">
+                <Button onClick={() => createGameMutation.mutate()}>
+                    Create Game
+                </Button>
+                <Divider />
+                <div>
+                    <Flex gap="xs" direction="column">
+                        {gameList.data.map((game, idx) => {
+                            return <GameItem key={idx} game={game} />;
+                        })}
+                    </Flex>
+                </div>
+            </Flex>
+        </Container>
+    );
+};
+
+const GameItem = ({ game }: { game: Game }) => {
+    const navigate = useNavigate({});
+
+    const [selectedValue, setSelectedValue] = useState<string | null>("dm");
+
+    return (
+        <Flex gap="xs">
+            <Button
+                style={{ flexGrow: 2 }}
+                onClick={() => {
+                    navigate({
+                        to: BOARD_ROUTE_PATH,
+                        params: {
+                            gameId: String(game.id),
+                            playerId: selectedValue ?? "dm",
+                        },
+                    });
+                }}
+            >
+                Join {game.name} - {game.id} as:
             </Button>
-            <div>
-                <Flex gap="xs" direction="column">
-                    {gameList.data.map((game, idx) => {
-                        return (
-                            <Button
-                                key={idx}
-                                onClick={() => {
-                                    navigate({
-                                        to: BOARD_ROUTE_PATH,
-                                        params: {
-                                            gameId: String(game.id),
-                                            // playerId: String("dm"),
-                                        },
-                                    });
-                                }}
-                            >
-                                {game.name} - {game.id}
-                            </Button>
-                        );
-                    })}
-                </Flex>
-            </div>
+            <Select
+                style={{ flexGrow: 1 }}
+                value={selectedValue}
+                onChange={setSelectedValue}
+                data={createUsersArray()}
+            />
         </Flex>
     );
 };
