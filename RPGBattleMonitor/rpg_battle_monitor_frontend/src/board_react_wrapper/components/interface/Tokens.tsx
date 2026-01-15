@@ -1,5 +1,13 @@
 import { tokenAtoms } from "@/board_react_wrapper/stores/token_store";
-import { Button, Fieldset, Flex, Image, Paper, Text } from "@mantine/core";
+import {
+    ActionIcon,
+    Button,
+    Fieldset,
+    Flex,
+    Image,
+    Paper,
+    Text,
+} from "@mantine/core";
 import { useAtomValue, useSetAtom } from "jotai";
 import { DeleteConfirmation } from "../utils/DeleteConfirmation";
 import { RpgTokenData } from "@/rpg_impl/tokens/rpg_token_data";
@@ -14,7 +22,11 @@ import { AssetHoverPreviewDefault } from "../assets/AssetHoverPreview";
 import { TokenDataBase } from "@/board_core/token/token_data";
 import { GTokenWindowRegistry } from "@/rpg_impl/registry/token_window_registry";
 import { TokenDataFactory } from "@/rpg_impl/factories/token_data_factory";
-import { IconChess } from "@tabler/icons-react";
+import { IconChess, IconEye, IconEyeOff } from "@tabler/icons-react";
+import { isPubliclyVisible } from "@/board_core/utils/visible_to_users";
+import { useState } from "react";
+import { queueEntityUpdate } from "@/websocket/websocket";
+import { GBoard } from "@/board_core/board";
 
 export const defaultImageUrl = getUrl("/public/rpg/default.jpeg");
 
@@ -124,51 +136,22 @@ type RpgTokensFieldsetProps = {
 const RpgTokensFieldset = (props: RpgTokensFieldsetProps) => {
     const { tokens, deleteToken } = props;
 
-    const tokenElements = tokens.map((token, idx) => {
+    let filteredTokens = tokens;
+    if (!GBoard.isDm) {
+        filteredTokens = tokens.filter((t) => t.visibleToUsers.includes("*"));
+    }
+
+    const tokenElements = filteredTokens.map((token, idx) => {
         const imageUrl =
             token.image !== undefined ? getUrl(token.image) : defaultImageUrl;
 
         return (
-            <Flex
+            <TokenEntry
                 key={idx}
-                gap="xs"
-                align="center"
-                draggable
-                onDragStart={(e) => {
-                    GDragAndDropRegistry.emit(
-                        e as unknown as DragEvent,
-                        RPG_TOKEN_DROP,
-                        token.getUId(),
-                    );
-                }}
-                style={{ cursor: "pointer" }}
-                onClick={() => {
-                    GTokenWindowRegistry.openWindow(token);
-                }}
-            >
-                <AssetHoverPreviewDefault
-                    target={
-                        <Image
-                            draggable="false"
-                            maw="128px"
-                            mah="128px"
-                            miw="32px"
-                            mih="32px"
-                            src={imageUrl}
-                        />
-                    }
-                    dropdown={<Image mah="256px" maw="256px" src={imageUrl} />}
-                />
-                <Paper>
-                    <Text>{`${token.name}`}</Text>
-                </Paper>
-                <DeleteConfirmation
-                    title="Delete token"
-                    onDelete={() => {
-                        deleteToken(token);
-                    }}
-                />
-            </Flex>
+                token={token}
+                imageUrl={imageUrl}
+                deleteToken={deleteToken}
+            />
         );
     });
 
@@ -186,5 +169,89 @@ const RpgTokensFieldset = (props: RpgTokensFieldsetProps) => {
                 {tokenElements}
             </Flex>
         </Fieldset>
+    );
+};
+
+const TokenEntry = ({
+    token,
+    imageUrl,
+    deleteToken,
+}: {
+    token: RpgTokenData;
+    imageUrl: string;
+    deleteToken: (token: TokenDataBase) => void;
+}) => {
+    const isPublic = () => {
+        return isPubliclyVisible(token.visibleToUsers ?? []);
+    };
+
+    const [hidden, setHidden] = useState(!isPublic());
+
+    const toggleHiddenHandler = () => {
+        if (!hidden) {
+            token.visibleToUsers = token.visibleToUsers.filter(
+                (v) => v !== "*",
+            );
+        } else {
+            token.visibleToUsers.push("*");
+        }
+
+        queueEntityUpdate(() => {
+            return token;
+        });
+
+        setHidden((hidden) => !hidden);
+    };
+
+    return (
+        <Flex
+            gap="xs"
+            align="center"
+            draggable
+            onDragStart={(e) => {
+                GDragAndDropRegistry.emit(
+                    e as unknown as DragEvent,
+                    RPG_TOKEN_DROP,
+                    token.getUId(),
+                );
+            }}
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+                GTokenWindowRegistry.openWindow(token);
+            }}
+        >
+            <AssetHoverPreviewDefault
+                target={
+                    <Image
+                        draggable="false"
+                        maw="128px"
+                        mah="128px"
+                        miw="32px"
+                        mih="32px"
+                        src={imageUrl}
+                    />
+                }
+                dropdown={<Image mah="256px" maw="256px" src={imageUrl} />}
+            />
+            <Paper>
+                <Text>{`${token.name}`}</Text>
+            </Paper>
+            <ActionIcon
+                onClick={(e) => {
+                    e.stopPropagation();
+                    toggleHiddenHandler();
+                }}
+                variant="outline"
+                title={hidden ? "Make public" : "Make private"}
+            >
+                {hidden ? <IconEyeOff /> : <IconEye />}
+            </ActionIcon>
+            <DeleteConfirmation
+                title="Delete token"
+                onDelete={() => {
+                    deleteToken(token);
+                }}
+            />
+        </Flex>
     );
 };

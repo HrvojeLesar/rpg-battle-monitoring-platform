@@ -43,6 +43,7 @@ import { getRpgTokenWindowName } from "../components/windows/RpgTokenWindow";
 import { queueEntityUpdate } from "@/websocket/websocket";
 import { HealthState } from "../characters_stats/health_state";
 import { Action } from "../actions/action";
+import { VisibleToUsers } from "@/board_core/utils/visible_to_users";
 
 export type RpgTokenAttributes = {
     tint: Maybe<number>;
@@ -68,6 +69,7 @@ export type RpgTokenAttributes = {
     skills: Skills;
     tags: string[];
     healthState: HealthState;
+    visibleToUsers: VisibleToUsers;
 } & TokenDataBaseAttributes;
 
 export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
@@ -101,6 +103,8 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
     public tags: string[];
 
     protected _healthState: HealthState;
+
+    public visibleToUsers: VisibleToUsers;
 
     // TODO: Spellcasting, cantrips, spell slots
     //
@@ -139,6 +143,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
         this.skills = options?.skills ?? getEmptySkills();
         this.tags = options?.tags ?? [];
         this._healthState = options?.healthState ?? HealthState.Healthy;
+        this.visibleToUsers = options?.visibleToUsers ?? ['*'];
     }
 
     public getAttributes(): RpgTokenAttributes {
@@ -167,6 +172,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
             skills: this.skills,
             tags: this.tags,
             healthState: this._healthState,
+            visibleToUsers: this.visibleToUsers
         };
     }
 
@@ -194,6 +200,7 @@ export class RpgTokenData extends TokenDataBase<RpgTokenAttributes> {
         this.skills = changes.skills;
         this.tags = changes.tags;
         this._healthState = changes.healthState;
+        this.visibleToUsers = changes.visibleToUsers;
 
         super.applyUpdateAction(changes);
     }

@@ -48,6 +48,7 @@ import {
     Item,
     PREDEFINED_ITEMS,
 } from "../characters_stats/equipment";
+import { isPubliclyVisible } from "@/board_core/utils/visible_to_users";
 
 export const TurnOrderIcon = () => {
     return <IconSwords size={20} />;
@@ -232,6 +233,21 @@ export const TurnOrder = () => {
 
         let index = 0;
 
+        const hideActions = (): boolean => {
+            const currentToken = turnOrder.getTokenOnTurn();
+            if (currentToken === undefined) {
+                return false;
+            }
+
+            if (GBoard.isDm) {
+                return false;
+            }
+
+            return !isPubliclyVisible(
+                currentToken.token.tokenData.visibleToUsers,
+            );
+        };
+
         return (
             <Flex direction="column">
                 <TokenTurnEntry>
@@ -331,33 +347,37 @@ export const TurnOrder = () => {
                     })}
                 </TokenTurnEntry>
                 <Fieldset legend="Actions">
-                    <Stack>
-                        <Text>
-                            Actions left {turnOrder.getTokenOnTurn()?.action}
-                        </Text>
-                        <Text>
-                            Bonus actions left{" "}
-                            {turnOrder.getTokenOnTurn()?.bonusAction}
-                        </Text>
-                        {combatButtons()}
-                        {actionButtons()}
-                        <ActionDeathSave
-                            turnOrder={turnOrder}
-                            refreshTurnOrder={refreshTurnOrder}
-                        />
-                        <Button
-                            onClick={() => {
-                                turnOrder.scene.targetSelectionHandler.cancelAction();
-                            }}
-                            disabled={
-                                turnOrder.getTokenOnTurn()?.token.tokenData
-                                    .healthState !== HealthState.Healthy ||
-                                turnOrder.getTokenOnTurn()?.action === 0
-                            }
-                        >
-                            Cancel attack
-                        </Button>
-                    </Stack>
+                    {hideActions() && <Text>Actions hidden</Text>}
+                    {!hideActions() && (
+                        <Stack>
+                            <Text>
+                                Actions left:{" "}
+                                {turnOrder.getTokenOnTurn()?.action}
+                            </Text>
+                            <Text>
+                                Bonus actions left:{" "}
+                                {turnOrder.getTokenOnTurn()?.bonusAction}
+                            </Text>
+                            {combatButtons()}
+                            {actionButtons()}
+                            <ActionDeathSave
+                                turnOrder={turnOrder}
+                                refreshTurnOrder={refreshTurnOrder}
+                            />
+                            <Button
+                                onClick={() => {
+                                    turnOrder.scene.targetSelectionHandler.cancelAction();
+                                }}
+                                disabled={
+                                    turnOrder.getTokenOnTurn()?.token.tokenData
+                                        .healthState !== HealthState.Healthy ||
+                                    turnOrder.getTokenOnTurn()?.action === 0
+                                }
+                            >
+                                Cancel attack
+                            </Button>
+                        </Stack>
+                    )}
                 </Fieldset>
             </Flex>
         );
@@ -519,9 +539,18 @@ export type TokenTurnEntrySpeedProps = {
 };
 
 const Speed = ({ entry }: TokenTurnEntrySpeedProps) => {
-    const speed = entry.speed;
+    const getSpeed = () => {
+        if (
+            !GBoard.isDm &&
+            !isPubliclyVisible(entry.token.tokenData.visibleToUsers)
+        ) {
+            return "hidden";
+        }
 
-    return <Text>Speed: {speed}</Text>;
+        return entry.speed;
+    };
+
+    return <Text>Speed: {getSpeed()}</Text>;
 };
 
 export type TokenTurnEntryInitiativeProps = {

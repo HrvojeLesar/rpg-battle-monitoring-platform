@@ -56,16 +56,15 @@ export class Websocket {
     }
 
     public static createDefaultSocket(gameId: number): Websocket {
-        return new Websocket(
-            `ws://${getBaseUrl()}`,
-            {
-                path: "/api/socket.io",
-                auth: {
-                    userToken: "some-session-token",
-                    game: gameId,
-                },
+        const websocketProtocol =
+            window.location.protocol === "https:" ? "wss" : "ws";
+        return new Websocket(`${websocketProtocol}://${getBaseUrl()}`, {
+            path: "/api/socket.io",
+            auth: {
+                userToken: "some-session-token",
+                game: gameId,
             },
-        );
+        });
     }
 
     public get socket(): Socket<ListenEvents, EmitEvents> {

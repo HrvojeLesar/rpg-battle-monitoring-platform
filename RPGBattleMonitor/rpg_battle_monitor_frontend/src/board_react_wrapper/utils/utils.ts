@@ -10,7 +10,7 @@ export const getBaseUrl = (): string => {
 };
 
 export const assetsUrlBase = () => {
-    return `http://${getBaseUrl()}`;
+    return `${location.protocol}//${getBaseUrl()}`;
 };
 
 export const getUrl = (path: string) => {

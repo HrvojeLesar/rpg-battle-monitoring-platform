@@ -81,7 +81,7 @@ export const PREDEFINED_ITEMS: Item[] = [
 
 export const formatPredefinedItem = (
     item: Item,
-    token: RpgTokenData,
+    _token: RpgTokenData,
 ): string => {
     if (item.action === undefined) return item.name;
 

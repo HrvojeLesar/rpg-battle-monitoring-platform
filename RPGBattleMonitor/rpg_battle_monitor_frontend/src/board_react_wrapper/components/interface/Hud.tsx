@@ -29,47 +29,6 @@ const SidesFlexBox = ({ children }: { children?: ReactNode }) => {
 const HudLeft = () => {
     const currentScene = useAtomValue(sceneAtoms.getCurrentScene);
 
-    const focusOnSelection = () => {
-        if (!currentScene) {
-            return <></>;
-        }
-
-        return (
-            <Button
-                style={{
-                    pointerEvents: "all",
-                }}
-                onClick={() => {
-                    const selection =
-                        currentScene.selectHandler.selections.at(0);
-
-                    if (selection === undefined) {
-                        return;
-                    }
-
-                    selection.getOccupiedCells();
-
-                    const pos = selection.position.clone();
-                    const width = selection.width;
-                    const height = selection.height;
-                    if (
-                        pos === undefined ||
-                        width === undefined ||
-                        height === undefined
-                    ) {
-                        return;
-                    }
-
-                    pos.set(pos.x + width / 2, pos.y + height / 2);
-
-                    currentScene.viewport.moveCenter(pos);
-                }}
-            >
-                Focus on selection
-            </Button>
-        );
-    };
-
     const switchViewportDragging = () => {
         if (!(currentScene instanceof RpgScene)) {
             return <></>;
