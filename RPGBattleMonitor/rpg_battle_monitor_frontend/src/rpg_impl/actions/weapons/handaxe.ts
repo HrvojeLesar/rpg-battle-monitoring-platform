@@ -1,13 +1,13 @@
 import { BaseWeapon } from "./base_weapon";
 
-export class Maul extends BaseWeapon {
+export class Handaxe extends BaseWeapon {
     public constructor() {
         super({
-            baseDamage: "2d6",
+            baseDamage: "1d6",
             rangeFt: 5,
-            damageType: "bludgeoning",
+            damageType: "slashing",
             targeting: ["hostile"],
-            properties: ["Heavy", "Two-Handed"],
+            properties: ["Light", "Range", "Thrown"],
         });
     }
 }

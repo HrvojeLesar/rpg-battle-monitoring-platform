@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Item } from "../characters_stats/equipment";
+import { formatPredefinedItem, Item } from "../characters_stats/equipment";
 import {
     CheckIcon,
     Combobox,
@@ -8,13 +8,20 @@ import {
     PillsInput,
     useCombobox,
 } from "@mantine/core";
+import { RpgTokenData } from "../tokens/rpg_token_data";
 
 export type MultiSelectCreatableProps = {
     data: Item[];
+    token: RpgTokenData;
+    onChange: (value: Item[]) => void;
+    value: Item[];
 };
 
 export const EquipmentMultiselect = ({
+    token,
+    onChange: onChangeCallback,
     data: initialData,
+    value,
 }: MultiSelectCreatableProps) => {
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption(),
@@ -23,7 +30,8 @@ export const EquipmentMultiselect = ({
 
     const [search, setSearch] = useState("");
     const [data, setData] = useState(initialData);
-    const [value, setValue] = useState<Item[]>([]);
+
+    const findItem = (name: string) => value.find((item) => item.name === name);
 
     const exactOptionMatch = data.some((item) => item.name === search);
 
@@ -33,15 +41,15 @@ export const EquipmentMultiselect = ({
         if (val === "$create") {
             const newItem = { name: search };
             setData((current) => [...current, newItem]);
-            setValue((current) => [...current, newItem]);
+            onChangeCallback([...value, newItem]);
         } else {
             const selectedItem = data.find((item) => item.name === val);
             if (!selectedItem) return;
 
-            setValue((current) =>
-                current.includes(selectedItem)
-                    ? current.filter((v) => v !== selectedItem)
-                    : [...current, selectedItem],
+            onChangeCallback(
+                value.includes(selectedItem)
+                    ? value.filter((v) => v !== selectedItem)
+                    : [...value, selectedItem],
             );
         }
     };
@@ -56,8 +64,9 @@ export const EquipmentMultiselect = ({
         </Pill>
     ));
 
-    const handleValueRemove = (val: Item) =>
-        setValue((current) => current.filter((v) => v !== val));
+    const handleValueRemove = (val: Item) => {
+        onChangeCallback(value.filter((v) => v !== val));
+    };
 
     const options = data
         .filter((item) =>
@@ -70,8 +79,8 @@ export const EquipmentMultiselect = ({
                 active={value.includes(item)}
             >
                 <Group gap="sm">
-                    {value.includes(item) ? <CheckIcon size={12} /> : null}
-                    <span>{item.name}</span>
+                    {findItem(item.name) ? <CheckIcon size={12} /> : null}
+                    <span>{formatPredefinedItem(item, token)}</span>
                 </Group>
             </Combobox.Option>
         ));

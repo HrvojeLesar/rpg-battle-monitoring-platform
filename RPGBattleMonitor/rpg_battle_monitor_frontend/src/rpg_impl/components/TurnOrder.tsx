@@ -21,7 +21,6 @@ import {
 } from "../turn/turn_order";
 import { queueEntityUpdate } from "@/websocket/websocket";
 import { useDebouncedCallback } from "@mantine/hooks";
-import { Maul } from "../actions/weapons/maul";
 import { DeathSave as DeathSaveAction } from "../actions/death_save";
 import { AssetHoverPreviewDefault } from "@/board_react_wrapper/components/assets/AssetHoverPreview";
 import { getUrl } from "@/board_react_wrapper/utils/utils";
@@ -43,6 +42,12 @@ import {
     openRollWindow,
 } from "./windows/DiceRollWindow";
 import { Dash } from "../actions/dash";
+import { Action } from "../actions/action";
+import {
+    formatPredefinedItem,
+    Item,
+    PREDEFINED_ITEMS,
+} from "../characters_stats/equipment";
 
 export const TurnOrderIcon = () => {
     return <IconSwords size={20} />;
@@ -102,6 +107,118 @@ export const TurnOrder = () => {
                 )}
             </>
         );
+    };
+
+    const actionButtons = () => {
+        if (turnOrder === undefined) {
+            return <></>;
+        }
+
+        const currentToken = turnOrder.getTokenOnTurn();
+
+        if (currentToken === undefined) {
+            return <></>;
+        }
+
+        const actions = currentToken.token.tokenData.equipment.backpack
+            .filter(
+                (item) =>
+                    item.action !== undefined &&
+                    PREDEFINED_ITEMS.some((i) => i.name === item.name),
+            )
+            .map(
+                (item) =>
+                    [
+                        item,
+                        PREDEFINED_ITEMS.find((i) => i.name === item.name)!
+                            .action,
+                    ] as [Item, Action],
+            );
+
+        const mappedActions = actions.map(([item, action], idx) => {
+            return (
+                <Button
+                    key={idx}
+                    disabled={
+                        turnOrder.getTokenOnTurn()?.token.tokenData
+                            .healthState !== HealthState.Healthy ||
+                        turnOrder.getTokenOnTurn()?.action === 0
+                    }
+                    onClick={() => {
+                        // TODO: emit message that other clients can handle and sync state
+                        const onTurnEntry = turnOrder.getTokenOnTurn();
+                        if (onTurnEntry === undefined) {
+                            return;
+                        }
+
+                        console.log(action);
+
+                        turnOrder.doAction(onTurnEntry.token, action, {
+                            onFinished: () => {
+                                refreshTurnOrder();
+                                queueEntityUpdate(() => {
+                                    return turnOrder;
+                                });
+                            },
+                            actCallback: (damageResults, act) => {
+                                if (damageResults.length > 0) {
+                                    openWindow(
+                                        openAttackDiceRollWindow({
+                                            onClose: () => {
+                                                act();
+                                            },
+                                            act,
+                                            damageResults,
+                                        }),
+                                    );
+                                } else {
+                                    act();
+                                }
+                            },
+                        });
+                    }}
+                >
+                    {formatPredefinedItem(item, currentToken.token.tokenData)}
+                </Button>
+            );
+        });
+
+        mappedActions.push(
+            <Button
+                key={mappedActions.length}
+                disabled={
+                    turnOrder.getTokenOnTurn()?.token.tokenData.healthState !==
+                        HealthState.Healthy ||
+                    turnOrder.getTokenOnTurn()?.action === 0
+                }
+                onClick={() => {
+                    // TODO: emit message that other clients can handle and sync state
+                    const action = new Dash();
+                    const onTurnEntry = turnOrder.getTokenOnTurn();
+                    if (onTurnEntry === undefined) {
+                        return;
+                    }
+
+                    turnOrder.doAction(
+                        onTurnEntry.token,
+                        action,
+                        {
+                            onFinished: () => {
+                                refreshTurnOrder();
+                                queueEntityUpdate(() => {
+                                    return turnOrder;
+                                });
+                            },
+                        },
+                        turnOrder.getTokenOnTurn(),
+                    );
+                }}
+            >
+                Dash
+            </Button>,
+        );
+
+        return mappedActions;
     };
 
     const displayTokens = () => {
@@ -223,78 +340,7 @@ export const TurnOrder = () => {
                             {turnOrder.getTokenOnTurn()?.bonusAction}
                         </Text>
                         {combatButtons()}
-                        <Button
-                            disabled={
-                                turnOrder.getTokenOnTurn()?.token.tokenData
-                                    .healthState !== HealthState.Healthy ||
-                                turnOrder.getTokenOnTurn()?.action === 0
-                            }
-                            onClick={() => {
-                                // TODO: emit message that other clients can handle and sync state
-                                const action = new Maul();
-                                const onTurnEntry = turnOrder.getTokenOnTurn();
-                                if (onTurnEntry === undefined) {
-                                    return;
-                                }
-
-                                turnOrder.doAction(onTurnEntry.token, action, {
-                                    onFinished: () => {
-                                        refreshTurnOrder();
-                                        queueEntityUpdate(() => {
-                                            return turnOrder;
-                                        });
-                                    },
-                                    actCallback: (damageResults, act) => {
-                                        if (damageResults.length > 0) {
-                                            openWindow(
-                                                openAttackDiceRollWindow({
-                                                    onClose: () => {
-                                                        act();
-                                                    },
-                                                    act,
-                                                    damageResults,
-                                                }),
-                                            );
-                                        } else {
-                                            act();
-                                        }
-                                    },
-                                });
-                            }}
-                        >
-                            Handaxe (1d6) + 2
-                        </Button>
-                        <Button
-                            disabled={
-                                turnOrder.getTokenOnTurn()?.token.tokenData
-                                    .healthState !== HealthState.Healthy ||
-                                turnOrder.getTokenOnTurn()?.action === 0
-                            }
-                            onClick={() => {
-                                // TODO: emit message that other clients can handle and sync state
-                                const action = new Dash();
-                                const onTurnEntry = turnOrder.getTokenOnTurn();
-                                if (onTurnEntry === undefined) {
-                                    return;
-                                }
-
-                                turnOrder.doAction(
-                                    onTurnEntry.token,
-                                    action,
-                                    {
-                                        onFinished: () => {
-                                            refreshTurnOrder();
-                                            queueEntityUpdate(() => {
-                                                return turnOrder;
-                                            });
-                                        },
-                                    },
-                                    turnOrder.getTokenOnTurn(),
-                                );
-                            }}
-                        >
-                            Dash
-                        </Button>
+                        {actionButtons()}
                         <ActionDeathSave
                             turnOrder={turnOrder}
                             refreshTurnOrder={refreshTurnOrder}

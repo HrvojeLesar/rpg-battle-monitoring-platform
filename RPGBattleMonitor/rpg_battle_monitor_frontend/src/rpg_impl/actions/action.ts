@@ -74,22 +74,24 @@ export type ActionOnCanceled<T> = (
 
 export type ActionOptions = {
     baseDamage: string;
-    rangeFt: number;
+    rangeFt: number | string;
     damageType: string;
     targeting: TargetingType[];
     areaOfEffect?: AreaOfEffectType;
     actionType?: ActionType;
+    properties?: string[];
 };
 
 export abstract class Action<T = DamageResult[], D = undefined> {
     public baseDamage: string;
-    public rangeFt: number;
+    public rangeFt: number | string;
     public damageType: string;
     public targeting: TargetingType[];
     public areaOfEffect?: AreaOfEffectType;
     public actionType: ActionType = "action";
     public abilityScoreModifierType: AbilityScoreType =
         AbilityScoreType.Strength;
+    public properties: string[];
 
     protected die: Die;
 
@@ -103,6 +105,8 @@ export abstract class Action<T = DamageResult[], D = undefined> {
             this.actionType = options.actionType;
         }
 
+        this.properties = options.properties ?? [];
+
         this.die = GDieParser.parse(this.baseDamage);
     }
 
@@ -111,6 +115,12 @@ export abstract class Action<T = DamageResult[], D = undefined> {
     }
 
     public get cellRange(): number {
+        if (typeof this.rangeFt === "string") {
+            const maxRange = this.rangeFt.split("/")[1];
+
+            return parseInt(maxRange) / 5;
+        }
+
         return this.rangeFt / 5;
     }
 

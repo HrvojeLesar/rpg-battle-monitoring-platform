@@ -832,7 +832,24 @@ export const CharacterSheet = (props: CharacterSheetProps) => {
         return (
             <Fieldset legend="Equipment">
                 <Flex direction="column" gap="xs" wrap="wrap">
-                    <EquipmentMultiselect data={PREDEFINED_ITEMS} />
+                    <EquipmentMultiselect
+                        token={token}
+                        data={PREDEFINED_ITEMS}
+                        value={equipment.backpack}
+                        onChange={(items) => {
+                            setEquipment((old) => {
+                                old.backpack = items;
+
+                                const newEqipment = {
+                                    ...old,
+                                };
+
+                                queueUpdate(newEqipment, "equipment");
+
+                                return newEqipment;
+                            });
+                        }}
+                    />
                 </Flex>
             </Fieldset>
         );
